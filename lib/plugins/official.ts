@@ -12,3 +12,5 @@ export * from './Label_ColonComma';
 export * from './Label_H1_M1BPOS';
 export * from './Label_H1_M1BPRG';
 export * from './Label_SQ';
+export * from './Label_QR';
+export * from './Label_QQ';

@@ -25,6 +25,8 @@ export class MessageDecoder {
     this.registerPlugin(new Plugins.Label_H1_M1BPOS(this));
     this.registerPlugin(new Plugins.Label_80(this));
     this.registerPlugin(new Plugins.Label_SQ(this));
+    this.registerPlugin(new Plugins.Label_QR(this));
+    this.registerPlugin(new Plugins.Label_QQ(this));
   }
 
   registerPlugin(plugin: DecoderPluginInterface) : boolean {
