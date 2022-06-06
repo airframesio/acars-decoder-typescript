@@ -16,8 +16,7 @@ export class Label_QQ extends DecoderPlugin {
     decodeResult.raw.origin = message.text.substring(0, 4);
     decodeResult.raw.destination = message.text.substring(4, 8);
     decodeResult.raw.wheels_off = message.text.substring(8, 12);
-   
-    let remain = message.text.substring(12);
+    decodeResult.remaining.text = message.text.substring(12);
 
     decodeResult.formatted.description = 'OFF Report';
 
@@ -43,12 +42,10 @@ export class Label_QQ extends DecoderPlugin {
     ];
 
     decodeResult.decoded = true;
-    if(remain === "") 
+    if(decodeResult.remaining.text === "") 
 	decodeResult.decoder.decodeLevel = 'full';
     else
 	decodeResult.decoder.decodeLevel = 'partial';
-
-console.log(decodeResult.decoder.decodeLevel);
 
     return decodeResult;
   }
