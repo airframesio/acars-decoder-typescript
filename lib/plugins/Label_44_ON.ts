@@ -19,7 +19,7 @@ export class Label_44_ON extends DecoderPlugin {
 
     // Style: ON02,N38333W121178,KRNO,KMHR,0806,2350,005.2
     // Match: ON02,coords,departure_icao,arrival_icao,current_date,current_time,fuel_in_tons
-    const regex = /^ON02,(?<unsplit_coords>.*),(?<departure_icao>.*),(?<arrival_icao>.*),(?<current_date>.*),(?<current_time>.*),(?<fuel_in_tons>.*)$/;
+    const regex = /^.*,(?<unsplit_coords>.*),(?<departure_icao>.*),(?<arrival_icao>.*),(?<current_date>.*),(?<current_time>.*),(?<fuel_in_tons>.*)$/;
     const results = message.text.match(regex);
     if (results) {
       if (options.debug) {
