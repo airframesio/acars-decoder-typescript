@@ -19,7 +19,7 @@ export class Label_44_ETA extends DecoderPlugin {
 
     // Style: IN02,N38338W121179,KMHR,KPDX,0806,2355,005.1
     // Match: IN02,coords,departure_icao,arrival_icao,current_date,current_time,fuel_in_tons
-    const regex = /^IN02,(?<unsplit_coords>.*),(?<departure_icao>.*),(?<arrival_icao>.*),(?<current_date>.*),(?<current_time>.*),(?<fuel_in_tons>.*)$/;
+    const regex = /^.*,(?<unsplit_coords>.*),(?<departure_icao>.*),(?<arrival_icao>.*),(?<current_date>.*),(?<current_time>.*),(?<fuel_in_tons>.*)$/;
     const results = message.text.match(regex);
     if (results) {
       if (options.debug) {
