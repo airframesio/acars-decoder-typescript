@@ -163,13 +163,21 @@ export class Label_80 extends DecoderPlugin {
               break;
             }
             case 'POS': {
-	      decodeResult.raw.position = this.decodeStringCoordinates(match.groups.value);
-	      decodeResult.formatted.items.push({
-	        type: 'position',
-	        code: 'POS' ,
-	        label: 'Position',
-	        value: this.coordinateString(decodeResult.raw.position),
-	      });
+	      // don't use decodeStringCoordinates because of different position format
+	      const posRegex = /^(?<latd>[NS])(?<lat>.+)(?<lngd>[EW])(?<lng>.+)/;
+              const posResult = match.groups.value.match(posRegex);
+              const latitude = (Number(posResult.groups.lat) / 100) * (posResult.groups.lngd === 'S' ? -1 : 1);
+              const longitude = (Number(posResult.groups.lng) / 100) * (posResult.groups.lngd === 'W' ? -1 : 1);
+              decodeResult.raw.aircraft_position = {
+                latitude,
+                longitude,
+              };
+              decodeResult.formatted.items.push({
+               type: 'position',
+               code: 'POS' ,
+               label: 'Position',
+               value: `${(Number(posResult.groups.lat) / 100).toPrecision(5)} ${posResult.groups.latd}, ${(Number(posResult.groups.lng) / 100).toPrecision(5)} ${posResult.groups.lngd}`,
+              });
               break;
             }
             case 'SWND': {
