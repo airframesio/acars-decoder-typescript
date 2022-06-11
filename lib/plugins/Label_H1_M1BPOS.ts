@@ -22,13 +22,15 @@ export class Label_H1_M1BPOS extends DecoderPlugin { // eslint-disable-line came
     const secondHalf = parts[1];
     const items = firstHalf.split(',');
 
-     decodeResult.raw.position = this.decodeStringCoordinates(items[0]);
+    decodeResult.raw.position = this.decodeStringCoordinates(items[0]);
+    if(decodeResult.raw.position) {
      decodeResult.formatted.items.push({
         type: 'position',
         code: 'POS' ,
         label: 'Position',
         value: this.coordinateString(decodeResult.raw.position),
       });
+    }
 
       let route = items.slice(1).filter((part: any) => !/^\d(.+)$/.test(part));
       route = route.map((hop: any) => hop || '?');

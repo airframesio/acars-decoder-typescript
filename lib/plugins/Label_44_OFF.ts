@@ -48,13 +48,15 @@ export class Label_44_OFF extends DecoderPlugin {
         decodeResult.raw.fuel_in_tons = Number(results.groups.fuel_in_tons);
       }
 
-     decodeResult.raw.position = this.decodeStringCoordinates(results.groups.unsplit_coords);
-      decodeResult.formatted.items.push({
-        type: 'position',
-        code: 'POS' ,
-        label: 'Position',
-        value: this.coordinateString(decodeResult.raw.position),
-      });
+      decodeResult.raw.position = this.decodeStringCoordinates(results.groups.unsplit_coords);
+      if(decodeResult.raw.position) {
+        decodeResult.formatted.items.push({
+          type: 'position',
+          code: 'POS' ,
+          label: 'Position',
+          value: this.coordinateString(decodeResult.raw.position),
+        });
+      }
 
       decodeResult.formatted.items.push({
         type: 'origin',
