@@ -19,11 +19,13 @@ export class Label_H1_POS extends DecoderPlugin {
 
     const rawCoords = message.text.substring(3);
     decodeResult.raw.position = this.decodeStringCoordinates(rawCoords);
-    decodeResult.formatted.items.push({
-        type: 'position',
-        label: 'Position',
-        value: this.coordinateString(decodeResult.raw.position),
-    });
+    if(decodeResult.raw.position) {
+      decodeResult.formatted.items.push({
+          type: 'position',
+          label: 'Position',
+          value: this.coordinateString(decodeResult.raw.position),
+      });
+    }
 
     decodeResult.decoded = true;
     decodeResult.decoder.decodeLevel = 'partial';

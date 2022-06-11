@@ -43,12 +43,14 @@ export class Label_44_IN extends DecoderPlugin {
         decodeResult.raw.fuel_in_tons = Number(results.groups.fuel_in_tons);
       }
 
-      decodeResult.formatted.items.push({
-        type: 'position',
-        code: 'POS' ,
-        label: 'Position',
-        value: this.coordinateString(decodeResult.raw.position),
-      });
+      if(decodeResult.raw.position) {
+        decodeResult.formatted.items.push({
+          type: 'position',
+          code: 'POS' ,
+          label: 'Position',
+          value: this.coordinateString(decodeResult.raw.position),
+        });
+      }
 
       decodeResult.formatted.items.push({
         type: 'origin',

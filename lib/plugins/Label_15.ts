@@ -22,17 +22,18 @@ export class Label_15 extends DecoderPlugin {
       // Style: (2N38111W 82211266 76400-64(Z
       // console.log(`Label 15 Position Report: between = ${results.groups.between}`);
       decodeResult.raw.position = this.decodeStringCoordinates(results.groups.between.substr(0,13));
-      decodeResult.formatted.items.push({
+      if(decodeResult.raw.position) {
+	decodeResult.formatted.items.push({
         type: 'position',
 	code: 'POS' ,
         label: 'Position',
         value: this.coordinateString(decodeResult.raw.position),
       });
+     }
     }
 
     decodeResult.decoded = true;
     decodeResult.decoder.decodeLevel = 'partial';
-
     return decodeResult;
   }
 }
