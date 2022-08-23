@@ -47,3 +47,10 @@ decode(
 
 // Label 8E 
 decode("8E", "EGSS,1618");
+
+// Label 1M with slash
+decode("1M", `/BA0843/ETA01/230822/LDSP/EGLL/EGSS/2JK0
+1940/EGLL27L/10 `);
+decode("1M", `/AY1416/ETA02/230822/EDDF/EFHK/EETN/2JK0
+1956/EFHK04L/50 
+     /    /    /   /    /   /`);
