@@ -16,7 +16,7 @@ test('decodes Label 8E sample 1', () => {
   console.log(JSON.stringify(decodeResult, null, 2));
 
   expect(decodeResult.decoded).toBe(true);
-  expect(decodeResult.decoder.name).toBe('label-8E');
+  expect(decodeResult.decoder.name).toBe('label-8e');
   expect(decodeResult.formatted.description).toBe('ETA Report');
   expect(decodeResult.message.text).toBe('EGSS,1618');
   expect(decodeResult.raw.arrival_eta.getUTCHours()).toBe(16);
