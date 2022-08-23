@@ -17,8 +17,8 @@ export class Label_8E extends DecoderPlugin {
     decodeResult.message = message;
 
     // Style: EGSS,1618
-    // Match: arrival_icao,current_time
-    const regex = /^(?<arrival_icao>\w{4}),(?<current_time>\d{4})$/;
+    // Match: arrival_icao,arrival_eta
+    const regex = /^(?<arrival_icao>\w{4}),(?<arrival_eta>\d{4})$/;
     const results = message.text.match(regex);
     if (results) {
       if (options.debug) {
@@ -26,14 +26,14 @@ export class Label_8E extends DecoderPlugin {
         console.log(results.groups);
       }
 
-      decodeResult.raw.current_time = new Date();
-      decodeResult.raw.current_time.setUTCHours(results.groups.current_time.substr(0, 2), results.groups.current_time.substr(2, 2));
+      decodeResult.raw.arrival_eta = new Date();
+      decodeResult.raw.arrival_eta.setUTCHours(results.groups.arrival_eta.substr(0, 2), results.groups.arrival_eta.substr(2, 2));
 
-      if(new Date().getUTCHours() > decodeResult.raw.current_time.getUTCHours()) { // Check if ETA is in the past, which would imply it is for the next day
+      if(new Date().getUTCHours() > decodeResult.raw.arrival_eta.getUTCHours()) { // Check if ETA is in the past, which would imply it is for the next day
         if(options.debug) {
           console.log("Label 8E: Moving ETA to subsequent day");
         }
-        decodeResult.raw.current_time.setDate(decodeResult.raw.current_time.getDate() + 1);
+        decodeResult.raw.arrival_eta.setDate(decodeResult.raw.arrival_eta.getDate() + 1);
       }
 
       decodeResult.raw.arrival_icao = results.groups.arrival_icao;
