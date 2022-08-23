@@ -22,6 +22,7 @@ export class Label_1M_Slash extends DecoderPlugin {
     if (results) {
       if (options.debug) {
         console.log(`Label 1M ETA: results`);
+        console.log(results);
       }
 
       decodeResult.raw.flight_number = results[0];
