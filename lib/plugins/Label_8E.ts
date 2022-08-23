@@ -2,7 +2,7 @@ import { DecoderPlugin } from '../DecoderPlugin';
 
 // ETA
 export class Label_8E extends DecoderPlugin {
-  name = 'label-8E';
+  name = 'label-8e';
 
   qualifiers() { // eslint-disable-line class-methods-use-this
     return {
@@ -30,7 +30,7 @@ export class Label_8E extends DecoderPlugin {
       decodeResult.raw.arrival_eta.setUTCHours(results.groups.arrival_eta.substr(0, 2), results.groups.arrival_eta.substr(2, 2));
 
       if(new Date().getUTCHours() > decodeResult.raw.arrival_eta.getUTCHours()) { // Check if ETA is in the past, which would imply it is for the next day
-        if(options.debug) {
+        if (options.debug) {
           console.log("Label 8E: Moving ETA to subsequent day");
         }
         decodeResult.raw.arrival_eta.setDate(decodeResult.raw.arrival_eta.getDate() + 1);
