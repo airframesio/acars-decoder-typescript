@@ -16,7 +16,7 @@ export class Label_1M_Slash extends DecoderPlugin {
     decodeResult.formatted.description = 'ETA Report';
     decodeResult.message = message;
 
-    // Style: /BA0843/ETA01/230822/LDSP/EGLL/EGSS/2JK0(NEW LINE)1940/EGLL27L/10 
+    // Style: /BA0843/ETA01/230822/LDSP/EGLL/EGSS/2JK0(NEW LINE)1940/EGLL27L/10
     const results = message.text.split(/\n|\//).slice(1); // Split by / and new line
 
     if (results) {
@@ -60,7 +60,6 @@ export class Label_1M_Slash extends DecoderPlugin {
         label: 'Origin',
         value: decodeResult.raw.departure_icao,
       });
-
     }
 
     decodeResult.decoded = true;
