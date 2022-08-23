@@ -36,6 +36,14 @@ export class Label_8E extends DecoderPlugin {
         decodeResult.raw.arrival_eta.setDate(decodeResult.raw.arrival_eta.getDate() + 1);
       }
 
+      decodeResult.formatted.items.push({
+        type: 'eta',
+        code: 'ETA',
+        label: 'Estimated Time of Arrival',
+        value: decodeResult.raw.arrival_eta.toGMTString(),
+      });
+
+
       decodeResult.raw.arrival_icao = results.groups.arrival_icao;
       decodeResult.formatted.items.push({
         type: 'destination',
