@@ -26,8 +26,6 @@ export class Label_8E extends DecoderPlugin {
         console.log(results.groups);
       }
 
-      
-
       decodeResult.raw.current_time = new Date();
       decodeResult.raw.current_time.setUTCHours(results.groups.current_time.substr(0, 2), results.groups.current_time.substr(2, 2));
 
