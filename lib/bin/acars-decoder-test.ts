@@ -27,6 +27,11 @@ function decode(label: string, text: string) {
   debugMessage(message, decoding);
 }
 
+// Label 30 with slash EA
+decode('30', '/EA1830/DSKSFO/SK24');
+decode('30', '/EA1611/DSMMSD/SK24');
+decode('30', '/EA1719/DSKSFO/SK23');
+
 // Label 5Z
 decode('5Z', '/R3 SNAORD 2205-14 SNA');
 
