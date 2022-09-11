@@ -1,3 +1,4 @@
+import { DateTimeUtils } from '../DateTimeUtils';
 import { DecoderPlugin } from '../DecoderPlugin';
 
 export class Label_30_Slash_EA extends DecoderPlugin {
@@ -26,14 +27,11 @@ export class Label_30_Slash_EA extends DecoderPlugin {
       }
     }
 
-    decodeResult.raw.arrival_eta = new Date();
-    decodeResult.raw.arrival_eta.setUTCHours(results[0].substr(2, 2), results[0].substr(4, 2), 0);
-
     decodeResult.formatted.items.push({
       type: 'eta',
       code: 'ETA',
       label: 'Estimated Time of Arrival',
-      value: decodeResult.raw.arrival_eta.toTimeString(),
+      value: DateTimeUtils.UTCToString(results[0].substr(2, 4)),
     });
 
     if (results[1].substr(0, 2) === "DS") {

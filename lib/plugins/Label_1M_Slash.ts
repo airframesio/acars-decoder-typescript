@@ -1,3 +1,4 @@
+import { DateTimeUtils } from '../DateTimeUtils';
 import { DecoderPlugin } from '../DecoderPlugin';
 
 export class Label_1M_Slash extends DecoderPlugin {
@@ -36,15 +37,11 @@ export class Label_1M_Slash extends DecoderPlugin {
       decodeResult.raw.arrival_runway = results[8].replace(decodeResult.raw.arrival_icao, ""); // results[8] EGLL27L
       // results[9]: 10(space) (???)
 
-      decodeResult.raw.arrival_eta = new Date();
-      decodeResult.raw.arrival_eta.setUTCDate(results[2].substring(0, 2), results[2].substring(2, 2), results[2].substring(4, 2));
-      decodeResult.raw.arrival_eta.setUTCHours(results[7].substr(0, 2), results[7].substr(2, 2), 0);
-
       decodeResult.formatted.items.push({
         type: 'eta',
         code: 'ETA',
         label: 'Estimated Time of Arrival',
-        value: decodeResult.raw.arrival_eta.toGMTString(),
+        value: DateTimeUtils.UTCDateTimeToString(results[2], results[7]),
       });
 
       decodeResult.formatted.items.push({
