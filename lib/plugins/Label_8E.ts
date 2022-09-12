@@ -1,3 +1,4 @@
+import { DateTimeUtils } from '../DateTimeUtils';
 import { DecoderPlugin } from '../DecoderPlugin';
 
 // ETA
@@ -26,21 +27,11 @@ export class Label_8E extends DecoderPlugin {
         console.log(results.groups);
       }
 
-      decodeResult.raw.arrival_eta = new Date();
-      decodeResult.raw.arrival_eta.setUTCHours(results.groups.arrival_eta.substr(0, 2), results.groups.arrival_eta.substr(2, 2));
-
-      if(new Date().getUTCHours() > decodeResult.raw.arrival_eta.getUTCHours()) { // Check if ETA is in the past, which would imply it is for the next day
-        if (options.debug) {
-          console.log("Label 8E: Moving ETA to subsequent day");
-        }
-        decodeResult.raw.arrival_eta.setDate(decodeResult.raw.arrival_eta.getDate() + 1);
-      }
-
       decodeResult.formatted.items.push({
         type: 'eta',
         code: 'ETA',
         label: 'Estimated Time of Arrival',
-        value: decodeResult.raw.arrival_eta.toGMTString(),
+        value: DateTimeUtils.UTCToString(results.groups.arrival_eta),
       });
 
 
