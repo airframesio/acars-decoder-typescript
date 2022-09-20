@@ -20,7 +20,7 @@ export class Label_16_N_Space extends DecoderPlugin {
     let variant1Regex = /^(?<lat>[NS])\s(?<lat_coord>.*),(?<long>[EW])\s(?<long_coord>.*),(?<alt>.*),(?<unkwn1>.*),\s(?<unkwn2>.*)$/;
 
     // Style: N 28.177/W 96.055
-    let variant2Regex = /^(?<lat>[NS])\s(?<lat_coord>.*)\/(?<long>[EW])\s(?<long_coord>.*)$/;
+    let variant2Regex = /^(?<lat>[NS])\s(?<lat_coord>.*)\/(?<long>[EW])\s?(?<long_coord>.*)$/;
 
     let results;
     if (results = message.text.match(variant1Regex)) {
