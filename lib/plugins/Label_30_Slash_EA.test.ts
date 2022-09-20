@@ -22,10 +22,8 @@ test('decodes Label 30 sample 1', () => {
   expect(decodeResult.decoder.name).toBe('label-30-slash-ea');
   expect(decodeResult.formatted.description).toBe('ETA Report');
   expect(decodeResult.message.text).toBe(text);
-  expect(decodeResult.raw.arrival_eta.getUTCHours()).toBe(17);
-  expect(decodeResult.raw.arrival_eta.getUTCMinutes()).toBe(19);
   expect(decodeResult.raw.arrival_icao).toBe('KSFO');
-  expect(decodeResult.formatted.items.length).toBe(3);
+  expect(decodeResult.formatted.items.length).toBe(2);
   expect(decodeResult.formatted.items[0].type).toBe('eta');
   expect(decodeResult.formatted.items[0].code).toBe('ETA');
   expect(decodeResult.formatted.items[0].label).toBe('Estimated Time of Arrival');
