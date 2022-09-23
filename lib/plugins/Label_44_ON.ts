@@ -19,7 +19,7 @@ export class Label_44_ON extends DecoderPlugin {
 
     // Style: ON02,N38333W121178,KRNO,KMHR,0806,2350,005.2
     // Match: ON02,coords,departure_icao,arrival_icao,current_date,current_time,fuel_in_tons
-    const regex = /^ON02,(?<unsplit_coords>.*),(?<departure_icao>.*),(?<arrival_icao>.*),(?<current_date>.*),(?<current_time>.*),(?<fuel_in_tons>.*)$/;
+    const regex = /^.*,(?<unsplit_coords>.*),(?<departure_icao>.*),(?<arrival_icao>.*),(?<current_date>.*),(?<current_time>.*),(?<fuel_in_tons>.*)$/;
     const results = message.text.match(regex);
     if (results) {
       if (options.debug) {
@@ -27,13 +27,8 @@ export class Label_44_ON extends DecoderPlugin {
         console.log(results.groups);
       }
 
-      const coordsRegex = /(?<lac>[NS])(?<la>.+)\s*(?<lnc>[EW])(?<ln>.+)/;
-      const coordsResults = results.groups.unsplit_coords.match(coordsRegex);
+     decodeResult.raw.position = this.decodeStringCoordinates(results.groups.unsplit_coords);
 
-      decodeResult.raw.latitude_direction = coordsResults.groups.lac;
-      decodeResult.raw.latitude = Number(coordsResults.groups.la) / 1000;
-      decodeResult.raw.longitude_direction = coordsResults.groups.lnc;
-      decodeResult.raw.longitude = Number(coordsResults.groups.ln) / 1000;
       decodeResult.raw.departure_icao = results.groups.departure_icao;
       decodeResult.raw.arrival_icao = results.groups.arrival_icao;
       decodeResult.raw.current_time = Date.parse(
@@ -48,12 +43,14 @@ export class Label_44_ON extends DecoderPlugin {
         decodeResult.raw.fuel_in_tons = Number(results.groups.fuel_in_tons);
       }
 
-      decodeResult.formatted.items.push({
-        type: 'aircraft_position',
-        code: 'POS',
-        label: 'Aircraft Position',
-        value: `${decodeResult.raw.latitude} ${decodeResult.raw.latitude_direction}, ${decodeResult.raw.longitude} ${decodeResult.raw.longitude_direction}`,
-      });
+      if(decodeResult.raw.position) {
+        decodeResult.formatted.items.push({
+          type: 'position',
+          code: 'POS' ,
+          label: 'Position',
+          value: this.coordinateString(decodeResult.raw.position),
+        });
+      }
 
       decodeResult.formatted.items.push({
         type: 'origin',

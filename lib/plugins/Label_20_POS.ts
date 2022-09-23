@@ -32,11 +32,13 @@ export class Label_20_POS extends DecoderPlugin {
       // Field 1: Coordinates
       const rawCoords = fields[0];
       decodeResult.raw.position = this.decodeStringCoordinates(rawCoords);
-      decodeResult.formatted.items.push({
-        type: 'position',
-        label: 'Position',
-        value: this.coordinateString(decodeResult.raw.position),
-      });
+      if(decodeResult.raw.position) {
+        decodeResult.formatted.items.push({
+          type: 'position',
+          label: 'Position',
+          value: this.coordinateString(decodeResult.raw.position),
+        });
+      }
 
       decodeResult.decoded = true;
       decodeResult.decoder.decodeLevel = 'full';

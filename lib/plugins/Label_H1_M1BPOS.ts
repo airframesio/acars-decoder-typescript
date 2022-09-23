@@ -22,35 +22,30 @@ export class Label_H1_M1BPOS extends DecoderPlugin { // eslint-disable-line came
     const secondHalf = parts[1];
     const items = firstHalf.split(',');
 
-    const coordsRegex = /(?<lac>[NS])(?<la>.+)\s*(?<lnc>[EW])(?<ln>.+)/;
-    const results = items[0].match(coordsRegex);
-
-    if (results && results.length >= 4) {
-      decodeResult.raw.position = {
-        latitudeDirection: results.groups.lac,
-        latitude: (results.groups.la / 1000) * (results.groups.lac === 'S' ? -1 : 1),
-        longitudeDirection: results.groups.lnc,
-        longitude: (results.groups.ln / 1000) * (results.groups.lnc === 'W' ? -1 : 1),
-      };
+    decodeResult.raw.position = this.decodeStringCoordinates(items[0]);
+    if(decodeResult.raw.position) {
+     decodeResult.formatted.items.push({
+        type: 'position',
+        code: 'POS' ,
+        label: 'Position',
+        value: this.coordinateString(decodeResult.raw.position),
+      });
+    }
 
       let route = items.slice(1).filter((part: any) => !/^\d(.+)$/.test(part));
       route = route.map((hop: any) => hop || '?');
       decodeResult.raw.route = route;
 
       decodeResult.formatted.description = 'Position Report';
-      decodeResult.formatted.items = {
-        coordinates: {
-          label: 'Position',
-          value: this.coordinateString(decodeResult.raw.position),
-        },
-        route: {
+
+      decodeResult.formatted.items.push({
+          type: 'route',
           label: 'Route',
           value: `${route.join(' > ')}`,
-        },
-      };
+      });
+
       decodeResult.decoded = true;
       decodeResult.decodeLevel = 'partial';
-    }
     decodeResult.remaining.text = secondHalf;
 
     return decodeResult;

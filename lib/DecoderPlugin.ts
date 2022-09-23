@@ -59,15 +59,21 @@ export abstract class DecoderPlugin implements DecoderPluginInterface {
 
   decodeStringCoordinates(stringCoords: String) : any { // eslint-disable-line class-methods-use-this
     var results : any = {};
+    // format: N12345W123456 or N12345 W123456
     const firstChar = stringCoords.substring(0, 1);
-    if (firstChar == 'N' || firstChar == 'S') {
-      // format: N12345W123456
-      results.latitudeDirection = stringCoords.substring(0, 1);
-      results.latitude = (Number(stringCoords.substring(1, 6)) / 1000) * (results.latitudeDirection === 'S' ? -1 : 1);
-      results.longitudeDirection = stringCoords.substring(6, 7);
-      results.longitude = (Number(stringCoords.substring(7, 13)) / 1000) * (results.longitudeDirection === 'W' ? -1 : 1);
+    let middleChar = stringCoords.substring(6, 7);
+    let longitudeChars = stringCoords.substring(7, 13);
+    if (middleChar ==' ') {
+      middleChar = stringCoords.substring(7, 8);
+      longitudeChars = stringCoords.substring(8, 14);
+    }
+    if ((firstChar === 'N' || firstChar === 'S') && (middleChar === 'W' || middleChar === 'E')) {
+      results.latitudeDirection = firstChar;
+      results.latitude = (Number(stringCoords.substring(1, 6)) / 1000) * (firstChar === 'S' ? -1 : 1);
+      results.longitudeDirection = middleChar;
+      results.longitude = (Number(longitudeChars) / 1000) * (middleChar === 'W' ? -1 : 1);
     } else {
-      console.log(`DEBUG: decodeStringCoordinates: Failure to decode String-based coordinates: ${stringCoords}`);
+      return;
     }
 
     return results;
