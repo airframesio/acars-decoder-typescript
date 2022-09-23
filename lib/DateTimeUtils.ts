@@ -16,7 +16,11 @@ export class DateTimeUtils {
     if (dateString.length === 6) {
       utcDate.setUTCFullYear(2000 + +dateString.substr(4, 2));
     }
-    utcDate.setUTCHours(+timeString.substr(0, 2), +timeString.substr(2, 2), 0);
+    if (timeString.length === 6) {
+      utcDate.setUTCHours(+timeString.substr(0, 2), +timeString.substr(2, 2), +timeString.substr(4, 2));
+    } else {
+      utcDate.setUTCHours(+timeString.substr(0, 2), +timeString.substr(2, 2), 0);
+    }
     return utcDate.toUTCString();
   }
 }
