@@ -15,6 +15,7 @@ export class MessageDecoder {
     this.registerPlugin(new Plugins.Label_ColonComma(this));
     this.registerPlugin(new Plugins.Label_5Z(this));
     this.registerPlugin(new Plugins.Label_15(this));
+    this.registerPlugin(new Plugins.Label_15_FST(this));
     this.registerPlugin(new Plugins.Label_16_N_Space(this));
     this.registerPlugin(new Plugins.Label_20_POS(this));
     this.registerPlugin(new Plugins.Label_30_Slash_EA(this));
@@ -25,6 +26,7 @@ export class MessageDecoder {
     this.registerPlugin(new Plugins.Label_44_POS(this));
     this.registerPlugin(new Plugins.Label_B6_Forwardslash(this));
     this.registerPlugin(new Plugins.Label_H1_M1BPOS(this));
+    this.registerPlugin(new Plugins.Label_H1_POS(this));
     this.registerPlugin(new Plugins.Label_80(this));
     this.registerPlugin(new Plugins.Label_8E(this));
     this.registerPlugin(new Plugins.Label_1M_Slash(this));

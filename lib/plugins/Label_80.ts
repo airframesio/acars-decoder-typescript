@@ -163,7 +163,8 @@ export class Label_80 extends DecoderPlugin {
               break;
             }
             case 'POS': {
-              const posRegex = /^(?<latd>[NS])(?<lat>.+)(?<lngd>[EW])(?<lng>.+)/;
+	      // don't use decodeStringCoordinates because of different position format
+	      const posRegex = /^(?<latd>[NS])(?<lat>.+)(?<lngd>[EW])(?<lng>.+)/;
               const posResult = match.groups.value.match(posRegex);
               const latitude = (Number(posResult.groups.lat) / 100) * (posResult.groups.lngd === 'S' ? -1 : 1);
               const longitude = (Number(posResult.groups.lng) / 100) * (posResult.groups.lngd === 'W' ? -1 : 1);
@@ -172,10 +173,10 @@ export class Label_80 extends DecoderPlugin {
                 longitude,
               };
               decodeResult.formatted.items.push({
-                type: 'aircraft_position',
-                code: 'POS',
-                label: this.descriptions[match.groups.field],
-                value: `${(Number(posResult.groups.lat) / 100).toPrecision(5)} ${posResult.groups.latd}, ${(Number(posResult.groups.lng) / 100).toPrecision(5)} ${posResult.groups.lngd}`,
+               type: 'position',
+               code: 'POS' ,
+               label: 'Position',
+               value: `${(Number(posResult.groups.lat) / 100).toPrecision(5)} ${posResult.groups.latd}, ${(Number(posResult.groups.lng) / 100).toPrecision(5)} ${posResult.groups.lngd}`,
               });
               break;
             }

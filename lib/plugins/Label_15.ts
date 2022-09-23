@@ -21,23 +21,19 @@ export class Label_15 extends DecoderPlugin {
     if (results) {
       // Style: (2N38111W 82211266 76400-64(Z
       // console.log(`Label 15 Position Report: between = ${results.groups.between}`);
-
-      decodeResult.raw.latitude_direction = results.groups.between.substr(0, 1);
-      decodeResult.raw.latitude = Number(results.groups.between.substr(1, 5)) / 1000;
-      decodeResult.raw.longitude_direction = results.groups.between.substr(6, 1);
-      decodeResult.raw.longitude = Number(results.groups.between.substr(7, 6)) / 1000;
-      decodeResult.remaining.text = results.groups.between.substr(13);
-
-      decodeResult.formatted.items.push({
-        type: 'coordinates',
-        label: 'Coordinates',
-        value: `${decodeResult.raw.latitude} ${decodeResult.raw.latitude_direction}, ${decodeResult.raw.longitude} ${decodeResult.raw.longitude_direction}`,
+      decodeResult.raw.position = this.decodeStringCoordinates(results.groups.between.substr(0,13));
+      if(decodeResult.raw.position) {
+	decodeResult.formatted.items.push({
+        type: 'position',
+	code: 'POS' ,
+        label: 'Position',
+        value: this.coordinateString(decodeResult.raw.position),
       });
+     }
     }
 
     decodeResult.decoded = true;
     decodeResult.decoder.decodeLevel = 'partial';
-
     return decodeResult;
   }
 }
