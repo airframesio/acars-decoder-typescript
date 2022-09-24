@@ -34,6 +34,6 @@ Contributions are welcome! Please follow the [ACARS Message Documentation](https
 
 | Contributor | Description |
 | ----------- | ----------- |
-| [Kevin Elliott] | Primary Airframes contributor |
-| [Michael Johnson](https://github.com/johnsom] | Decoder plugins, testing framework |
+| [Kevin Elliott](https://github.com/kevinelliott) | Primary Airframes contributor |
+| [Michael Johnson](https://github.com/johnsom) | Decoder plugins, testing framework |
 
