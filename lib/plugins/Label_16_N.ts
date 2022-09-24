@@ -1,7 +1,7 @@
 import { DecoderPlugin } from '../DecoderPlugin';
 
-export class Label_16_N_Space extends DecoderPlugin {
-  name = 'label-16-n-space';
+export class Label_16_N extends DecoderPlugin {
+  name = 'label-16-n';
 
   qualifiers() { // eslint-disable-line class-methods-use-this
     return {
@@ -17,10 +17,10 @@ export class Label_16_N_Space extends DecoderPlugin {
     decodeResult.message = message;
 
     // Style: N 44.203,W 86.546,31965,6, 290
-    let variant1Regex = /^(?<lat>[NS])\s(?<lat_coord>.*),(?<long>[EW])\s(?<long_coord>.*),(?<alt>.*),(?<unkwn1>.*),\s(?<unkwn2>.*)$/;
+    let variant1Regex = /^(?<lat>[NS])\s*(?<lat_coord>.*),(?<long>[EW])\s*(?<long_coord>.*),(?<alt>.*),(?<unkwn1>.*),\s*(?<unkwn2>.*)$/;
 
     // Style: N 28.177/W 96.055
-    let variant2Regex = /^(?<lat>[NS])\s(?<lat_coord>.*)\/(?<long>[EW])\s?(?<long_coord>.*)$/;
+    let variant2Regex = /^(?<lat>[NS])\s*(?<lat_coord>.*)\/(?<long>[EW])\s*(?<long_coord>.*)$/;
 
     let results;
     if (results = message.text.match(variant1Regex)) {
