@@ -27,9 +27,9 @@ function decode(label: string, text: string) {
   debugMessage(message, decoding);
 }
 
-// Label 16 with N space
+// Label 16 with N
 decode('16', 'N 44.203,W 86.546,31965,6, 290');
-decode('16', 'N 42.777,W 85.477,35004,6, 132');
+decode('16', 'N 44.988,W121.644,35940,6, 170');
 decode('16', 'N 28.177/W 96.055');
 decode('16', 'N 44.640/W119.729');
 
