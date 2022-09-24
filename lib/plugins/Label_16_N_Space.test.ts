@@ -1,12 +1,12 @@
 import { MessageDecoder } from '../MessageDecoder';
-import { Label_16_N } from './Label_16_N';
+import { Label_16_N_Space } from './Label_16_N_Space';
 
 test('decodes Label 16 variant 1', () => {
   const decoder = new MessageDecoder();
-  const decoderPlugin = new Label_16_N(decoder);
+  const decoderPlugin = new Label_16_N_Space(decoder);
 
   expect(decoderPlugin.decode).toBeDefined();
-  expect(decoderPlugin.name).toBe('label-16-n');
+  expect(decoderPlugin.name).toBe('label-16-n-space');
   expect(decoderPlugin.qualifiers).toBeDefined();
   expect(decoderPlugin.qualifiers()).toEqual({
     labels: ['16'],
@@ -19,7 +19,7 @@ test('decodes Label 16 variant 1', () => {
 
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
-  expect(decodeResult.decoder.name).toBe('label-16-n');
+  expect(decodeResult.decoder.name).toBe('label-16-n-space');
   expect(decodeResult.formatted.description).toBe('Position Report');
   expect(decodeResult.message.text).toBe(text);
   expect(decodeResult.raw.latitude_direction).toBe('N');
@@ -40,10 +40,10 @@ test('decodes Label 16 variant 1', () => {
 
 test('decodes Label 16 variant 2', () => {
   const decoder = new MessageDecoder();
-  const decoderPlugin = new Label_16_N(decoder);
+  const decoderPlugin = new Label_16_N_Space(decoder);
 
   expect(decoderPlugin.decode).toBeDefined();
-  expect(decoderPlugin.name).toBe('label-16-n');
+  expect(decoderPlugin.name).toBe('label-16-n-space');
   expect(decoderPlugin.qualifiers).toBeDefined();
   expect(decoderPlugin.qualifiers()).toEqual({
     labels: ['16'],
@@ -56,7 +56,7 @@ test('decodes Label 16 variant 2', () => {
 
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('full');
-  expect(decodeResult.decoder.name).toBe('label-16-n');
+  expect(decodeResult.decoder.name).toBe('label-16-n-space');
   expect(decodeResult.formatted.description).toBe('Position Report');
   expect(decodeResult.message.text).toBe(text);
   expect(decodeResult.raw.latitude_direction).toBe('N');
@@ -72,10 +72,10 @@ test('decodes Label 16 variant 2', () => {
 
 test('decodes Label 16 variant 3', () => {
   const decoder = new MessageDecoder();
-  const decoderPlugin = new Label_16_N(decoder);
+  const decoderPlugin = new Label_16_N_Space(decoder);
 
   expect(decoderPlugin.decode).toBeDefined();
-  expect(decoderPlugin.name).toBe('label-16-n');
+  expect(decoderPlugin.name).toBe('label-16-n-space');
   expect(decoderPlugin.qualifiers).toBeDefined();
   expect(decoderPlugin.qualifiers()).toEqual({
     labels: ['16'],
@@ -88,7 +88,7 @@ test('decodes Label 16 variant 3', () => {
 
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
-  expect(decodeResult.decoder.name).toBe('label-16-n');
+  expect(decodeResult.decoder.name).toBe('label-16-n-space');
   expect(decodeResult.formatted.description).toBe('Position Report');
   expect(decodeResult.message.text).toBe(text);
   expect(decodeResult.raw.latitude_direction).toBe('N');
@@ -109,10 +109,10 @@ test('decodes Label 16 variant 3', () => {
 
 test('decodes Label 16 variant <invalid>', () => {
   const decoder = new MessageDecoder();
-  const decoderPlugin = new Label_16_N(decoder);
+  const decoderPlugin = new Label_16_N_Space(decoder);
 
   expect(decoderPlugin.decode).toBeDefined();
-  expect(decoderPlugin.name).toBe('label-16-n');
+  expect(decoderPlugin.name).toBe('label-16-n-space');
   expect(decoderPlugin.qualifiers).toBeDefined();
   expect(decoderPlugin.qualifiers()).toEqual({
     labels: ['16'],
@@ -125,7 +125,7 @@ test('decodes Label 16 variant <invalid>', () => {
 
   expect(decodeResult.decoded).toBe(false);
   expect(decodeResult.decoder.decodeLevel).toBe('none');
-  expect(decodeResult.decoder.name).toBe('label-16-n');
+  expect(decodeResult.decoder.name).toBe('label-16-n-space');
   expect(decodeResult.formatted.description).toBe('Position Report');
   expect(decodeResult.message.text).toBe(text);
 });
