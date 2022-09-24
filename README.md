@@ -29,3 +29,11 @@ Documentation coming soon.
 # Contributions
 
 Contributions are welcome! Please follow the [ACARS Message Documentation](https://github.com/airframesio/acars-message-documentation) when implementing. Most find that this makes things a lot easier. Submit a Pull Request and we will gratefully review and merge.
+
+# Contributors
+
+| Contributor | Description |
+| ----------- | ----------- |
+| [Kevin Elliott] | Primary Airframes contributor |
+| [Michael Johnson](https://github.com/johnsom] | Decoder plugins, testing framework |
+
