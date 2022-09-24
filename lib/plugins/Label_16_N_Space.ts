@@ -68,7 +68,7 @@ export class Label_16_N_Space extends DecoderPlugin {
         type: 'aircraft_position',
         code: 'POS',
         label: 'Aircraft Position',
-        value: `${decodeResult.raw.latitude} ${decodeResult.raw.latitude_direction}, ${decodeResult.raw.longitude} ${decodeResult.raw.longitude_direction}`,
+        value: `${results.groups.lat_coord} ${decodeResult.raw.latitude_direction}, ${results.groups.long_coord} ${decodeResult.raw.longitude_direction}`,
       });
 
       decodeResult.decoded = true;
