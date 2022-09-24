@@ -27,6 +27,10 @@ function decode(label: string, text: string) {
   debugMessage(message, decoding);
 }
 
+// Label 12 with N space
+decode('12', 'N 42.150,W121.187,39000,161859, 109,.C-GWSO,1742');
+decode('12', 'N 28.371,W 80.458,38000,170546, 100,.C-GVWJ,1736');
+
 // Label 16 with N space
 decode('16', 'N 44.203,W 86.546,31965,6, 290');
 decode('16', 'N 44.988,W121.644,35940,6, 170');
