@@ -21,7 +21,7 @@ export class Label_H1_POS extends DecoderPlugin {
     let variant1Regex = /^POS(?<lat>[NS])(?<lat_coord>[0-9]+)(?<long>[EW])(?<long_coord>[0-9]+),(?<waypoint1>[a-zA-Z0-9]*),(?<unknown1>[0-9]*),(?<unknown2>[0-9]*),(?<waypoint2>[a-zA-Z0-9]*),(?<unknown3>[0-9]*),(?<waypoint3>[a-zA-Z0-9]*).(?<unknown4>M[a-zA-Z0-9]*),(?<unknown5>[0-9]*),(?<unknown6>[0-9]*)\/TS(?<timestamp>[0-9][0-9][0-9][0-9][0-9][0-9]),(?<date>[0-9][0-9][0-9][0-9][0-9][0-9])(?<unknown7>.*)$/;
 
     // Style: POSN45209W122550,PEGTY,220309,134,MINNE,220424,HISKU,M6,060013,269,366,355K,292K,730A5B
-    let variant2Regex = /^POS(?<lat>[NS])(?<lat_coord>[0-9]+)(?<long>[EW])(?<long_coord>[0-9]+),(?<waypoint1>[a-zA-Z0-9]*),(?<unknown1>[0-9]*),(?<unknown2>[0-9]*),(?<waypoint2>[a-zA-Z0-9]*),(?<unknown3>[0-9]*),(?<waypoint3>[a-zA-Z0-9]*).(?<unknown4>M[a-zA-Z0-9]*),(?<unknown5>[0-9]*),(?<unknown6>[0-9]*),(?<unknown7>[0-9]*),(?<unknown8>[a-zA-Z0-9]*),(?<unknown9>[a-zA-Z0-9]*),(?<unknown10>[a-zA-Z0-9]*)$/;
+    let variant2Regex = /^POS(?<lat>[NS])(?<lat_coord>[0-9]+)(?<long>[EW])(?<long_coord>[0-9]+),(?<waypoint1>[a-zA-Z0-9]*),(?<unknown1>[0-9]*),(?<unknown2>[0-9]*),(?<waypoint2>[a-zA-Z0-9]*),(?<unknown3>[0-9]*),(?<waypoint3>[a-zA-Z0-9]*).(?<unknown4>M[a-zA-Z0-9]*),(?<unknown5>[0-9]*),(?<unknown6>[0-9]*),(?<groundspeed>[0-9]*),(?<unknown7>[a-zA-Z0-9]*),(?<unknown8>[a-zA-Z0-9]*),(?<unknown9>[a-zA-Z0-9]*)$/;
 
     // Style: POSN33225W079428,SCOOB,232933,340,ENEME,235712,FETAL,M42,003051,15857F6
     let variant4Regex = /^POS(?<lat>[NS])(?<lat_coord>[0-9]+)(?<long>[EW])(?<long_coord>[0-9]+),(?<waypoint1>[a-zA-Z0-9]*),(?<unknown1>[0-9]*),(?<unknown2>[0-9]*),(?<waypoint2>[a-zA-Z0-9]*),(?<unknown3>[0-9]*),(?<waypoint3>[a-zA-Z0-9]*).(?<unknown4>M[a-zA-Z0-9]*),(?<unknown5>[0-9]*),(?<unknown6>[a-zfA-Z0-9]*)$/;
@@ -47,7 +47,16 @@ export class Label_H1_POS extends DecoderPlugin {
 
       decodeResult = this.decodePositionRoute(decodeResult, results, options);
 
-      decodeResult.remaining.text = `${results.groups.unknown1},${results.groups.unknown2},${results.groups.unknown3},${results.groups.unknown4},${results.groups.unknown5},${results.groups.unknown6},${results.groups.unknown7},${results.groups.unknown8},${results.groups.unknown9},${results.groups.unknown10}`;
+      decodeResult.raw.groundspeed = Number(results.groups.groundspeed);
+
+      decodeResult.formatted.items.push({
+        type: 'aircraft_groundspeed',
+        code: 'GSPD',
+        label: 'Aircraft Groundspeed',
+        value: `${decodeResult.raw.groundspeed}`
+      });
+
+      decodeResult.remaining.text = `${results.groups.unknown1},${results.groups.unknown2},${results.groups.unknown3},${results.groups.unknown4},${results.groups.unknown5},${results.groups.unknown6},${results.groups.unknown7},${results.groups.unknown8},${results.groups.unknown9}`;
 
       decodeResult.decoded = true;
       decodeResult.decoder.decodeLevel = 'partial';

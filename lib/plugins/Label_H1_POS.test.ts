@@ -66,7 +66,8 @@ test('decodes Label H1 Preamble POS variant 2', () => {
   expect(decodeResult.raw.latitude).toBe(45.209);
   expect(decodeResult.raw.longitude_direction).toBe('W');
   expect(decodeResult.raw.longitude).toBe(122.55);
-  expect(decodeResult.formatted.items.length).toBe(2);
+  expect(decodeResult.raw.groundspeed).toBe(366);
+  expect(decodeResult.formatted.items.length).toBe(3);
   expect(decodeResult.formatted.items[0].type).toBe('aircraft_position');
   expect(decodeResult.formatted.items[0].code).toBe('POS');
   expect(decodeResult.formatted.items[0].label).toBe('Aircraft Position');
@@ -75,6 +76,10 @@ test('decodes Label H1 Preamble POS variant 2', () => {
   expect(decodeResult.formatted.items[1].code).toBe('ROUTE');
   expect(decodeResult.formatted.items[1].label).toBe('Aircraft Route');
   expect(decodeResult.formatted.items[1].value).toBe('PEGTY > MINNE > HISKU');
+  expect(decodeResult.formatted.items[2].type).toBe('aircraft_groundspeed');
+  expect(decodeResult.formatted.items[2].code).toBe('GSPD');
+  expect(decodeResult.formatted.items[2].label).toBe('Aircraft Groundspeed');
+  expect(decodeResult.formatted.items[2].value).toBe('366');
 });
 
 test('decodes Label H1 Preamble POS variant 3', () => {
