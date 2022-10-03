@@ -18,13 +18,13 @@ export class Label_H1_POS extends DecoderPlugin {
     decodeResult.message = message;
 
     // Style: POSN43312W123174,EASON,215754,370,EBINY,220601,ELENN,M48,02216,185/TS215754,0921227A40
-    let variant1Regex = /^POS(?<lat>[NS])(?<lat_coord>[0-9]+)(?<long>[EW])(?<long_coord>[0-9]+),(?<waypoint1>[a-zA-Z0-9]*),(?<unknown1>[0-9]*),(?<unknown2>[0-9]*),(?<waypoint2>[a-zA-Z0-9]*),(?<unknown3>[0-9]*),(?<waypoint3>[a-zA-Z0-9]*).(?<unknown4>M[a-zA-Z0-9]*),(?<unknown5>[0-9]*),(?<unknown6>[0-9]*)\/TS(?<timestamp>[0-9][0-9][0-9][0-9][0-9][0-9]),(?<date>[0-9][0-9][0-9][0-9][0-9][0-9])(?<unknown7>.*)$/;
+    let variant1Regex = /^POS(?<lat>[NS])(?<lat_coord>[0-9]+)(?<long>[EW])(?<long_coord>[0-9]+),(?<waypoint1>[a-zA-Z0-9]*),(?<unknown1>[0-9]*),(?<unknown2>[0-9]*),(?<waypoint2>[a-zA-Z0-9]*),(?<unknown3>[0-9]*),(?<waypoint3>[a-zA-Z0-9]*).(?<temp_sign>[MP])(?<temperature>[0-9]*),(?<unknown4>[0-9]*),(?<unknown5>[0-9]*)\/TS(?<timestamp>[0-9][0-9][0-9][0-9][0-9][0-9]),(?<date>[0-9][0-9][0-9][0-9][0-9][0-9])(?<unknown6>.*)$/;
 
     // Style: POSN45209W122550,PEGTY,220309,134,MINNE,220424,HISKU,M6,060013,269,366,355K,292K,730A5B
-    let variant2Regex = /^POS(?<lat>[NS])(?<lat_coord>[0-9]+)(?<long>[EW])(?<long_coord>[0-9]+),(?<waypoint1>[a-zA-Z0-9]*),(?<unknown1>[0-9]*),(?<unknown2>[0-9]*),(?<waypoint2>[a-zA-Z0-9]*),(?<unknown3>[0-9]*),(?<waypoint3>[a-zA-Z0-9]*).(?<unknown4>M[a-zA-Z0-9]*),(?<unknown5>[0-9]*),(?<unknown6>[0-9]*),(?<groundspeed>[0-9]*),(?<unknown7>[a-zA-Z0-9]*),(?<unknown8>[a-zA-Z0-9]*),(?<unknown9>[a-zA-Z0-9]*)$/;
+    let variant2Regex = /^POS(?<lat>[NS])(?<lat_coord>[0-9]+)(?<long>[EW])(?<long_coord>[0-9]+),(?<waypoint1>[a-zA-Z0-9]*),(?<unknown1>[0-9]*),(?<unknown2>[0-9]*),(?<waypoint2>[a-zA-Z0-9]*),(?<unknown3>[0-9]*),(?<waypoint3>[a-zA-Z0-9]*).(?<temp_sign>[MP])(?<temperature>[0-9]*),(?<unknown4>[0-9]*),(?<unknown5>[0-9]*),(?<groundspeed>[0-9]*),(?<unknown6>[a-zA-Z0-9]*),(?<unknown7>[a-zA-Z0-9]*),(?<unknown8>[a-zA-Z0-9]*)$/;
 
     // Style: POSN33225W079428,SCOOB,232933,340,ENEME,235712,FETAL,M42,003051,15857F6
-    let variant4Regex = /^POS(?<lat>[NS])(?<lat_coord>[0-9]+)(?<long>[EW])(?<long_coord>[0-9]+),(?<waypoint1>[a-zA-Z0-9]*),(?<unknown1>[0-9]*),(?<unknown2>[0-9]*),(?<waypoint2>[a-zA-Z0-9]*),(?<unknown3>[0-9]*),(?<waypoint3>[a-zA-Z0-9]*).(?<unknown4>M[a-zA-Z0-9]*),(?<unknown5>[0-9]*),(?<unknown6>[a-zfA-Z0-9]*)$/;
+    let variant4Regex = /^POS(?<lat>[NS])(?<lat_coord>[0-9]+)(?<long>[EW])(?<long_coord>[0-9]+),(?<waypoint1>[a-zA-Z0-9]*),(?<unknown1>[0-9]*),(?<unknown2>[0-9]*),(?<waypoint2>[a-zA-Z0-9]*),(?<unknown3>[0-9]*),(?<waypoint3>[a-zA-Z0-9]*).(?<temp_sign>[MP])(?<temperature>[0-9]*),(?<unknown4>[0-9]*),(?<unknown5>[a-zfA-Z0-9]*)$/;
 
     let results;
     if (results = message.text.match(variant1Regex)) {
@@ -103,6 +103,8 @@ export class Label_H1_POS extends DecoderPlugin {
 
     decodeResult.raw.route = [results.groups.waypoint1 || '?', results.groups.waypoint2 || '?', results.groups.waypoint3 || '?'];
 
+    decodeResult.raw.outside_air_temperature = Number(results.groups.temperature) * (results.groups.temp_sign === 'M' ? -1 : 1);
+
     decodeResult.formatted.items.push({
       type: 'aircraft_position',
       code: 'POS',
@@ -115,6 +117,13 @@ export class Label_H1_POS extends DecoderPlugin {
       code: 'ROUTE',
       label: 'Aircraft Route',
       value: `${decodeResult.raw.route.join(' > ')}`,
+    });
+
+    decodeResult.formatted.items.push({
+      type: 'outside_air_temperature',
+      code: 'OATEMP',
+      label: 'Outside Air Temperature (C)',
+      value: `${decodeResult.raw.outside_air_temperature}`,
     });
 
     return decodeResult;
