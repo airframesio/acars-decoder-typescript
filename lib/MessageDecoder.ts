@@ -1,11 +1,12 @@
 import { DecoderPluginInterface } from './DecoderPluginInterface'; // eslint-disable-line import/no-cycle
 
 import * as Plugins from './plugins/official';
+import { MIAMCoreUtils } from './utils/miam';
 
 export class MessageDecoder {
-  name : string;
-  plugins : Array<DecoderPluginInterface>;
-  debug : boolean;
+  name: string;
+  plugins: Array<DecoderPluginInterface>;
+  debug: boolean;
 
   constructor() {
     this.name = 'acars-decoder-typescript';
@@ -38,7 +39,7 @@ export class MessageDecoder {
     this.registerPlugin(new Plugins.Label_QS(this));
   }
 
-  registerPlugin(plugin: DecoderPluginInterface) : boolean {
+  registerPlugin(plugin: DecoderPluginInterface): boolean {
     const pluginInstance = plugin;
     // plugin.onRegister(this.store);
     this.plugins.push(plugin);
@@ -46,10 +47,17 @@ export class MessageDecoder {
   }
 
   decode(message: any, options: any = {}) {
+    if (message.label === 'MA') {
+      console.log(MIAMCoreUtils.parse(message.text));
+
+      // TODO: make sure decoding succeeded with acars content
+      // TODO: replace label, sublabel, MFI, and text with new content
+    }
+
     // console.log('All plugins');
     // console.log(this.plugins);
     const usablePlugins = this.plugins.filter((plugin) => {
-      const qualifiers : any = plugin.qualifiers();
+      const qualifiers: any = plugin.qualifiers();
 
       if (qualifiers.labels.includes(message.label)) {
         if (qualifiers.preambles && qualifiers.preambles.length > 0) {
@@ -106,8 +114,8 @@ export class MessageDecoder {
     return result;
   }
 
-  lookupAirportByIata(iata: string) : any {
-    const airportsArray : Array<any> = []; // = this.store.state.acarsData.airports;
+  lookupAirportByIata(iata: string): any {
+    const airportsArray: Array<any> = []; // = this.store.state.acarsData.airports;
     // console.log(airportsArray);
     const airport = airportsArray.filter((e: any) => e.iata === iata);
 
