@@ -1,6 +1,6 @@
 import { MessageDecoder } from "../MessageDecoder";
 
-test('Simple MIAM Decode', () => {
+test('v1, compressed, acars', () => {
   const decoder = new MessageDecoder();
   const miamMsgFrame = {
     label: 'MA',
