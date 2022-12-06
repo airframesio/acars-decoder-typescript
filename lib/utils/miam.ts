@@ -45,20 +45,30 @@ enum MIAMCoreV2Compression {
 const MIAMCoreV1CRCLength = 4;
 const MIAMCoreV2CRCLength = 2;
 
-interface Pdu {
-  size?: number,
+interface PduACARSData {
   tail?: string,
-  acars: boolean,
-  appId: string,
-  msgNum: number,
-  ackOption: number,
+  label: string,
+  sublabel?: string,
+  mfi?: string,
+  text?: string,
+}
+
+interface PduNonACARSData {
+  appId?: string,
+  text?: string,
+}
+
+interface Pdu {
+  version: number,
+  crc: number,
+  crcOk: boolean,
+  complete: boolean,
   compression: number,
   encoding: number,
-  appType: number,
-  crc: number,
-  valid: boolean,
-  data?: Buffer,
-  errors: string[],
+  msgNum: number,
+  ackOptions: number,
+  acars?: PduACARSData,
+  non_acars?: PduNonACARSData,
 }
 
 export class MIAMCoreUtils {
@@ -311,79 +321,94 @@ export class MIAMCoreUtils {
       };
     }
 
-    let pdu: Pdu = { acars: true, appId: '', msgNum: 0, ackOption: 0, compression: 0, encoding: 0, crc: 0, valid: false, appType: 0, errors: [] };
+    let pduSize: number | undefined = undefined;
+    let pduCompression: number = 0;
+    let pduEncoding: number = 0;
+    let pduAppType: number = 0;
+    let pduAppId: string = '';
+    let pduCrc: number = 0;
+    let pduData: Buffer | undefined = undefined;
+    let pduCrcIsOk: boolean = false;
+    let pduIsComplete: boolean = true;
+
+    let pduErrors: string[] = [];
+
+    let tail: string | undefined = undefined;
+    let msgNum: number = 0;
+    let ackOptions: number = 0;
 
     if (version === 1) {
-      pdu.size = (hdr.readUInt8(1) << 16) | (hdr.readUInt8(2) << 8) | hdr.readUInt8(3);
+      pduSize = (hdr.readUInt8(1) << 16) | (hdr.readUInt8(2) << 8) | hdr.readUInt8(3);
 
       const msgSize = hdr.length + (body === undefined ? 0 : body.length);
-      if (pdu.size > msgSize) {
-        pdu.errors.push('v1 PDU truncated: expecting ' + pdu.size + ', got ' + msgSize);
+      if (pduSize > msgSize) {
+        pduIsComplete = false;
+        pduErrors.push('v1 PDU truncated: expecting ' + pduSize + ', got ' + msgSize);
       }
       hdr = hdr.subarray(4);
 
-      pdu.tail = hdr.subarray(0, 7).toString('ascii');
+      tail = hdr.subarray(0, 7).toString('ascii');
       hdr = hdr.subarray(7);
     } else if (version === 2) {
       hdr = hdr.subarray(1);
     }
 
-    pdu.msgNum = (hdr.readUInt8(0) >> 1) & 0x7f;
-    pdu.ackOption = hdr.readUInt8(0) & 1;
+    msgNum = (hdr.readUInt8(0) >> 1) & 0x7f;
+    ackOptions = hdr.readUInt8(0) & 1;
     hdr = hdr.subarray(1);
 
-    pdu.compression = ((hdr.readUInt8(0) << 2) | ((hdr.readUInt8(1) >> 6) & 0x3)) & 0x7;
-    pdu.encoding = (hdr.readUInt8(1) >> 4) & 0x3;
-    pdu.appType = hdr.readUInt8(1) & 0xf;
+    pduCompression = ((hdr.readUInt8(0) << 2) | ((hdr.readUInt8(1) >> 6) & 0x3)) & 0x7;
+    pduEncoding = (hdr.readUInt8(1) >> 4) & 0x3;
+    pduAppType = hdr.readUInt8(1) & 0xf;
     hdr = hdr.subarray(2)
 
-    let appIdLen = this.AppTypeToAppIdLenTable[version][pdu.appType];
+    let appIdLen = this.AppTypeToAppIdLenTable[version][pduAppType];
     if (appIdLen === undefined) {
-      if (version === 2 && (pdu.appType & 0x8) !== 0 && pdu.appType !== 0xd) {
-        appIdLen = (pdu.appType & 0x7) + 1;
+      if (version === 2 && (pduAppType & 0x8) !== 0 && pduAppType !== 0xd) {
+        appIdLen = (pduAppType & 0x7) + 1;
       } else {
         return {
           decoded: false,
-          error: 'Invalid v' + version + ' appType: ' + pdu.appType,
+          error: 'Invalid v' + version + ' appType: ' + pduAppType,
         };
       }
     }
 
-    pdu.acars = ([
+    const pduIsACARS = ([
       MIAMCoreV1App.ACARS2Char, MIAMCoreV1App.ACARS4Char, MIAMCoreV1App.ACARS6Char,
-      MIAMCoreV2App.ACARS2Char, MIAMCoreV2App.ACARS4Char, MIAMCoreV2App.ACARS6Char].indexOf(pdu.appType) >= 0);
+      MIAMCoreV2App.ACARS2Char, MIAMCoreV2App.ACARS4Char, MIAMCoreV2App.ACARS6Char].indexOf(pduAppType) >= 0);
 
     if (hdr.length < appIdLen + crcLen) {
       return {
         decoded: false,
-        error: 'Header too short for v' + version + ' appType: ' + pdu.appType,
+        error: 'Header too short for v' + version + ' appType: ' + pduAppType,
       };
     }
 
-    pdu.appId = hdr.subarray(0, appIdLen).toString('ascii')
+    pduAppId = hdr.subarray(0, appIdLen).toString('ascii')
     hdr = hdr.subarray(appIdLen);
 
     if (crcLen === 4) {
-      pdu.crc = (hdr.readUInt8(0) << 24) | (hdr.readUInt8(1) << 16) | (hdr.readUInt8(2) << 8) | hdr.readUInt8(3); // crc
+      pduCrc = (hdr.readUInt8(0) << 24) | (hdr.readUInt8(1) << 16) | (hdr.readUInt8(2) << 8) | hdr.readUInt8(3); // crc
     } else if (crcLen === 2) {
-      pdu.crc = (hdr.readUInt8(0) << 8) | hdr.readUInt8(1); // crc
+      pduCrc = (hdr.readUInt8(0) << 8) | hdr.readUInt8(1); // crc
     }
     hdr = hdr.subarray(crcLen)
 
     if (body !== undefined && body.length > 0) {
-      if ([MIAMCoreV1Compression.Deflate, MIAMCoreV2Compression.Deflate].indexOf(pdu.compression) >= 0) {
+      if ([MIAMCoreV1Compression.Deflate, MIAMCoreV2Compression.Deflate].indexOf(pduCompression) >= 0) {
         try {
-          pdu.data = Zlib.inflateRawSync(body, { windowBits: 15 });
+          pduData = Zlib.inflateRawSync(body, { windowBits: 15 });
         } catch (e) {
-          pdu.errors.push('Inflation failed for body: ' + e);
+          pduErrors.push('Inflation failed for body: ' + e);
         }
-      } else if ([MIAMCoreV1Compression.None, MIAMCoreV2Compression.None].indexOf(pdu.compression) >= 0) {
-        pdu.data = body;
+      } else if ([MIAMCoreV1Compression.None, MIAMCoreV2Compression.None].indexOf(pduCompression) >= 0) {
+        pduData = body;
       } else {
-        pdu.errors.push('Unsupported v' + version + ' compression type: ' + pdu.compression)
+        pduErrors.push('Unsupported v' + version + ' compression type: ' + pduCompression)
       }
 
-      if (pdu.data !== undefined) {
+      if (pduData !== undefined) {
         const crcAlgoHandlerByVersion: any = {
           1: (buf: Buffer, seed?: number) => { return ~this.arinc665Crc32(buf, seed); },
           2: this.arincCrc16,
@@ -397,16 +422,47 @@ export class MIAMCoreUtils {
           };
         }
 
-        const crcCheck = crcAlgoHandler(pdu.data, 0xffffffff);
-        if (crcCheck === pdu.crc) {
-          pdu.valid = true;
+        const crcCheck = crcAlgoHandler(pduData, 0xffffffff);
+        if (crcCheck === pduCrc) {
+          pduCrcIsOk = true;
         } else {
-          pdu.errors.push('Body failed CRC check: provided=' + pdu.crc + ', generated=' + crcCheck);
+          pduErrors.push('Body failed CRC check: provided=' + pduCrc + ', generated=' + crcCheck);
         }
       }
+    } else {
+      // No PDU body means we can't verify CRC checksum; however, the message should still be valid...
+      pduCrcIsOk = true;
     }
 
-    // TODO: consider a different output message structure... something more similar to libacars?
+    let pdu: Pdu = {
+      version,
+      crc: pduCrc,
+      crcOk: pduCrcIsOk,
+      complete: pduIsComplete,
+      compression: pduCompression,
+      encoding: pduEncoding,
+      msgNum,
+      ackOptions,
+    }
+
+    if (pduIsACARS) {
+      const label = pduAppId.substring(0, 2);
+      const sublabel = (appIdLen >= 4) ? pduAppId.substring(2, 4) : undefined;
+      const mfi = (appIdLen >= 6) ? pduAppId.substring(4, 6) : undefined;
+
+      pdu.acars = {
+        ...(tail ? { tail } : {}),
+        label,
+        ...(sublabel ? { sublabel } : {}),
+        ...(mfi ? { mfi } : {}),
+        ...(pduData ? { text: pduData.toString('ascii') } : {}),
+      }
+    } else {
+      pdu.non_acars = {
+        appId: pduAppId,
+        ...(pduData ? { text: pduData.toString('ascii') } : {}),
+      }
+    }
 
     return {
       decoded: true,

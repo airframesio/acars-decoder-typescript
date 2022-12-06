@@ -48,10 +48,18 @@ export class MessageDecoder {
 
   decode(message: any, options: any = {}) {
     if (message.label === 'MA') {
-      console.log(MIAMCoreUtils.parse(message.text));
+      const decodeResult = MIAMCoreUtils.parse(message.text);
 
-      // TODO: make sure decoding succeeded with acars content
-      // TODO: replace label, sublabel, MFI, and text with new content
+      // Only transplant message text if the MIAM core decoded message passed CRC and is complete
+      if (decodeResult.decoded && decodeResult.message.crcOk && decodeResult.message.complete && decodeResult.message.acars !== undefined) {
+        message = {
+          ...message,
+          label: decodeResult.message.acars.label,
+          ...(decodeResult.message.acars.sublabel ? { sublabel: decodeResult.message.acars.sublabel } : {}),
+          ...(decodeResult.message.acars.mfi ? { mfi: decodeResult.message.acars.mfi } : {}),
+          ...(decodeResult.message.acars.text ? { text: decodeResult.message.acars.text } : {}),
+        }
+      }
     }
 
     // console.log('All plugins');
