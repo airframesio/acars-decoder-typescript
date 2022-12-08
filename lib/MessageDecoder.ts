@@ -51,13 +51,17 @@ export class MessageDecoder {
       const decodeResult = MIAMCoreUtils.parse(message.text);
 
       // Only transplant message text if the MIAM core decoded message passed CRC and is complete
-      if (decodeResult.decoded && decodeResult.message.crcOk && decodeResult.message.complete && decodeResult.message.acars !== undefined) {
+      if (decodeResult.decoded &&
+        decodeResult.message.data !== undefined &&
+        decodeResult.message.data.crcOk &&
+        decodeResult.message.data.complete &&
+        decodeResult.message.data.acars !== undefined) {
         message = {
           ...message,
-          label: decodeResult.message.acars.label,
-          ...(decodeResult.message.acars.sublabel ? { sublabel: decodeResult.message.acars.sublabel } : {}),
-          ...(decodeResult.message.acars.mfi ? { mfi: decodeResult.message.acars.mfi } : {}),
-          ...(decodeResult.message.acars.text ? { text: decodeResult.message.acars.text } : {}),
+          label: decodeResult.message.data.acars.label,
+          ...(decodeResult.message.data.acars.sublabel ? { sublabel: decodeResult.message.data.acars.sublabel } : {}),
+          ...(decodeResult.message.data.acars.mfi ? { mfi: decodeResult.message.data.acars.mfi } : {}),
+          ...(decodeResult.message.data.acars.text ? { text: decodeResult.message.data.acars.text } : {}),
         }
       }
     }

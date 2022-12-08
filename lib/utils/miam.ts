@@ -32,12 +32,12 @@ enum MIAMCoreV2App {
   NonACARS6Char = 0x3,
 }
 
-enum MIAMCoreV1Compression {
+export enum MIAMCoreV1Compression {
   None = 0x0,
   Deflate = 0x1,
 }
 
-enum MIAMCoreV2Compression {
+export enum MIAMCoreV2Compression {
   None = 0x0,
   Deflate = 0x1,
 }
@@ -466,7 +466,9 @@ export class MIAMCoreUtils {
 
     return {
       decoded: true,
-      message: pdu,
+      message: {
+        data: pdu,
+      },
     };
   }
 
