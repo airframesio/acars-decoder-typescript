@@ -51,7 +51,7 @@ test('v1, compressed, acars, incomplete', () => {
   expect(decodeResult.message.data.version).toBe(1);
   expect(decodeResult.message.data.complete).toBe(false);
   expect(decodeResult.message.data.crcOk).toBe(false);
-  expect(decodeResult.message.data.crc).toBe(0xa17c6d88);
+  expect(decodeResult.message.data.crc).toBe(0x7d8e4eae);
   expect(decodeResult.message.data.compression).toBe(MIAMCoreV1Compression.Deflate);
   expect(decodeResult.message.data.msgNum).toBe(20);
   expect(decodeResult.message.data.ackOptions).toBe(1);
