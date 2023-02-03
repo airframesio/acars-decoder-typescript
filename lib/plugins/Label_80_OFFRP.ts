@@ -48,9 +48,9 @@ export class Label_80_OFFRP extends DecoderPlugin {
 
     let results;
     if(message.text.startsWith("1106 OFFRP")) { // Appears to be a newer version
-      results = message.text.match(/(?<origin_icao>\w{4})\/.*(?<destination_icao>\w{4}) +.(?<registration>(.*?))  (?<atd_date_utc>\d{8}) (?<atd_time_utc>\d{4})\n\/OUT  (?<gate_departure_time_utc>\d{4})\/OFF  (?<weight_off_wheels_utc>\d{4})\/FOB (?<fuel_on_board_tonnes>[0-9\.]*)\/ETA  (?<eta_time_utc>\d{4})/);
+      results = message.text.match(/(?<origin_icao>[A-Z]{4})\/.*(?<destination_icao>[A-Z]{4}) +.(?<registration>(.*?))  (?<atd_date_utc>\d{8}) (?<atd_time_utc>\d{4})\n\/OUT  (?<gate_departure_time_utc>\d{4})\/OFF  (?<weight_off_wheels_utc>\d{4})\/FOB (?<fuel_on_board_tonnes>[0-9\.]*)\/ETA  (?<eta_time_utc>\d{4})/);
     } else if(message.text.startsWith("1101 OFFRP")) {
-      results = message.text.match(/(?<origin_icao>\D{4})\/.*(?<destination_icao>\D{4}) +\.(?<registration>(.*?))\n\/OUT +(?<gate_departure_time_utc>\d{4})\/OFF +(?<weight_off_wheels_utc>\d{4})\/FOB (?<fuel_on_board_tonnes>[0-9\.]*)\/ETA +(?<eta_time_utc>[\d ]{4})/);
+      results = message.text.match(/(?<origin_icao>[A-Z]{4})\/.*(?<destination_icao>[A-Z]{4}) +\.(?<registration>(.*?))\n\/OUT +(?<gate_departure_time_utc>\d{4})\/OFF +(?<weight_off_wheels_utc>\d{4})\/FOB (?<fuel_on_board_tonnes>[0-9\.]*)\/ETA +(?<eta_time_utc>[\d ]{4})/);
     }
 
     if (results && results.length > 0) {
