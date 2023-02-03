@@ -30,6 +30,7 @@ export class MessageDecoder {
     this.registerPlugin(new Plugins.Label_H1_M1BPOS(this));
     this.registerPlugin(new Plugins.Label_H1_POS(this));
     this.registerPlugin(new Plugins.Label_80_POSRPT(this));
+    this.registerPlugin(new Plugins.Label_80_OFFRP(this));
     this.registerPlugin(new Plugins.Label_8E(this));
     this.registerPlugin(new Plugins.Label_1M_Slash(this));
     this.registerPlugin(new Plugins.Label_SQ(this));
