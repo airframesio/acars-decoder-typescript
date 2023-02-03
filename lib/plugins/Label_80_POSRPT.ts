@@ -2,8 +2,8 @@ import { DecoderPlugin } from '../DecoderPlugin';
 
 // Airline Defined
 // 3N01 POSRPT
-export class Label_80 extends DecoderPlugin {
-  name = 'label-80';
+export class Label_80_POSRPT extends DecoderPlugin {
+  name = 'label-80-posrpt';
 
   descriptions: any = {
     ALT: 'Altitude',

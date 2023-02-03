@@ -10,7 +10,7 @@ export * from './Label_44_IN';
 export * from './Label_44_OFF';
 export * from './Label_44_ON';
 export * from './Label_44_POS';
-export * from './Label_80';
+export * from './Label_80_POSRPT';
 export * from './Label_8E';
 export * from './Label_B6';
 export * from './Label_ColonComma';
