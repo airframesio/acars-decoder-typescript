@@ -16,7 +16,7 @@ export class Label_80 extends DecoderPlugin {
     NWYP: 'Next Waypoint',
     POS: 'Aircraft Position',
     SAT: 'Static Air Temperature',
-    SWND: 'Window Speed',
+    SWND: 'Wind Speed',
     TAS: 'True Airspeed',
     WYP: 'Waypoint',
   }
