@@ -32,8 +32,8 @@ export class Label_H1_POS extends DecoderPlugin {
     //   7 - temp
     //   8 - ?
     //   9 - ? or variant 1 ? + /TS + valid at HHMMSS
-    //  10 - ? or variant 1 date MMDDYY (opt)
-    //  11 - ? or variant 2 gspd (opt) 
+    //  10 - ? or variant 1 date MMDDYY or variant 2 gspd (opt)
+    //  11 - ? (opt) 
     //  12 - ? (opt)
     //  13 - ? (opt)
 
