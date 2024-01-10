@@ -18,15 +18,16 @@ export class Label_H1_POS extends DecoderPlugin {
     decodeResult.message = message;
 
     const checksum = message.text.substring(-4);
-    const data = message.text.substring(0, message.text.length-4);
+    //strip POS and checksum
+    const data = message.text.substring(3, message.text.length-4);
     const fields = data.split(',');
     // idx - value
-    //   0 - position
+    //   0 - position in millidegrees
     //   1 - waypoint 1
     //   2 - waypoint 1 valid at HHMMSS
     //   3 - baro alititude
     //   4 - waypoint 2
-    //   5 - waypoint 2 eta
+    //   5 - waypoint 2 eta HHMMSS
     //   6 - waypoint 3
     //   7 - temp
     //   8 - ?
@@ -81,12 +82,13 @@ export class Label_H1_POS extends DecoderPlugin {
       console.log(fields);
     }
     
-    const header = fields[0];
+    //N12345W012345
+    const position = fields[0];
 
-    decodeResult.raw.latitude_direction = header.charAt(3);
-    decodeResult.raw.latitude = Number(header.substring(4,9))/1000;
-    decodeResult.raw.longitude_direction = header.charAt(9);
-    decodeResult.raw.longitude = Number(header.substring(10,16))/1000;
+    decodeResult.raw.latitude_direction = position.charAt(0);
+    decodeResult.raw.latitude = Number(position.substring(1,6))/1000;
+    decodeResult.raw.longitude_direction = position.charAt(6);
+    decodeResult.raw.longitude = Number(position.substring(7))/1000;
 
     decodeResult.raw.position = {
       latitudeDirection: decodeResult.raw.latitude_direction,
