@@ -17,59 +17,51 @@ export class Label_H1_POS extends DecoderPlugin {
     decodeResult.formatted.description = 'Position Report';
     decodeResult.message = message;
 
-    // Style: POSN43312W123174,EASON,215754,370,EBINY,220601,ELENN,M48,02216,185/TS215754,0921227A40
-    let variant1Regex = /^POS(?<lat>[NS])(?<lat_coord>[0-9]+)(?<long>[EW])(?<long_coord>[0-9]+),(?<waypoint1>[a-zA-Z0-9]*),(?<unknown1>[0-9]*),(?<unknown2>[0-9]*),(?<waypoint2>[a-zA-Z0-9]*),(?<unknown3>[0-9]*),(?<waypoint3>[a-zA-Z0-9]*).(?<temp_sign>[MP])(?<temperature>[0-9]*),(?<unknown4>[0-9]*),(?<unknown5>[0-9]*)\/TS(?<timestamp>[0-9][0-9][0-9][0-9][0-9][0-9]),(?<date>[0-9][0-9][0-9][0-9][0-9][0-9])(?<unknown6>.*)$/;
+    const checksum = message.text.substring(-4);
+    const data = message.text.substring(0, message.text.length-4);
+    const fields = data.split(',');
+    // idx - value
+    //   0 - position
+    //   1 - waypoint 1
+    //   2 - waypoint 1 valid at HHMMSS
+    //   3 - baro alititude
+    //   4 - waypoint 2
+    //   5 - waypoint 2 eta
+    //   6 - waypoint 3
+    //   7 - temp
+    //   8 - ?
+    //   9 - ? or variant 1 ? + /TS + valid at HHMMSS
+    //  10 - ? or variant 1 date MMDDYY (opt)
+    //  11 - ? or variant 2 gspd (opt) 
+    //  12 - ? (opt)
+    //  13 - ? (opt)
 
-    // Style: POSN45209W122550,PEGTY,220309,134,MINNE,220424,HISKU,M6,060013,269,366,355K,292K,730A5B
-    let variant2Regex = /^POS(?<lat>[NS])(?<lat_coord>[0-9]+)(?<long>[EW])(?<long_coord>[0-9]+),(?<waypoint1>[a-zA-Z0-9]*),(?<unknown1>[0-9]*),(?<unknown2>[0-9]*),(?<waypoint2>[a-zA-Z0-9]*),(?<unknown3>[0-9]*),(?<waypoint3>[a-zA-Z0-9]*).(?<temp_sign>[MP])(?<temperature>[0-9]*),(?<unknown4>[0-9]*),(?<unknown5>[0-9]*),(?<groundspeed>[0-9]*),(?<unknown6>[a-zA-Z0-9]*),(?<unknown7>[a-zA-Z0-9]*),(?<unknown8>[a-zA-Z0-9]*)$/;
+    if(fields.length>9) {
+      this.decodePositionRoute(decodeResult, options, fields);
 
-    // Style: POSN33225W079428,SCOOB,232933,340,ENEME,235712,FETAL,M42,003051,15857F6
-    let variant4Regex = /^POS(?<lat>[NS])(?<lat_coord>[0-9]+)(?<long>[EW])(?<long_coord>[0-9]+),(?<waypoint1>[a-zA-Z0-9]*),(?<unknown1>[0-9]*),(?<unknown2>[0-9]*),(?<waypoint2>[a-zA-Z0-9]*),(?<unknown3>[0-9]*),(?<waypoint3>[a-zA-Z0-9]*).(?<temp_sign>[MP])(?<temperature>[0-9]*),(?<unknown4>[0-9]*),(?<unknown5>[a-zfA-Z0-9]*)$/;
-
-    let results;
-    if (results = message.text.match(variant1Regex)) {
-
-      decodeResult = this.decodePositionRoute(decodeResult, results, options);
-
-      decodeResult.formatted.items.push({
-        type: 'aircraft_timestamp',
-        code: 'TIMESTAMP',
-        label: 'Aircraft Timestamp',
-        value: DateTimeUtils.UTCDateTimeToString(results.groups.date, results.groups.timestamp),
-      });
-
-      decodeResult.remaining.text = `${results.groups.unknown1},${results.groups.unknown2},${results.groups.unknown3},${results.groups.unknown4},${results.groups.unknown5},${results.groups.unknown6},${results.groups.unknown7}`;
-
-      decodeResult.decoded = true;
-      decodeResult.decoder.decodeLevel = 'partial';
-
-    } else if (results = message.text.match(variant2Regex)) {
-
-      decodeResult = this.decodePositionRoute(decodeResult, results, options);
-
-      decodeResult.raw.groundspeed = Number(results.groups.groundspeed);
-
-      decodeResult.formatted.items.push({
-        type: 'aircraft_groundspeed',
-        code: 'GSPD',
-        label: 'Aircraft Groundspeed',
-        value: `${decodeResult.raw.groundspeed}`
-      });
-
-      decodeResult.remaining.text = `${results.groups.unknown1},${results.groups.unknown2},${results.groups.unknown3},${results.groups.unknown4},${results.groups.unknown5},${results.groups.unknown6},${results.groups.unknown7},${results.groups.unknown8},${results.groups.unknown9}`;
+      decodeResult.remaining.text = `${fields[2]},${fields[5]},${fields[8]}`;
 
       decodeResult.decoded = true;
       decodeResult.decoder.decodeLevel = 'partial';
 
-    } else if (results = message.text.match(variant4Regex)) {
+      // variant 2
+      if (fields.length==14) {
+        decodeResult.raw.groundspeed = Number(fields[10]);
 
-      decodeResult = this.decodePositionRoute(decodeResult, results, options);
+        decodeResult.formatted.items.push({
+          type: 'aircraft_groundspeed',
+          code: 'GSPD',
+          label: 'Aircraft Groundspeed',
+          value: `${decodeResult.raw.groundspeed}`
+        });
 
-      decodeResult.remaining.text = `${results.groups.unknown1},${results.groups.unknown2},${results.groups.unknown3},${results.groups.unknown4},${results.groups.unknown5},${results.groups.unknown6}`;
-
-      decodeResult.decoded = true;
-      decodeResult.decoder.decodeLevel = 'partial';
-
+        decodeResult.remaining.text += `,${fields[9]},${fields[11]},${fields[12]},${fields[13]}`;
+      } else {
+        for(let i=9; i<fields.length; ++i) {
+          decodeResult.remaining.text += `,${fields[i]}`;
+        }
+      }
+    decodeResult.remaining.text += checksum;
     } else {
       // Unknown
       if (options.debug) {
@@ -83,16 +75,18 @@ export class Label_H1_POS extends DecoderPlugin {
 	  return decodeResult;
   }
 
-  private decodePositionRoute(decodeResult: any, results: any, options: any) {
+  private decodePositionRoute(decodeResult: any, options: any,  fields: string[]) {
     if (options.debug) {
       console.log(`Label 16 N : results`);
-      console.log(results);
+      console.log(fields);
     }
+    
+    const header = fields[0];
 
-    decodeResult.raw.latitude_direction = results.groups.lat;
-    decodeResult.raw.latitude = Number(results.groups.lat_coord)/1000;
-    decodeResult.raw.longitude_direction = results.groups.long;
-    decodeResult.raw.longitude = Number(results.groups.long_coord)/1000;
+    decodeResult.raw.latitude_direction = header.charAt(3);
+    decodeResult.raw.latitude = Number(header.substring(4,9))/1000;
+    decodeResult.raw.longitude_direction = header.charAt(9);
+    decodeResult.raw.longitude = Number(header.substring(10,16))/1000;
 
     decodeResult.raw.position = {
       latitudeDirection: decodeResult.raw.latitude_direction,
@@ -101,15 +95,23 @@ export class Label_H1_POS extends DecoderPlugin {
       longitude: decodeResult.raw.longitude * (decodeResult.raw.longitude_direction === 'W' ? -1 : 1),
     };
 
-    decodeResult.raw.route = [results.groups.waypoint1 || '?', results.groups.waypoint2 || '?', results.groups.waypoint3 || '?'];
+    decodeResult.raw.route = [fields[1] || '?', fields[4] || '?', fields[6] || '?'];
 
-    decodeResult.raw.outside_air_temperature = Number(results.groups.temperature) * (results.groups.temp_sign === 'M' ? -1 : 1);
+    decodeResult.raw.outside_air_temperature = Number(fields[7].substring(1)) * (fields[7].charAt(0) === 'M' ? -1 : 1);
 
     decodeResult.formatted.items.push({
       type: 'aircraft_position',
       code: 'POS',
       label: 'Aircraft Position',
       value: `${decodeResult.raw.latitude} ${decodeResult.raw.latitude_direction}, ${decodeResult.raw.longitude} ${decodeResult.raw.longitude_direction}`,
+    });
+
+    decodeResult.raw.altitude = Number(fields[3])*100;
+    decodeResult.formatted.items.push({
+      type: 'altitude',
+      code: 'ALT',
+      label: 'Altitude',
+      value: `${decodeResult.raw.altitude} feet`,
     });
 
     decodeResult.formatted.items.push({
