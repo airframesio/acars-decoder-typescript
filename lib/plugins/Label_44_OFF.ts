@@ -1,4 +1,5 @@
 import { DecoderPlugin } from '../DecoderPlugin';
+import { CoordinateUtils } from '../utils/coordinate_utils';
 
 // Off Runway Report
 export class Label_44_OFF extends DecoderPlugin {
@@ -48,13 +49,13 @@ export class Label_44_OFF extends DecoderPlugin {
         decodeResult.raw.fuel_in_tons = Number(results.groups.fuel_in_tons);
       }
 
-      decodeResult.raw.position = this.decodeStringCoordinates(results.groups.unsplit_coords);
+      decodeResult.raw.position = CoordinateUtils.decodeStringCoordinates(results.groups.unsplit_coords);
       if(decodeResult.raw.position) {
         decodeResult.formatted.items.push({
           type: 'position',
           code: 'POS' ,
           label: 'Position',
-          value: this.coordinateString(decodeResult.raw.position),
+          value: CoordinateUtils.coordinateString(decodeResult.raw.position),
         });
       }
 

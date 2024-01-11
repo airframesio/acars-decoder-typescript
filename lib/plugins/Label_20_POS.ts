@@ -1,4 +1,5 @@
 import { DecoderPlugin } from '../DecoderPlugin';
+import { CoordinateUtils } from '../utils/coordinate_utils';
 
 // Position Report
 export class Label_20_POS extends DecoderPlugin {
@@ -31,12 +32,12 @@ export class Label_20_POS extends DecoderPlugin {
 
       // Field 1: Coordinates
       const rawCoords = fields[0];
-      decodeResult.raw.position = this.decodeStringCoordinates(rawCoords);
+      decodeResult.raw.position = CoordinateUtils.decodeStringCoordinates(rawCoords);
       if(decodeResult.raw.position) {
         decodeResult.formatted.items.push({
           type: 'position',
           label: 'Position',
-          value: this.coordinateString(decodeResult.raw.position),
+          value: CoordinateUtils.coordinateString(decodeResult.raw.position),
         });
       }
 
@@ -48,11 +49,11 @@ export class Label_20_POS extends DecoderPlugin {
 
       // Field 1: Coordinates
       const rawCoords = fields[0];
-      decodeResult.raw.position = this.decodeStringCoordinates(rawCoords);
+      decodeResult.raw.position = CoordinateUtils.decodeStringCoordinates(rawCoords);
       decodeResult.formatted.items.push({
         type: 'position',
         label: 'Position',
-        value: this.coordinateString(decodeResult.raw.position),
+        value: CoordinateUtils.coordinateString(decodeResult.raw.position),
       });
 
       decodeResult.decoded = true;

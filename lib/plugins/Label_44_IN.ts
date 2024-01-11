@@ -1,4 +1,5 @@
 import { DecoderPlugin } from '../DecoderPlugin';
+import { CoordinateUtils } from '../utils/coordinate_utils';
 
 // In Air Report
 export class Label_44_IN extends DecoderPlugin {
@@ -27,7 +28,7 @@ export class Label_44_IN extends DecoderPlugin {
         console.log(results.groups);
       }
 
-     decodeResult.raw.position = this.decodeStringCoordinates(results.groups.unsplit_coords);
+     decodeResult.raw.position = CoordinateUtils.decodeStringCoordinates(results.groups.unsplit_coords);
 
       decodeResult.raw.departure_icao = results.groups.departure_icao;
       decodeResult.raw.arrival_icao = results.groups.arrival_icao;
@@ -48,7 +49,7 @@ export class Label_44_IN extends DecoderPlugin {
           type: 'position',
           code: 'POS' ,
           label: 'Position',
-          value: this.coordinateString(decodeResult.raw.position),
+          value: CoordinateUtils.coordinateString(decodeResult.raw.position),
         });
       }
 

@@ -40,7 +40,7 @@ test('decodes Label H1 Preamble POS variant 1', () => {
   expect(decodeResult.formatted.items[2].type).toBe('aircraft_route');
   expect(decodeResult.formatted.items[2].code).toBe('ROUTE');
   expect(decodeResult.formatted.items[2].label).toBe('Aircraft Route');
-  expect(decodeResult.formatted.items[2].value).toBe('EASON > EBINY > ELENN');
+  expect(decodeResult.formatted.items[2].value).toBe('EASON@2022-09-21T21:57:54Z > EBINY@2022-09-21T22:06:01Z > ELENN');
   expect(decodeResult.formatted.items[3].type).toBe('outside_air_temperature');
   expect(decodeResult.formatted.items[3].code).toBe('OATEMP');
   expect(decodeResult.formatted.items[3].label).toBe('Outside Air Temperature (C)');
@@ -87,7 +87,7 @@ test('decodes Label H1 Preamble POS variant 2', () => {
   expect(decodeResult.formatted.items[2].type).toBe('aircraft_route');
   expect(decodeResult.formatted.items[2].code).toBe('ROUTE');
   expect(decodeResult.formatted.items[2].label).toBe('Aircraft Route');
-  expect(decodeResult.formatted.items[2].value).toBe('PEGTY > MINNE > HISKU');
+  expect(decodeResult.formatted.items[2].value).toBe('PEGTY@22:03:09 > MINNE@22:04:24 > HISKU');
   expect(decodeResult.formatted.items[3].type).toBe('outside_air_temperature');
   expect(decodeResult.formatted.items[3].code).toBe('OATEMP');
   expect(decodeResult.formatted.items[3].label).toBe('Outside Air Temperature (C)');
@@ -137,7 +137,7 @@ test('decodes Label H1 Preamble POS variant 3', () => {
   expect(decodeResult.formatted.items[2].type).toBe('aircraft_route');
   expect(decodeResult.formatted.items[2].code).toBe('ROUTE');
   expect(decodeResult.formatted.items[2].label).toBe('Aircraft Route');
-  expect(decodeResult.formatted.items[2].value).toBe('IBALL > AARON > MOXEE');
+  expect(decodeResult.formatted.items[2].value).toBe('IBALL@2022-09-21T22:05:16Z > AARON@2022-09-21T22:08:16Z > MOXEE');
   expect(decodeResult.formatted.items[3].type).toBe('outside_air_temperature');
   expect(decodeResult.formatted.items[3].code).toBe('OATEMP');
   expect(decodeResult.formatted.items[3].label).toBe('Outside Air Temperature (C)');
@@ -183,7 +183,7 @@ test('decodes Label H1 Preamble POS variant 4', () => {
   expect(decodeResult.formatted.items[2].type).toBe('aircraft_route');
   expect(decodeResult.formatted.items[2].code).toBe('ROUTE');
   expect(decodeResult.formatted.items[2].label).toBe('Aircraft Route');
-  expect(decodeResult.formatted.items[2].value).toBe('SCOOB > ENEME > FETAL');
+  expect(decodeResult.formatted.items[2].value).toBe('SCOOB@23:29:33 > ENEME@23:57:12 > FETAL');
   expect(decodeResult.formatted.items[3].type).toBe('outside_air_temperature');
   expect(decodeResult.formatted.items[3].code).toBe('OATEMP');
   expect(decodeResult.formatted.items[3].label).toBe('Outside Air Temperature (C)');
@@ -231,7 +231,7 @@ test('decodes Label H1 Preamble POS variant 5', () => {
   expect(decodeResult.formatted.items[2].type).toBe('aircraft_route');
   expect(decodeResult.formatted.items[2].code).toBe('ROUTE');
   expect(decodeResult.formatted.items[2].label).toBe('Aircraft Route');
-  expect(decodeResult.formatted.items[2].value).toBe('CSN-01 > CYN-02 > ACK');
+  expect(decodeResult.formatted.items[2].value).toBe('CSN-01@11:23:09 > CYN-02@11:41:51 > ACK');
   expect(decodeResult.formatted.items[3].type).toBe('outside_air_temperature');
   expect(decodeResult.formatted.items[3].code).toBe('OATEMP');
   expect(decodeResult.formatted.items[3].label).toBe('Outside Air Temperature (C)');

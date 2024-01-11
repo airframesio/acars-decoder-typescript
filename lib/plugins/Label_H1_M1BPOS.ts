@@ -1,4 +1,5 @@
 import { DecoderPlugin } from '../DecoderPlugin';
+import { CoordinateUtils } from '../utils/coordinate_utils';
 
 export class Label_H1_M1BPOS extends DecoderPlugin { // eslint-disable-line camelcase
   name = 'label-h1-m1bpos';
@@ -22,13 +23,13 @@ export class Label_H1_M1BPOS extends DecoderPlugin { // eslint-disable-line came
     const secondHalf = parts[1];
     const items = firstHalf.split(',');
 
-    decodeResult.raw.position = this.decodeStringCoordinates(items[0]);
+    decodeResult.raw.position = CoordinateUtils.decodeStringCoordinates(items[0]);
     if(decodeResult.raw.position) {
      decodeResult.formatted.items.push({
         type: 'position',
         code: 'POS' ,
         label: 'Position',
-        value: this.coordinateString(decodeResult.raw.position),
+        value: CoordinateUtils.coordinateString(decodeResult.raw.position),
       });
     }
 
