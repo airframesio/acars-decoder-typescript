@@ -28,7 +28,7 @@ test('decodes Label H1 Preamble POS variant 1', () => {
   expect(decodeResult.raw.longitude).toBe(123.174);
   expect(decodeResult.raw.altitude).toBe(37000);
   expect(decodeResult.raw.outside_air_temperature).toBe(-48);
-  expect(decodeResult.formatted.items.length).toBe(4);
+  expect(decodeResult.formatted.items.length).toBe(5);
   expect(decodeResult.formatted.items[0].type).toBe('aircraft_position');
   expect(decodeResult.formatted.items[0].code).toBe('POS');
   expect(decodeResult.formatted.items[0].label).toBe('Aircraft Position');
@@ -45,6 +45,8 @@ test('decodes Label H1 Preamble POS variant 1', () => {
   expect(decodeResult.formatted.items[3].code).toBe('OATEMP');
   expect(decodeResult.formatted.items[3].label).toBe('Outside Air Temperature (C)');
   expect(decodeResult.formatted.items[3].value).toBe('-48');
+  expect(decodeResult.formatted.items[4].label).toBe('Message Checksum');
+  expect(decodeResult.formatted.items[4].value).toBe('0x7a40');
 });
 
 test('decodes Label H1 Preamble POS variant 2', () => {
@@ -75,7 +77,7 @@ test('decodes Label H1 Preamble POS variant 2', () => {
   expect(decodeResult.raw.altitude).toBe(13400);
   expect(decodeResult.raw.groundspeed).toBe(366);
   expect(decodeResult.raw.outside_air_temperature).toBe(-6);
-  expect(decodeResult.formatted.items.length).toBe(5);
+  expect(decodeResult.formatted.items.length).toBe(6);
   expect(decodeResult.formatted.items[0].type).toBe('aircraft_position');
   expect(decodeResult.formatted.items[0].code).toBe('POS');
   expect(decodeResult.formatted.items[0].label).toBe('Aircraft Position');
@@ -96,6 +98,8 @@ test('decodes Label H1 Preamble POS variant 2', () => {
   expect(decodeResult.formatted.items[4].code).toBe('GSPD');
   expect(decodeResult.formatted.items[4].label).toBe('Aircraft Groundspeed');
   expect(decodeResult.formatted.items[4].value).toBe('366');
+  expect(decodeResult.formatted.items[5].label).toBe('Message Checksum');
+  expect(decodeResult.formatted.items[5].value).toBe('0x0a5b');
 });
 
 test('decodes Label H1 Preamble POS variant 3', () => {
@@ -125,7 +129,7 @@ test('decodes Label H1 Preamble POS variant 3', () => {
   expect(decodeResult.raw.longitude).toBe(122.406);
   expect(decodeResult.raw.altitude).toBe(38000);
   expect(decodeResult.raw.outside_air_temperature).toBe(-47);
-  expect(decodeResult.formatted.items.length).toBe(4);
+  expect(decodeResult.formatted.items.length).toBe(5);
   expect(decodeResult.formatted.items[0].type).toBe('aircraft_position');
   expect(decodeResult.formatted.items[0].code).toBe('POS');
   expect(decodeResult.formatted.items[0].label).toBe('Aircraft Position');
@@ -142,6 +146,8 @@ test('decodes Label H1 Preamble POS variant 3', () => {
   expect(decodeResult.formatted.items[3].code).toBe('OATEMP');
   expect(decodeResult.formatted.items[3].label).toBe('Outside Air Temperature (C)');
   expect(decodeResult.formatted.items[3].value).toBe('-47');
+  expect(decodeResult.formatted.items[4].label).toBe('Message Checksum');
+  expect(decodeResult.formatted.items[4].value).toBe('0xbf64');
 });
 
 test('decodes Label H1 Preamble POS variant 4', () => {
@@ -171,7 +177,7 @@ test('decodes Label H1 Preamble POS variant 4', () => {
   expect(decodeResult.raw.longitude).toBe(79.428);
   expect(decodeResult.raw.altitude).toBe(34000);
   expect(decodeResult.raw.outside_air_temperature).toBe(-42);
-  expect(decodeResult.formatted.items.length).toBe(4);
+  expect(decodeResult.formatted.items.length).toBe(5);
   expect(decodeResult.formatted.items[0].type).toBe('aircraft_position');
   expect(decodeResult.formatted.items[0].code).toBe('POS');
   expect(decodeResult.formatted.items[0].label).toBe('Aircraft Position');
@@ -188,6 +194,8 @@ test('decodes Label H1 Preamble POS variant 4', () => {
   expect(decodeResult.formatted.items[3].code).toBe('OATEMP');
   expect(decodeResult.formatted.items[3].label).toBe('Outside Air Temperature (C)');
   expect(decodeResult.formatted.items[3].value).toBe('-42');
+  expect(decodeResult.formatted.items[4].label).toBe('Message Checksum');
+  expect(decodeResult.formatted.items[4].value).toBe('0x57f6');
 });
 
 
@@ -219,7 +227,7 @@ test('decodes Label H1 Preamble POS variant 5', () => {
   expect(decodeResult.raw.longitude).toBe(78.000);
   expect(decodeResult.raw.altitude).toBe(31000);
   expect(decodeResult.raw.outside_air_temperature).toBe(-40);
-  expect(decodeResult.formatted.items.length).toBe(4);
+  expect(decodeResult.formatted.items.length).toBe(5);
   expect(decodeResult.formatted.items[0].type).toBe('aircraft_position');
   expect(decodeResult.formatted.items[0].code).toBe('POS');
   expect(decodeResult.formatted.items[0].label).toBe('Aircraft Position');
@@ -236,6 +244,38 @@ test('decodes Label H1 Preamble POS variant 5', () => {
   expect(decodeResult.formatted.items[3].code).toBe('OATEMP');
   expect(decodeResult.formatted.items[3].label).toBe('Outside Air Temperature (C)');
   expect(decodeResult.formatted.items[3].value).toBe('-40');
+  expect(decodeResult.formatted.items[4].label).toBe('Message Checksum');
+  expect(decodeResult.formatted.items[4].value).toBe('0x9226');
+});
+
+test('decodes Label H1 Preamble POS variant 6', () => {
+  const decoder = new MessageDecoder();
+  const decoderPlugin = new Label_H1_POS(decoder);
+
+  expect(decoderPlugin.decode).toBeDefined();
+  expect(decoderPlugin.name).toBe('label-h1-pos');
+  expect(decoderPlugin.qualifiers).toBeDefined();
+  expect(decoderPlugin.qualifiers()).toEqual({
+    labels: ['H1'],
+    preambles: ['POS'],
+  });
+
+  // https://app.airframes.io/messages/2295027018
+  const text = 'POS/RFSCOOB.KEMPR.ECG.OHPEA.TOMMZ.OXANA.ZZTOP.OMALA.WILYY.KANUX.GALVN.KASAR.LNHOM.SLUKA.FIPEK.PUYYA.PLING.KOLAO.JETSSF2FC';
+  const decodeResult = decoderPlugin.decode({ text: text });
+  console.log(JSON.stringify(decodeResult, null, 2));
+
+  expect(decodeResult.decoded).toBe(true);
+  expect(decodeResult.decoder.decodeLevel).toBe('partial');
+  expect(decodeResult.decoder.name).toBe('label-h1-pos');
+  expect(decodeResult.formatted.description).toBe('Position Report');
+  expect(decodeResult.message.text).toBe(text);
+  expect(decodeResult.formatted.items.length).toBe(2);
+  expect(decodeResult.formatted.items[0].label).toBe('Aircraft Route');
+  expect(decodeResult.formatted.items[0].value).toBe('SCOOB > KEMPR > ECG > OHPEA > TOMMZ > OXANA > ZZTOP > OMALA > WILYY > KANUX > GALVN > KASAR > LNHOM > SLUKA > FIPEK > PUYYA > PLING > KOLAO > JETSS');
+  expect(decodeResult.formatted.items[1].label).toBe('Message Checksum');
+  expect(decodeResult.formatted.items[1].value).toBe('0xf2fc');
+
 });
 
 test('decodes Label H1 Preamble POS <invalid>', () => {

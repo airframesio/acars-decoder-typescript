@@ -18,27 +18,48 @@ export class Label_H1_POS extends DecoderPlugin {
     decodeResult.formatted.description = 'Position Report';
     decodeResult.message = message;
 
-    const checksum = message.text.substring(-4);
+    const checksum = message.text.slice(-4);
     //strip POS and checksum
     const data = message.text.substring(3, message.text.length-4);
     const fields = data.split(',');
-    // idx - value
-    //   0 - position in millidegrees
-    //   1 - waypoint 1
-    //   2 - waypoint 1 valid at HHMMSS
-    //   3 - baro alititude
-    //   4 - waypoint 2
-    //   5 - waypoint 2 eta HHMMSS
-    //   6 - waypoint 3
-    //   7 - temp
-    //   8 - ?
-    //   9 - ? or variant 1 ? + /TS + valid at HHMMSS
-    //  10 - ? or variant 1 date MMDDYY or variant 2 gspd (opt)
-    //  11 - ? (opt) 
-    //  12 - ? (opt)
-    //  13 - ? (opt)
+    
+    if(fields.length==1 && data.startsWith('/RF')) {
+      decodeResult.raw.route = data.substring(3,data.length).split('.').map((leg: string) => {return {name: leg}});
+      decodeResult.formatted.items.push({
+        type: 'aircraft_route',
+        code: 'ROUTE',
+        label: 'Aircraft Route',
+        value: RouteUtils.routeToString(decodeResult.raw.route),
+      });
 
-    if(fields.length>9) {
+      decodeResult.raw.checksum = Number("0x"+checksum);
+      decodeResult.formatted.items.push({
+        type: 'message_checksum',
+        code: 'CHECKSUM',
+        label: 'Message Checksum',
+        value: '0x' + ('0000' + decodeResult.raw.checksum.toString(16)).slice(-4),
+      });    
+      
+      decodeResult.decoded = true;
+      // Once we know what RF stands for, I feel comfortable marking this full
+      decodeResult.decoder.decodeLevel = 'partial';
+      decodeResult.remaining.text += 'RF'
+    } else if(fields.length>9) {
+      // idx - value
+      //   0 - position in millidegrees
+      //   1 - waypoint 1
+      //   2 - waypoint 1 valid at HHMMSS
+      //   3 - baro alititude
+      //   4 - waypoint 2
+      //   5 - waypoint 2 eta HHMMSS
+      //   6 - waypoint 3
+      //   7 - temp
+      //   8 - ?
+      //   9 - ? or variant 1 ? + /TS + valid at HHMMSS
+      //  10 - ? or variant 1 date MMDDYY or variant 2 gspd (opt)
+      //  11 - ? (opt) 
+      //  12 - ? (opt)
+      //  13 - ? (opt)
       this.decodePositionRoute(decodeResult, options, fields);
 
       decodeResult.remaining.text = `${fields[2]},${fields[5]},${fields[8]}`;
@@ -63,7 +84,14 @@ export class Label_H1_POS extends DecoderPlugin {
           decodeResult.remaining.text += `,${fields[i]}`;
         }
       }
-    decodeResult.remaining.text += checksum;
+
+      decodeResult.raw.checksum = Number("0x"+checksum);
+      decodeResult.formatted.items.push({
+        type: 'message_checksum',
+        code: 'CHECKSUM',
+        label: 'Message Checksum',
+        value: '0x' + ('0000' + decodeResult.raw.checksum.toString(16)).slice(-4),
+      });    
     } else {
       // Unknown
       if (options.debug) {
