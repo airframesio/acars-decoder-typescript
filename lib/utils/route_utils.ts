@@ -17,6 +17,20 @@ export class RouteUtils {
         }
         return s;
     }
+    
+    public static getWaypoint(leg: string): Waypoint {
+        const waypoint = leg.split(',');
+        if(waypoint.length ==2) {
+        const position = CoordinateUtils.decodeStringCoordinates(waypoint[1]);
+        return {name: waypoint[0], latitude: position.latitude, longitude: position.longitude};
+        }
+        if(leg.length == 14) { //looks like coordinates
+        const position = CoordinateUtils.decodeStringCoordinates(leg);
+        return {name: waypoint[0], latitude: position.latitude, longitude: position.longitude};
+        }
+        return {name: leg};
+    }
+
     // move out if we want public
     private static timestampToString(time: number, format: 'tod' | 'epoch'): string {
         const date = new Date(time * 1000);

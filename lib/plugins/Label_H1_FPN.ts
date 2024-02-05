@@ -145,7 +145,7 @@ function addDepartureRunway(decodeResult: any, value: string) {
 
 function addRoute(decodeResult: any, value: string) {
   const route = value.split('.');
-  decodeResult.raw.route = route.map((leg)=> CoordinateUtils.getWaypoint(leg));
+  decodeResult.raw.route = route.map((leg)=> RouteUtils.getWaypoint(leg));
   decodeResult.formatted.items.push({
     type: 'aircraft_route',
     code: 'ROUTE',
