@@ -1,3 +1,5 @@
+import { Waypoint } from "../types/waypoint";
+
 export class CoordinateUtils {
   public static decodeStringCoordinates(stringCoords: String) : any { // eslint-disable-line class-methods-use-this
     var results : any = {};
@@ -19,6 +21,19 @@ export class CoordinateUtils {
     }
 
     return results;
+  }
+
+  public static getWaypoint(leg: string): Waypoint {
+    const waypoint = leg.split(',');
+    if(waypoint.length ==2) {
+      const position = CoordinateUtils.decodeStringCoordinates(waypoint[1]);
+      return {name: waypoint[0], latitude: position.latitude, longitude: position.longitude};
+    }
+    if(leg.length == 14) { //looks like coordinates
+      const position = CoordinateUtils.decodeStringCoordinates(leg);
+      return {name: waypoint[0], latitude: position.latitude, longitude: position.longitude};
+    }
+    return {name: leg};
   }
 
   public static coordinateString(coords: any) : String {

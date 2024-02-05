@@ -4,7 +4,7 @@ import { CoordinateUtils } from "./coordinate_utils";
 export class RouteUtils {
     
     public static routeToString(route: Waypoint[]): string {
-        return route.map((x) => RouteUtils.waypointToString(x)).join( ' > ');
+        return route.map((x) => RouteUtils.waypointToString(x)).join( ' > ').replaceAll('>  >', '>>');
     }
 
     public static waypointToString(waypoint: Waypoint): string {
