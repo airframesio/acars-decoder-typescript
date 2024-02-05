@@ -1,5 +1,6 @@
 import { DateTimeUtils } from '../DateTimeUtils';
 import { DecoderPlugin } from '../DecoderPlugin';
+import { RouteUtils } from '../utils/route_utils';
 
 export class Label_H1_POS extends DecoderPlugin {
   name = 'label-h1-pos';
@@ -17,59 +18,80 @@ export class Label_H1_POS extends DecoderPlugin {
     decodeResult.formatted.description = 'Position Report';
     decodeResult.message = message;
 
-    // Style: POSN43312W123174,EASON,215754,370,EBINY,220601,ELENN,M48,02216,185/TS215754,0921227A40
-    let variant1Regex = /^POS(?<lat>[NS])(?<lat_coord>[0-9]+)(?<long>[EW])(?<long_coord>[0-9]+),(?<waypoint1>[a-zA-Z0-9]*),(?<unknown1>[0-9]*),(?<unknown2>[0-9]*),(?<waypoint2>[a-zA-Z0-9]*),(?<unknown3>[0-9]*),(?<waypoint3>[a-zA-Z0-9]*).(?<temp_sign>[MP])(?<temperature>[0-9]*),(?<unknown4>[0-9]*),(?<unknown5>[0-9]*)\/TS(?<timestamp>[0-9][0-9][0-9][0-9][0-9][0-9]),(?<date>[0-9][0-9][0-9][0-9][0-9][0-9])(?<unknown6>.*)$/;
-
-    // Style: POSN45209W122550,PEGTY,220309,134,MINNE,220424,HISKU,M6,060013,269,366,355K,292K,730A5B
-    let variant2Regex = /^POS(?<lat>[NS])(?<lat_coord>[0-9]+)(?<long>[EW])(?<long_coord>[0-9]+),(?<waypoint1>[a-zA-Z0-9]*),(?<unknown1>[0-9]*),(?<unknown2>[0-9]*),(?<waypoint2>[a-zA-Z0-9]*),(?<unknown3>[0-9]*),(?<waypoint3>[a-zA-Z0-9]*).(?<temp_sign>[MP])(?<temperature>[0-9]*),(?<unknown4>[0-9]*),(?<unknown5>[0-9]*),(?<groundspeed>[0-9]*),(?<unknown6>[a-zA-Z0-9]*),(?<unknown7>[a-zA-Z0-9]*),(?<unknown8>[a-zA-Z0-9]*)$/;
-
-    // Style: POSN33225W079428,SCOOB,232933,340,ENEME,235712,FETAL,M42,003051,15857F6
-    let variant4Regex = /^POS(?<lat>[NS])(?<lat_coord>[0-9]+)(?<long>[EW])(?<long_coord>[0-9]+),(?<waypoint1>[a-zA-Z0-9]*),(?<unknown1>[0-9]*),(?<unknown2>[0-9]*),(?<waypoint2>[a-zA-Z0-9]*),(?<unknown3>[0-9]*),(?<waypoint3>[a-zA-Z0-9]*).(?<temp_sign>[MP])(?<temperature>[0-9]*),(?<unknown4>[0-9]*),(?<unknown5>[a-zfA-Z0-9]*)$/;
-
-    let results;
-    if (results = message.text.match(variant1Regex)) {
-
-      decodeResult = this.decodePositionRoute(decodeResult, results, options);
-
+    const checksum = message.text.slice(-4);
+    //strip POS and checksum
+    const data = message.text.substring(3, message.text.length-4);
+    const fields = data.split(',');
+    
+    if(fields.length==1 && data.startsWith('/RF')) {
+      decodeResult.raw.route = data.substring(3,data.length).split('.').map((leg: string) => {return {name: leg}});
       decodeResult.formatted.items.push({
-        type: 'aircraft_timestamp',
-        code: 'TIMESTAMP',
-        label: 'Aircraft Timestamp',
-        value: DateTimeUtils.UTCDateTimeToString(results.groups.date, results.groups.timestamp),
+        type: 'aircraft_route',
+        code: 'ROUTE',
+        label: 'Aircraft Route',
+        value: RouteUtils.routeToString(decodeResult.raw.route),
       });
 
-      decodeResult.remaining.text = `${results.groups.unknown1},${results.groups.unknown2},${results.groups.unknown3},${results.groups.unknown4},${results.groups.unknown5},${results.groups.unknown6},${results.groups.unknown7}`;
-
-      decodeResult.decoded = true;
-      decodeResult.decoder.decodeLevel = 'partial';
-
-    } else if (results = message.text.match(variant2Regex)) {
-
-      decodeResult = this.decodePositionRoute(decodeResult, results, options);
-
-      decodeResult.raw.groundspeed = Number(results.groups.groundspeed);
-
+      decodeResult.raw.checksum = Number("0x"+checksum);
       decodeResult.formatted.items.push({
-        type: 'aircraft_groundspeed',
-        code: 'GSPD',
-        label: 'Aircraft Groundspeed',
-        value: `${decodeResult.raw.groundspeed}`
-      });
+        type: 'message_checksum',
+        code: 'CHECKSUM',
+        label: 'Message Checksum',
+        value: '0x' + ('0000' + decodeResult.raw.checksum.toString(16)).slice(-4),
+      });    
+      
+      decodeResult.decoded = true;
+      // Once we know what RF stands for, I feel comfortable marking this full
+      decodeResult.decoder.decodeLevel = 'partial';
+      decodeResult.remaining.text += 'RF'
+    } else if(fields.length>9) {
+      // idx - value
+      //   0 - position in millidegrees
+      //   1 - waypoint 1
+      //   2 - waypoint 1 valid at HHMMSS
+      //   3 - baro alititude
+      //   4 - waypoint 2
+      //   5 - waypoint 2 eta HHMMSS
+      //   6 - waypoint 3
+      //   7 - temp
+      //   8 - ?
+      //   9 - ? or variant 1 ? + /TS + valid at HHMMSS
+      //  10 - ? or variant 1 date MMDDYY or variant 2 gspd (opt)
+      //  11 - ? (opt) 
+      //  12 - ? (opt)
+      //  13 - ? (opt)
+      this.decodePositionRoute(decodeResult, options, fields);
 
-      decodeResult.remaining.text = `${results.groups.unknown1},${results.groups.unknown2},${results.groups.unknown3},${results.groups.unknown4},${results.groups.unknown5},${results.groups.unknown6},${results.groups.unknown7},${results.groups.unknown8},${results.groups.unknown9}`;
+      decodeResult.remaining.text = `${fields[2]},${fields[5]},${fields[8]}`;
 
       decodeResult.decoded = true;
       decodeResult.decoder.decodeLevel = 'partial';
 
-    } else if (results = message.text.match(variant4Regex)) {
+      // variant 2
+      if (fields.length==14) {
+        decodeResult.raw.groundspeed = Number(fields[10]);
 
-      decodeResult = this.decodePositionRoute(decodeResult, results, options);
+        decodeResult.formatted.items.push({
+          type: 'aircraft_groundspeed',
+          code: 'GSPD',
+          label: 'Aircraft Groundspeed',
+          value: `${decodeResult.raw.groundspeed}`
+        });
 
-      decodeResult.remaining.text = `${results.groups.unknown1},${results.groups.unknown2},${results.groups.unknown3},${results.groups.unknown4},${results.groups.unknown5},${results.groups.unknown6}`;
+        decodeResult.remaining.text += `,${fields[9]},${fields[11]},${fields[12]},${fields[13]}`;
+      } else {
+        for(let i=9; i<fields.length; ++i) {
+          decodeResult.remaining.text += `,${fields[i]}`;
+        }
+      }
 
-      decodeResult.decoded = true;
-      decodeResult.decoder.decodeLevel = 'partial';
-
+      decodeResult.raw.checksum = Number("0x"+checksum);
+      decodeResult.formatted.items.push({
+        type: 'message_checksum',
+        code: 'CHECKSUM',
+        label: 'Message Checksum',
+        value: '0x' + ('0000' + decodeResult.raw.checksum.toString(16)).slice(-4),
+      });    
     } else {
       // Unknown
       if (options.debug) {
@@ -83,16 +105,19 @@ export class Label_H1_POS extends DecoderPlugin {
 	  return decodeResult;
   }
 
-  private decodePositionRoute(decodeResult: any, results: any, options: any) {
+  private decodePositionRoute(decodeResult: any, options: any,  fields: string[]) {
     if (options.debug) {
       console.log(`Label 16 N : results`);
-      console.log(results);
+      console.log(fields);
     }
+    
+    //N12345W012345
+    const position = fields[0];
 
-    decodeResult.raw.latitude_direction = results.groups.lat;
-    decodeResult.raw.latitude = Number(results.groups.lat_coord)/1000;
-    decodeResult.raw.longitude_direction = results.groups.long;
-    decodeResult.raw.longitude = Number(results.groups.long_coord)/1000;
+    decodeResult.raw.latitude_direction = position.charAt(0);
+    decodeResult.raw.latitude = Number(position.substring(1,6))/1000;
+    decodeResult.raw.longitude_direction = position.charAt(6);
+    decodeResult.raw.longitude = Number(position.substring(7))/1000;
 
     decodeResult.raw.position = {
       latitudeDirection: decodeResult.raw.latitude_direction,
@@ -101,9 +126,17 @@ export class Label_H1_POS extends DecoderPlugin {
       longitude: decodeResult.raw.longitude * (decodeResult.raw.longitude_direction === 'W' ? -1 : 1),
     };
 
-    decodeResult.raw.route = [results.groups.waypoint1 || '?', results.groups.waypoint2 || '?', results.groups.waypoint3 || '?'];
+    if(fields.length == 11) {//variant 1
+    decodeResult.raw.route = [{name: fields[1] || '?,', time: convertDateTimeToEpoch(fields[2], fields[10]), timeFormat: 'epoch'}, 
+                              {name: fields[4] || '?', time: convertDateTimeToEpoch(fields[5], fields[10]), timeFormat: 'epoch'}, 
+                              {name: fields[6] || '?'}];
+    } else {
+      decodeResult.raw.route = [{name: fields[1] || '?,', time: convertHHMMSSToTod(fields[2]), timeFormat: 'tod'}, 
+                                {name: fields[4] || '?', time: convertHHMMSSToTod(fields[5]), timeFormat: 'tod'}, 
+                                {name: fields[6] || '?'}];
+    }
 
-    decodeResult.raw.outside_air_temperature = Number(results.groups.temperature) * (results.groups.temp_sign === 'M' ? -1 : 1);
+    decodeResult.raw.outside_air_temperature = Number(fields[7].substring(1)) * (fields[7].charAt(0) === 'M' ? -1 : 1);
 
     decodeResult.formatted.items.push({
       type: 'aircraft_position',
@@ -112,11 +145,19 @@ export class Label_H1_POS extends DecoderPlugin {
       value: `${decodeResult.raw.latitude} ${decodeResult.raw.latitude_direction}, ${decodeResult.raw.longitude} ${decodeResult.raw.longitude_direction}`,
     });
 
+    decodeResult.raw.altitude = Number(fields[3])*100;
+    decodeResult.formatted.items.push({
+      type: 'altitude',
+      code: 'ALT',
+      label: 'Altitude',
+      value: `${decodeResult.raw.altitude} feet`,
+    });
+
     decodeResult.formatted.items.push({
       type: 'aircraft_route',
       code: 'ROUTE',
       label: 'Aircraft Route',
-      value: `${decodeResult.raw.route.join(' > ')}`,
+      value: RouteUtils.routeToString(decodeResult.raw.route),
     });
 
     decodeResult.formatted.items.push({
@@ -131,3 +172,24 @@ export class Label_H1_POS extends DecoderPlugin {
 }
 
 export default {};
+function convertHHMMSSToTod(time: string): number{
+  const h = Number(time.substring(0,2));
+  const m = Number(time.substring(2,4));
+  const s = Number(time.substring(4,6));
+  const tod = (h*3600 )+ (m*60) + s;
+  return tod;
+}
+
+/**
+ * 
+ * @param time - HHMMSS
+ * @param date - MMDDYY
+ * @returns seconds since epoch
+ */
+function convertDateTimeToEpoch(time: string, date: string):number {
+  //YYYY-MM-DDTHH:mm:ss.sssZ
+  const timestamp = `20${date.substring(4,6)}-${date.substring(0,2)}-${date.substring(2,4)}T${time.substring(0,2)}:${time.substring(2,4)}:${time.substring(4,6)}.000Z`
+  const millis = Date.parse(timestamp);
+  return millis / 1000;
+}
+

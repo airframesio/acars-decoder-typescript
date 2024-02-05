@@ -1,4 +1,5 @@
 import { DecoderPlugin } from '../DecoderPlugin';
+import { CoordinateUtils } from '../utils/coordinate_utils';
 
 // Position Report
 export class Label_15_FST extends DecoderPlugin {
@@ -43,7 +44,7 @@ export class Label_15_FST extends DecoderPlugin {
       decodeResult.formatted.items.push({
         type: 'position',
         label: 'Position',
-        value: this.coordinateString(decodeResult.raw.position)
+        value: CoordinateUtils.coordinateString(decodeResult.raw.position)
       });
 
       decodeResult.formatted.items.push({
