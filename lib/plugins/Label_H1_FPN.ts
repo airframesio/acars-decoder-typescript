@@ -52,7 +52,7 @@ export class Label_H1_FPN extends DecoderPlugin {
               decodeResult.remaining.text = '';
               allKnownFields = false;
             }
-            decodeResult.remaining.text += `,${data[i]}`;
+            decodeResult.remaining.text += `:${data[i]}`;
             decodeResult.decoder.decodeLevel = 'partial';
         }
       }
