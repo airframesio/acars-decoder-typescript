@@ -30,15 +30,21 @@ export class Label_H1_FPN extends DecoderPlugin {
         const value = data[i+1];
         // TODO: discuss how store commented out bits as both raw and formatted
         switch(key) {
-          // case 'A': // Arrival Procedure (?)
-          // break;
+          case 'A': // Arrival Procedure (?)
+            addProcedure(decodeResult, value, 'arrival');
+          break;
           case 'AA':
             addArrivalAirport(decodeResult, value);
           break;
-          // case 'CR': // Current Route (?)
-          // break;
-          // case 'D': // Departure Procedure
-          // break;
+          case 'AP':
+            addProcedure(decodeResult, value, 'approach');
+          break;
+          case 'CR':
+            addCompanyRoute(decodeResult, value);
+          break;
+          case 'D': // Departure Procedure
+            addProcedure(decodeResult, value, 'departure');
+          break;
           case 'DA':
             addDepartureAirport(decodeResult, value);
           break;
@@ -47,6 +53,7 @@ export class Label_H1_FPN extends DecoderPlugin {
           break;
           case 'R':
             addDepartureRunway(decodeResult, value);
+          break;
           default:
             if(allKnownFields) {
               decodeResult.remaining.text = '';
@@ -124,6 +131,55 @@ function addArrivalAirport(decodeResult: any, value: string) {
   });
 };
 
+function addProcedure(decodeResult: any, value: string, type: string) {
+  if(decodeResult.raw.procedures === undefined) {
+    decodeResult.raw.procedures = [];
+  }
+  const data = value.split('.');
+  let waypoints;
+  if(data.length>1) {
+    waypoints = data.slice(1).map((leg)=> RouteUtils.getWaypoint(leg));
+  }
+  const route = {name: data[0], waypoints: waypoints};
+  decodeResult.raw.procedures.push({type: type, route: route});
+  const procedureName = type.substring(0,1).toUpperCase() + type.slice(1);
+  let procedureValue = route.name;
+  decodeResult.formatted.items.push({
+    type: `procedure`,
+    code: 'proc',
+    label: `${procedureName} Procedure`,
+    value: RouteUtils.routeToString(route),
+  });
+};
+
+function addCompanyRoute(decodeResult: any, value: string) {
+  const segments = value.split('.');
+  const parens_idx = segments[0].indexOf('(');
+  let name;
+  let runway;
+  if(parens_idx === -1) {
+    name = segments[0];
+  } else {
+    name = segments[0].slice(0, parens_idx);
+    runway = segments[0].slice(parens_idx+1, segments[0].indexOf(')'));
+  }
+  let waypoints;
+  if(segments.length > 1) {
+    waypoints = segments.slice(1).map((leg) => RouteUtils.getWaypoint(leg));
+  }
+  decodeResult.raw.company_route = {
+    name: name,
+    runway: runway,
+    waypoints: waypoints,
+  };
+  decodeResult.formatted.items.push({
+    type: 'company_route',
+    code: 'CR',
+    label: 'Company Route',
+    value: RouteUtils.routeToString(decodeResult.raw.company_route),
+  });
+};
+
 function addDepartureAirport(decodeResult: any, value: string) {
   decodeResult.raw.departure_icao = value;
   decodeResult.formatted.items.push({
@@ -145,7 +201,7 @@ function addDepartureRunway(decodeResult: any, value: string) {
 
 function addRoute(decodeResult: any, value: string) {
   const route = value.split('.');
-  decodeResult.raw.route = route.map((leg)=> RouteUtils.getWaypoint(leg));
+  decodeResult.raw.route = {waypoints: route.map((leg)=> RouteUtils.getWaypoint(leg))};
   decodeResult.formatted.items.push({
     type: 'aircraft_route',
     code: 'ROUTE',

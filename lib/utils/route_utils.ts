@@ -1,10 +1,29 @@
+import { Route } from "../types/route";
 import { Waypoint } from "../types/waypoint";
 import { CoordinateUtils } from "./coordinate_utils";
 
 export class RouteUtils {
     
-    public static routeToString(route: Waypoint[]): string {
-        return route.map((x) => RouteUtils.waypointToString(x)).join( ' > ').replaceAll('>  >', '>>');
+    public static routeToString(route: Route): string {
+        let str = '';
+        if(route.name) {
+            str += route.name;
+        }
+        if(route.runway) {
+            str += `(${route.runway})`;
+        }
+        if(str.length!==0 && route.waypoints && route.waypoints.length === 1) {
+            str += ' starting at '
+        }
+        else if(str.length!==0 && route.waypoints) {
+            str += ': ';
+        }
+
+        if(route.waypoints) {
+            str += RouteUtils.waypointsToString(route.waypoints);
+        } 
+        
+        return str;
     }
 
     public static waypointToString(waypoint: Waypoint): string {
@@ -33,11 +52,18 @@ export class RouteUtils {
 
     // move out if we want public
     private static timestampToString(time: number, format: 'tod' | 'epoch'): string {
-        const date = new Date(time * 1000);
-        if(format == 'tod') {
+        const date = new Date(time * 1000);        if(format == 'tod') {
             return date.toISOString().slice(11, 19);
         }
         //strip off millis
         return date.toISOString().slice(0,-5)+"Z";
+    }
+
+    private static waypointsToString(waypoints: Waypoint[]): string {
+        let str = waypoints.map((x) => RouteUtils.waypointToString(x)).join( ' > ').replaceAll('>  >', '>>');
+            if(str.startsWith(' > ')) {
+                str = '>>' + str.slice(2);
+            }
+        return str;
     }
 }

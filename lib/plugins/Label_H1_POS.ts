@@ -1,5 +1,6 @@
 import { DateTimeUtils } from '../DateTimeUtils';
 import { DecoderPlugin } from '../DecoderPlugin';
+import { Waypoint } from '../types/waypoint';
 import { RouteUtils } from '../utils/route_utils';
 
 export class Label_H1_POS extends DecoderPlugin {
@@ -24,7 +25,7 @@ export class Label_H1_POS extends DecoderPlugin {
     const fields = data.split(',');
     
     if(fields.length==1 && data.startsWith('/RF')) {
-      decodeResult.raw.route = data.substring(3,data.length).split('.').map((leg: string) => {return {name: leg}});
+      decodeResult.raw.route = {waypoints: data.substring(3,data.length).split('.').map((leg: string) => RouteUtils.getWaypoint(leg))};
       decodeResult.formatted.items.push({
         type: 'aircraft_route',
         code: 'ROUTE',
@@ -126,16 +127,17 @@ export class Label_H1_POS extends DecoderPlugin {
       longitude: decodeResult.raw.longitude * (decodeResult.raw.longitude_direction === 'W' ? -1 : 1),
     };
 
+    let waypoints : Waypoint[];
     if(fields.length == 11) {//variant 1
-    decodeResult.raw.route = [{name: fields[1] || '?,', time: convertDateTimeToEpoch(fields[2], fields[10]), timeFormat: 'epoch'}, 
-                              {name: fields[4] || '?', time: convertDateTimeToEpoch(fields[5], fields[10]), timeFormat: 'epoch'}, 
-                              {name: fields[6] || '?'}];
+      waypoints = [{name: fields[1] || '?,', time: convertDateTimeToEpoch(fields[2], fields[10]), timeFormat: 'epoch'}, 
+                   {name: fields[4] || '?', time: convertDateTimeToEpoch(fields[5], fields[10]), timeFormat: 'epoch'}, 
+                   {name: fields[6] || '?'}]
     } else {
-      decodeResult.raw.route = [{name: fields[1] || '?,', time: convertHHMMSSToTod(fields[2]), timeFormat: 'tod'}, 
-                                {name: fields[4] || '?', time: convertHHMMSSToTod(fields[5]), timeFormat: 'tod'}, 
-                                {name: fields[6] || '?'}];
+      waypoints = [{name: fields[1] || '?,', time: convertHHMMSSToTod(fields[2]), timeFormat: 'tod'}, 
+                   {name: fields[4] || '?', time: convertHHMMSSToTod(fields[5]), timeFormat: 'tod'}, 
+                   {name: fields[6] || '?'}];
     }
-
+    decodeResult.raw.route = {waypoints: waypoints};
     decodeResult.raw.outside_air_temperature = Number(fields[7].substring(1)) * (fields[7].charAt(0) === 'M' ? -1 : 1);
 
     decodeResult.formatted.items.push({

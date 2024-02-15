@@ -18,22 +18,28 @@ test('decodes Label H1 Preamble FPN landing', () => {
   console.log(JSON.stringify(decodeResult, null, 2));
 
   expect(decodeResult.decoded).toBe(true);
-  expect(decodeResult.decoder.decodeLevel).toBe('partial');
+  expect(decodeResult.decoder.decodeLevel).toBe('full');
   expect(decodeResult.decoder.name).toBe('label-h1-fpn');
   expect(decodeResult.formatted.description).toBe('Flight Plan');
-  expect(decodeResult.formatted.items.length).toBe(6);
+  expect(decodeResult.formatted.items.length).toBe(9);
   expect(decodeResult.formatted.items[0].label).toBe('Route Status');
   expect(decodeResult.formatted.items[0].value).toBe('Route Inactive');
   expect(decodeResult.formatted.items[1].label).toBe('Origin');
   expect(decodeResult.formatted.items[1].value).toBe('KEWR');
   expect(decodeResult.formatted.items[2].label).toBe('Destination');
   expect(decodeResult.formatted.items[2].value).toBe('KDFW');
-  expect(decodeResult.formatted.items[3].label).toBe('Aircraft Route');
-  expect(decodeResult.formatted.items[3].value).toBe('VECTOR >> DISCO >> RIVET');
-  expect(decodeResult.formatted.items[4].label).toBe('Aircraft Route');
-  expect(decodeResult.formatted.items[4].value).toBe('TACKE');
-  expect(decodeResult.formatted.items[5].label).toBe('Message Checksum');
-  expect(decodeResult.formatted.items[5].value).toBe('0xc8b5');
+  expect(decodeResult.formatted.items[3].label).toBe('Company Route');
+  expect(decodeResult.formatted.items[3].value).toBe('EWRDFW01(17L): >> SAAME > J6 > HVQ > Q68 > LITTR >> MEEOW >> FEWWW');
+  expect(decodeResult.formatted.items[4].label).toBe('Arrival Procedure');
+  expect(decodeResult.formatted.items[4].value).toBe('SEEVR4 starting at FEWWW');
+  expect(decodeResult.formatted.items[5].label).toBe('Aircraft Route');
+  expect(decodeResult.formatted.items[5].value).toBe('VECTOR >> DISCO >> RIVET');
+  expect(decodeResult.formatted.items[6].label).toBe('Approach Procedure');
+  expect(decodeResult.formatted.items[6].value).toBe('ILS 17L starting at RIVET');
+  expect(decodeResult.formatted.items[7].label).toBe('Aircraft Route');
+  expect(decodeResult.formatted.items[7].value).toBe('TACKE');
+  expect(decodeResult.formatted.items[8].label).toBe('Message Checksum');
+  expect(decodeResult.formatted.items[8].value).toBe('0xc8b5');
 });
 test('decodes Label H1 Preamble FPN full flight', () => {
   const decoder = new MessageDecoder();
@@ -53,21 +59,30 @@ test('decodes Label H1 Preamble FPN full flight', () => {
   console.log(JSON.stringify(decodeResult, null, 2));
 
   expect(decodeResult.decoded).toBe(true);
-  expect(decodeResult.decoder.decodeLevel).toBe('partial');
+  expect(decodeResult.decoder.decodeLevel).toBe('full');
   expect(decodeResult.decoder.name).toBe('label-h1-fpn');
-  expect(decodeResult.raw.flight_number).toBe('AAL1956')
+  expect(decodeResult.raw.flight_number).toBe('AAL1956');
+  expect(decodeResult.raw.company_route.waypoints).toBeUndefined();
   expect(decodeResult.formatted.description).toBe('Flight Plan');
-  expect(decodeResult.formatted.items.length).toBe(5);
+  expect(decodeResult.formatted.items.length).toBe(9);
   expect(decodeResult.formatted.items[0].label).toBe('Route Status');
   expect(decodeResult.formatted.items[0].value).toBe('Route Planned');
   expect(decodeResult.formatted.items[1].label).toBe('Origin');
   expect(decodeResult.formatted.items[1].value).toBe('KPHL');
   expect(decodeResult.formatted.items[2].label).toBe('Destination');
   expect(decodeResult.formatted.items[2].value).toBe('KPHX');
-  expect(decodeResult.formatted.items[3].label).toBe('Runway');
-  expect(decodeResult.formatted.items[3].value).toBe('27L(26O)');
-  expect(decodeResult.formatted.items[4].label).toBe('Message Checksum');
-  expect(decodeResult.formatted.items[4].value).toBe('0x293b');
+  expect(decodeResult.formatted.items[3].label).toBe('Company Route');
+  expect(decodeResult.formatted.items[3].value).toBe('PHLPHX61');
+  expect(decodeResult.formatted.items[4].label).toBe('Runway');
+  expect(decodeResult.formatted.items[4].value).toBe('27L(26O)');
+  expect(decodeResult.formatted.items[5].label).toBe('Departure Procedure');
+  expect(decodeResult.formatted.items[5].value).toBe('PHL3');
+  expect(decodeResult.formatted.items[6].label).toBe('Arrival Procedure');
+  expect(decodeResult.formatted.items[6].value).toBe('EAGUL6 starting at ZUN');
+  expect(decodeResult.formatted.items[7].label).toBe('Approach Procedure');
+  expect(decodeResult.formatted.items[7].value).toBe('ILS26: >> AIR(40.01 N, 80.49 W) > J110 > BOWRR >> VLA(39.056 N, 89.097 W) >> STL(38.516 N, 90.289 W) >> GIBSN(38.43 N, 92.244 W) >> TYGER(38.41 N, 94.05 W) >> GCK(37.551 N, 100.435 W) >> DIXAN(36.169 N, 105.573 W) >> ZUN(34.579 N, 109.093 W)');
+  expect(decodeResult.formatted.items[8].label).toBe('Message Checksum');
+  expect(decodeResult.formatted.items[8].value).toBe('0x293b');
 });
 
 test('decodes Label H1 Preamble FPN in-flight', () => {
