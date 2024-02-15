@@ -21,8 +21,8 @@ export interface DecodeResult {
   decoded: boolean;
   decoder: {
       name: string,
-      type:  string, // 'pattern-match',
-      decodeLevel: string, // 'none' | 'partial' | 'full',
+      type:  'pattern-match' | 'none',
+      decodeLevel: 'none' | 'partial' | 'full',
   },
   error?: string,
   formatted: {

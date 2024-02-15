@@ -94,7 +94,7 @@ export class MessageDecoder {
       console.log(usablePlugins);
     }
 
-    let result;
+    let result : DecodeResult;
     if (usablePlugins.length > 0) {
       const plugin: DecoderPluginInterface = usablePlugins[0];
       result = plugin.decode(message);
