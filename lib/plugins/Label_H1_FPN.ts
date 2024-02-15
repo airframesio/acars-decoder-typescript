@@ -1,6 +1,7 @@
 import { decode } from 'base85';
 import { DateTimeUtils } from '../DateTimeUtils';
 import { DecoderPlugin } from '../DecoderPlugin';
+import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
 import { CoordinateUtils } from '../utils/coordinate_utils';
 import { RouteUtils } from '../utils/route_utils';
 
@@ -14,7 +15,7 @@ export class Label_H1_FPN extends DecoderPlugin {
     };
   }
 
-  decode(message: any, options: any = {} ): any {
+  decode(message: Message, options: any = {} ): any {
     let decodeResult: any = this.defaultResult;
     decodeResult.decoder.name = this.name;
     decodeResult.formatted.description = 'Flight Plan';

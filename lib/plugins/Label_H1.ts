@@ -1,4 +1,5 @@
 import { DecoderPlugin } from '../DecoderPlugin';
+import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
 
 export class Label_H1 extends DecoderPlugin {
   qualifiers() { // eslint-disable-line class-methods-use-this
@@ -7,7 +8,7 @@ export class Label_H1 extends DecoderPlugin {
     };
   }
 
-  decode(message: any, options: any = {}) : any {
+  decode(message: Message, options: Options = {}) : DecodeResult {
     const decodeResult: any = this.defaultResult;
     // console.log('DECODER: H1 detected');
 

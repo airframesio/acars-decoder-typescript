@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 
+import { DecodeResult, Message } from '../DecoderPluginInterface';
 import { MessageDecoder } from '../MessageDecoder';
 
-function debugMessage(message: any, decoding: any) {
+function debugMessage(message: Message, decoding: DecodeResult) {
   console.log("ORIGINAL MESSAGE");
   console.log("Label:", message.label);
   console.log("Text:", message.text);
