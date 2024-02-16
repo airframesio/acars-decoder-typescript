@@ -43,7 +43,7 @@ export class Label_H1_M1BPOS extends DecoderPlugin { // eslint-disable-line came
       decodeResult.formatted.items.push({
           type: 'route',
           label: 'Route',
-          value: `${route.join(' > ')}`,
+          value: RouteUtils.routeToString(decodeResult.raw.route),
       });
 
       decodeResult.decoded = true;
