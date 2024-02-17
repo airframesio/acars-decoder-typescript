@@ -120,6 +120,45 @@ test('decodes Label H1 Preamble FPN in-flight', () => {
   expect(decodeResult.formatted.items[4].value).toBe('0xddfb');
 });
 
+
+test('decodes Label H1 Preamble with WS', () => {
+  const decoder = new MessageDecoder();
+  const decoderPlugin = new Label_H1_FPN(decoder);
+
+  expect(decoderPlugin.decode).toBeDefined();
+  expect(decoderPlugin.name).toBe('label-h1-fpn');
+  expect(decoderPlugin.qualifiers).toBeDefined();
+  expect(decoderPlugin.qualifiers()).toEqual({
+    labels: ['H1'],
+    preambles: ['FPN'],
+  });
+
+  // https://app.airframes.io/messages/2372685289
+  const text = 'FPN/TS140017,021724/RP:DA:EHAM:AA:KMSP..N55064W000477..N55163W001141..ERAKA..N60000W020000..N61000W030000:WS:N61000W030000,370..N61000W040000..N60000W050000..URTAK:WS:URTAK,380..LAKES:WS:LAKES,400..N57000W070000..N54300W080000..N49000W090000..DLH..COLDD:A:BAINY3:AP:ILS30L(30L)/PR4356,344,360,1060,,,13,,,30,,,P50,M40,36090,,3296,292/DTKMSP,30L,172,215117156D';
+  const decodeResult = decoderPlugin.decode({ text: text });
+  console.log(JSON.stringify(decodeResult, null, 2));
+
+  expect(decodeResult.decoded).toBe(true);
+  expect(decodeResult.decoder.decodeLevel).toBe('partial');
+  expect(decodeResult.decoder.name).toBe('label-h1-fpn');
+  expect(decodeResult.raw.flight_number).toBe('140017,021724') // FIXME - this is a timestamp (2024-02-17T14:00:17.000Z)
+  expect(decodeResult.formatted.description).toBe('Flight Plan');
+  expect(decodeResult.formatted.items.length).toBe(6);
+  expect(decodeResult.formatted.items[0].label).toBe('Route Status');
+  expect(decodeResult.formatted.items[0].value).toBe('Route Planned');
+  expect(decodeResult.formatted.items[1].label).toBe('Origin');
+  expect(decodeResult.formatted.items[1].value).toBe('EHAM');
+  expect(decodeResult.formatted.items[2].label).toBe('Destination');
+  expect(decodeResult.formatted.items[2].value).toBe('KMSP..N55064W000477..N55163W001141..ERAKA..N60000W020000..N61000W030000'); // FIXME - just 'KMSP'
+  expect(decodeResult.formatted.items[3].label).toBe('Arrival Procedure');
+  expect(decodeResult.formatted.items[3].value).toBe('BAINY3');
+  expect(decodeResult.formatted.items[4].label).toBe('Approach Procedure');
+  expect(decodeResult.formatted.items[4].value).toBe('ILS30L(30L)/PR4356,344,360,1060,,,13,,,30,,,P50,M40,36090,,3296,292/DTKMSP,30L,172,215117'); //FIXME - just 'ILS30L'
+  expect(decodeResult.formatted.items[5].label).toBe('Message Checksum');
+  expect(decodeResult.formatted.items[5].value).toBe('0x156d');
+  expect(decodeResult.remaining.text).toBe(':WS:N61000W030000,370..N61000W040000..N60000W050000..URTAK:WS:URTAK,380..LAKES:WS:LAKES,400..N57000W070000..N54300W080000..N49000W090000..DLH..COLDD');
+});
+
 test('decodes Label H1 Preamble FPN <invalid>', () => {
   const decoder = new MessageDecoder();
   const decoderPlugin = new Label_H1_FPN(decoder);

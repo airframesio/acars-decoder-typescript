@@ -54,12 +54,14 @@ export class Label_H1_FPN extends DecoderPlugin {
           case 'R':
             addDepartureRunway(decodeResult, value);
           break;
+          // case 'WS': // something about routes, has altitude, so current parsing won't work
+          // break;
           default:
             if(allKnownFields) {
               decodeResult.remaining.text = '';
               allKnownFields = false;
             }
-            decodeResult.remaining.text += `:${data[i]}`;
+            decodeResult.remaining.text += `:${key}:${value}`;
             decodeResult.decoder.decodeLevel = 'partial';
         }
       }
