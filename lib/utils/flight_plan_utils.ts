@@ -68,7 +68,7 @@ function parseHeader(decodeResult: any, header: string): boolean {
             decodeResult.raw.serial_number = fields[i].substring(2); // Strip off 'FN'
         }  else if (fields[i].startsWith('TS')) {
             const ts = fields[i].substring(2).split(',');
-            decodeResult.raw.message_timestamp = DateTimeUtils.UTCDateTimeToString(ts[1],ts[0]);
+            decodeResult.raw.message_timestamp = DateTimeUtils.convertDateTimeToEpoch(ts[0],ts[1]);
         } else {
             decodeResult.remaining.text += '/' + fields[i];
             allKnownFields = false

@@ -129,12 +129,12 @@ export class Label_H1_POS extends DecoderPlugin {
 
     let waypoints : Waypoint[];
     if(fields.length == 11) {//variant 1
-      waypoints = [{name: fields[1] || '?,', time: convertDateTimeToEpoch(fields[2], fields[10]), timeFormat: 'epoch'}, 
-                   {name: fields[4] || '?', time: convertDateTimeToEpoch(fields[5], fields[10]), timeFormat: 'epoch'}, 
+      waypoints = [{name: fields[1] || '?,', time: DateTimeUtils.convertDateTimeToEpoch(fields[2], fields[10]), timeFormat: 'epoch'}, 
+                   {name: fields[4] || '?', time: DateTimeUtils.convertDateTimeToEpoch(fields[5], fields[10]), timeFormat: 'epoch'}, 
                    {name: fields[6] || '?'}]
     } else {
-      waypoints = [{name: fields[1] || '?,', time: convertHHMMSSToTod(fields[2]), timeFormat: 'tod'}, 
-                   {name: fields[4] || '?', time: convertHHMMSSToTod(fields[5]), timeFormat: 'tod'}, 
+      waypoints = [{name: fields[1] || '?,', time: DateTimeUtils.convertHHMMSSToTod(fields[2]), timeFormat: 'tod'}, 
+                   {name: fields[4] || '?', time: DateTimeUtils.convertHHMMSSToTod(fields[5]), timeFormat: 'tod'}, 
                    {name: fields[6] || '?'}];
     }
     decodeResult.raw.route = {waypoints: waypoints};
@@ -174,24 +174,3 @@ export class Label_H1_POS extends DecoderPlugin {
 }
 
 export default {};
-function convertHHMMSSToTod(time: string): number{
-  const h = Number(time.substring(0,2));
-  const m = Number(time.substring(2,4));
-  const s = Number(time.substring(4,6));
-  const tod = (h*3600 )+ (m*60) + s;
-  return tod;
-}
-
-/**
- * 
- * @param time - HHMMSS
- * @param date - MMDDYY
- * @returns seconds since epoch
- */
-function convertDateTimeToEpoch(time: string, date: string):number {
-  //YYYY-MM-DDTHH:mm:ss.sssZ
-  const timestamp = `20${date.substring(4,6)}-${date.substring(0,2)}-${date.substring(2,4)}T${time.substring(0,2)}:${time.substring(2,4)}:${time.substring(4,6)}.000Z`
-  const millis = Date.parse(timestamp);
-  return millis / 1000;
-}
-

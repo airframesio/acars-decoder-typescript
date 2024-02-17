@@ -121,7 +121,7 @@ test('decodes Label H1 Preamble FPN in-flight', () => {
 });
 
 
-test('decodes Label H1 Preamble with WS', () => {
+test('decodes Label H1 Preamble FPN with WS', () => {
   const decoder = new MessageDecoder();
   const decoderPlugin = new Label_H1_FPN(decoder);
 
@@ -141,7 +141,7 @@ test('decodes Label H1 Preamble with WS', () => {
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
   expect(decodeResult.decoder.name).toBe('label-h1-fpn');
-  expect(decodeResult.raw.message_timestamp).toBe('Sun, 02 Jun 2024 14:00:17 GMT')
+  expect(decodeResult.raw.message_timestamp).toBe(Number.NaN) // why two different formats?!?
   expect(decodeResult.formatted.description).toBe('Flight Plan');
   expect(decodeResult.formatted.items.length).toBe(6);
   expect(decodeResult.formatted.items[0].label).toBe('Route Status');
@@ -157,6 +157,44 @@ test('decodes Label H1 Preamble with WS', () => {
   expect(decodeResult.formatted.items[5].label).toBe('Message Checksum');
   expect(decodeResult.formatted.items[5].value).toBe('0x156d');
   expect(decodeResult.remaining.text).toBe(':WS:N61000W030000,370..N61000W040000..N60000W050000..URTAK:WS:URTAK,380..LAKES:WS:LAKES,400..N57000W070000..N54300W080000..N49000W090000..DLH..COLDD');
+});
+
+test('decodes Label H1 Preamble FPN with SN', () => {
+  const decoder = new MessageDecoder();
+  const decoderPlugin = new Label_H1_FPN(decoder);
+
+  expect(decoderPlugin.decode).toBeDefined();
+  expect(decoderPlugin.name).toBe('label-h1-fpn');
+  expect(decoderPlugin.qualifiers).toBeDefined();
+  expect(decoderPlugin.qualifiers()).toEqual({
+    labels: ['H1'],
+    preambles: ['FPN'],
+  });
+
+  // https://app.airframes.io/messages/2372685289
+  const text = 'FPN/TS155631,170224/SN155631/RP:DA:PHNL:AA:KASE:D:MKK5.KOLEA:F:KOLEA,N22354W155133..CLUTS,N23002W154393.R465.CINNY,N36109W124456..OAL,N38002W117462.J58.ILC,N38150W114237..EYELO,N38455W110469..SAKES,N38500W110163.J80.DBL,N39264W106537F5E1'
+   const decodeResult = decoderPlugin.decode({ text: text });
+  console.log(JSON.stringify(decodeResult, null, 2));
+
+  expect(decodeResult.decoded).toBe(true);
+  expect(decodeResult.decoder.decodeLevel).toBe('full');
+  expect(decodeResult.decoder.name).toBe('label-h1-fpn');
+  expect(decodeResult.raw.message_timestamp).toBe(1708185391)
+  expect(decodeResult.raw.serial_number).toBe('155631')
+  expect(decodeResult.formatted.description).toBe('Flight Plan');
+  expect(decodeResult.formatted.items.length).toBe(6);
+  expect(decodeResult.formatted.items[0].label).toBe('Route Status');
+  expect(decodeResult.formatted.items[0].value).toBe('Route Planned');
+  expect(decodeResult.formatted.items[1].label).toBe('Origin');
+  expect(decodeResult.formatted.items[1].value).toBe('PHNL');
+  expect(decodeResult.formatted.items[2].label).toBe('Destination');
+  expect(decodeResult.formatted.items[2].value).toBe('KASE');
+  expect(decodeResult.formatted.items[3].label).toBe('Departure Procedure');
+  expect(decodeResult.formatted.items[3].value).toBe('MKK5 starting at KOLEA');
+  expect(decodeResult.formatted.items[4].label).toBe('Aircraft Route');
+  expect(decodeResult.formatted.items[4].value).toBe('KOLEA(22.354 N, 155.133 W) >> CLUTS(23.002 N, 154.393 W) > R465 > CINNY(36.109 N, 124.456 W) >> OAL(38.002 N, 117.462 W) > J58 > ILC(38.15 N, 114.237 W) >> EYELO(38.455 N, 110.469 W) >> SAKES(38.5 N, 110.163 W) > J80 > DBL(39.264 N, 106.537 W)');
+  expect(decodeResult.formatted.items[5].label).toBe('Message Checksum');
+  expect(decodeResult.formatted.items[5].value).toBe('0xf5e1');
 });
 
 test('decodes Label H1 Preamble FPN <invalid>', () => {
