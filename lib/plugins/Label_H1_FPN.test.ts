@@ -141,7 +141,7 @@ test('decodes Label H1 Preamble FPN with WS', () => {
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
   expect(decodeResult.decoder.name).toBe('label-h1-fpn');
-  expect(decodeResult.raw.message_timestamp).toBe(Number.NaN) // why two different formats?!?
+  expect(decodeResult.raw.message_timestamp).toBe(1708178417);
   expect(decodeResult.formatted.description).toBe('Flight Plan');
   expect(decodeResult.formatted.items.length).toBe(6);
   expect(decodeResult.formatted.items[0].label).toBe('Route Status');
@@ -179,8 +179,8 @@ test('decodes Label H1 Preamble FPN with SN', () => {
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('full');
   expect(decodeResult.decoder.name).toBe('label-h1-fpn');
-  expect(decodeResult.raw.message_timestamp).toBe(1708185391)
-  expect(decodeResult.raw.serial_number).toBe('155631')
+  expect(decodeResult.raw.message_timestamp).toBe(Number.NaN); // DDMMYY instead of MMDDYY - need to figure out how to determine
+  expect(decodeResult.raw.serial_number).toBe('155631');
   expect(decodeResult.formatted.description).toBe('Flight Plan');
   expect(decodeResult.formatted.items.length).toBe(6);
   expect(decodeResult.formatted.items[0].label).toBe('Route Status');

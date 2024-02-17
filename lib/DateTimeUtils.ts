@@ -40,14 +40,12 @@ export class DateTimeUtils {
   /**
    * 
    * @param time HHMMSS
-   * @param date DDMMYY
+   * @param date MMDDYY
    * @returns seconds since epoch
    */
   public static convertDateTimeToEpoch(time: string, date: string):number {
     //YYYY-MM-DDTHH:mm:ss.sssZ
-    console.log('date: ' + date);
-    console.log('time: ' + time);
-    const timestamp = `20${date.substring(4,6)}-${date.substring(2,4)}-${date.substring(0,2)}T${time.substring(0,2)}:${time.substring(2,4)}:${time.substring(4,6)}.000Z`
+    const timestamp = `20${date.substring(4,6)}-${date.substring(0,2)}-${date.substring(2,4)}T${time.substring(0,2)}:${time.substring(2,4)}:${time.substring(4,6)}.000Z`
     const millis = Date.parse(timestamp);
     return millis / 1000;
   }
