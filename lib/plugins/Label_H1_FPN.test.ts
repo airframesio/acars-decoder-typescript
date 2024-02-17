@@ -141,7 +141,7 @@ test('decodes Label H1 Preamble with WS', () => {
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
   expect(decodeResult.decoder.name).toBe('label-h1-fpn');
-  expect(decodeResult.raw.flight_number).toBe('140017,021724') // FIXME - this is a timestamp (2024-02-17T14:00:17.000Z)
+  expect(decodeResult.raw.message_timestamp).toBe('Sun, 02 Jun 2024 14:00:17 GMT')
   expect(decodeResult.formatted.description).toBe('Flight Plan');
   expect(decodeResult.formatted.items.length).toBe(6);
   expect(decodeResult.formatted.items[0].label).toBe('Route Status');
