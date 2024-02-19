@@ -17,8 +17,9 @@ export class Label_H1_FPN extends DecoderPlugin {
     decodeResult.formatted.description = 'Flight Plan';
     decodeResult.message = message;
 
-    const checksum = message.text.slice(-4);
-    const data = message.text.slice(0, message.text.length-4).split(':');
+    const msg = message.text.replace(/\n|\r/g, "");
+    const checksum = msg.slice(-4);
+    const data = msg.slice(0, msg.length-4).split(':');
     if(data.length > 1) {
       const fulllyDecoded = FlightPlanUtils.processFlightPlan(decodeResult, data)
       addChecksum(decodeResult, checksum);

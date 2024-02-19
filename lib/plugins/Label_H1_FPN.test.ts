@@ -1,7 +1,7 @@
 import { MessageDecoder } from '../MessageDecoder';
 import { Label_H1_FPN } from './Label_H1_FPN';
 
-test('decodes Label H1 Preamble FPN landing', () => {
+test('Label H1 Preamble FPN decoder has right qualifiers', () => {
   const decoder = new MessageDecoder();
   const decoderPlugin = new Label_H1_FPN(decoder);
 
@@ -12,6 +12,11 @@ test('decodes Label H1 Preamble FPN landing', () => {
     labels: ['H1'],
     preambles: ['FPN'],
   });
+});
+
+test('decodes Label H1 Preamble FPN landing', () => {
+  const decoder = new MessageDecoder();
+  const decoderPlugin = new Label_H1_FPN(decoder);
 
   const text = 'FPN/RI:DA:KEWR:AA:KDFW:CR:EWRDFW01(17L)..SAAME.J6.HVQ.Q68.LITTR..MEEOW..FEWWW:A:SEEVR4.FEWWW:F:VECTOR..DISCO..RIVET:AP:ILS 17L.RIVET:F:TACKEC8B5';
   const decodeResult = decoderPlugin.decode({ text: text });
@@ -45,13 +50,6 @@ test('decodes Label H1 Preamble FPN full flight', () => {
   const decoder = new MessageDecoder();
   const decoderPlugin = new Label_H1_FPN(decoder);
 
-  expect(decoderPlugin.decode).toBeDefined();
-  expect(decoderPlugin.name).toBe('label-h1-fpn');
-  expect(decoderPlugin.qualifiers).toBeDefined();
-  expect(decoderPlugin.qualifiers()).toEqual({
-    labels: ['H1'],
-    preambles: ['FPN'],
-  });
 
   // https://app.airframes.io/messages/2161768398
   const text = 'FPN/FNAAL1956/RP:DA:KPHL:AA:KPHX:CR:PHLPHX61:R:27L(26O):D:PHL3:A:EAGUL6.ZUN:AP:ILS26..AIR,N40010W080490.J110.BOWRR..VLA,N39056W089097..STL,N38516W090289..GIBSN,N38430W092244..TYGER,N38410W094050..GCK,N37551W100435..DIXAN,N36169W105573..ZUN,N34579W109093293B';
@@ -89,14 +87,6 @@ test('decodes Label H1 Preamble FPN in-flight', () => {
   const decoder = new MessageDecoder();
   const decoderPlugin = new Label_H1_FPN(decoder);
 
-  expect(decoderPlugin.decode).toBeDefined();
-  expect(decoderPlugin.name).toBe('label-h1-fpn');
-  expect(decoderPlugin.qualifiers).toBeDefined();
-  expect(decoderPlugin.qualifiers()).toEqual({
-    labels: ['H1'],
-    preambles: ['FPN'],
-  });
-
   // https://app.airframes.io/messages/2161761202
   const text = 'FPN/FNUAL1187/RP:DA:KSFO:AA:KPHX:F:KAYEX,N36292W120569..LOSHN,N35509W120000..BOILE,N34253W118016..BLH,N33358W114457DDFB';
   const decodeResult = decoderPlugin.decode({ text: text });
@@ -125,14 +115,6 @@ test('decodes Label H1 Preamble FPN with WS', () => {
   const decoder = new MessageDecoder();
   const decoderPlugin = new Label_H1_FPN(decoder);
 
-  expect(decoderPlugin.decode).toBeDefined();
-  expect(decoderPlugin.name).toBe('label-h1-fpn');
-  expect(decoderPlugin.qualifiers).toBeDefined();
-  expect(decoderPlugin.qualifiers()).toEqual({
-    labels: ['H1'],
-    preambles: ['FPN'],
-  });
-
   // https://app.airframes.io/messages/2372685289
   const text = 'FPN/TS140017,021724/RP:DA:EHAM:AA:KMSP..N55064W000477..N55163W001141..ERAKA..N60000W020000..N61000W030000:WS:N61000W030000,370..N61000W040000..N60000W050000..URTAK:WS:URTAK,380..LAKES:WS:LAKES,400..N57000W070000..N54300W080000..N49000W090000..DLH..COLDD:A:BAINY3:AP:ILS30L(30L)/PR4356,344,360,1060,,,13,,,30,,,P50,M40,36090,,3296,292/DTKMSP,30L,172,215117156D';
   const decodeResult = decoderPlugin.decode({ text: text });
@@ -159,17 +141,37 @@ test('decodes Label H1 Preamble FPN with WS', () => {
   expect(decodeResult.remaining.text).toBe(':WS:N61000W030000,370..N61000W040000..N60000W050000..URTAK:WS:URTAK,380..LAKES:WS:LAKES,400..N57000W070000..N54300W080000..N49000W090000..DLH..COLDD');
 });
 
-test('decodes Label H1 Preamble FPN with SN', () => {
+test('decodes Label H1 Preamble FPN with newlines', () => {
   const decoder = new MessageDecoder();
   const decoderPlugin = new Label_H1_FPN(decoder);
 
-  expect(decoderPlugin.decode).toBeDefined();
-  expect(decoderPlugin.name).toBe('label-h1-fpn');
-  expect(decoderPlugin.qualifiers).toBeDefined();
-  expect(decoderPlugin.qualifiers()).toEqual({
-    labels: ['H1'],
-    preambles: ['FPN'],
-  });
+  // https://app.airframes.io/messages/2381936957
+  const text = 'FPN/SN2125/FNQFA780/RI:DA:YPPH:CR:PERMEL001:AA:YMML..MEMUP,S33451E\r\n120525.Y53.WENDY0560'
+   const decodeResult = decoderPlugin.decode({ text: text });
+  console.log(JSON.stringify(decodeResult, null, 2));
+
+  expect(decodeResult.decoded).toBe(true);
+  expect(decodeResult.decoder.decodeLevel).toBe('full');
+  expect(decodeResult.decoder.name).toBe('label-h1-fpn');
+  expect(decodeResult.raw.flight_number).toBe('QFA780');
+  expect(decodeResult.raw.serial_number).toBe('2125');
+  expect(decodeResult.formatted.description).toBe('Flight Plan');
+  expect(decodeResult.formatted.items.length).toBe(5);
+  expect(decodeResult.formatted.items[0].label).toBe('Route Status');
+  expect(decodeResult.formatted.items[0].value).toBe('Route Inactive');
+  expect(decodeResult.formatted.items[1].label).toBe('Origin');
+  expect(decodeResult.formatted.items[1].value).toBe('YPPH');
+  expect(decodeResult.formatted.items[2].label).toBe('Company Route');
+  expect(decodeResult.formatted.items[2].value).toBe('PERMEL001');
+  expect(decodeResult.formatted.items[3].label).toBe('Destination');
+  expect(decodeResult.formatted.items[3].value).toBe('YMML..MEMUP,S33451E120525.Y53.WENDY'); //TODO - pull out route
+  expect(decodeResult.formatted.items[4].label).toBe('Message Checksum');
+  expect(decodeResult.formatted.items[4].value).toBe('0x0560');
+});
+
+test('decodes Label H1 Preamble FPN with SN and TS', () => {
+  const decoder = new MessageDecoder();
+  const decoderPlugin = new Label_H1_FPN(decoder);
 
   // https://app.airframes.io/messages/2372685289
   const text = 'FPN/TS155631,170224/SN155631/RP:DA:PHNL:AA:KASE:D:MKK5.KOLEA:F:KOLEA,N22354W155133..CLUTS,N23002W154393.R465.CINNY,N36109W124456..OAL,N38002W117462.J58.ILC,N38150W114237..EYELO,N38455W110469..SAKES,N38500W110163.J80.DBL,N39264W106537F5E1'
@@ -200,14 +202,6 @@ test('decodes Label H1 Preamble FPN with SN', () => {
 test('decodes Label H1 Preamble FPN <invalid>', () => {
   const decoder = new MessageDecoder();
   const decoderPlugin = new Label_H1_FPN(decoder);
-
-  expect(decoderPlugin.decode).toBeDefined();
-  expect(decoderPlugin.name).toBe('label-h1-fpn');
-  expect(decoderPlugin.qualifiers).toBeDefined();
-  expect(decoderPlugin.qualifiers()).toEqual({
-    labels: ['H1'],
-    preambles: ['FPN'],
-  });
 
   const text = 'FPN Bogus message';
   const decodeResult = decoderPlugin.decode({ text: text });
