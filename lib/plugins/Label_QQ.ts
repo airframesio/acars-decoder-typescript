@@ -1,4 +1,5 @@
 import { DecoderPlugin } from '../DecoderPlugin';
+import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
 
 export class Label_QQ extends DecoderPlugin {
   name = 'label-qq';
@@ -9,7 +10,7 @@ export class Label_QQ extends DecoderPlugin {
     };
   }
 
-  decode(message: any, options: any = {}) : any {
+  decode(message: Message, options: Options = {}) : DecodeResult {
     const decodeResult: any = this.defaultResult;
     decodeResult.decoder.name = this.name;
     

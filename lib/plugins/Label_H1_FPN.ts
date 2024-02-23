@@ -1,4 +1,5 @@
 import { DecoderPlugin } from '../DecoderPlugin';
+import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
 import { FlightPlanUtils } from '../utils/flight_plan_utils';
 
 export class Label_H1_FPN extends DecoderPlugin {
@@ -11,7 +12,7 @@ export class Label_H1_FPN extends DecoderPlugin {
     };
   }
 
-  decode(message: any, options: any = {} ): any {
+  decode(message: Message, options: any = {} ): any {
     let decodeResult: any = this.defaultResult;
     decodeResult.decoder.name = this.name;
     decodeResult.formatted.description = 'Flight Plan';

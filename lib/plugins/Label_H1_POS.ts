@@ -1,5 +1,6 @@
 import { DateTimeUtils } from '../DateTimeUtils';
 import { DecoderPlugin } from '../DecoderPlugin';
+import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
 import { Waypoint } from '../types/waypoint';
 import { RouteUtils } from '../utils/route_utils';
 
@@ -13,7 +14,7 @@ export class Label_H1_POS extends DecoderPlugin {
     };
   }
 
-  decode(message: any, options: any = {}) : any {
+  decode(message: Message, options: Options = {}) : DecodeResult {
     let decodeResult: any = this.defaultResult;
     decodeResult.decoder.name = this.name;
     decodeResult.formatted.description = 'Position Report';

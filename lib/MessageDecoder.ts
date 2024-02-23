@@ -1,4 +1,4 @@
-import { DecoderPluginInterface } from './DecoderPluginInterface'; // eslint-disable-line import/no-cycle
+import { DecodeResult, DecoderPluginInterface, Message, Options } from './DecoderPluginInterface'; // eslint-disable-line import/no-cycle
 
 import * as Plugins from './plugins/official';
 import { MIAMCoreUtils } from './utils/miam';
@@ -47,7 +47,7 @@ export class MessageDecoder {
     return true;
   }
 
-  decode(message: any, options: any = {}) {
+  decode(message: Message, options: Options = {}): DecodeResult {
     if (message.label === 'MA') {
       const decodeResult = MIAMCoreUtils.parse(message.text);
 
@@ -94,34 +94,34 @@ export class MessageDecoder {
       console.log(usablePlugins);
     }
 
-    let result;
+    let result : DecodeResult;
     if (usablePlugins.length > 0) {
       const plugin: DecoderPluginInterface = usablePlugins[0];
       result = plugin.decode(message);
     } else {
       result = {
         decoded: false,
-        decodeLevel: 'none',
         error: 'No known decoder plugin for this message',
+        decoder: {
+          name: 'none',
+          type: 'none',
+          decodeLevel: 'none',
+        },
         message: message,
         remaining: {
           text: message.text,
         },
         raw: {},
-        formatted: {},
+        formatted: {
+          description: 'Not Decoded',
+          items: [],
+        },
       };
     }
 
     if (options.debug) {
-      let performDebug = true;
-      if (options.debug.only_decoded) {
-        performDebug = result.decoded;
-      }
-
-      if (performDebug) {
-        console.log('Result');
-        console.log(result);
-      }
+      console.log('Result');
+      console.log(result);
     }
 
     return result;
