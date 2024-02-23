@@ -1,6 +1,7 @@
 import { DecoderPlugin } from '../DecoderPlugin';
 import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
 import { CoordinateUtils } from '../utils/coordinate_utils';
+import { RouteUtils } from '../utils/route_utils';
 
 export class Label_H1_M1BPOS extends DecoderPlugin { // eslint-disable-line camelcase
   name = 'label-h1-m1bpos';
@@ -34,16 +35,16 @@ export class Label_H1_M1BPOS extends DecoderPlugin { // eslint-disable-line came
       });
     }
 
-      let route = items.slice(1).filter((part: any) => !/^\d(.+)$/.test(part));
-      route = route.map((hop: any) => hop || '?');
-      decodeResult.raw.route = route;
+      const route = items.slice(1).filter((part: any) => !/^\d(.+)$/.test(part));
+      const waypoints = route.map((hop: any) => RouteUtils.getWaypoint(hop || '?'));
+      decodeResult.raw.route = {waypoints: waypoints};
 
       decodeResult.formatted.description = 'Position Report';
 
       decodeResult.formatted.items.push({
           type: 'route',
           label: 'Route',
-          value: `${route.join(' > ')}`,
+          value: RouteUtils.routeToString(decodeResult.raw.route),
       });
 
       decodeResult.decoded = true;
