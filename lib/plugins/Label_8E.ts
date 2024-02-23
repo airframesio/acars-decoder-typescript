@@ -1,5 +1,6 @@
 import { DateTimeUtils } from '../DateTimeUtils';
 import { DecoderPlugin } from '../DecoderPlugin';
+import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
 
 // ETA
 export class Label_8E extends DecoderPlugin {
@@ -11,7 +12,7 @@ export class Label_8E extends DecoderPlugin {
     };
   }
 
-  decode(message: any, options: any = {}) : any {
+  decode(message: Message, options: Options = {}) : DecodeResult {
     const decodeResult: any = this.defaultResult;
     decodeResult.decoder.name = this.name;
     decodeResult.formatted.description = 'ETA Report';

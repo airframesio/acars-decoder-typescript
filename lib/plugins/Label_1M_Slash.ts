@@ -1,5 +1,6 @@
 import { DateTimeUtils } from '../DateTimeUtils';
 import { DecoderPlugin } from '../DecoderPlugin';
+import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
 
 export class Label_1M_Slash extends DecoderPlugin {
   name = 'label-1m-slash';
@@ -11,7 +12,7 @@ export class Label_1M_Slash extends DecoderPlugin {
     };
   }
 
-  decode(message: any, options: any = {}) : any {
+  decode(message: Message, options: Options = {}) : DecodeResult {
     const decodeResult: any = this.defaultResult;
     decodeResult.decoder.name = this.name;
     decodeResult.formatted.description = 'ETA Report';

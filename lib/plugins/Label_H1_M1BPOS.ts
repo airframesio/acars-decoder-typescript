@@ -1,4 +1,5 @@
 import { DecoderPlugin } from '../DecoderPlugin';
+import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
 import { CoordinateUtils } from '../utils/coordinate_utils';
 
 export class Label_H1_M1BPOS extends DecoderPlugin { // eslint-disable-line camelcase
@@ -11,7 +12,7 @@ export class Label_H1_M1BPOS extends DecoderPlugin { // eslint-disable-line came
     };
   }
 
-  decode(message: any, options: any = {}) : any {
+  decode(message: Message, options: Options = {}) : DecodeResult {
     const decodeResult: any = this.defaultResult;
     decodeResult.decoder.name = this.name;
 

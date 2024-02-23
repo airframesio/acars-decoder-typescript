@@ -1,4 +1,5 @@
 import { DecoderPlugin } from '../DecoderPlugin';
+import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
 
 // Airline Defined
 // 3N01 POSRPT
@@ -28,7 +29,7 @@ export class Label_80 extends DecoderPlugin {
     };
   }
 
-  decode(message: any, options: any = {}) : any {
+  decode(message: Message, options: Options = {}) : DecodeResult {
     const decodeResult: any = this.defaultResult;
     decodeResult.decoder.name = this.name;
 
