@@ -1,7 +1,7 @@
 import { MessageDecoder } from '../MessageDecoder';
 import { Label_H1_POS } from './Label_H1_POS';
 
-test('decodes Label H1 Preamble POS variant 1', () => {
+test('matches Label H1 Preamble POS qualifiers', () => {
   const decoder = new MessageDecoder();
   const decoderPlugin = new Label_H1_POS(decoder);
 
@@ -10,8 +10,12 @@ test('decodes Label H1 Preamble POS variant 1', () => {
   expect(decoderPlugin.qualifiers).toBeDefined();
   expect(decoderPlugin.qualifiers()).toEqual({
     labels: ['H1'],
-    preambles: ['POS'],
+    preambles: ['POS', '#M1BPOS'],
   });
+});
+test('decodes Label H1 Preamble POS variant 1', () => {
+  const decoder = new MessageDecoder();
+  const decoderPlugin = new Label_H1_POS(decoder);
 
   const text = 'POSN43312W123174,EASON,215754,370,EBINY,220601,ELENN,M48,02216,185/TS215754,0921227A40';
   const decodeResult = decoderPlugin.decode({ text: text });
@@ -52,14 +56,6 @@ test('decodes Label H1 Preamble POS variant 1', () => {
 test('decodes Label H1 Preamble POS variant 2', () => {
   const decoder = new MessageDecoder();
   const decoderPlugin = new Label_H1_POS(decoder);
-
-  expect(decoderPlugin.decode).toBeDefined();
-  expect(decoderPlugin.name).toBe('label-h1-pos');
-  expect(decoderPlugin.qualifiers).toBeDefined();
-  expect(decoderPlugin.qualifiers()).toEqual({
-    labels: ['H1'],
-    preambles: ['POS'],
-  });
 
   const text = 'POSN45209W122550,PEGTY,220309,134,MINNE,220424,HISKU,M6,060013,269,366,355K,292K,730A5B';
   const decodeResult = decoderPlugin.decode({ text: text });
@@ -106,14 +102,6 @@ test('decodes Label H1 Preamble POS variant 3', () => {
   const decoder = new MessageDecoder();
   const decoderPlugin = new Label_H1_POS(decoder);
 
-  expect(decoderPlugin.decode).toBeDefined();
-  expect(decoderPlugin.name).toBe('label-h1-pos');
-  expect(decoderPlugin.qualifiers).toBeDefined();
-  expect(decoderPlugin.qualifiers()).toEqual({
-    labels: ['H1'],
-    preambles: ['POS'],
-  });
-
   const text = 'POSN43030W122406,IBALL,220516,380,AARON,220816,MOXEE,M47,0047,86/TS220516,092122BF64';
   const decodeResult = decoderPlugin.decode({ text: text });
   console.log(JSON.stringify(decodeResult, null, 2));
@@ -153,14 +141,6 @@ test('decodes Label H1 Preamble POS variant 3', () => {
 test('decodes Label H1 Preamble POS variant 4', () => {
   const decoder = new MessageDecoder();
   const decoderPlugin = new Label_H1_POS(decoder);
-
-  expect(decoderPlugin.decode).toBeDefined();
-  expect(decoderPlugin.name).toBe('label-h1-pos');
-  expect(decoderPlugin.qualifiers).toBeDefined();
-  expect(decoderPlugin.qualifiers()).toEqual({
-    labels: ['H1'],
-    preambles: ['POS'],
-  });
 
   const text = 'POSN33225W079428,SCOOB,232933,340,ENEME,235712,FETAL,M42,003051,15857F6';
   const decodeResult = decoderPlugin.decode({ text: text });
@@ -203,14 +183,6 @@ test('decodes Label H1 Preamble POS variant 5', () => {
   const decoder = new MessageDecoder();
   const decoderPlugin = new Label_H1_POS(decoder);
 
-  expect(decoderPlugin.decode).toBeDefined();
-  expect(decoderPlugin.name).toBe('label-h1-pos');
-  expect(decoderPlugin.qualifiers).toBeDefined();
-  expect(decoderPlugin.qualifiers()).toEqual({
-    labels: ['H1'],
-    preambles: ['POS'],
-  });
-
   // https://app.airframes.io/messages/2184441420
   const text = 'POSN38531W078000,CSN-01,112309,310,CYN-02,114151,ACK,M40,26067,22479226';
   const decodeResult = decoderPlugin.decode({ text: text });
@@ -252,43 +224,29 @@ test('decodes Label H1 Preamble POS variant 6', () => {
   const decoder = new MessageDecoder();
   const decoderPlugin = new Label_H1_POS(decoder);
 
-  expect(decoderPlugin.decode).toBeDefined();
-  expect(decoderPlugin.name).toBe('label-h1-pos');
-  expect(decoderPlugin.qualifiers).toBeDefined();
-  expect(decoderPlugin.qualifiers()).toEqual({
-    labels: ['H1'],
-    preambles: ['POS'],
-  });
-
   // https://app.airframes.io/messages/2295027018
   const text = 'POS/RFSCOOB.KEMPR.ECG.OHPEA.TOMMZ.OXANA.ZZTOP.OMALA.WILYY.KANUX.GALVN.KASAR.LNHOM.SLUKA.FIPEK.PUYYA.PLING.KOLAO.JETSSF2FC';
   const decodeResult = decoderPlugin.decode({ text: text });
   console.log(JSON.stringify(decodeResult, null, 2));
 
   expect(decodeResult.decoded).toBe(true);
-  expect(decodeResult.decoder.decodeLevel).toBe('partial');
+  expect(decodeResult.decoder.decodeLevel).toBe('full');
   expect(decodeResult.decoder.name).toBe('label-h1-pos');
   expect(decodeResult.formatted.description).toBe('Position Report');
   expect(decodeResult.message.text).toBe(text);
-  expect(decodeResult.formatted.items.length).toBe(2);
-  expect(decodeResult.formatted.items[0].label).toBe('Aircraft Route');
-  expect(decodeResult.formatted.items[0].value).toBe('SCOOB > KEMPR > ECG > OHPEA > TOMMZ > OXANA > ZZTOP > OMALA > WILYY > KANUX > GALVN > KASAR > LNHOM > SLUKA > FIPEK > PUYYA > PLING > KOLAO > JETSS');
-  expect(decodeResult.formatted.items[1].label).toBe('Message Checksum');
-  expect(decodeResult.formatted.items[1].value).toBe('0xf2fc');
+  expect(decodeResult.formatted.items.length).toBe(3);
+  expect(decodeResult.formatted.items[0].label).toBe('Route Status');
+  expect(decodeResult.formatted.items[0].value).toBe('Route Filed');
+  expect(decodeResult.formatted.items[1].label).toBe('Aircraft Route');
+  expect(decodeResult.formatted.items[1].value).toBe('SCOOB > KEMPR > ECG > OHPEA > TOMMZ > OXANA > ZZTOP > OMALA > WILYY > KANUX > GALVN > KASAR > LNHOM > SLUKA > FIPEK > PUYYA > PLING > KOLAO > JETSS');
+  expect(decodeResult.formatted.items[2].label).toBe('Message Checksum');
+  expect(decodeResult.formatted.items[2].value).toBe('0xf2fc');
 
 });
 
 test('decodes Label H1 Preamble POS <invalid>', () => {
   const decoder = new MessageDecoder();
   const decoderPlugin = new Label_H1_POS(decoder);
-
-  expect(decoderPlugin.decode).toBeDefined();
-  expect(decoderPlugin.name).toBe('label-h1-pos');
-  expect(decoderPlugin.qualifiers).toBeDefined();
-  expect(decoderPlugin.qualifiers()).toEqual({
-    labels: ['H1'],
-    preambles: ['POS'],
-  });
 
   const text = 'POS Bogus message';
   const decodeResult = decoderPlugin.decode({ text: text });
@@ -299,4 +257,84 @@ test('decodes Label H1 Preamble POS <invalid>', () => {
   expect(decodeResult.decoder.name).toBe('label-h1-pos');
   expect(decodeResult.formatted.description).toBe('Position Report');
   expect(decodeResult.message.text).toBe(text);
+});
+
+test('decodes Label H1 Preamble #M1BPOS short variant', () => {
+  const decoder = new MessageDecoder();
+  const decoderPlugin = new Label_H1_POS(decoder);
+
+  // https://app.airframes.io/messages/2368445399
+  const text = '#M1BPOSN37533W096476,ROKNE,185212,330,DOSOA,190059,BUM,M50,272100,1571541'
+  const decodeResult = decoderPlugin.decode({ text: text });
+  console.log(JSON.stringify(decodeResult, null, 2));
+
+  expect(decodeResult.decoded).toBe(true);
+  expect(decodeResult.decoder.decodeLevel).toBe('partial');
+  expect(decodeResult.decoder.name).toBe('label-h1-pos');
+  expect(decodeResult.formatted.description).toBe('Position Report');
+  expect(decodeResult.formatted.items.length).toBe(5);
+  expect(decodeResult.formatted.items[0].label).toBe('Aircraft Position');
+  expect(decodeResult.formatted.items[0].value).toBe('37.533 N, 96.476 W');
+  expect(decodeResult.formatted.items[1].label).toBe('Altitude');
+  expect(decodeResult.formatted.items[1].value).toBe('33000 feet');
+  expect(decodeResult.formatted.items[2].label).toBe('Aircraft Route');
+  expect(decodeResult.formatted.items[2].value).toBe('ROKNE@18:52:12 > DOSOA@19:00:59 > BUM');
+  expect(decodeResult.formatted.items[3].label).toBe('Outside Air Temperature (C)');
+  expect(decodeResult.formatted.items[3].value).toBe('-50');
+  expect(decodeResult.formatted.items[4].label).toBe('Message Checksum');
+  expect(decodeResult.formatted.items[4].value).toBe('0x1541');
+
+  expect(decodeResult.remaining.text).toBe(',272100,157');
+});
+
+test('decodes Label H1 Preamble #M1BPOS long variant', () => {
+  const decoder = new MessageDecoder();
+  const decoderPlugin = new Label_H1_POS(decoder);
+
+  // https://app.airframes.io/messages/2366921571
+  const text = '#M1BPOSN29510W098448,RW04,140407,188,TATAR,4,140445,ALISS,M12,246048,374K,282K,1223,133,KSAT,KELP,,70,151437,415,73/PR1223,222,240,133,,44,40,252074,M22,180,P0,P0/RI:DA:KSAT:AA:KELP..TATAR:D:ALISS6:F:ALISS..FST';
+  const decodeResult = decoderPlugin.decode({ text: text });
+  console.log(JSON.stringify(decodeResult, null, 2));
+
+  expect(decodeResult.decoded).toBe(true);
+  expect(decodeResult.decoder.decodeLevel).toBe('partial');
+  expect(decodeResult.decoder.name).toBe('label-h1-pos');
+  expect(decodeResult.formatted.description).toBe('Position Report');
+  expect(decodeResult.formatted.items.length).toBe(10);
+  expect(decodeResult.formatted.items[0].label).toBe('Aircraft Position');
+  expect(decodeResult.formatted.items[0].value).toBe('29.51 N, 98.448 W');
+  expect(decodeResult.formatted.items[1].label).toBe('Runway');
+  expect(decodeResult.formatted.items[1].value).toBe('04');
+  expect(decodeResult.formatted.items[2].label).toBe('Aircraft Groundspeed');
+  expect(decodeResult.formatted.items[2].value).toBe('415');
+  expect(decodeResult.formatted.items[3].label).toBe('Altitude');
+  expect(decodeResult.formatted.items[3].value).toBe('24000 feet');
+  expect(decodeResult.formatted.items[4].label).toBe('Route Status');
+  expect(decodeResult.formatted.items[4].value).toBe('Route Inactive');
+  expect(decodeResult.formatted.items[5].label).toBe('Origin');
+  expect(decodeResult.formatted.items[5].value).toBe('KSAT');
+  expect(decodeResult.formatted.items[6].label).toBe('Destination');
+  expect(decodeResult.formatted.items[6].value).toBe('KELP..TATAR'); // should be just kelp
+  expect(decodeResult.formatted.items[7].label).toBe('Departure Procedure');
+  expect(decodeResult.formatted.items[7].value).toBe('ALISS6');
+  expect(decodeResult.formatted.items[8].label).toBe('Aircraft Route');
+  expect(decodeResult.formatted.items[8].value).toBe('ALISS >> FST');
+  expect(decodeResult.formatted.items[9].label).toBe('Aircraft Route');
+  expect(decodeResult.formatted.items[9].value).toBe('TATAR@14:04:07 > ALISS@14:04:45 > ?'); // ? should be FST
+  expect(decodeResult.remaining.text).toBe(',188,4,M12,246048,374K,282K,1223,133,,70,151437,73/PR1223,222,133,,44,40,252074,M22,180,P0');
+});
+
+test('decodes Label H1 Preamble #M1BPOS <invalid>', () => {
+  const decoder = new MessageDecoder();
+  const decoderPlugin = new Label_H1_POS(decoder);
+
+  const text = '#M1BPOS Bogus message';
+  const decodeResult = decoderPlugin.decode({ text: text });
+  console.log(JSON.stringify(decodeResult, null, 2));
+
+  expect(decodeResult.decoded).toBe(false);
+  expect(decodeResult.decoder.decodeLevel).toBe('none');
+  expect(decodeResult.decoder.name).toBe('label-h1-pos');
+  expect(decodeResult.formatted.description).toBe('Position Report');
+  expect(decodeResult.formatted.items.length).toBe(0);
 });
