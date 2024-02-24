@@ -8,7 +8,7 @@ export class Label_H1_FPN extends DecoderPlugin {
   qualifiers() { // eslint-disable-line class-methods-use-this
     return {
       labels: ["H1"],
-      preambles: ['FPN'],
+      preambles: ['FPN', '#M1BFPN'],
     };
   }
 
