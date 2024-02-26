@@ -10,7 +10,7 @@ test('Label H1 Preamble FPN decoder has right qualifiers', () => {
   expect(decoderPlugin.qualifiers).toBeDefined();
   expect(decoderPlugin.qualifiers()).toEqual({
     labels: ['H1'],
-    preambles: ['FPN'],
+    preambles: ['FPN', '#M1BFPN'],
   });
 });
 
@@ -197,6 +197,72 @@ test('decodes Label H1 Preamble FPN with SN and TS', () => {
   expect(decodeResult.formatted.items[4].value).toBe('KOLEA(22.354 N, 155.133 W) >> CLUTS(23.002 N, 154.393 W) > R465 > CINNY(36.109 N, 124.456 W) >> OAL(38.002 N, 117.462 W) > J58 > ILC(38.15 N, 114.237 W) >> EYELO(38.455 N, 110.469 W) >> SAKES(38.5 N, 110.163 W) > J80 > DBL(39.264 N, 106.537 W)');
   expect(decodeResult.formatted.items[5].label).toBe('Message Checksum');
   expect(decodeResult.formatted.items[5].value).toBe('0xf5e1');
+});
+
+
+test('decodes Label H1 Preamble #M1BFPN', () => {
+  const decoder = new MessageDecoder();
+  const decoderPlugin = new Label_H1_FPN(decoder);
+
+  // https://app.airframes.io/messages/2400593101
+  const text = '#M1BFPN/RI:DA:KJFK:AA:KPHX:CR:JFKPHX20..KG701..KG702..KP702..KP703..KD601..KD602..PUB..ALS.J102.GUP:A:EAGUL6.GUP:F:HOMRR90E1';
+  const decodeResult = decoderPlugin.decode({ text: text });
+  console.log(JSON.stringify(decodeResult, null, 2));
+
+  expect(decodeResult.decoded).toBe(true);
+  expect(decodeResult.decoder.decodeLevel).toBe('full');
+  expect(decodeResult.decoder.name).toBe('label-h1-fpn');
+  expect(decodeResult.formatted.description).toBe('Flight Plan');
+  expect(decodeResult.formatted.items.length).toBe(7);
+  expect(decodeResult.formatted.items[0].label).toBe('Route Status');
+  expect(decodeResult.formatted.items[0].value).toBe('Route Inactive');
+  expect(decodeResult.formatted.items[1].label).toBe('Origin');
+  expect(decodeResult.formatted.items[1].value).toBe('KJFK');
+  expect(decodeResult.formatted.items[2].label).toBe('Destination');
+  expect(decodeResult.formatted.items[2].value).toBe('KPHX');
+  expect(decodeResult.formatted.items[3].label).toBe('Company Route');
+  expect(decodeResult.formatted.items[3].value).toBe('JFKPHX20: >> KG701 >> KG702 >> KP702 >> KP703 >> KD601 >> KD602 >> PUB >> ALS > J102 > GUP');
+  expect(decodeResult.formatted.items[4].label).toBe('Arrival Procedure');
+  expect(decodeResult.formatted.items[4].value).toBe('EAGUL6 starting at GUP');
+  expect(decodeResult.formatted.items[5].label).toBe('Aircraft Route');
+  expect(decodeResult.formatted.items[5].value).toBe('HOMRR');
+  expect(decodeResult.formatted.items[6].label).toBe('Message Checksum');
+  expect(decodeResult.formatted.items[6].value).toBe('0x90e1');
+});
+
+
+// Does not match the preamble
+// This might move to a different parser, but while we're here...
+test('decodes Label H1 #M1BFPN No Preamble', () => {
+  const decoder = new MessageDecoder();
+  const decoderPlugin = new Label_H1_FPN(decoder);
+
+  // https://app.airframes.io/messages/2400409588
+  const text = 'F37AKL0767#M1BFPN/TS232008,022324/RP:DA:TNCA:AA:TNCB:R:11O:D:ADRI1F..IRLEP.A574..PJG:AP:RNV10(10O)/PR,,110,,183,7,13,,M7,25,,,P30,M40,36090,13,3455,300/DTTNCB,10O,119,23440847C0';
+  const decodeResult = decoderPlugin.decode({ text: text });
+  console.log(JSON.stringify(decodeResult, null, 2));
+
+  expect(decodeResult.decoded).toBe(true);
+  expect(decodeResult.decoder.decodeLevel).toBe('full'); // should be partial
+  expect(decodeResult.decoder.name).toBe('label-h1-fpn');
+  expect(decodeResult.raw.message_timestamp).toBe(1708730408);
+  expect(decodeResult.formatted.description).toBe('Flight Plan');
+  expect(decodeResult.formatted.items.length).toBe(7);
+  expect(decodeResult.formatted.items[0].label).toBe('Route Status');
+  expect(decodeResult.formatted.items[0].value).toBe('Route Planned');
+  expect(decodeResult.formatted.items[1].label).toBe('Origin');
+  expect(decodeResult.formatted.items[1].value).toBe('TNCA');
+  expect(decodeResult.formatted.items[2].label).toBe('Destination');
+  expect(decodeResult.formatted.items[2].value).toBe('TNCB');
+  expect(decodeResult.formatted.items[3].label).toBe('Runway');
+  expect(decodeResult.formatted.items[3].value).toBe('11O');
+  expect(decodeResult.formatted.items[4].label).toBe('Departure Procedure');
+  expect(decodeResult.formatted.items[4].value).toBe('ADRI1F: >> IRLEP > A574 >> PJG');
+  expect(decodeResult.formatted.items[5].label).toBe('Approach Procedure');
+  expect(decodeResult.formatted.items[5].value).toBe('RNV10(10O)/PR,,110,,183,7,13,,M7,25,,,P30,M40,36090,13,3455,300/DTTNCB,10O,119,234408'); /// TODO - Fix
+  expect(decodeResult.formatted.items[6].label).toBe('Message Checksum');
+  expect(decodeResult.formatted.items[6].value).toBe('0x47c0');
+  // expect(decodeResult.remaining.text).toBe('F37AKL0767'); // KL0767 is the flight number
 });
 
 test('decodes Label H1 Preamble FPN <invalid>', () => {
