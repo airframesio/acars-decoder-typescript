@@ -2,6 +2,8 @@ import { DateTimeUtils } from '../DateTimeUtils';
 import { DecoderPlugin } from '../DecoderPlugin';
 import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
 import { Waypoint } from '../types/waypoint';
+import { CoordinateUtils } from '../utils/coordinate_utils';
+import { FlightPlanUtils } from '../utils/flight_plan_utils';
 import { RouteUtils } from '../utils/route_utils';
 
 export class Label_H1_POS extends DecoderPlugin {
@@ -10,7 +12,7 @@ export class Label_H1_POS extends DecoderPlugin {
   qualifiers() { // eslint-disable-line class-methods-use-this
     return {
       labels: ["H1"],
-      preambles: ['POS'],
+      preambles: ['POS', '#M1BPOS'], //TODO - support data before #
     };
   }
 
@@ -22,11 +24,18 @@ export class Label_H1_POS extends DecoderPlugin {
 
     const checksum = message.text.slice(-4);
     //strip POS and checksum
-    const data = message.text.substring(3, message.text.length-4);
-    const fields = data.split(',');
-    
-    if(fields.length==1 && data.startsWith('/RF')) {
-      decodeResult.raw.route = {waypoints: data.substring(3,data.length).split('.').map((leg: string) => RouteUtils.getWaypoint(leg))};
+    const parts = message.text.replace('#M1B', '').replace('POS', '').slice(0,-4).split(',');
+    console.log(parts);
+    if(parts.length==1 && parts[0].startsWith('/RF')) {
+      // TODO - use FlightPlanUtils to parse
+      decodeResult.raw.route_status == 'RF'
+      decodeResult.formatted.items.push({
+        type: 'status',
+        code: 'ROUTE_STATUS',
+        label: 'Route Status',
+        value: 'Route Filed',
+      });
+      decodeResult.raw.route = {waypoints: parts[0].substring(3,parts[0].length).split('.').map((leg: string) => RouteUtils.getWaypoint(leg))};
       decodeResult.formatted.items.push({
         type: 'aircraft_route',
         code: 'ROUTE',
@@ -34,66 +43,77 @@ export class Label_H1_POS extends DecoderPlugin {
         value: RouteUtils.routeToString(decodeResult.raw.route),
       });
 
-      decodeResult.raw.checksum = Number("0x"+checksum);
-      decodeResult.formatted.items.push({
-        type: 'message_checksum',
-        code: 'CHECKSUM',
-        label: 'Message Checksum',
-        value: '0x' + ('0000' + decodeResult.raw.checksum.toString(16)).slice(-4),
-      });    
+      processChecksum(decodeResult, checksum);
+      decodeResult.decoded = true;
+      decodeResult.decoder.decodeLevel = 'full';
+    } else if(parts.length === 10) { // variant 4
+      decodeResult.remaining.text = ''
+      processPosition(decodeResult, parts[0]);
+      processAlt(decodeResult, parts[3]);
+      processRoute(decodeResult, parts[1], parts[2], parts[4], parts[5], parts[6]);
+      processTemp(decodeResult, parts[7]);
+      processUnknown(decodeResult, parts[8]);
+      processUnknown(decodeResult, parts[9]);
+      processChecksum(decodeResult, checksum);
       
       decodeResult.decoded = true;
-      // Once we know what RF stands for, I feel comfortable marking this full
       decodeResult.decoder.decodeLevel = 'partial';
-      decodeResult.remaining.text += 'RF'
-    } else if(fields.length>9) {
-      // idx - value
-      //   0 - position in millidegrees
-      //   1 - waypoint 1
-      //   2 - waypoint 1 valid at HHMMSS
-      //   3 - baro alititude
-      //   4 - waypoint 2
-      //   5 - waypoint 2 eta HHMMSS
-      //   6 - waypoint 3
-      //   7 - temp
-      //   8 - ?
-      //   9 - ? or variant 1 ? + /TS + valid at HHMMSS
-      //  10 - ? or variant 1 date MMDDYY or variant 2 gspd (opt)
-      //  11 - ? (opt) 
-      //  12 - ? (opt)
-      //  13 - ? (opt)
-      this.decodePositionRoute(decodeResult, options, fields);
+    } else if(parts.length === 11) { // variant 1
 
-      decodeResult.remaining.text = `${fields[2]},${fields[5]},${fields[8]}`;
+      decodeResult.remaining.text = ''
+      processPosition(decodeResult, parts[0]);
+      processAlt(decodeResult, parts[3]);
+      processRoute(decodeResult, parts[1], parts[2], parts[4], parts[5], parts[6], parts[10]);
+      processTemp(decodeResult, parts[7]);
+      processUnknown(decodeResult, parts[8]);
+      processUnknown(decodeResult, parts[9]);
+      processChecksum(decodeResult, checksum);
 
       decodeResult.decoded = true;
       decodeResult.decoder.decodeLevel = 'partial';
+    }  else if(parts.length === 14) { // variant 2
 
-      // variant 2
-      if (fields.length==14) {
-        decodeResult.raw.groundspeed = Number(fields[10]);
+      decodeResult.remaining.text = ''
+      processPosition(decodeResult, parts[0]);
+      processAlt(decodeResult, parts[3]);
+      processRoute(decodeResult, parts[1], parts[2], parts[4], parts[5], parts[6]);
+      processTemp(decodeResult, parts[7]);
+      processUnknown(decodeResult, parts[8]);
+      processUnknown(decodeResult, parts[9]);
+      processGndspd(decodeResult, parts[10]);
+      processUnknown(decodeResult, parts[11]);
+      processUnknown(decodeResult, parts[12]);
+      processUnknown(decodeResult, parts[13]);
+      processChecksum(decodeResult, checksum);
 
-        decodeResult.formatted.items.push({
-          type: 'aircraft_groundspeed',
-          code: 'GSPD',
-          label: 'Aircraft Groundspeed',
-          value: `${decodeResult.raw.groundspeed}`
-        });
+      decodeResult.decoded = true;
+      decodeResult.decoder.decodeLevel = 'partial';
+    } else if(parts.length === 32) { // #M1B long variant
+      decodeResult.remaining.text = ''
+      processPosition(decodeResult, parts[0]);
+      processRunway(decodeResult, parts[1]);
+      const time = parts[2];
+      processUnknown(decodeResult, parts[3]);
+      const past = parts[4];
+      processUnknown(decodeResult, parts[5]);
+      const eta = parts[6];
+      const next = parts[7];
+      processUnknown(decodeResult, parts.slice(8,14).join(','));
+      //processDeptApt(decodeResult, parts[14]); // in flightplan
+      //processArrvApt(decodeResult, parts[15]); // in flightplan
+      processUnknown(decodeResult, parts[16]);
+      processUnknown(decodeResult, parts[17]);
+      processUnknown(decodeResult, parts[18]);
+      processGndspd(decodeResult, parts[19],)
+      processUnknown(decodeResult, parts[20]);
+      processUnknown(decodeResult, parts[21]);
+      processAlt(decodeResult, parts[22]);
+      processUnknown(decodeResult, parts.slice(23,31).join(','));
+      const allProcessed = FlightPlanUtils.processFlightPlan(decodeResult, (parts[31]+checksum).split(':')); //checksum isnt a checksum here
+      processRoute(decodeResult, past,time, next, eta, '?'); // TODO pull `then` from flight plan
 
-        decodeResult.remaining.text += `,${fields[9]},${fields[11]},${fields[12]},${fields[13]}`;
-      } else {
-        for(let i=9; i<fields.length; ++i) {
-          decodeResult.remaining.text += `,${fields[i]}`;
-        }
-      }
-
-      decodeResult.raw.checksum = Number("0x"+checksum);
-      decodeResult.formatted.items.push({
-        type: 'message_checksum',
-        code: 'CHECKSUM',
-        label: 'Message Checksum',
-        value: '0x' + ('0000' + decodeResult.raw.checksum.toString(16)).slice(-4),
-      });    
+      decodeResult.decoded = true;
+      decodeResult.decoder.decodeLevel = 'partial';
     } else {
       // Unknown
       if (options.debug) {
@@ -106,72 +126,108 @@ export class Label_H1_POS extends DecoderPlugin {
 
 	  return decodeResult;
   }
-
-  private decodePositionRoute(decodeResult: any, options: any,  fields: string[]) {
-    if (options.debug) {
-      console.log(`Label 16 N : results`);
-      console.log(fields);
-    }
-    
-    //N12345W012345
-    const position = fields[0];
-
-    decodeResult.raw.latitude_direction = position.charAt(0);
-    decodeResult.raw.latitude = Number(position.substring(1,6))/1000;
-    decodeResult.raw.longitude_direction = position.charAt(6);
-    decodeResult.raw.longitude = Number(position.substring(7))/1000;
-
-    decodeResult.raw.position = {
-      latitudeDirection: decodeResult.raw.latitude_direction,
-      latitude: decodeResult.raw.latitude * (decodeResult.raw.latitude_direction === 'S' ? -1 : 1),
-      longitudeDirection: decodeResult.raw.longitude_direction,
-      longitude: decodeResult.raw.longitude * (decodeResult.raw.longitude_direction === 'W' ? -1 : 1),
-    };
-
-    let waypoints : Waypoint[];
-    if(fields.length == 11) {//variant 1
-      waypoints = [{name: fields[1] || '?,', time: DateTimeUtils.convertDateTimeToEpoch(fields[2], fields[10]), timeFormat: 'epoch'}, 
-                   {name: fields[4] || '?', time: DateTimeUtils.convertDateTimeToEpoch(fields[5], fields[10]), timeFormat: 'epoch'}, 
-                   {name: fields[6] || '?'}]
-    } else {
-      waypoints = [{name: fields[1] || '?,', time: DateTimeUtils.convertHHMMSSToTod(fields[2]), timeFormat: 'tod'}, 
-                   {name: fields[4] || '?', time: DateTimeUtils.convertHHMMSSToTod(fields[5]), timeFormat: 'tod'}, 
-                   {name: fields[6] || '?'}];
-    }
-    decodeResult.raw.route = {waypoints: waypoints};
-    decodeResult.raw.outside_air_temperature = Number(fields[7].substring(1)) * (fields[7].charAt(0) === 'M' ? -1 : 1);
-
-    decodeResult.formatted.items.push({
-      type: 'aircraft_position',
-      code: 'POS',
-      label: 'Aircraft Position',
-      value: `${decodeResult.raw.latitude} ${decodeResult.raw.latitude_direction}, ${decodeResult.raw.longitude} ${decodeResult.raw.longitude_direction}`,
-    });
-
-    decodeResult.raw.altitude = Number(fields[3])*100;
-    decodeResult.formatted.items.push({
-      type: 'altitude',
-      code: 'ALT',
-      label: 'Altitude',
-      value: `${decodeResult.raw.altitude} feet`,
-    });
-
-    decodeResult.formatted.items.push({
-      type: 'aircraft_route',
-      code: 'ROUTE',
-      label: 'Aircraft Route',
-      value: RouteUtils.routeToString(decodeResult.raw.route),
-    });
-
-    decodeResult.formatted.items.push({
-      type: 'outside_air_temperature',
-      code: 'OATEMP',
-      label: 'Outside Air Temperature (C)',
-      value: `${decodeResult.raw.outside_air_temperature}`,
-    });
-
-    return decodeResult;
-  }
 }
 
 export default {};
+
+function processUnknown(decodeResult: any, value: string) {
+  decodeResult.remaining.text += ',' + value;
+}
+
+function processPosition(decodeResult: any, value: string) {
+  const position = CoordinateUtils.decodeStringCoordinates(value);
+  decodeResult.raw.latitude_direction = position.latitudeDirection;
+  decodeResult.raw.latitude = Math.abs(position.latitude);
+  decodeResult.raw.longitude_direction = position.longitudeDirection;
+  decodeResult.raw.longitude = Math.abs(position.longitude);
+  decodeResult.formatted.items.push({
+     type: 'aircraft_position',
+     code: 'POS' ,
+     label: 'Aircraft Position',
+     value: CoordinateUtils.coordinateString(position),
+   });
+}
+function processAlt(decodeResult: any, value: string) {
+  decodeResult.raw.altitude = Number(value)*100;
+  decodeResult.formatted.items.push({
+    type: 'altitude',
+    code: 'ALT',
+    label: 'Altitude',
+    value: `${decodeResult.raw.altitude} feet`,
+  });
+}
+function processTemp(decodeResult: any, value: string) {
+  decodeResult.raw.outside_air_temperature = Number(value.substring(1)) * (value.charAt(0) === 'M' ? -1 : 1);
+  decodeResult.formatted.items.push({
+    type: 'outside_air_temperature',
+    code: 'OATEMP',
+    label: 'Outside Air Temperature (C)',
+    value: `${decodeResult.raw.outside_air_temperature}`,
+  });
+}
+
+function processRunway(decodeResult: any, value: string) {
+  decodeResult.raw.runway = value.replace('RW', '');
+  decodeResult.formatted.items.push({
+    type: 'runway',
+    label: 'Runway',
+    value: decodeResult.raw.runway,
+  });
+};
+
+function processDeptApt(decodeResult: any, value: string) {
+  decodeResult.raw.departure_icao = value;
+  decodeResult.formatted.items.push({
+    type: 'origin',
+    code: 'ORG',
+    label: 'Origin',
+    value: decodeResult.raw.departure_icao,
+  });
+};
+
+function processArrvApt(decodeResult: any, value: string) {
+  decodeResult.raw.arrival_icao = value;
+  decodeResult.formatted.items.push({
+    type: 'destination',
+    code: 'DST',
+    label: 'Destination',
+    value: decodeResult.raw.arrival_icao,
+  });
+};
+
+function processGndspd(decodeResult: any, value: string) {
+  decodeResult.raw.groundspeed = Number(value);
+  decodeResult.formatted.items.push({
+    type: 'aircraft_groundspeed',
+    code: 'GSPD',
+    label: 'Aircraft Groundspeed',
+    value: `${decodeResult.raw.groundspeed}`
+  });
+}
+
+function processRoute(decodeResult: any, last: string, time: string, next: string, eta: string, then: string, date?: string) {
+  let waypoints : Waypoint[];
+  waypoints = date===undefined ? [{name: last || '?,', time: DateTimeUtils.convertHHMMSSToTod(time), timeFormat: 'tod'}, 
+                                  {name: next || '?', time:  DateTimeUtils.convertHHMMSSToTod(eta), timeFormat: 'tod'}, 
+                                  {name: then || '?'}]
+                               : [{name: last || '?,', time: DateTimeUtils.convertDateTimeToEpoch(time, date), timeFormat: 'epoch'}, 
+                                  {name: next || '?', time:  DateTimeUtils.convertDateTimeToEpoch(eta, date), timeFormat: 'epoch'}, 
+                                  {name: then || '?'}];
+  decodeResult.raw.route = {waypoints: waypoints};
+  decodeResult.formatted.items.push({
+    type: 'aircraft_route',
+    code: 'ROUTE',
+    label: 'Aircraft Route',
+    value: RouteUtils.routeToString(decodeResult.raw.route),
+  });
+}
+
+function processChecksum(decodeResult: any, value: string) {
+  decodeResult.raw.checksum = Number("0x"+value);
+  decodeResult.formatted.items.push({
+    type: 'message_checksum',
+    code: 'CHECKSUM',
+    label: 'Message Checksum',
+    value: '0x' + ('0000' + decodeResult.raw.checksum.toString(16)).slice(-4),
+  });    
+}

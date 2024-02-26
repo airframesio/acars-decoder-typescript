@@ -16,7 +16,6 @@ export * from './Label_8E';
 export * from './Label_B6';
 export * from './Label_ColonComma';
 export * from './Label_H1_FPN';
-export * from './Label_H1_M1BPOS';
 export * from './Label_H1_PRG';
 export * from './Label_H1_POS';
 export * from './Label_SQ';
