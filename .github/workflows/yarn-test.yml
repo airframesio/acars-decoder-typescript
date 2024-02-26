@@ -14,13 +14,15 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [18.x]
+        # build against all active LTS and latest node
+        node-version: [18.x, 20.x, latest]
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v1
+      uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
+        cache: yarn
     - run: yarn install
     - run: yarn test
