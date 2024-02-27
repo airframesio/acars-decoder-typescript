@@ -3232,10 +3232,10 @@ type-fest@^0.21.3:
   resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-0.21.3.tgz#d260a24b0198436e133fa26a524a6d65fa3b2e37"
   integrity sha512-t0rzBq87m3fVcduHDUFhKmyyX+9eo6WQjZvf51Ea/M0Q7+T374Jp1aUiyUl0GKxp8M/OETVHSDvmkyPgvX+X2w==
 
-typescript@^4.9.0-dev.20220830:
-  version "4.9.0-dev.20220830"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.9.0-dev.20220830.tgz#254c9068b7186708e09d9069d7c0ee3ae4e0d00f"
-  integrity sha512-DVMaPFszCw9wFZcTYcFiksny0rUttUJpIvtwCD3ynKYepnX1OCTHwLwsAGtETxi6AuutJ5pSRn2LoAILjzYwvw==
+typescript@^5.3.3:
+  version "5.3.3"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-5.3.3.tgz#b3ce6ba258e72e6305ba66f5c9b452aaee3ffe37"
+  integrity sha512-pXWcraxM0uxAS+tN0AG/BF2TyqmHO014Z070UsJ+pFvYuRSq8KH8DmWpnbXe0pEPDHXZV3FcAbJkijJ5oNEnWw==
 
 underscore@^1.9.1:
   version "1.13.6"
