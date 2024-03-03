@@ -168,8 +168,10 @@ export class Label_80 extends DecoderPlugin {
 	      // don't use decodeStringCoordinates because of different position format
 	      const posRegex = /^(?<latd>[NS])(?<lat>.+)(?<lngd>[EW])(?<lng>.+)/;
               const posResult = match.groups.value.match(posRegex);
-              const latitude = (Number(posResult.groups.lat) / 100) * (posResult.groups.lngd === 'S' ? -1 : 1);
-              const longitude = (Number(posResult.groups.lng) / 100) * (posResult.groups.lngd === 'W' ? -1 : 1);
+              const lat = Number(posResult.groups.lat) * (posResult.groups.lngd === 'S' ? -1 : 1);
+              const lon = Number(posResult.groups.lng) * (posResult.groups.lngd === 'W' ? -1 : 1);
+              const latitude = Number.isInteger(lat) ? lat/1000 : lat/100;
+              const longitude = Number.isInteger(lon) ? lon/1000 : lon/100;
               decodeResult.raw.aircraft_position = {
                 latitude,
                 longitude,
