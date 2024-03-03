@@ -32,9 +32,7 @@ export class Label_15_FST extends DecoderPlugin {
     decodeResult.raw.position = {};
 
     if ((firstChar === 'N' || firstChar === 'S') && (middleChar === 'W' || middleChar === 'E')) {
-      decodeResult.raw.position.latitudeDirection = firstChar;
       decodeResult.raw.position.latitude = (Number(stringCoords.substring(1, 7)) / 10000) * (firstChar === 'S' ? -1 : 1);
-      decodeResult.raw.position.longitudeDirection = middleChar;
       decodeResult.raw.position.longitude = (Number(stringCoords.substring(8, 26)) / 100000) * (middleChar === 'W' ? -1 : 1);
      } else {
     	decodeResult.decoded = false;
