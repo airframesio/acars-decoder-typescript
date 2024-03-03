@@ -172,9 +172,9 @@ export class Label_80 extends DecoderPlugin {
               const lon = Number(posResult.groups.lng) * (posResult.groups.lngd === 'W' ? -1 : 1);
               const latitude = Number.isInteger(lat) ? lat/1000 : lat/100;
               const longitude = Number.isInteger(lon) ? lon/1000 : lon/100;
-              decodeResult.raw.aircraft_position = {
-                latitude,
-                longitude,
+              decodeResult.raw.position = {
+                latitude: latitude,
+                longitude: longitude,
               };
               decodeResult.formatted.items.push({
                type: 'position',
