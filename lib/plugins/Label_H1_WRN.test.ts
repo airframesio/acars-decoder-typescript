@@ -133,7 +133,6 @@ test('decodes Label H1 Preamble WRN invalid', () => {
   const decoder = new MessageDecoder();
   const decoderPlugin = new Label_H1_WRN(decoder);
 
-  // https://app.airframes.io/messages/2435520576
   const text = 'WRN <Invalid text>';
   const decodeResult = decoderPlugin.decode({ text: text });
   console.log(JSON.stringify(decodeResult, null, 2));
