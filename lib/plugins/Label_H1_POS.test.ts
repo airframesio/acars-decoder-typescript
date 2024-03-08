@@ -331,7 +331,7 @@ test('decodes Label H1 Preamble POS variant 6', () => {
   expect(decodeResult.formatted.items[0].label).toBe('Aircraft Position');
   expect(decodeResult.formatted.items[0].value).toBe('39.277 N, 77.359 W');
   expect(decodeResult.formatted.items[1].label).toBe('Aircraft Route');
-  expect(decodeResult.formatted.items[1].value).toBe('(39.3 N, 77.11 W)@2024-03-03T14:28:00Z > (38.56 N, 77.15 W)@2024-03-03T03:14:30Z > ?');
+  expect(decodeResult.formatted.items[1].value).toBe('(39.300 N, 77.110 W)@2024-03-03T14:28:00Z > (38.560 N, 77.150 W)@2024-03-03T03:14:30Z > ?');
   expect(decodeResult.formatted.items[2].label).toBe('Altitude');
   expect(decodeResult.formatted.items[2].value).toBe('24000 feet');
   expect(decodeResult.formatted.items[3].label).toBe('Outside Air Temperature (C)');
@@ -356,7 +356,7 @@ test('decodes Label H1 Preamble #M1BPOS variant 6', () => {
   expect(decodeResult.formatted.description).toBe('Position Report');
   expect(decodeResult.formatted.items.length).toBe(5);
   expect(decodeResult.formatted.items[0].label).toBe('Aircraft Position');
-  expect(decodeResult.formatted.items[0].value).toBe('42.579 N, 108.09 W');
+  expect(decodeResult.formatted.items[0].value).toBe('42.579 N, 108.090 W');
   expect(decodeResult.formatted.items[1].label).toBe('Aircraft Route');
   expect(decodeResult.formatted.items[1].value).toBe('WAIDE@2024-03-03T17:32:07Z > WEDAK@2024-03-03T03:17:59Z > ?');
   expect(decodeResult.formatted.items[2].label).toBe('Altitude');
