@@ -1,5 +1,6 @@
 import { DecoderPlugin } from '../DecoderPlugin';
 import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
+import { CoordinateUtils } from '../utils/coordinate_utils';
 
 // Airline Defined
 // 3N01 POSRPT
@@ -171,15 +172,15 @@ export class Label_80 extends DecoderPlugin {
               const lon = Number(posResult.groups.lng) * (posResult.groups.lngd === 'W' ? -1 : 1);
               const latitude = Number.isInteger(lat) ? lat/1000 : lat/100;
               const longitude = Number.isInteger(lon) ? lon/1000 : lon/100;
-              decodeResult.raw.aircraft_position = {
-                latitude,
-                longitude,
+              decodeResult.raw.position = {
+                latitude: latitude,
+                longitude: longitude,
               };
               decodeResult.formatted.items.push({
                type: 'position',
                code: 'POS' ,
                label: 'Position',
-               value: `${Math.abs(latitude).toPrecision(5)} ${posResult.groups.latd}, ${Math.abs(longitude).toPrecision(5)} ${posResult.groups.lngd}`,
+               value: CoordinateUtils.coordinateString(decodeResult.raw.position),
               });
               break;
             }

@@ -1,15 +1,19 @@
 {
   "name": "@airframes/acars-decoder",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "description": "ACARS Message Decoder for TypeScript/JavaScript",
-  "main": "index.js",
-  "types": "index.d.ts",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "bin": {
     "acars-decoder": "./dist/bin/acars-decoder.js",
     "acars-decoder-test": "./dist/bin/acars-decoder-test.js"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsup",
     "test": "jest"
   },
   "repository": {
@@ -35,6 +39,7 @@
     "jest": "^28.1.3",
     "ts-jest": "^28.0.8",
     "ts-node": "^10.9.1",
+    "tsup": "^8.0.2",
     "typescript": "^5.3.3"
   }
 }

@@ -1,5 +1,6 @@
 import { DecoderPlugin } from '../DecoderPlugin';
 import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
+import { CoordinateUtils } from '../utils/coordinate_utils';
 
 export class Label_16_N_Space extends DecoderPlugin {
   name = 'label-16-n-space';
@@ -30,17 +31,17 @@ export class Label_16_N_Space extends DecoderPlugin {
         console.log(results);
       }
 
-      decodeResult.raw.latitude_direction = results.groups.lat;
-      decodeResult.raw.latitude = Number(results.groups.lat_coord);
-      decodeResult.raw.longitude_direction = results.groups.long;
-      decodeResult.raw.longitude = Number(results.groups.long_coord);
+      decodeResult.raw.position = {
+        latitude: Number(results.groups.lat_coord) * (results.groups.lat == 'N' ? 1 : -1),
+       longitude: Number(results.groups.long_coord) * (results.groups.long == 'E' ? 1 : -1),
+      };
       decodeResult.raw.flight_level = results.groups.alt == 'GRD' || results.groups.alt == '***' ? '0' : Number(results.groups.alt);
 
       decodeResult.formatted.items.push({
         type: 'aircraft_position',
         code: 'POS',
         label: 'Aircraft Position',
-        value: `${decodeResult.raw.latitude} ${decodeResult.raw.latitude_direction}, ${decodeResult.raw.longitude} ${decodeResult.raw.longitude_direction}`,
+        value: CoordinateUtils.coordinateString(decodeResult.raw.position),
       });
 
       decodeResult.formatted.items.push({
@@ -60,16 +61,16 @@ export class Label_16_N_Space extends DecoderPlugin {
         console.log(results);
       }
 
-      decodeResult.raw.latitude_direction = results.groups.lat;
-      decodeResult.raw.latitude = Number(results.groups.lat_coord);
-      decodeResult.raw.longitude_direction = results.groups.long;
-      decodeResult.raw.longitude = Number(results.groups.long_coord);
-
+      decodeResult.raw.position = {
+        latitude: Number(results.groups.lat_coord) * (results.groups.lat == 'N' ? 1 : -1),
+        longitude:  Number(results.groups.long_coord) * (results.groups.long == 'E' ? 1 : -1)
+      };
+      
       decodeResult.formatted.items.push({
         type: 'aircraft_position',
         code: 'POS',
         label: 'Aircraft Position',
-        value: `${results.groups.lat_coord} ${decodeResult.raw.latitude_direction}, ${results.groups.long_coord} ${decodeResult.raw.longitude_direction}`,
+        value: CoordinateUtils.coordinateString(decodeResult.raw.position),
       });
 
       decodeResult.decoded = true;

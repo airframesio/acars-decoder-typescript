@@ -29,7 +29,7 @@ export class RouteUtils {
     public static waypointToString(waypoint: Waypoint): string {
         let s = waypoint.name;
         if(waypoint.latitude && waypoint.longitude) {
-            s += `(${CoordinateUtils.latLonToCoordinateString(waypoint.latitude, waypoint.longitude)})`;
+            s += `(${CoordinateUtils.coordinateString({latitude:waypoint.latitude, longitude: waypoint.longitude})})`;
         }
         if(waypoint.time && waypoint.timeFormat) {
             s +=`@${RouteUtils.timestampToString(waypoint.time, waypoint.timeFormat)}`;
@@ -40,12 +40,16 @@ export class RouteUtils {
     public static getWaypoint(leg: string): Waypoint {
         const waypoint = leg.split(',');
         if(waypoint.length ==2) {
-        const position = CoordinateUtils.decodeStringCoordinates(waypoint[1]);
-        return {name: waypoint[0], latitude: position.latitude, longitude: position.longitude};
+            const position = CoordinateUtils.decodeStringCoordinates(waypoint[1]);
+            if(position) {
+                return {name: waypoint[0], latitude: position.latitude, longitude: position.longitude};
+            }
         }
         if(leg.length == 14) { //looks like coordinates
-        const position = CoordinateUtils.decodeStringCoordinates(leg);
-        return {name: waypoint[0], latitude: position.latitude, longitude: position.longitude};
+            const position = CoordinateUtils.decodeStringCoordinates(leg);
+            if(position) {
+                return {name: waypoint[0], latitude: position.latitude, longitude: position.longitude};
+            }
         }
         return {name: leg};
     }

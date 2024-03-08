@@ -22,10 +22,8 @@ test('decodes Label 12 variant 1', () => {
   expect(decodeResult.decoder.name).toBe('label-12-n-space');
   expect(decodeResult.formatted.description).toBe('Position Report');
   expect(decodeResult.message.text).toBe(text);
-  expect(decodeResult.raw.latitude_direction).toBe('N');
-  expect(decodeResult.raw.latitude).toBe(42.150);
-  expect(decodeResult.raw.longitude_direction).toBe('W');
-  expect(decodeResult.raw.longitude).toBe(121.187);
+  expect(decodeResult.raw.position.latitude).toBe(42.150);
+  expect(decodeResult.raw.position.longitude).toBe(-121.187);
   expect(decodeResult.raw.flight_level).toBe(39000);
   expect(decodeResult.formatted.items.length).toBe(2);
   expect(decodeResult.formatted.items[0].type).toBe('aircraft_position');
@@ -59,10 +57,8 @@ test('decodes Label 12 variant 2', () => {
   expect(decodeResult.decoder.name).toBe('label-12-n-space');
   expect(decodeResult.formatted.description).toBe('Position Report');
   expect(decodeResult.message.text).toBe(text);
-  expect(decodeResult.raw.latitude_direction).toBe('N');
-  expect(decodeResult.raw.latitude).toBe(28.371);
-  expect(decodeResult.raw.longitude_direction).toBe('W');
-  expect(decodeResult.raw.longitude).toBe(80.458);
+  expect(decodeResult.raw.position.latitude).toBe(28.371);
+  expect(decodeResult.raw.position.longitude).toBe(-80.458);
   expect(decodeResult.raw.flight_level).toBe(38000);
   expect(decodeResult.formatted.items.length).toBe(2);
   expect(decodeResult.formatted.items[0].type).toBe('aircraft_position');
