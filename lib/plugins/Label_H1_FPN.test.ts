@@ -78,7 +78,7 @@ test('decodes Label H1 Preamble FPN full flight', () => {
   expect(decodeResult.formatted.items[6].label).toBe('Arrival Procedure');
   expect(decodeResult.formatted.items[6].value).toBe('EAGUL6 starting at ZUN');
   expect(decodeResult.formatted.items[7].label).toBe('Approach Procedure');
-  expect(decodeResult.formatted.items[7].value).toBe('ILS26: >> AIR(40.01 N, 80.49 W) > J110 > BOWRR >> VLA(39.056 N, 89.097 W) >> STL(38.516 N, 90.289 W) >> GIBSN(38.43 N, 92.244 W) >> TYGER(38.41 N, 94.05 W) >> GCK(37.551 N, 100.435 W) >> DIXAN(36.169 N, 105.573 W) >> ZUN(34.579 N, 109.093 W)');
+  expect(decodeResult.formatted.items[7].value).toBe('ILS26: >> AIR(40.010 N, 80.490 W) > J110 > BOWRR >> VLA(39.056 N, 89.097 W) >> STL(38.516 N, 90.289 W) >> GIBSN(38.430 N, 92.244 W) >> TYGER(38.410 N, 94.050 W) >> GCK(37.551 N, 100.435 W) >> DIXAN(36.169 N, 105.573 W) >> ZUN(34.579 N, 109.093 W)');
   expect(decodeResult.formatted.items[8].label).toBe('Message Checksum');
   expect(decodeResult.formatted.items[8].value).toBe('0x293b');
 });
@@ -105,7 +105,7 @@ test('decodes Label H1 Preamble FPN in-flight', () => {
   expect(decodeResult.formatted.items[2].label).toBe('Destination');
   expect(decodeResult.formatted.items[2].value).toBe('KPHX');
   expect(decodeResult.formatted.items[3].label).toBe('Aircraft Route');
-  expect(decodeResult.formatted.items[3].value).toBe('KAYEX(36.292 N, 120.569 W) >> LOSHN(35.509 N, 120 W) >> BOILE(34.253 N, 118.016 W) >> BLH(33.358 N, 114.457 W)');
+  expect(decodeResult.formatted.items[3].value).toBe('KAYEX(36.292 N, 120.569 W) >> LOSHN(35.509 N, 120.000 W) >> BOILE(34.253 N, 118.016 W) >> BLH(33.358 N, 114.457 W)');
   expect(decodeResult.formatted.items[4].label).toBe('Message Checksum');
   expect(decodeResult.formatted.items[4].value).toBe('0xddfb');
 });
@@ -194,7 +194,7 @@ test('decodes Label H1 Preamble FPN with SN and TS', () => {
   expect(decodeResult.formatted.items[3].label).toBe('Departure Procedure');
   expect(decodeResult.formatted.items[3].value).toBe('MKK5 starting at KOLEA');
   expect(decodeResult.formatted.items[4].label).toBe('Aircraft Route');
-  expect(decodeResult.formatted.items[4].value).toBe('KOLEA(22.354 N, 155.133 W) >> CLUTS(23.002 N, 154.393 W) > R465 > CINNY(36.109 N, 124.456 W) >> OAL(38.002 N, 117.462 W) > J58 > ILC(38.15 N, 114.237 W) >> EYELO(38.455 N, 110.469 W) >> SAKES(38.5 N, 110.163 W) > J80 > DBL(39.264 N, 106.537 W)');
+  expect(decodeResult.formatted.items[4].value).toBe('KOLEA(22.354 N, 155.133 W) >> CLUTS(23.002 N, 154.393 W) > R465 > CINNY(36.109 N, 124.456 W) >> OAL(38.002 N, 117.462 W) > J58 > ILC(38.150 N, 114.237 W) >> EYELO(38.455 N, 110.469 W) >> SAKES(38.500 N, 110.163 W) > J80 > DBL(39.264 N, 106.537 W)');
   expect(decodeResult.formatted.items[5].label).toBe('Message Checksum');
   expect(decodeResult.formatted.items[5].value).toBe('0xf5e1');
 });

@@ -136,16 +136,15 @@ function processUnknown(decodeResult: any, value: string) {
 
 function processPosition(decodeResult: any, value: string) {
   const position = CoordinateUtils.decodeStringCoordinates(value);
-  decodeResult.raw.latitude_direction = position.latitudeDirection;
-  decodeResult.raw.latitude = Math.abs(position.latitude);
-  decodeResult.raw.longitude_direction = position.longitudeDirection;
-  decodeResult.raw.longitude = Math.abs(position.longitude);
-  decodeResult.formatted.items.push({
-     type: 'aircraft_position',
-     code: 'POS' ,
-     label: 'Aircraft Position',
-     value: CoordinateUtils.coordinateString(position),
-   });
+  if(position) {
+    decodeResult.raw.position = position
+    decodeResult.formatted.items.push({
+      type: 'aircraft_position',
+      code: 'POS' ,
+      label: 'Aircraft Position',
+      value: CoordinateUtils.coordinateString(position),
+    });
+  }
 }
 function processAlt(decodeResult: any, value: string) {
   decodeResult.raw.altitude = Number(value)*100;

@@ -22,10 +22,8 @@ test('decodes Label 16 variant 1', () => {
   expect(decodeResult.decoder.name).toBe('label-16-n-space');
   expect(decodeResult.formatted.description).toBe('Position Report');
   expect(decodeResult.message.text).toBe(text);
-  expect(decodeResult.raw.latitude_direction).toBe('N');
-  expect(decodeResult.raw.latitude).toBe(44.203);
-  expect(decodeResult.raw.longitude_direction).toBe('W');
-  expect(decodeResult.raw.longitude).toBe(86.546);
+  expect(decodeResult.raw.position.latitude).toBe(44.203);
+  expect(decodeResult.raw.position.longitude).toBe(-86.546);
   expect(decodeResult.raw.flight_level).toBe(31965);
   expect(decodeResult.formatted.items.length).toBe(2);
   expect(decodeResult.formatted.items[0].type).toBe('aircraft_position');
@@ -59,10 +57,8 @@ test('decodes Label 16 variant 2', () => {
   expect(decodeResult.decoder.name).toBe('label-16-n-space');
   expect(decodeResult.formatted.description).toBe('Position Report');
   expect(decodeResult.message.text).toBe(text);
-  expect(decodeResult.raw.latitude_direction).toBe('N');
-  expect(decodeResult.raw.latitude).toBe(28.177);
-  expect(decodeResult.raw.longitude_direction).toBe('W');
-  expect(decodeResult.raw.longitude).toBe(96.055);
+  expect(decodeResult.raw.position.latitude).toBe(28.177);
+  expect(decodeResult.raw.position.longitude).toBe(-96.055);
   expect(decodeResult.formatted.items.length).toBe(1);
   expect(decodeResult.formatted.items[0].type).toBe('aircraft_position');
   expect(decodeResult.formatted.items[0].code).toBe('POS');
@@ -91,10 +87,8 @@ test('decodes Label 16 variant 3', () => {
   expect(decodeResult.decoder.name).toBe('label-16-n-space');
   expect(decodeResult.formatted.description).toBe('Position Report');
   expect(decodeResult.message.text).toBe(text);
-  expect(decodeResult.raw.latitude_direction).toBe('N');
-  expect(decodeResult.raw.latitude).toBe(44.988);
-  expect(decodeResult.raw.longitude_direction).toBe('W');
-  expect(decodeResult.raw.longitude).toBe(121.644);
+  expect(decodeResult.raw.position.latitude).toBe(44.988);
+  expect(decodeResult.raw.position.longitude).toBe(-121.644);
   expect(decodeResult.raw.flight_level).toBe(35940);
   expect(decodeResult.formatted.items.length).toBe(2);
   expect(decodeResult.formatted.items[0].type).toBe('aircraft_position');

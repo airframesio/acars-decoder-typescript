@@ -1,5 +1,5 @@
 export class CoordinateUtils {
-  public static decodeStringCoordinates(stringCoords: String) : any { // eslint-disable-line class-methods-use-this
+  public static decodeStringCoordinates(stringCoords: String) : {latitude: number, longitude: number} | undefined{ // eslint-disable-line class-methods-use-this
     var results : any = {};
     // format: N12345W123456 or N12345 W123456
     const firstChar = stringCoords.substring(0, 1);
@@ -10,9 +10,7 @@ export class CoordinateUtils {
       longitudeChars = stringCoords.substring(8, 14);
     }
     if ((firstChar === 'N' || firstChar === 'S') && (middleChar === 'W' || middleChar === 'E')) {
-      results.latitudeDirection = firstChar;
       results.latitude = (Number(stringCoords.substring(1, 6)) / 1000) * (firstChar === 'S' ? -1 : 1);
-      results.longitudeDirection = middleChar;
       results.longitude = (Number(longitudeChars) / 1000) * (middleChar === 'W' ? -1 : 1);
     } else {
       return;
@@ -21,13 +19,9 @@ export class CoordinateUtils {
     return results;
   }
 
-  public static coordinateString(coords: any) : String {
-    return `${Math.abs(coords.latitude)} ${coords.latitudeDirection}, ${Math.abs(coords.longitude)} ${coords.longitudeDirection}`;
-  }
-  
-  public static latLonToCoordinateString(lat: number, lon: number) : String {
-    const latDir = lat > 0 ? 'N' : 'S';
-    const lonDir = lon > 0 ? 'E' : 'W';
-    return `${Math.abs(lat)} ${latDir}, ${Math.abs(lon)} ${lonDir}`;
+  public static coordinateString(coords: {latitude: number, longitude: number}) : String {
+    const latDir = coords.latitude > 0 ? 'N' : 'S';
+    const lonDir = coords.longitude > 0 ? 'E' : 'W';
+    return `${Math.abs(coords.latitude).toFixed(3)} ${latDir}, ${Math.abs(coords.longitude).toFixed(3)} ${lonDir}`;
   }
 }

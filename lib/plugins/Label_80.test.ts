@@ -27,8 +27,8 @@ test('decodes Label 80 variant 1', () => {
   expect(decodeResult.decoder.decodeLevel).toBe('none'); //FIXME: full
   expect(decodeResult.decoder.name).toBe('label-80');
   expect(decodeResult.formatted.description).toBe('Airline Defined Position Report');
-  expect(decodeResult.raw.aircraft_position.latitude).toBe(29.395);
-  expect(decodeResult.raw.aircraft_position.longitude).toBe(-95.133);
+  expect(decodeResult.raw.position.latitude).toBe(29.395);
+  expect(decodeResult.raw.position.longitude).toBe(-95.133);
   expect(decodeResult.raw.altitude).toBe('+15608');
   expect(decodeResult.formatted.items.length).toBe(8);
   expect(decodeResult.formatted.items[0].type).toBe('origin');
@@ -76,8 +76,8 @@ test('decodes Label 80 variant 2', () => {
   expect(decodeResult.decoder.decodeLevel).toBe('none'); //FIXME: full
   expect(decodeResult.decoder.name).toBe('label-80');
   expect(decodeResult.formatted.description).toBe('Airline Defined Position Report');
-  expect(decodeResult.raw.aircraft_position.latitude).toBe(35.391999999999996); // FIXME?: 35.392
-  expect(decodeResult.raw.aircraft_position.longitude).toBe(-79.372);
+  expect(decodeResult.raw.position.latitude).toBe(35.391999999999996); // FIXME?: 35.392
+  expect(decodeResult.raw.position.longitude).toBe(-79.372);
   expect(decodeResult.formatted.items.length).toBe(16);
   expect(decodeResult.formatted.items[0].type).toBe('origin');
   expect(decodeResult.formatted.items[0].code).toBe('ORG');
