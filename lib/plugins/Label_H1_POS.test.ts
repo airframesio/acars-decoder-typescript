@@ -314,6 +314,60 @@ test('decodes Label H1 Preamble #M1BPOS long variant', () => {
   expect(decodeResult.remaining.text).toBe(',188,4,M12,246048,374K,282K,1223,133,,70,151437,73/PR1223,222,133,,44,40,252074,M22,180,P0');
 });
 
+test('decodes Label H1 Preamble POS variant 6', () => {
+  const decoder = new MessageDecoder();
+  const decoderPlugin = new Label_H1_POS(decoder);
+
+  // https://app.airframes.io/messages/2434848463
+  const text = 'POS/ID91459S,BANKR31,/DC03032024,142813/MR64,0/ET31539/PSN39277W077359,142800,240,N39300W077110,031430,N38560W077150,M28,27619,MT370/CG311,160,350/FB732/VR329071';
+  const decodeResult = decoderPlugin.decode({ text: text });
+  console.log(JSON.stringify(decodeResult, null, 2));
+
+  expect(decodeResult.decoded).toBe(true);
+  expect(decodeResult.decoder.decodeLevel).toBe('partial');
+  expect(decodeResult.decoder.name).toBe('label-h1-pos');
+  expect(decodeResult.formatted.description).toBe('Position Report');
+  expect(decodeResult.formatted.items.length).toBe(5);
+  expect(decodeResult.formatted.items[0].label).toBe('Aircraft Position');
+  expect(decodeResult.formatted.items[0].value).toBe('39.277 N, 77.359 W');
+  expect(decodeResult.formatted.items[1].label).toBe('Aircraft Route');
+  expect(decodeResult.formatted.items[1].value).toBe('(39.300 N, 77.110 W)@2024-03-03T14:28:00Z > (38.560 N, 77.150 W)@2024-03-03T03:14:30Z > ?');
+  expect(decodeResult.formatted.items[2].label).toBe('Altitude');
+  expect(decodeResult.formatted.items[2].value).toBe('24000 feet');
+  expect(decodeResult.formatted.items[3].label).toBe('Outside Air Temperature (C)');
+  expect(decodeResult.formatted.items[3].value).toBe('-28');
+  expect(decodeResult.formatted.items[4].label).toBe('Message Checksum');
+  expect(decodeResult.formatted.items[4].value).toBe('0x9071');
+  expect(decodeResult.remaining.text).toBe(',/ID91459S,BANKR31,142813/MR64,0,/ET31539,27619,MT370/CG311,160,350/FB732/VR32');
+});
+
+test('decodes Label H1 Preamble #M1BPOS variant 6', () => {
+  const decoder = new MessageDecoder();
+  const decoderPlugin = new Label_H1_POS(decoder);
+
+  // https://app.airframes.io/messages/2434835903
+  const text = 'F37AMCLL93#M1BPOS/ID746026,,/DC03032024,173207/MR1,/ET031846/PSN42579W108090,173207,320,WAIDE,031759,WEDAK,M49,267070,T468/CG264,110,360/FB742/VR324E17';
+  const decodeResult = decoderPlugin.decode({ text: text });
+  console.log(JSON.stringify(decodeResult, null, 2));
+
+  expect(decodeResult.decoded).toBe(true);
+  expect(decodeResult.decoder.decodeLevel).toBe('partial');
+  expect(decodeResult.decoder.name).toBe('label-h1-pos');
+  expect(decodeResult.formatted.description).toBe('Position Report');
+  expect(decodeResult.formatted.items.length).toBe(5);
+  expect(decodeResult.formatted.items[0].label).toBe('Aircraft Position');
+  expect(decodeResult.formatted.items[0].value).toBe('42.579 N, 108.090 W');
+  expect(decodeResult.formatted.items[1].label).toBe('Aircraft Route');
+  expect(decodeResult.formatted.items[1].value).toBe('WAIDE@2024-03-03T17:32:07Z > WEDAK@2024-03-03T03:17:59Z > ?');
+  expect(decodeResult.formatted.items[2].label).toBe('Altitude');
+  expect(decodeResult.formatted.items[2].value).toBe('32000 feet');
+  expect(decodeResult.formatted.items[3].label).toBe('Outside Air Temperature (C)');
+  expect(decodeResult.formatted.items[3].value).toBe('-49');
+  expect(decodeResult.formatted.items[4].label).toBe('Message Checksum');
+  expect(decodeResult.formatted.items[4].value).toBe('0x4e17');
+  expect(decodeResult.remaining.text).toBe(',F37AMCLL93/ID746026,,173207/MR1,,/ET031846,267070,T468/CG264,110,360/FB742/VR32');
+});
+
 test('decodes Label H1 Preamble #M1BPOS <invalid>', () => {
   const decoder = new MessageDecoder();
   const decoderPlugin = new Label_H1_POS(decoder);

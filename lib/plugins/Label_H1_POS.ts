@@ -25,7 +25,6 @@ export class Label_H1_POS extends DecoderPlugin {
     const checksum = message.text.slice(-4);
     //strip POS and checksum
     const parts = message.text.replace('#M1B', '').replace('POS', '').slice(0,-4).split(',');
-    console.log(parts);
     if(parts.length==1 && parts[0].startsWith('/RF')) {
       // TODO - use FlightPlanUtils to parse
       decodeResult.raw.route_status == 'RF'
@@ -88,7 +87,42 @@ export class Label_H1_POS extends DecoderPlugin {
 
       decodeResult.decoded = true;
       decodeResult.decoder.decodeLevel = 'partial';
-    } else if(parts.length === 32) { // #M1B long variant
+    } else if(parts.length === 15) { // variant 6
+    decodeResult.remaining.text = ''
+    processUnknown(decodeResult, parts[0]);
+    processUnknown(decodeResult, parts[1]);
+    let date = undefined;
+    if(parts[2].startsWith('/DC')) {
+      date = parts[2].substring(3);
+    } else {
+      processUnknown(decodeResult, parts[2]);
+    }
+    processUnknown(decodeResult, parts[3]);
+    const fields = parts[4].split('/');
+    for(let i=0; i<fields.length; ++i) {
+      const field = fields[i];
+      if(field.startsWith('PS')) {
+        processPosition(decodeResult, field.substring(2));
+      } else {
+        if(i===0) {
+          processUnknown(decodeResult, field);
+        } else {
+          processUnknown(decodeResult, '/'+field);
+        }
+      }
+    }
+    processRoute(decodeResult, parts[7], parts[5], parts[9], parts[8], undefined, date);
+    processAlt(decodeResult, parts[6]);
+    processTemp(decodeResult, parts[10]);
+    processUnknown(decodeResult, parts[11]);
+    processUnknown(decodeResult, parts[12]);
+    processUnknown(decodeResult, parts[13]);
+    processUnknown(decodeResult, parts[14]);
+    processChecksum(decodeResult, checksum);
+
+    decodeResult.decoded = true;
+    decodeResult.decoder.decodeLevel = 'partial';
+  } else if(parts.length === 32) { // #M1B long variant
       decodeResult.remaining.text = ''
       processPosition(decodeResult, parts[0]);
       processRunway(decodeResult, parts[1]);
@@ -110,7 +144,7 @@ export class Label_H1_POS extends DecoderPlugin {
       processAlt(decodeResult, parts[22]);
       processUnknown(decodeResult, parts.slice(23,31).join(','));
       const allProcessed = FlightPlanUtils.processFlightPlan(decodeResult, (parts[31]+checksum).split(':')); //checksum isnt a checksum here
-      processRoute(decodeResult, past,time, next, eta, '?'); // TODO pull `then` from flight plan
+      processRoute(decodeResult, past,time, next, eta); // TODO pull `then` from flight plan
 
       decodeResult.decoded = true;
       decodeResult.decoder.decodeLevel = 'partial';
@@ -204,14 +238,18 @@ function processGndspd(decodeResult: any, value: string) {
   });
 }
 
-function processRoute(decodeResult: any, last: string, time: string, next: string, eta: string, then: string, date?: string) {
-  let waypoints : Waypoint[];
-  waypoints = date===undefined ? [{name: last || '?,', time: DateTimeUtils.convertHHMMSSToTod(time), timeFormat: 'tod'}, 
-                                  {name: next || '?', time:  DateTimeUtils.convertHHMMSSToTod(eta), timeFormat: 'tod'}, 
-                                  {name: then || '?'}]
-                               : [{name: last || '?,', time: DateTimeUtils.convertDateTimeToEpoch(time, date), timeFormat: 'epoch'}, 
-                                  {name: next || '?', time:  DateTimeUtils.convertDateTimeToEpoch(eta, date), timeFormat: 'epoch'}, 
-                                  {name: then || '?'}];
+function processRoute(decodeResult: any, last: string, time: string, next: string, eta: string, then?: string, date?: string) {
+  const lastCoords = CoordinateUtils.decodeStringCoordinates(last);
+  const nextCoords = CoordinateUtils.decodeStringCoordinates(next);
+  const lastTime = date ? DateTimeUtils.convertDateTimeToEpoch(time, date) : DateTimeUtils.convertHHMMSSToTod(time);
+  const nextTime = date ? DateTimeUtils.convertDateTimeToEpoch(eta, date) : DateTimeUtils.convertHHMMSSToTod(eta);
+  const timeFormat = date ? 'epoch' : 'tod';
+  const lastWaypoint: Waypoint = lastCoords ? {name: '', latitude: lastCoords.latitude, longitude: lastCoords.longitude, time: lastTime, timeFormat: timeFormat}
+                                  : {name: last, time: lastTime, timeFormat: timeFormat};
+  const nextWaypoint: Waypoint = nextCoords ? {name: '', latitude: nextCoords.latitude, longitude: nextCoords.longitude, time: nextTime, timeFormat: timeFormat} 
+                                  : {name: next, time: nextTime, timeFormat: timeFormat};
+
+  const waypoints : Waypoint[] = [lastWaypoint, nextWaypoint, {name: then || '?'}];
   decodeResult.raw.route = {waypoints: waypoints};
   decodeResult.formatted.items.push({
     type: 'aircraft_route',
