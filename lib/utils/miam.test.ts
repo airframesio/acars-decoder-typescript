@@ -59,5 +59,5 @@ test('v1, compressed, acars, incomplete', () => {
   expect(decodeResult.message.data.acars.label).toBe('H1');
   expect(decodeResult.message.data.acars.sublabel).toBe('DF');
   expect(decodeResult.message.data.acars.mfi).toBe(undefined);
-  expect(decodeResult.message.data.acars.text).toBe(undefined);
+  expect(decodeResult.message.data.acars.text).toBe('A350,000130,1,1,TB000000/REP019,24,02;H01,019,24,02,6400,00175,B-18910,3,0,03,11,19,08,07,01,070/H02,NZAA YBBN,CAL054  ,S');
 })
