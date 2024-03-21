@@ -12,7 +12,7 @@ export class Label_H1_POS extends DecoderPlugin {
   qualifiers() { // eslint-disable-line class-methods-use-this
     return {
       labels: ["H1"],
-      preambles: ['POS', '#M1BPOS'], //TODO - support data before #
+      preambles: ['POS', '#M1BPOS', '/.POS'], //TODO - support data before #
     };
   }
 
@@ -21,33 +21,27 @@ export class Label_H1_POS extends DecoderPlugin {
     decodeResult.decoder.name = this.name;
     decodeResult.formatted.description = 'Position Report';
     decodeResult.message = message;
+    decodeResult.remaining.text = '';
 
     const checksum = message.text.slice(-4);
+    const header = findHeader(message.text.slice(0,-4));
+    const decoded = FlightPlanUtils.processFlightPlan(decodeResult, header.split(':'));
     //strip POS and checksum
-    const parts = message.text.replace('#M1B', '').replace('POS', '').slice(0,-4).split(',');
-    if(parts.length==1 && parts[0].startsWith('/RF')) {
-      // TODO - use FlightPlanUtils to parse
-      decodeResult.raw.route_status == 'RF'
-      decodeResult.formatted.items.push({
-        type: 'status',
-        code: 'ROUTE_STATUS',
-        label: 'Route Status',
-        value: 'Route Filed',
-      });
-      decodeResult.raw.route = {waypoints: parts[0].substring(3,parts[0].length).split('.').map((leg: string) => RouteUtils.getWaypoint(leg))};
-      decodeResult.formatted.items.push({
-        type: 'aircraft_route',
-        code: 'ROUTE',
-        label: 'Aircraft Route',
-        value: RouteUtils.routeToString(decodeResult.raw.route),
-      });
-
-      processChecksum(decodeResult, checksum);
-      decodeResult.decoded = true;
-      decodeResult.decoder.decodeLevel = 'full';
+    const parts = message.text.replace(header, '').slice(0,-4).split(',');
+    if(parts.length==1) {
+      if(decoded) {
+        processChecksum(decodeResult, checksum);
+        decodeResult.decoded = true;
+        decodeResult.decoder.decodeLevel = 'full';
+      } else if(decodeResult.remaining.text.length > 0) {
+        processChecksum(decodeResult, checksum);
+        decodeResult.decoded = true;
+        decodeResult.decoder.decodeLevel = 'partial';
+      } else {
+        decodeResult.decoded = false;
+        decodeResult.decoder.decodeLevel = 'none';
+      }
     } else if(parts.length === 10) { // variant 4
-      decodeResult.remaining.text = ''
-      processPosition(decodeResult, parts[0]);
       processAlt(decodeResult, parts[3]);
       processRoute(decodeResult, parts[1], parts[2], parts[4], parts[5], parts[6]);
       processTemp(decodeResult, parts[7]);
@@ -59,8 +53,6 @@ export class Label_H1_POS extends DecoderPlugin {
       decodeResult.decoder.decodeLevel = 'partial';
     } else if(parts.length === 11) { // variant 1
 
-      decodeResult.remaining.text = ''
-      processPosition(decodeResult, parts[0]);
       processAlt(decodeResult, parts[3]);
       processRoute(decodeResult, parts[1], parts[2], parts[4], parts[5], parts[6], parts[10]);
       processTemp(decodeResult, parts[7]);
@@ -72,8 +64,6 @@ export class Label_H1_POS extends DecoderPlugin {
       decodeResult.decoder.decodeLevel = 'partial';
     }  else if(parts.length === 14) { // variant 2
 
-      decodeResult.remaining.text = ''
-      processPosition(decodeResult, parts[0]);
       processAlt(decodeResult, parts[3]);
       processRoute(decodeResult, parts[1], parts[2], parts[4], parts[5], parts[6]);
       processTemp(decodeResult, parts[7]);
@@ -88,8 +78,6 @@ export class Label_H1_POS extends DecoderPlugin {
       decodeResult.decoded = true;
       decodeResult.decoder.decodeLevel = 'partial';
     } else if(parts.length === 15) { // variant 6
-    decodeResult.remaining.text = ''
-    processUnknown(decodeResult, parts[0]);
     processUnknown(decodeResult, parts[1]);
     let date = undefined;
     if(parts[2].startsWith('/DC')) {
@@ -122,9 +110,17 @@ export class Label_H1_POS extends DecoderPlugin {
 
     decodeResult.decoded = true;
     decodeResult.decoder.decodeLevel = 'partial';
-  } else if(parts.length === 32) { // #M1B long variant
-      decodeResult.remaining.text = ''
-      processPosition(decodeResult, parts[0]);
+  } else if(parts.length === 21) { // variant 8
+    processRunway(decodeResult, parts[1]);
+    processUnknown(decodeResult,parts.slice(2,11).join(','));
+    processTemp(decodeResult, parts[11]);
+    processUnknown(decodeResult,parts.slice(12,20).join(','));
+    FlightPlanUtils.processFlightPlan(decodeResult, parts[20].split(':'));
+    processChecksum(decodeResult, checksum);
+
+    decodeResult.decoded = true;
+    decodeResult.decoder.decodeLevel = 'partial';
+  }else if(parts.length === 32) { // #M1B long variant
       processRunway(decodeResult, parts[1]);
       const time = parts[2];
       processUnknown(decodeResult, parts[3]);
@@ -153,7 +149,7 @@ export class Label_H1_POS extends DecoderPlugin {
       if (options.debug) {
         console.log(`Decoder: Unknown H1 message: ${message.text}`);
       }
-      decodeResult.remaining.text = message.text;
+      decodeResult.remaining.text += message.text;
       decodeResult.decoded = false;
       decodeResult.decoder.decodeLevel = 'none';
     }
@@ -208,26 +204,6 @@ function processRunway(decodeResult: any, value: string) {
   });
 };
 
-function processDeptApt(decodeResult: any, value: string) {
-  decodeResult.raw.departure_icao = value;
-  decodeResult.formatted.items.push({
-    type: 'origin',
-    code: 'ORG',
-    label: 'Origin',
-    value: decodeResult.raw.departure_icao,
-  });
-};
-
-function processArrvApt(decodeResult: any, value: string) {
-  decodeResult.raw.arrival_icao = value;
-  decodeResult.formatted.items.push({
-    type: 'destination',
-    code: 'DST',
-    label: 'Destination',
-    value: decodeResult.raw.arrival_icao,
-  });
-};
-
 function processGndspd(decodeResult: any, value: string) {
   decodeResult.raw.groundspeed = Number(value);
   decodeResult.formatted.items.push({
@@ -241,6 +217,7 @@ function processGndspd(decodeResult: any, value: string) {
 function processRoute(decodeResult: any, last: string, time: string, next: string, eta: string, then?: string, date?: string) {
   const lastCoords = CoordinateUtils.decodeStringCoordinates(last);
   const nextCoords = CoordinateUtils.decodeStringCoordinates(next);
+  const thenCoords = then? CoordinateUtils.decodeStringCoordinates(then) : undefined;
   const lastTime = date ? DateTimeUtils.convertDateTimeToEpoch(time, date) : DateTimeUtils.convertHHMMSSToTod(time);
   const nextTime = date ? DateTimeUtils.convertDateTimeToEpoch(eta, date) : DateTimeUtils.convertHHMMSSToTod(eta);
   const timeFormat = date ? 'epoch' : 'tod';
@@ -248,8 +225,8 @@ function processRoute(decodeResult: any, last: string, time: string, next: strin
                                   : {name: last, time: lastTime, timeFormat: timeFormat};
   const nextWaypoint: Waypoint = nextCoords ? {name: '', latitude: nextCoords.latitude, longitude: nextCoords.longitude, time: nextTime, timeFormat: timeFormat} 
                                   : {name: next, time: nextTime, timeFormat: timeFormat};
-
-  const waypoints : Waypoint[] = [lastWaypoint, nextWaypoint, {name: then || '?'}];
+  const thenWaypoint: Waypoint = thenCoords ? {name: '', latitude: thenCoords.latitude, longitude: thenCoords.longitude} : {name: then || '?'}
+  const waypoints : Waypoint[] = [lastWaypoint, nextWaypoint, thenWaypoint];
   decodeResult.raw.route = {waypoints: waypoints};
   decodeResult.formatted.items.push({
     type: 'aircraft_route',
@@ -267,4 +244,20 @@ function processChecksum(decodeResult: any, value: string) {
     label: 'Message Checksum',
     value: '0x' + ('0000' + decodeResult.raw.checksum.toString(16)).slice(-4),
   });    
+}
+
+/**
+ * naive implementation to find the end of the
+ * 
+ * corrently only lookint at `/TS in which the format is `/TSHHMMSS,DDMMYY
+ * @param text 
+ * @returns 
+ */
+function findHeader(text: string) {
+  const parts = text.split(',');
+  const header = parts[0];
+  if(header.indexOf('/TS') === -1) {
+    return header;
+  }
+  return parts[0] + ',' + parts[1];
 }
