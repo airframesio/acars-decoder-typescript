@@ -10,7 +10,7 @@ test('matches Label H1 Preamble POS qualifiers', () => {
   expect(decoderPlugin.qualifiers).toBeDefined();
   expect(decoderPlugin.qualifiers()).toEqual({
     labels: ['H1'],
-    preambles: ['POS', '#M1BPOS'],
+    preambles: ['POS', '#M1BPOS', '/.POS'],
   });
 });
 test('decodes Label H1 Preamble POS variant 1', () => {
@@ -293,7 +293,7 @@ test('decodes Label H1 Preamble #M1BPOS long variant', () => {
   expect(decodeResult.formatted.items.length).toBe(10);
   expect(decodeResult.formatted.items[0].label).toBe('Aircraft Position');
   expect(decodeResult.formatted.items[0].value).toBe('29.510 N, 98.448 W');
-  expect(decodeResult.formatted.items[1].label).toBe('Departure Runway');
+  expect(decodeResult.formatted.items[1].label).toBe('Arrival Runway');
   expect(decodeResult.formatted.items[1].value).toBe('04');
   expect(decodeResult.formatted.items[2].label).toBe('Aircraft Groundspeed');
   expect(decodeResult.formatted.items[2].value).toBe('415');
@@ -314,7 +314,7 @@ test('decodes Label H1 Preamble #M1BPOS long variant', () => {
   expect(decodeResult.remaining.text).toBe(',188,4,M12,246048,374K,282K,1223,133,,70,151437,73/PR1223,222,133,,44,40,252074,M22,180,P0');
 });
 
-test('decodes Label H1 Preamble POS variant 6', () => {
+test('decodes Label H1 Preamble POS variant 7', () => {
   const decoder = new MessageDecoder();
   const decoderPlugin = new Label_H1_POS(decoder);
 
@@ -338,10 +338,10 @@ test('decodes Label H1 Preamble POS variant 6', () => {
   expect(decodeResult.formatted.items[3].value).toBe('-28');
   expect(decodeResult.formatted.items[4].label).toBe('Message Checksum');
   expect(decodeResult.formatted.items[4].value).toBe('0x9071');
-  expect(decodeResult.remaining.text).toBe(',/ID91459S,BANKR31,142813/MR64,0,/ET31539,27619,MT370/CG311,160,350/FB732/VR32');
+  expect(decodeResult.remaining.text).toBe('/ID91459S,BANKR31,142813/MR64,0,/ET31539,27619,MT370/CG311,160,350/FB732/VR32');
 });
 
-test('decodes Label H1 Preamble #M1BPOS variant 6', () => {
+test('decodes Label H1 Preamble #M1BPOS variant 7', () => {
   const decoder = new MessageDecoder();
   const decoderPlugin = new Label_H1_POS(decoder);
 
@@ -354,6 +354,7 @@ test('decodes Label H1 Preamble #M1BPOS variant 6', () => {
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
   expect(decodeResult.decoder.name).toBe('label-h1-pos');
   expect(decodeResult.formatted.description).toBe('Position Report');
+  expect(decodeResult.raw.flight_number).toBe('AMCLL93');
   expect(decodeResult.formatted.items.length).toBe(5);
   expect(decodeResult.formatted.items[0].label).toBe('Aircraft Position');
   expect(decodeResult.formatted.items[0].value).toBe('42.579 N, 108.090 W');
@@ -365,7 +366,75 @@ test('decodes Label H1 Preamble #M1BPOS variant 6', () => {
   expect(decodeResult.formatted.items[3].value).toBe('-49');
   expect(decodeResult.formatted.items[4].label).toBe('Message Checksum');
   expect(decodeResult.formatted.items[4].value).toBe('0x4e17');
-  expect(decodeResult.remaining.text).toBe(',F37AMCLL93/ID746026,,173207/MR1,,/ET031846,267070,T468/CG264,110,360/FB742/VR32');
+  expect(decodeResult.remaining.text).toBe('F37#M1B/ID746026,,173207/MR1,,/ET031846,267070,T468/CG264,110,360/FB742/VR32');
+});
+
+test('decodes Label H1 Preamble POS variant 8', () => {
+  const decoder = new MessageDecoder();
+  const decoderPlugin = new Label_H1_POS(decoder);
+
+  // https://app.airframes.io/messages/2500335076
+  const text = 'POS/TS080616,210324/DTMMGL,29O,64,103316/PR1754,231,350,189,,0,0,,M45,185,,,P16,P0,36000,,1565,250/RP:DA:MMTJ:AA:MMGL:R:27O:D:TUMA2B..SANFE.UT4..LMM:A:LONV1D:AP:ILSZ29.PLADE(29O)9D1C';
+  const decodeResult = decoderPlugin.decode({ text: text });
+  console.log(JSON.stringify(decodeResult, null, 2));
+
+  expect(decodeResult.decoded).toBe(true);
+  expect(decodeResult.decoder.decodeLevel).toBe('partial');
+  expect(decodeResult.decoder.name).toBe('label-h1-pos');
+  expect(decodeResult.formatted.description).toBe('Position Report');
+  expect(decodeResult.formatted.items.length).toBe(11);
+  expect(decodeResult.formatted.items[0].label).toBe('Destination');
+  expect(decodeResult.formatted.items[0].value).toBe('MMGL');
+  expect(decodeResult.formatted.items[1].label).toBe('Arrival Runway');
+  expect(decodeResult.formatted.items[1].value).toBe('29O');
+  expect(decodeResult.formatted.items[2].label).toBe('Outside Air Temperature (C)');
+  expect(decodeResult.formatted.items[2].value).toBe('-45');
+  expect(decodeResult.formatted.items[3].label).toBe('Route Status');
+  expect(decodeResult.formatted.items[3].value).toBe('Route Planned');
+  expect(decodeResult.formatted.items[4].label).toBe('Origin');
+  expect(decodeResult.formatted.items[4].value).toBe('MMTJ');
+  expect(decodeResult.formatted.items[5].label).toBe('Destination');
+  expect(decodeResult.formatted.items[5].value).toBe('MMGL');
+  expect(decodeResult.formatted.items[6].label).toBe('Departure Runway');
+  expect(decodeResult.formatted.items[6].value).toBe('27O');
+  expect(decodeResult.formatted.items[7].label).toBe('Departure Procedure');
+  expect(decodeResult.formatted.items[7].value).toBe('TUMA2B: >> SANFE > UT4 >> LMM');
+  expect(decodeResult.formatted.items[8].label).toBe('Arrival Procedure');
+  expect(decodeResult.formatted.items[8].value).toBe('LONV1D');
+  expect(decodeResult.formatted.items[9].label).toBe('Approach Procedure');
+  expect(decodeResult.formatted.items[9].value).toBe('ILSZ29 starting at PLADE(29O)');
+  expect(decodeResult.formatted.items[10].label).toBe('Message Checksum');
+  expect(decodeResult.formatted.items[10].value).toBe('0x9d1c');
+  expect(decodeResult.remaining.text).toBe(',64,103316/PR1754,231,350,189,,0,0,,185,,,P16,P0,36000,,1565');
+});
+test('decodes Label H1 Preamble /.POS variant 2', () => {
+  const decoder = new MessageDecoder();
+  const decoderPlugin = new Label_H1_POS(decoder);
+
+  // https://app.airframes.io/messages/2500488708
+  const text = '/.POS/TS100316,210324/PSS35333W058220,,100316,250,S37131W059150,101916,S39387W060377,M23,27282,241,780,MANUAL,0,813E711';
+  const decodeResult = decoderPlugin.decode({ text: text });
+  console.log(JSON.stringify(decodeResult, null, 2));
+
+  expect(decodeResult.decoded).toBe(true);
+  expect(decodeResult.decoder.decodeLevel).toBe('partial');
+  expect(decodeResult.decoder.name).toBe('label-h1-pos');
+  expect(decodeResult.formatted.description).toBe('Position Report');
+  expect(decodeResult.raw.message_timestamp).toBe(1711015396);
+  expect(decodeResult.formatted.items.length).toBe(6);
+  expect(decodeResult.formatted.items[0].label).toBe('Aircraft Position');
+  expect(decodeResult.formatted.items[0].value).toBe('35.333 S, 58.220 W');
+  expect(decodeResult.formatted.items[1].label).toBe('Altitude');
+  expect(decodeResult.formatted.items[1].value).toBe('25000 feet');
+  expect(decodeResult.formatted.items[2].label).toBe('Aircraft Route');
+  expect(decodeResult.formatted.items[2].value).toBe('@10:03:16 > (37.131 S, 59.150 W)@10:19:16 > (39.387 S, 60.377 W)');
+  expect(decodeResult.formatted.items[3].label).toBe('Outside Air Temperature (C)');
+  expect(decodeResult.formatted.items[3].value).toBe('-23');
+  expect(decodeResult.formatted.items[4].label).toBe('Aircraft Groundspeed');
+  expect(decodeResult.formatted.items[4].value).toBe('780');
+  expect(decodeResult.formatted.items[5].label).toBe('Message Checksum');
+  expect(decodeResult.formatted.items[5].value).toBe('0xe711');
+  expect(decodeResult.remaining.text).toBe('/.POS,27282,241,MANUAL,0,813');
 });
 
 test('decodes Label H1 Preamble #M1BPOS <invalid>', () => {

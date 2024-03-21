@@ -183,7 +183,7 @@ test('decodes Label H1 Preamble FPN with SN and TS', () => {
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('full');
   expect(decodeResult.decoder.name).toBe('label-h1-fpn');
-  expect(decodeResult.raw.message_timestamp).toBe(Number.NaN); // DDMMYY instead of MMDDYY - need to figure out how to determine
+  expect(decodeResult.raw.message_timestamp).toBe(1708185391);
   expect(decodeResult.raw.serial_number).toBe('155631');
   expect(decodeResult.formatted.description).toBe('Flight Plan');
   expect(decodeResult.formatted.items.length).toBe(6);
@@ -247,6 +247,7 @@ test('decodes Label H1 #M1BFPN No Preamble', () => {
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('full'); // should be partial
   expect(decodeResult.decoder.name).toBe('label-h1-fpn');
+  expect(decodeResult.raw.flight_number).toBe('AKL0767');
   expect(decodeResult.raw.message_timestamp).toBe(1708730408);
   expect(decodeResult.formatted.description).toBe('Flight Plan');
   expect(decodeResult.formatted.items.length).toBe(7);
