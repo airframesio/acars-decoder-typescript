@@ -293,7 +293,7 @@ test('decodes Label H1 Preamble #M1BPOS long variant', () => {
   expect(decodeResult.formatted.items.length).toBe(10);
   expect(decodeResult.formatted.items[0].label).toBe('Aircraft Position');
   expect(decodeResult.formatted.items[0].value).toBe('29.510 N, 98.448 W');
-  expect(decodeResult.formatted.items[1].label).toBe('Departure Runway');
+  expect(decodeResult.formatted.items[1].label).toBe('Arrival Runway');
   expect(decodeResult.formatted.items[1].value).toBe('04');
   expect(decodeResult.formatted.items[2].label).toBe('Aircraft Groundspeed');
   expect(decodeResult.formatted.items[2].value).toBe('415');
@@ -392,7 +392,7 @@ test('decodes Label H1 Preamble POS variant 8', () => {
   expect(decodeResult.formatted.items[3].label).toBe('Route Status');
   expect(decodeResult.formatted.items[3].value).toBe('Route Planned');
   expect(decodeResult.formatted.items[4].label).toBe('Origin');
-  expect(decodeResult.formatted.items[4].value).toBe('MTTJ');
+  expect(decodeResult.formatted.items[4].value).toBe('MMTJ');
   expect(decodeResult.formatted.items[5].label).toBe('Destination');
   expect(decodeResult.formatted.items[5].value).toBe('MMGL');
   expect(decodeResult.formatted.items[6].label).toBe('Departure Runway');
@@ -404,8 +404,8 @@ test('decodes Label H1 Preamble POS variant 8', () => {
   expect(decodeResult.formatted.items[9].label).toBe('Approach Procedure');
   expect(decodeResult.formatted.items[9].value).toBe('ILSZ29 starting at PLADE(29O)');
   expect(decodeResult.formatted.items[10].label).toBe('Message Checksum');
-  expect(decodeResult.formatted.items[10].value).toBe('0x9071');
-  expect(decodeResult.remaining.text).toBe(',/ID91459S,BANKR31,142813/MR64,0,/ET31539,27619,MT370/CG311,160,350/FB732/VR32');
+  expect(decodeResult.formatted.items[10].value).toBe('0x9d1c');
+  expect(decodeResult.remaining.text).toBe(',64,103316/PR1754,231,350,189,,0,0,,185,,,P16,P0,36000,,1565');
 });
 test('decodes Label H1 Preamble /.POS variant 2', () => {
   const decoder = new MessageDecoder();

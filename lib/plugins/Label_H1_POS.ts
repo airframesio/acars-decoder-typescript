@@ -196,11 +196,11 @@ function processTemp(decodeResult: any, value: string) {
 }
 
 function processRunway(decodeResult: any, value: string) {
-  decodeResult.raw.departure_runway = value.replace('RW', '');
+  decodeResult.raw.arrival_runway = value.replace('RW', '');
   decodeResult.formatted.items.push({
     type: 'runway',
-    label: 'Departure Runway',
-    value: decodeResult.raw.departure_runway,
+    label: 'Arrival Runway',
+    value: decodeResult.raw.arrival_runway,
   });
 };
 
