@@ -293,7 +293,7 @@ test('decodes Label H1 Preamble #M1BPOS long variant', () => {
   expect(decodeResult.formatted.items.length).toBe(10);
   expect(decodeResult.formatted.items[0].label).toBe('Aircraft Position');
   expect(decodeResult.formatted.items[0].value).toBe('29.510 N, 98.448 W');
-  expect(decodeResult.formatted.items[1].label).toBe('Runway');
+  expect(decodeResult.formatted.items[1].label).toBe('Departure Runway');
   expect(decodeResult.formatted.items[1].value).toBe('04');
   expect(decodeResult.formatted.items[2].label).toBe('Aircraft Groundspeed');
   expect(decodeResult.formatted.items[2].value).toBe('415');

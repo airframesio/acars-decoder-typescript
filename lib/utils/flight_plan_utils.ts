@@ -40,7 +40,7 @@ export class FlightPlanUtils {
                 addRoute(decodeResult, value);
               break;
               case 'R':
-                addDepartureRunway(decodeResult, value);
+                addRunway(decodeResult, value);
               break;
               // case 'WS': // something about routes, has altitude, so current parsing won't work
               // break;
@@ -115,13 +115,23 @@ function addDepartureAirport(decodeResult: any, value: string) {
     });
 };
 
-function addDepartureRunway(decodeResult: any, value: string) {
-    decodeResult.raw.runway = value;
+function addRunway(decodeResult: any, value: string) {
+  // xxx(yyy) where xxx is the departure runway and yyy is the arrival runway
+  if(value.length === 8) {
+    decodeResult.raw.arrival_runway = value.substring(4, 7);
     decodeResult.formatted.items.push({
-        type: 'runway',
-        label: 'Runway',
-        value: decodeResult.raw.runway,
+      type: 'runway',
+      label: 'Arrival Runway',
+      value: decodeResult.raw.arrival_runway,
     });
+  }
+
+  decodeResult.raw.departure_runway = value.substring(0, 3);
+  decodeResult.formatted.items.push({
+    type: 'runway',
+    label: 'Departure Runway',
+    value: decodeResult.raw.departure_runway,
+  });
 };
 
 function addRoute(decodeResult: any, value: string) {
