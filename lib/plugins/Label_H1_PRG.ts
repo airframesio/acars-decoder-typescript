@@ -139,11 +139,11 @@ function processETA(decodeResult:DecodeResult, value: string) {
 }
 
 function processRunway(decodeResult: any, value: string) {
-  decodeResult.raw.runway = value;
+  decodeResult.raw.arrival_runway = value;
   decodeResult.formatted.items.push({
     type: 'runway',
-    label: 'Runway',
-    value: decodeResult.raw.runway,
+    label: 'Arrival Runway',
+    value: decodeResult.raw.arrival_runway,
   });
 };
 
