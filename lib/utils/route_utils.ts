@@ -42,7 +42,6 @@ export class RouteUtils {
     
     public static getWaypoint(leg: string): Waypoint {
         const regex = leg.match(/^([A-Z]+)(\d{3})-(\d{4})$/); // {name}{bearing}-{distance}
-        console.log(regex);
         if(regex?.length == 4) {
             return {name: regex[1], offset: {bearing: parseInt(regex[2]), distance: parseInt(regex[3])/10}};
         }
