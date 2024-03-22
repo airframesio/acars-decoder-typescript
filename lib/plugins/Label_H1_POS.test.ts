@@ -407,6 +407,34 @@ test('decodes Label H1 Preamble POS variant 8', () => {
   expect(decodeResult.formatted.items[10].value).toBe('0x9d1c');
   expect(decodeResult.remaining.text).toBe(',64,103316/PR1754,231,350,189,,0,0,,185,,,P16,P0,36000,,1565');
 });
+
+test('decodes Label H1 Preamble POS variant 1 with offset', () => {
+  const decoder = new MessageDecoder();
+  const decoderPlugin = new Label_H1_POS(decoder);
+
+  // https://app.airframes.io/messages/2500335076
+  const text = 'POSN33204W114082,BLH176-0093,062056,330,SALOM180-0127,062211,KOFFA180-0148,M49,30628,3201251';
+  const decodeResult = decoderPlugin.decode({ text: text });
+  console.log(JSON.stringify(decodeResult, null, 2));
+
+  expect(decodeResult.decoded).toBe(true);
+  expect(decodeResult.decoder.decodeLevel).toBe('partial');
+  expect(decodeResult.decoder.name).toBe('label-h1-pos');
+  expect(decodeResult.formatted.description).toBe('Position Report');
+  expect(decodeResult.formatted.items.length).toBe(5);
+  expect(decodeResult.formatted.items[0].label).toBe('Aircraft Position');
+  expect(decodeResult.formatted.items[0].value).toBe('33.204 N, 114.082 W');
+  expect(decodeResult.formatted.items[1].label).toBe('Altitude');
+  expect(decodeResult.formatted.items[1].value).toBe('33000 feet');
+  expect(decodeResult.formatted.items[2].label).toBe('Aircraft Route');
+  expect(decodeResult.formatted.items[2].value).toBe('BLH[176° 9.3nm]@06:20:56 > SALOM[180° 12.7nm]@06:22:11 > KOFFA[180° 14.8nm]');
+  expect(decodeResult.formatted.items[3].label).toBe('Outside Air Temperature (C)');
+  expect(decodeResult.formatted.items[3].value).toBe('-49');
+  expect(decodeResult.formatted.items[4].label).toBe('Message Checksum');
+  expect(decodeResult.formatted.items[4].value).toBe('0x1251');
+  expect(decodeResult.remaining.text).toBe(',30628,320');
+});
+
 test('decodes Label H1 Preamble /.POS variant 2', () => {
   const decoder = new MessageDecoder();
   const decoderPlugin = new Label_H1_POS(decoder);

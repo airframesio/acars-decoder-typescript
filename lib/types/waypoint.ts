@@ -36,4 +36,12 @@ export interface Waypoint {
      */
     timeFormat?: 'tod' | 'epoch'
 
+    /**
+     * offset from the actual waypoint
+     * 
+     * bearing: degrees from the waypoint
+     * distance: distance in nautical miles
+     */
+    offset?: {bearing: number, distance: number};
+
 }
