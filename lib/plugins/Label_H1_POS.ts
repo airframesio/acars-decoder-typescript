@@ -215,17 +215,20 @@ function processGndspd(decodeResult: any, value: string) {
 }
 
 function processRoute(decodeResult: any, last: string, time: string, next: string, eta: string, then?: string, date?: string) {
-  const lastCoords = CoordinateUtils.decodeStringCoordinates(last);
-  const nextCoords = CoordinateUtils.decodeStringCoordinates(next);
-  const thenCoords = then? CoordinateUtils.decodeStringCoordinates(then) : undefined;
   const lastTime = date ? DateTimeUtils.convertDateTimeToEpoch(time, date) : DateTimeUtils.convertHHMMSSToTod(time);
   const nextTime = date ? DateTimeUtils.convertDateTimeToEpoch(eta, date) : DateTimeUtils.convertHHMMSSToTod(eta);
   const timeFormat = date ? 'epoch' : 'tod';
-  const lastWaypoint: Waypoint = lastCoords ? {name: '', latitude: lastCoords.latitude, longitude: lastCoords.longitude, time: lastTime, timeFormat: timeFormat}
-                                  : {name: last, time: lastTime, timeFormat: timeFormat};
-  const nextWaypoint: Waypoint = nextCoords ? {name: '', latitude: nextCoords.latitude, longitude: nextCoords.longitude, time: nextTime, timeFormat: timeFormat} 
-                                  : {name: next, time: nextTime, timeFormat: timeFormat};
-  const thenWaypoint: Waypoint = thenCoords ? {name: '', latitude: thenCoords.latitude, longitude: thenCoords.longitude} : {name: then || '?'}
+
+  const lastWaypoint = RouteUtils.getWaypoint(last);
+  lastWaypoint.time = lastTime;
+  lastWaypoint.timeFormat = timeFormat;
+
+  const nextWaypoint = RouteUtils.getWaypoint(next);
+  nextWaypoint.time = nextTime;
+  nextWaypoint.timeFormat = timeFormat;
+
+  const thenWaypoint = RouteUtils.getWaypoint(then || '?');
+  
   const waypoints : Waypoint[] = [lastWaypoint, nextWaypoint, thenWaypoint];
   decodeResult.raw.route = {waypoints: waypoints};
   decodeResult.formatted.items.push({
