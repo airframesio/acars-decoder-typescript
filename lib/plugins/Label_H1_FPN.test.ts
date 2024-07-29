@@ -62,7 +62,7 @@ test('decodes Label H1 Preamble FPN full flight', () => {
   expect(decodeResult.raw.flight_number).toBe('AAL1956');
   expect(decodeResult.raw.company_route.waypoints).toBeUndefined();
   expect(decodeResult.formatted.description).toBe('Flight Plan');
-  expect(decodeResult.formatted.items.length).toBe(9);
+  expect(decodeResult.formatted.items.length).toBe(10);
   expect(decodeResult.formatted.items[0].label).toBe('Route Status');
   expect(decodeResult.formatted.items[0].value).toBe('Route Planned');
   expect(decodeResult.formatted.items[1].label).toBe('Origin');
@@ -71,16 +71,18 @@ test('decodes Label H1 Preamble FPN full flight', () => {
   expect(decodeResult.formatted.items[2].value).toBe('KPHX');
   expect(decodeResult.formatted.items[3].label).toBe('Company Route');
   expect(decodeResult.formatted.items[3].value).toBe('PHLPHX61');
-  expect(decodeResult.formatted.items[4].label).toBe('Runway');
-  expect(decodeResult.formatted.items[4].value).toBe('27L(26O)');
-  expect(decodeResult.formatted.items[5].label).toBe('Departure Procedure');
-  expect(decodeResult.formatted.items[5].value).toBe('PHL3');
-  expect(decodeResult.formatted.items[6].label).toBe('Arrival Procedure');
-  expect(decodeResult.formatted.items[6].value).toBe('EAGUL6 starting at ZUN');
-  expect(decodeResult.formatted.items[7].label).toBe('Approach Procedure');
-  expect(decodeResult.formatted.items[7].value).toBe('ILS26: >> AIR(40.010 N, 80.490 W) > J110 > BOWRR >> VLA(39.056 N, 89.097 W) >> STL(38.516 N, 90.289 W) >> GIBSN(38.430 N, 92.244 W) >> TYGER(38.410 N, 94.050 W) >> GCK(37.551 N, 100.435 W) >> DIXAN(36.169 N, 105.573 W) >> ZUN(34.579 N, 109.093 W)');
-  expect(decodeResult.formatted.items[8].label).toBe('Message Checksum');
-  expect(decodeResult.formatted.items[8].value).toBe('0x293b');
+  expect(decodeResult.formatted.items[4].label).toBe('Arrival Runway');
+  expect(decodeResult.formatted.items[4].value).toBe('26O');
+  expect(decodeResult.formatted.items[5].label).toBe('Departure Runway');
+  expect(decodeResult.formatted.items[5].value).toBe('27L');
+  expect(decodeResult.formatted.items[6].label).toBe('Departure Procedure');
+  expect(decodeResult.formatted.items[6].value).toBe('PHL3');
+  expect(decodeResult.formatted.items[7].label).toBe('Arrival Procedure');
+  expect(decodeResult.formatted.items[7].value).toBe('EAGUL6 starting at ZUN');
+  expect(decodeResult.formatted.items[8].label).toBe('Approach Procedure');
+  expect(decodeResult.formatted.items[8].value).toBe('ILS26: >> AIR(40.010 N, 80.490 W) > J110 > BOWRR >> VLA(39.056 N, 89.097 W) >> STL(38.516 N, 90.289 W) >> GIBSN(38.430 N, 92.244 W) >> TYGER(38.410 N, 94.050 W) >> GCK(37.551 N, 100.435 W) >> DIXAN(36.169 N, 105.573 W) >> ZUN(34.579 N, 109.093 W)');
+  expect(decodeResult.formatted.items[9].label).toBe('Message Checksum');
+  expect(decodeResult.formatted.items[9].value).toBe('0x293b');
 });
 
 test('decodes Label H1 Preamble FPN in-flight', () => {
@@ -181,7 +183,7 @@ test('decodes Label H1 Preamble FPN with SN and TS', () => {
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('full');
   expect(decodeResult.decoder.name).toBe('label-h1-fpn');
-  expect(decodeResult.raw.message_timestamp).toBe(Number.NaN); // DDMMYY instead of MMDDYY - need to figure out how to determine
+  expect(decodeResult.raw.message_timestamp).toBe(1708185391);
   expect(decodeResult.raw.serial_number).toBe('155631');
   expect(decodeResult.formatted.description).toBe('Flight Plan');
   expect(decodeResult.formatted.items.length).toBe(6);
@@ -245,6 +247,7 @@ test('decodes Label H1 #M1BFPN No Preamble', () => {
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('full'); // should be partial
   expect(decodeResult.decoder.name).toBe('label-h1-fpn');
+  expect(decodeResult.raw.flight_number).toBe('AKL0767');
   expect(decodeResult.raw.message_timestamp).toBe(1708730408);
   expect(decodeResult.formatted.description).toBe('Flight Plan');
   expect(decodeResult.formatted.items.length).toBe(7);
@@ -254,7 +257,7 @@ test('decodes Label H1 #M1BFPN No Preamble', () => {
   expect(decodeResult.formatted.items[1].value).toBe('TNCA');
   expect(decodeResult.formatted.items[2].label).toBe('Destination');
   expect(decodeResult.formatted.items[2].value).toBe('TNCB');
-  expect(decodeResult.formatted.items[3].label).toBe('Runway');
+  expect(decodeResult.formatted.items[3].label).toBe('Departure Runway');
   expect(decodeResult.formatted.items[3].value).toBe('11O');
   expect(decodeResult.formatted.items[4].label).toBe('Departure Procedure');
   expect(decodeResult.formatted.items[4].value).toBe('ADRI1F: >> IRLEP > A574 >> PJG');

@@ -32,7 +32,7 @@ test('decodes Label H1 Preamble PRG message', () => {
   expect(decodeResult.formatted.items.length).toBe(6);
   expect(decodeResult.formatted.items[0].label).toBe('Destination');
   expect(decodeResult.formatted.items[0].value).toBe('EGPF');
-  expect(decodeResult.formatted.items[1].label).toBe('Runway');
+  expect(decodeResult.formatted.items[1].label).toBe('Arrival Runway');
   expect(decodeResult.formatted.items[1].value).toBe('23O');
   expect(decodeResult.formatted.items[2].label).toBe('Fuel On Board');
   expect(decodeResult.formatted.items[2].value).toBe('67');
@@ -63,7 +63,7 @@ test('decodes Label H1 Preamble PRG/LR', () => {
   expect(decodeResult.formatted.items[0].value).toBe('KBWI');
   expect(decodeResult.formatted.items[1].label).toBe('Destination');
   expect(decodeResult.formatted.items[1].value).toBe('KBOS');
-  expect(decodeResult.formatted.items[2].label).toBe('Runway');
+  expect(decodeResult.formatted.items[2].label).toBe('Arrival Runway');
   expect(decodeResult.formatted.items[2].value).toBe('04R');
   expect(decodeResult.formatted.items[3].label).toBe('Message Checksum');
   expect(decodeResult.formatted.items[3].value).toBe('0x1483');
@@ -89,7 +89,7 @@ xtest('decodes Label H1 Preamble #M1BPRG', () => {
   expect(decodeResult.formatted.items.length).toBe(6);
   expect(decodeResult.formatted.items[0].label).toBe('Destination');
   expect(decodeResult.formatted.items[0].value).toBe('EKCH');
-  expect(decodeResult.formatted.items[1].label).toBe('Runway');
+  expect(decodeResult.formatted.items[1].label).toBe('Arrival Runway');
   expect(decodeResult.formatted.items[1].value).toBe('22L');
   expect(decodeResult.formatted.items[2].label).toBe('Fuel On Board');
   expect(decodeResult.formatted.items[2].value).toBe('69');
@@ -117,7 +117,7 @@ xtest('decodes Label H1 PRG with flightplan', () => {
   expect(decodeResult.formatted.items.length).toBe(7);
   expect(decodeResult.formatted.items[0].label).toBe('Destination');
   expect(decodeResult.formatted.items[0].value).toBe('GCRR');
-  expect(decodeResult.formatted.items[1].label).toBe('Runway');
+  expect(decodeResult.formatted.items[1].label).toBe('Arrival Runway');
   expect(decodeResult.formatted.items[1].value).toBe('030');
   expect(decodeResult.formatted.items[2].label).toBe('Route Status');
   expect(decodeResult.formatted.items[2].value).toBe('Route Planned');
