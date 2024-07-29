@@ -1,5 +1,5 @@
 import * as Base85 from 'base85';
-import * as Zlib from 'zlib';
+import * as zlib  from "minizlib";
 
 enum MIAMFid {
   SingleTransfer = 'T',
@@ -398,7 +398,10 @@ export class MIAMCoreUtils {
     if (body !== undefined && body.length > 0) {
       if ([MIAMCoreV1Compression.Deflate, MIAMCoreV2Compression.Deflate].indexOf(pduCompression) >= 0) {
         try {
-          pduData = Zlib.inflateRawSync(body, { windowBits: 15 });
+          const decompress = new zlib.InflateRaw({windowBits: 15});
+          decompress.write(body);
+          decompress.flush(zlib.constants.Z_SYNC_FLUSH);
+          pduData = decompress.read();
         } catch (e) {
           pduErrors.push('Inflation failed for body: ' + e);
         }
