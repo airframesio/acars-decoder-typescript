@@ -62,6 +62,20 @@ export class Label_H1_POS extends DecoderPlugin {
 
       decodeResult.decoded = true;
       decodeResult.decoder.decodeLevel = 'partial';
+    }  else if(parts.length === 12) { // variant 9
+
+      // convert DDMMYY to MMDDYY as that's what processRoute expects
+      const date = parts[11].substring(2,4) + parts[11].substring(0,2) + parts[11].substring(4,6);
+      processUnknown(decodeResult, parts[3]);
+      processRoute(decodeResult, parts[1], parts[2], parts[4], parts[5], parts[6], date);
+      processTemp(decodeResult, parts[7]);
+      processUnknown(decodeResult, parts[8]);
+      processUnknown(decodeResult, parts[9]);
+      processUnknown(decodeResult, parts[10]); //message timestamp?
+      processChecksum(decodeResult, checksum);
+
+      decodeResult.decoded = true;
+      decodeResult.decoder.decodeLevel = 'partial';
     }  else if(parts.length === 14) { // variant 2
 
       processAlt(decodeResult, parts[3]);
