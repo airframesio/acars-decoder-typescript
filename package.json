@@ -27,7 +27,7 @@
   "author": "Kevin Elliott <kevin@welikeinc.com>",
   "license": "UNLICENSED",
   "dependencies": {
-    "@types/node": "^20.11.28",
+    "@types/node": "^22.0.0",
     "base85": "^3.1.0",
     "minizlib": "^2.1.2"
   },
