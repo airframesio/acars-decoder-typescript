@@ -435,6 +435,31 @@ test('decodes Label H1 Preamble POS variant 1 with offset', () => {
   expect(decodeResult.remaining.text).toBe(',30628,320');
 });
 
+test('decodes Label H1 Preamble POS variant 9', () => {
+  const decoder = new MessageDecoder();
+  const decoderPlugin = new Label_H1_POS(decoder);
+
+  // https://app.airframes.io/messages/3110992692
+  const text = 'POSN39164W077259,FORKL,231828,51,THRET,231917,TOOPR,P16,1726,167,/TS231828,2807244841';
+  const decodeResult = decoderPlugin.decode({ text: text });
+  console.log(JSON.stringify(decodeResult, null, 2));
+
+  expect(decodeResult.decoded).toBe(true);
+  expect(decodeResult.decoder.decodeLevel).toBe('partial');
+  expect(decodeResult.decoder.name).toBe('label-h1-pos');
+  expect(decodeResult.formatted.description).toBe('Position Report');
+  expect(decodeResult.formatted.items.length).toBe(4);
+  expect(decodeResult.formatted.items[0].label).toBe('Aircraft Position');
+  expect(decodeResult.formatted.items[0].value).toBe('39.164 N, 77.259 W');
+  expect(decodeResult.formatted.items[1].label).toBe('Aircraft Route');
+  expect(decodeResult.formatted.items[1].value).toBe('FORKL@2024-07-28T23:18:28Z > THRET@2024-07-28T23:19:17Z > TOOPR');
+  expect(decodeResult.formatted.items[2].label).toBe('Outside Air Temperature (C)');
+  expect(decodeResult.formatted.items[2].value).toBe('16');
+  expect(decodeResult.formatted.items[3].label).toBe('Message Checksum');
+  expect(decodeResult.formatted.items[3].value).toBe('0x4841');
+  expect(decodeResult.remaining.text).toBe(',51,1726,167,/TS231828');
+});
+
 test('decodes Label H1 Preamble /.POS variant 2', () => {
   const decoder = new MessageDecoder();
   const decoderPlugin = new Label_H1_POS(decoder);
