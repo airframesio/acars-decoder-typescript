@@ -15,6 +15,6 @@ jobs:
           scope: '@airframes'
       - run: yarn install --frozen-lockfile
       - run: yarn build
-      - run: yarn npm publish
+      - run: yarn publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
