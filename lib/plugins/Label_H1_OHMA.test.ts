@@ -10,7 +10,7 @@ test('matches Label H1 Preamble OHMA qualifiers', () => {
   expect(decoderPlugin.qualifiers).toBeDefined();
   expect(decoderPlugin.qualifiers()).toEqual({
     labels: ['H1'],
-    preambles: ['OHMA', '/RTNBOCR.OHMA'],
+    preambles: ['OHMA', '/RTNBOCR.OHMA', '#T1B/RTNBOCR.OHMA'],
   });
 });
 
