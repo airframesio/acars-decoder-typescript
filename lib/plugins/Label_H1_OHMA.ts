@@ -32,8 +32,6 @@ export class Label_H1_OHMA extends DecoderPlugin {
       const json = JSON.parse(jsonText);
       const ohmaMsg = JSON.parse(json.message);
 
-      const val = JSON.stringify(ohmaMsg, null, 2);
-      console.log(val);
       decodeResult.decoded = true;
       decodeResult.decoder.decodeLevel = 'full';
       decodeResult.raw.ohma = jsonText;
@@ -41,7 +39,7 @@ export class Label_H1_OHMA extends DecoderPlugin {
         type: 'ohma',
         code: 'OHMA' ,
         label: 'OHMA Downlink',
-        value: val,
+        value: JSON.stringify(ohmaMsg, null, 2)
       });
     } catch {
       // Unknown
