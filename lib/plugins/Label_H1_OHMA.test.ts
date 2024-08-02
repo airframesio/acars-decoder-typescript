@@ -72,12 +72,12 @@ xtest('decodes Label H1 Preamble OHMA partial', () => {
   expect(decodeResult.decoder.name).toBe('label-h1-ohma');
   expect(decodeResult.formatted.description).toBe('OHMA Message');
   expect(decodeResult.message.text).toBe(text);
-  expect(decodeResult.raw.ohma).toBe('{\"version\":\"2.0\",\"message\":\"undefined\"}');
+  expect(decodeResult.raw.ohma).toBe('{"version":"2.0","message":"{\"clientId\":\"OHMA\",\"messageDate\":\"2024-08-02T08:04:34.817Z\",\"data\":{\"airplanes\":[{\"tailNumber\":\"');
   expect(decodeResult.formatted.items.length).toBe(1);
   expect(decodeResult.formatted.items[0].type).toBe('ohma');
   expect(decodeResult.formatted.items[0].code).toBe('OHMA');
   expect(decodeResult.formatted.items[0].label).toBe('OHMA Downlink');
-  expect(decodeResult.formatted.items[0].value).toBe('undefined');
+  expect(decodeResult.formatted.items[0].value).toBe('DO WE EVEN WANT IT FORMATTED?');
 }); 
 
 test('decodes Label H1 Preamble OHMA invalid', () => {
