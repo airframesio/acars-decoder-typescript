@@ -58,6 +58,28 @@ test('decodes Label H1 Preamble OHMA RTN', () => {
   expect(decodeResult.formatted.items[0].value).toBe('undefined');
 }); 
 
+xtest('decodes Label H1 Preamble OHMA partial', () => {
+  const decoder = new MessageDecoder();
+  const decoderPlugin = new Label_H1_OHMA(decoder);
+
+  // https://app.airframes.io/messages/3126673935
+  const text = '#T1B/RTNBOCR.OHMAeJy1km+vmjAUxr/K0tfSlPLXvuMi5pJRL0Hc3MZCOu0cSUFTqsly43dfBb3zKmavBq9O+3uec84Dr+DAZVttG0AAhgiMQM3blm24rl8LsBIVb1S8LgApwMszDQowKi7IhCneXWCEbQP5BsI58gmyiWVD3/S+dvCaKaYpbcYquROs4a0uv+lasUrM9vUPLjuXZ'
+  const decodeResult = decoderPlugin.decode({ text: text }, { debug: true });
+  console.log(JSON.stringify(decodeResult, null, 2));
+
+  expect(decodeResult.decoded).toBe(true);
+  expect(decodeResult.decoder.decodeLevel).toBe('full');
+  expect(decodeResult.decoder.name).toBe('label-h1-ohma');
+  expect(decodeResult.formatted.description).toBe('OHMA Message');
+  expect(decodeResult.message.text).toBe(text);
+  expect(decodeResult.raw.ohma).toBe('{\"version\":\"2.0\",\"message\":\"undefined\"}');
+  expect(decodeResult.formatted.items.length).toBe(1);
+  expect(decodeResult.formatted.items[0].type).toBe('ohma');
+  expect(decodeResult.formatted.items[0].code).toBe('OHMA');
+  expect(decodeResult.formatted.items[0].label).toBe('OHMA Downlink');
+  expect(decodeResult.formatted.items[0].value).toBe('undefined');
+}); 
+
 test('decodes Label H1 Preamble OHMA invalid', () => {
   const decoder = new MessageDecoder();
   const decoderPlugin = new Label_H1_OHMA(decoder);

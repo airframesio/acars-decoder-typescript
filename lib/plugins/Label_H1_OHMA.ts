@@ -9,7 +9,7 @@ export class Label_H1_OHMA extends DecoderPlugin {
   qualifiers() { // eslint-disable-line class-methods-use-this
     return {
       labels: ["H1"],
-      preambles: ['OHMA', '/RTNBOCR.OHMA'],
+      preambles: ['OHMA', '/RTNBOCR.OHMA', '#T1B/RTNBOCR.OHMA'],
     };
   }
 
@@ -21,7 +21,6 @@ export class Label_H1_OHMA extends DecoderPlugin {
     decodeResult.remaining.text = '';
 
     const data = message.text.split('OHMA')[1]; // throw out '/RTNOCR.' - even though it means something
-
     try {
       const compressedBuffer = Buffer.from(data, 'base64');
       const decompress = new zlib.Inflate({windowBits: 15});
