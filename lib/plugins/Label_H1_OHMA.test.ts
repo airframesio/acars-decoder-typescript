@@ -10,7 +10,7 @@ test('matches Label H1 Preamble OHMA qualifiers', () => {
   expect(decoderPlugin.qualifiers).toBeDefined();
   expect(decoderPlugin.qualifiers()).toEqual({
     labels: ['H1'],
-    preambles: ['OHMA'],
+    preambles: ['OHMA', '/RTNBOCR.OHMA'],
   });
 });
 
@@ -33,8 +33,30 @@ test('decodes Label H1 Preamble OHMA valid', () => {
   expect(decodeResult.formatted.items[0].type).toBe('ohma');
   expect(decodeResult.formatted.items[0].code).toBe('OHMA');
   expect(decodeResult.formatted.items[0].label).toBe('OHMA Downlink');
-  expect(decodeResult.formatted.items[0].value.length).toBe(2658)}); // instead of comparing to a giant json obj
+  expect(decodeResult.formatted.items[0].value.length).toBe(2658); // instead of comparing to a giant json obj
+}); 
 
+test('decodes Label H1 Preamble OHMA RTN', () => {
+  const decoder = new MessageDecoder();
+  const decoderPlugin = new Label_H1_OHMA(decoder);
+
+  // https://app.airframes.io/messages/3125950763
+  const text = '/RTNBOCR.OHMAeJyrVipLLSrOzM9TslIy0jNQ0lHKTS0uTkxPBfJL81JS0zLzUlOUagH7TQzW'
+  const decodeResult = decoderPlugin.decode({ text: text }, { debug: true });
+  console.log(JSON.stringify(decodeResult, null, 2));
+
+  expect(decodeResult.decoded).toBe(true);
+  expect(decodeResult.decoder.decodeLevel).toBe('full');
+  expect(decodeResult.decoder.name).toBe('label-h1-ohma');
+  expect(decodeResult.formatted.description).toBe('OHMA Message');
+  expect(decodeResult.message.text).toBe(text);
+  expect(decodeResult.raw.ohma).toBe('{\"version\":\"2.0\",\"message\":\"undefined\"}');
+  expect(decodeResult.formatted.items.length).toBe(1);
+  expect(decodeResult.formatted.items[0].type).toBe('ohma');
+  expect(decodeResult.formatted.items[0].code).toBe('OHMA');
+  expect(decodeResult.formatted.items[0].label).toBe('OHMA Downlink');
+  expect(decodeResult.formatted.items[0].value).toBe('undefined');
+}); 
 
 test('decodes Label H1 Preamble OHMA invalid', () => {
   const decoder = new MessageDecoder();

@@ -9,7 +9,7 @@ export class Label_H1_OHMA extends DecoderPlugin {
   qualifiers() { // eslint-disable-line class-methods-use-this
     return {
       labels: ["H1"],
-      preambles: ['OHMA'],
+      preambles: ['OHMA', '/RTNBOCR.OHMA'],
     };
   }
 
@@ -20,7 +20,7 @@ export class Label_H1_OHMA extends DecoderPlugin {
     decodeResult.message = message;
     decodeResult.remaining.text = '';
 
-    const data = message.text.slice(4);
+    const data = message.text.split('OHMA')[1]; // throw out '/RTNOCR.' - even though it means something
 
     try {
       const compressedBuffer = Buffer.from(data, 'base64');
@@ -30,8 +30,14 @@ export class Label_H1_OHMA extends DecoderPlugin {
       const result = decompress.read();
       const jsonText = result.toString();
       const json = JSON.parse(jsonText);
-      const ohmaMsg = JSON.parse(json.message);
+      let formattedMsg;
 
+      if(json.message.startsWith('{')) {
+        const ohmaMsg = JSON.parse(json.message);
+        formattedMsg = JSON.stringify(ohmaMsg, null, 2);
+      } else {
+        formattedMsg = json.message;
+      }
       decodeResult.decoded = true;
       decodeResult.decoder.decodeLevel = 'full';
       decodeResult.raw.ohma = jsonText;
@@ -39,12 +45,12 @@ export class Label_H1_OHMA extends DecoderPlugin {
         type: 'ohma',
         code: 'OHMA' ,
         label: 'OHMA Downlink',
-        value: JSON.stringify(ohmaMsg, null, 2)
+        value: formattedMsg,
       });
-    } catch {
+    } catch (e) {
       // Unknown
       if (options.debug) {
-        console.log(`Decoder: Unknown H1 OHMA message: ${message.text}`);
+        console.log(`Decoder: Unknown H1 OHMA message: ${message.text}`, e);
       }
       decodeResult.remaining.text += message.text;
       decodeResult.decoded = false;
