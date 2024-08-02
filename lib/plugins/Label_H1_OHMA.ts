@@ -9,7 +9,7 @@ export class Label_H1_OHMA extends DecoderPlugin {
   qualifiers() { // eslint-disable-line class-methods-use-this
     return {
       labels: ["H1"],
-      preambles: ['OHMA'], //TODO - support data before #
+      preambles: ['OHMA'],
     };
   }
 
