@@ -11,7 +11,7 @@ export class Label_H1_POS extends DecoderPlugin {
 
   qualifiers() { // eslint-disable-line class-methods-use-this
     return {
-      labels: ["H1"],
+      labels: ["H1", '4J'],
       preambles: ['POS', '#M1BPOS', '/.POS'], //TODO - support data before #
     };
   }
@@ -91,8 +91,8 @@ export class Label_H1_POS extends DecoderPlugin {
 
       decodeResult.decoded = true;
       decodeResult.decoder.decodeLevel = 'partial';
-    } else if(parts.length === 15) { // variant 6
-    processUnknown(decodeResult, parts[1]);
+    } else if(parts.length === 15) { // variant 7
+    decodeResult.raw.flight_number = parts[1];
     let date = undefined;
     if(parts[2].startsWith('/DC')) {
       date = parts[2].substring(3);

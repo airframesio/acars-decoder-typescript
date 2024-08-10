@@ -13,7 +13,7 @@ export class FlightPlanUtils {
    * @returns whether all fields were processed or not
    */
   public static processFlightPlan(decodeResult: any, data: string[]): boolean {
-    let allKnownFields = parseHeader(decodeResult, data[0]);
+    let allKnownFields = FlightPlanUtils.parseHeader(decodeResult, data[0]);
     for (let i = 1; i < data.length; i += 2) {
       const key = data[i];
       const value = data[i + 1];
@@ -56,6 +56,79 @@ export class FlightPlanUtils {
     }
     return allKnownFields;
   }
+  public static parseHeader(decodeResult: any, header: string): boolean {
+    let allKnownFields = true;
+    const fields = header.split('/');
+    allKnownFields = allKnownFields && parseMessageType(decodeResult, fields[0]);
+    for (let i = 1; i < fields.length; ++i) {
+      if (fields[i].startsWith('FN')) {
+        decodeResult.raw.flight_number = fields[i].substring(2); // Strip off 'FN'
+      } else if (fields[i].startsWith('SN')) {
+        decodeResult.raw.serial_number = fields[i].substring(2); // Strip off 'SN'
+      } else if (fields[i].startsWith('TS')) {
+        const ts = fields[i].substring(2).split(','); // Strip off PS
+        let time = DateTimeUtils.convertDateTimeToEpoch(ts[0], ts[1]);
+      
+        if(Number.isNaN(time)) {  // convert DDMMYY to MMDDYY - TODO figure out a better way to determine
+          const date = ts[1].substring(2,4) + ts[1].substring(0,2) + ts[1].substring(4,6);
+          time = DateTimeUtils.convertDateTimeToEpoch(ts[0], date);
+        }
+        decodeResult.raw.message_timestamp = time;
+      } else if (fields[i].startsWith('PS')) {
+        const pos = fields[i].substring(2); // Strip off PS
+        allKnownFields == allKnownFields && processPosition(decodeResult, pos);
+      } else if (fields[i].startsWith('DT')) {
+        const icao = fields[i].substring(2); // Strip off DT
+        decodeResult.raw.arrival_icao = icao;
+        decodeResult.formatted.items.push({
+          type: 'destination',
+          code: 'DST',
+          label: 'Destination',
+          value: decodeResult.raw.arrival_icao,
+        });
+      }  else if (fields[i].startsWith('ID')) {
+        const tail = fields[i].substring(2); // Strip off ID
+        decodeResult.raw.tail = tail;
+        decodeResult.formatted.items.push({
+          type: 'tail',
+          label: 'Tail',
+          value: decodeResult.raw.tail,
+        });
+      } else if (fields[i].startsWith('RF')) {
+        decodeResult.formatted.items.push({
+          type: 'status',
+          code: 'ROUTE_STATUS',
+          label: 'Route Status',
+          value: 'Route Filed',
+        });
+        decodeResult.raw.route_status = 'RF';
+        if (fields[i].length > 2) {
+          addRoute(decodeResult, fields[i].substring(2));       
+        }
+      } else if (fields[i] == 'RP') {
+        decodeResult.raw.route_status = 'RP';
+        decodeResult.formatted.items.push({
+          type: 'status',
+          code: 'ROUTE_STATUS',
+          label: 'Route Status',
+          value: 'Route Planned',
+        });
+        decodeResult.raw.route_status = fields[i];
+      } else if (fields[i] == 'RI') {
+        decodeResult.raw.route_status = 'RI';
+        decodeResult.formatted.items.push({
+          type: 'status',
+          code: 'ROUTE_STATUS',
+          label: 'Route Status',
+          value: 'Route Inactive',
+        });
+      } else {
+          decodeResult.remaining.text += '/' + fields[i];
+          allKnownFields = false
+      }
+    }
+    return allKnownFields;
+  };
 }
 
 function parseMessageType(decodeResult: any, messageType: string): boolean {
@@ -83,73 +156,6 @@ function parseMessageType(decodeResult: any, messageType: string): boolean {
   decodeResult.remaining.text += messageType;
   return false;
 }
-
-function parseHeader(decodeResult: any, header: string): boolean {
-  let allKnownFields = true;
-  const fields = header.split('/');
-  allKnownFields = allKnownFields && parseMessageType(decodeResult, fields[0]);
-  for (let i = 1; i < fields.length; ++i) {
-    if (fields[i].startsWith('FN')) {
-      decodeResult.raw.flight_number = fields[i].substring(2); // Strip off 'FN'
-    } else if (fields[i].startsWith('SN')) {
-      decodeResult.raw.serial_number = fields[i].substring(2); // Strip off 'SN'
-    } else if (fields[i].startsWith('TS')) {
-      const ts = fields[i].substring(2).split(','); // Strip off PS
-      let time = DateTimeUtils.convertDateTimeToEpoch(ts[0], ts[1]);
-    
-      if(Number.isNaN(time)) {  // convert DDMMYY to MMDDYY - TODO figure out a better way to determine
-        const date = ts[1].substring(2,4) + ts[1].substring(0,2) + ts[1].substring(4,6);
-        time = DateTimeUtils.convertDateTimeToEpoch(ts[0], date);
-      }
-      decodeResult.raw.message_timestamp = time;
-    } else if (fields[i].startsWith('PS')) {
-      const pos = fields[i].substring(2); // Strip off PS
-      allKnownFields == allKnownFields && processPosition(decodeResult, pos);
-    } else if (fields[i].startsWith('DT')) {
-      const icao = fields[i].substring(2); // Strip off DT
-      decodeResult.raw.arrival_icao = icao;
-      decodeResult.formatted.items.push({
-        type: 'destination',
-        code: 'DST',
-        label: 'Destination',
-        value: decodeResult.raw.arrival_icao,
-      });
-    } else if (fields[i].startsWith('RF')) {
-      decodeResult.formatted.items.push({
-        type: 'status',
-        code: 'ROUTE_STATUS',
-        label: 'Route Status',
-        value: 'Route Filed',
-      });
-      decodeResult.raw.route_status = 'RF';
-      if (fields[i].length > 2) {
-        addRoute(decodeResult, fields[i].substring(2));       
-      }
-    } else if (fields[i] == 'RP') {
-      decodeResult.raw.route_status = 'RP';
-      decodeResult.formatted.items.push({
-        type: 'status',
-        code: 'ROUTE_STATUS',
-        label: 'Route Status',
-        value: 'Route Planned',
-      });
-      decodeResult.raw.route_status = fields[i];
-    } else if (fields[i] == 'RI') {
-      decodeResult.raw.route_status = 'RI';
-      decodeResult.formatted.items.push({
-        type: 'status',
-        code: 'ROUTE_STATUS',
-        label: 'Route Status',
-        value: 'Route Inactive',
-      });
-    } else {
-        decodeResult.remaining.text += '/' + fields[i];
-        allKnownFields = false
-    }
-  }
-  return allKnownFields;
-};
-
 
 function processPosition(decodeResult: any, value: string): boolean {
   const position = CoordinateUtils.decodeStringCoordinates(value);
