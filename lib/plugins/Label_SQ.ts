@@ -11,7 +11,7 @@ export class Label_SQ extends DecoderPlugin {
   }
 
   decode(message: Message, options: Options = {}) : DecodeResult {
-    const decodeResult: any = this.defaultResult;
+    const decodeResult: any = this.defaultResult();
     decodeResult.decoder.name = this.name;
 
     decodeResult.raw.preamble = message.text.substring(0, 4);

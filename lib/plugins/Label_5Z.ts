@@ -37,7 +37,7 @@ export class Label_5Z extends DecoderPlugin {
   }
 
   decode(message: Message, options: Options = {}) : DecodeResult {
-    const decodeResult: any = this.defaultResult;
+    const decodeResult: any = this.defaultResult();
     decodeResult.decoder.name = this.name;
 
     decodeResult.formatted.description = 'Airline Designated Downlink';

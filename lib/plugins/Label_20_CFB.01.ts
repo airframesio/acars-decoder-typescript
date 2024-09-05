@@ -14,7 +14,7 @@ export class Label_20_CFB01 extends DecoderPlugin {
   }
 
   decode(message: Message, options: Options = {}) : DecodeResult {
-    const decodeResult: any = this.defaultResult;
+    const decodeResult: any = this.defaultResult();
     decodeResult.decoder.name = this.name;
     decodeResult.formatted.description = 'Crew Flight Bag Message';
     decodeResult.message = message;

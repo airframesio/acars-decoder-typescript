@@ -5,19 +5,21 @@ export abstract class DecoderPlugin implements DecoderPluginInterface {
 
   name: string = 'unknown';
 
-  defaultResult: DecodeResult = {
-    decoded: false,
-    decoder: {
-      name: 'unknown',
-      type: 'pattern-match',
-      decodeLevel: 'none',
-    },
-    formatted: {
-      description: 'Unknown',
-      items: [],
-    },
-    raw: {},
-    remaining: {},
+  defaultResult(): DecodeResult {
+      return {
+          decoded: false,
+          decoder: {
+              name: 'unknown',
+              type: 'pattern-match',
+              decodeLevel: 'none',
+          },
+          formatted: {
+              description: 'Unknown',
+              items: [],
+          },
+          raw: {},
+          remaining: {},
+      };
   };
 
   options: Object;
@@ -49,7 +51,7 @@ export abstract class DecoderPlugin implements DecoderPluginInterface {
   }
 
   decode(message: Message) : DecodeResult { // eslint-disable-line class-methods-use-this
-    const decodeResult: any = this.defaultResult;
+    const decodeResult: any = this.defaultResult();
     decodeResult.remaining.text = message.text;
     return decodeResult;
   }

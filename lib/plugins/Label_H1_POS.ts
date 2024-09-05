@@ -17,7 +17,7 @@ export class Label_H1_POS extends DecoderPlugin {
   }
 
   decode(message: Message, options: Options = {}) : DecodeResult {
-    let decodeResult: any = this.defaultResult;
+    let decodeResult: any = this.defaultResult();
     decodeResult.decoder.name = this.name;
     decodeResult.formatted.description = 'Position Report';
     decodeResult.message = message;

@@ -11,7 +11,7 @@ export class Label_ColonComma extends DecoderPlugin {
   }
 
   decode(message: Message, options: Options = {}) : DecodeResult {
-    const decodeResult: any = this.defaultResult;
+    const decodeResult: any = this.defaultResult();
     decodeResult.decoder.name = this.name;
 
     decodeResult.raw.frequency = Number(message.text) / 1000;
