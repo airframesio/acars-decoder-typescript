@@ -13,3 +13,17 @@ test('MIAM core seamless decode', () => {
   expect(decodeResult.message.sublabel).toBe('DF');
   expect(decodeResult.message.text).toContain('A350,000354');
 })
+
+test('Handles Multiple decodes', () => {
+  const message = {
+    label: 'H1',
+    text: 'POSN43312W123174,EASON,215754,370,EBINY,220601,ELENN,M48,02216,185/TS215754,0921227A40'
+  };
+
+  const decoder = new MessageDecoder();
+  decoder.decode(message);
+  const decodeResult = decoder.decode(message);
+
+  expect(decodeResult.message.label).toBe('H1');
+  expect(decodeResult.formatted.items.length).toBe(5);
+})
