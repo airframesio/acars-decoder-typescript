@@ -13,7 +13,7 @@ export class Label_H1_WRN extends DecoderPlugin {
   }
 
   decode(message: Message, options: Options = {}) : DecodeResult {
-    let decodeResult: any = this.defaultResult;
+    let decodeResult: any = this.defaultResult();
     decodeResult.decoder.name = this.name;
     decodeResult.formatted.description = 'Warning Message';
     decodeResult.message = message;

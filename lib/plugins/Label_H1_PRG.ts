@@ -15,7 +15,7 @@ export class Label_H1_PRG extends DecoderPlugin { // eslint-disable-line camelca
 
   // https://acars-vdl2.groups.io/g/main/topic/decoding_last_part_of_prg/28964299
   decode(message: Message, options: Options = {}) : DecodeResult {
-    const decodeResult: any = this.defaultResult;
+    const decodeResult: any = this.defaultResult();
     decodeResult.decoder.name = this.name;
     decodeResult.formatted.description = 'Progress Report';
     decodeResult.message = message;

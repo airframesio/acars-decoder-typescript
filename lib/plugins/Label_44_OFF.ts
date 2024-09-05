@@ -14,7 +14,7 @@ export class Label_44_OFF extends DecoderPlugin {
   }
 
   decode(message: Message, options: Options = {}) : DecodeResult {
-    const decodeResult: any = this.defaultResult;
+    const decodeResult: any = this.defaultResult();
     decodeResult.decoder.name = this.name;
     decodeResult.formatted.description = 'Off Runway Report';
     decodeResult.message = message;

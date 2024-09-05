@@ -13,7 +13,7 @@ export class Label_H1_FPN extends DecoderPlugin {
   }
 
   decode(message: Message, options: any = {} ): any {
-    let decodeResult: any = this.defaultResult;
+    let decodeResult: any = this.defaultResult();
     decodeResult.decoder.name = this.name;
     decodeResult.formatted.description = 'Flight Plan';
     decodeResult.message = message;
