@@ -27,7 +27,7 @@ export class Label_H1_PRG extends DecoderPlugin { // eslint-disable-line camelca
     const data = message.text.substring(3, message.text.length-4);
     const fields = data.split(',');
     if(fields.length === 5) {
-      const allKnownFields = parseHeader(decodeResult, fields[0]);
+      const allKnownFields = FlightPlanUtils.parseHeader(decodeResult, fields[0]);
       processRunway(decodeResult, fields[1]);
       processCurrentFuel(decodeResult, fields[2]);
       processETA(decodeResult, fields[3]);
@@ -37,7 +37,7 @@ export class Label_H1_PRG extends DecoderPlugin { // eslint-disable-line camelca
       decodeResult.decoded = true;
       decodeResult.decoder.decodeLevel = allKnownFields ? 'full' : 'partial';
     } else if(fields.length === 6) {
-      const allKnownFields = parseHeader(decodeResult, fields[0]);
+      const allKnownFields = FlightPlanUtils.parseHeader(decodeResult, fields[0]);
       processRunway(decodeResult, fields[1]);
       processCurrentFuel(decodeResult, fields[2]);
       processETA(decodeResult, fields[3]);
@@ -47,7 +47,7 @@ export class Label_H1_PRG extends DecoderPlugin { // eslint-disable-line camelca
       decodeResult.decoded = true;
       decodeResult.decoder.decodeLevel = allKnownFields ? 'full' : 'partial';
     } else if(fields.length === 19) {
-      const allKnownFields = parseHeader(decodeResult, fields[0]);
+      const allKnownFields = FlightPlanUtils.parseHeader(decodeResult, fields[0]);
       processUnknown(decodeResult, fields[1]);
       processFlightNumber(decodeResult, fields[2]);
       processDeptApt(decodeResult, fields[3]);
@@ -59,7 +59,7 @@ export class Label_H1_PRG extends DecoderPlugin { // eslint-disable-line camelca
       decodeResult.decoded = true;
       decodeResult.decoder.decodeLevel = 'partial';
     } else if(fields.length === 21) {
-      const allKnownFields = parseHeader(decodeResult, fields[0]);
+      const allKnownFields = FlightPlanUtils.parseHeader(decodeResult, fields[0]);
       processRunway(decodeResult, fields[1]);
       processUnknown(decodeResult, fields.slice(2, 21).join(','));
       FlightPlanUtils.processFlightPlan(decodeResult, fields[21].split(':'));
@@ -82,28 +82,6 @@ export class Label_H1_PRG extends DecoderPlugin { // eslint-disable-line camelca
 }
 
 export default {};
-
-function parseHeader(decodeResult: DecodeResult, header: string): boolean {
-  let allKnownFields = true;
-  const fields = header.split('/');
-  // fields[0] is msg type - we already know this
-  for(let i=1; i<fields.length; ++i) {
-      if (fields[i].startsWith('FN')) {
-          decodeResult.raw.flight_number = fields[i].substring(2); // Strip off 'FN'
-      } else if (fields[i].startsWith('SN')) {
-          decodeResult.raw.serial_number = fields[i].substring(2); // Strip off 'SN'
-      }  else if (fields[i].startsWith('TS')) {
-        const ts = fields[i].substring(2).split(',');
-        decodeResult.raw.message_timestamp = DateTimeUtils.convertDateTimeToEpoch(ts[0],ts[1]);
-    }   else if (fields[i].startsWith('DT')) {
-      processArrvApt(decodeResult, fields[i].substring(2)) // Strip off 'DT'
-  } else {
-          decodeResult.remaining.text += '/' + fields[i];
-          allKnownFields = false
-      }
-  }
-  return allKnownFields;
-};
 
 function processFlightNumber(decodeResult: any, value: string) {
   decodeResult.raw.flight_number = value;
