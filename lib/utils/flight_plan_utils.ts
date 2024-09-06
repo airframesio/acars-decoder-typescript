@@ -79,13 +79,19 @@ export class FlightPlanUtils {
         allKnownFields == allKnownFields && processPosition(decodeResult, pos);
       } else if (fields[i].startsWith('DT')) {
         const icao = fields[i].substring(2); // Strip off DT
-        decodeResult.raw.arrival_icao = icao;
-        decodeResult.formatted.items.push({
-          type: 'destination',
-          code: 'DST',
-          label: 'Destination',
-          value: decodeResult.raw.arrival_icao,
-        });
+        if(!decodeResult.raw.arrival_icao) {
+          decodeResult.raw.arrival_icao = icao;
+          decodeResult.formatted.items.push({
+            type: 'destination',
+            code: 'DST',
+            label: 'Destination',
+            value: decodeResult.raw.arrival_icao,
+          });
+        } else if(decodeResult.raw.arrival_icao == icao ) {
+          continue;
+        }else {
+          decodeResult.remaining.text += '/' + fields[i];
+        }
       }  else if (fields[i].startsWith('ID')) {
         const tail = fields[i].substring(2); // Strip off ID
         decodeResult.raw.tail = tail;
@@ -105,7 +111,7 @@ export class FlightPlanUtils {
         if (fields[i].length > 2) {
           addRoute(decodeResult, fields[i].substring(2));       
         }
-      } else if (fields[i] == 'RP') {
+      } else if (fields[i].startsWith('RP')) {
         decodeResult.raw.route_status = 'RP';
         decodeResult.formatted.items.push({
           type: 'status',
@@ -113,8 +119,11 @@ export class FlightPlanUtils {
           label: 'Route Status',
           value: 'Route Planned',
         });
+        if (fields[i].length > 2) {
+          allKnownFields = allKnownFields && this.processFlightPlan(decodeResult, fields[i].split(':'));
+        }
         decodeResult.raw.route_status = fields[i];
-      } else if (fields[i] == 'RI') {
+      } else if (fields[i].startsWith('RI')) {
         decodeResult.raw.route_status = 'RI';
         decodeResult.formatted.items.push({
           type: 'status',
@@ -122,6 +131,9 @@ export class FlightPlanUtils {
           label: 'Route Status',
           value: 'Route Inactive',
         });
+        if (fields[i].length > 2) {
+          allKnownFields = allKnownFields && this.processFlightPlan(decodeResult, fields[i].split(':'));
+        }
       } else {
           decodeResult.remaining.text += '/' + fields[i];
           allKnownFields = false

@@ -46,6 +46,7 @@ test('decodes Label H1 Preamble FPN landing', () => {
   expect(decodeResult.formatted.items[8].label).toBe('Message Checksum');
   expect(decodeResult.formatted.items[8].value).toBe('0xc8b5');
 });
+
 test('decodes Label H1 Preamble FPN full flight', () => {
   const decoder = new MessageDecoder();
   const decoderPlugin = new Label_H1_FPN(decoder);
@@ -112,7 +113,6 @@ test('decodes Label H1 Preamble FPN in-flight', () => {
   expect(decodeResult.formatted.items[4].value).toBe('0xddfb');
 });
 
-
 test('decodes Label H1 Preamble FPN with WS', () => {
   const decoder = new MessageDecoder();
   const decoderPlugin = new Label_H1_FPN(decoder);
@@ -137,10 +137,10 @@ test('decodes Label H1 Preamble FPN with WS', () => {
   expect(decodeResult.formatted.items[3].label).toBe('Arrival Procedure');
   expect(decodeResult.formatted.items[3].value).toBe('BAINY3');
   expect(decodeResult.formatted.items[4].label).toBe('Approach Procedure');
-  expect(decodeResult.formatted.items[4].value).toBe('ILS30L(30L)/PR4356,344,360,1060,,,13,,,30,,,P50,M40,36090,,3296,292/DTKMSP,30L,172,215117'); //FIXME - just 'ILS30L'
+  expect(decodeResult.formatted.items[4].value).toBe('ILS30L(30L)');
   expect(decodeResult.formatted.items[5].label).toBe('Message Checksum');
   expect(decodeResult.formatted.items[5].value).toBe('0x156d');
-  expect(decodeResult.remaining.text).toBe(':WS:N61000W030000,370..N61000W040000..N60000W050000..URTAK:WS:URTAK,380..LAKES:WS:LAKES,400..N57000W070000..N54300W080000..N49000W090000..DLH..COLDD');
+  expect(decodeResult.remaining.text).toBe(':WS:N61000W030000,370..N61000W040000..N60000W050000..URTAK:WS:URTAK,380..LAKES:WS:LAKES,400..N57000W070000..N54300W080000..N49000W090000..DLH..COLDD/PR4356,344,360,1060,,,13,,,30,,,P50,M40,36090,,3296,292/DTKMSP,30L,172,215117');
 });
 
 test('decodes Label H1 Preamble FPN with newlines', () => {
@@ -201,6 +201,37 @@ test('decodes Label H1 Preamble FPN with SN and TS', () => {
   expect(decodeResult.formatted.items[5].value).toBe('0xf5e1');
 });
 
+test('decodes Label H1 Preamble FPN with FN', () => {
+  const decoder = new MessageDecoder();
+  const decoderPlugin = new Label_H1_FPN(decoder);
+
+  // https://app.airframes.io/messages/3281723743
+  const text = 'FPN/RP:DA:KSEA:AA:KPHX:D:SUMMA2.SUMMA:F:SUMMA,N46371W121593..LTJ,N45428W121061..IMB,N44389W119427.Q35..CORKR,N36050W112240..TENTS,N35295W112271:A:BRUSR1.TENTS/FNFFT17245D16';
+   const decodeResult = decoderPlugin.decode({ text: text });
+  console.log(JSON.stringify(decodeResult, null, 2));
+
+  expect(decodeResult.decoded).toBe(true);
+  expect(decodeResult.decoder.decodeLevel).toBe('full');
+  expect(decodeResult.decoder.name).toBe('label-h1-fpn');
+  expect(decodeResult.formatted.description).toBe('Flight Plan');
+  expect(decodeResult.raw.flight_number).toBe('FFT1724');
+  expect(decodeResult.formatted.items.length).toBe(7);
+  expect(decodeResult.formatted.items[0].label).toBe('Route Status');
+  expect(decodeResult.formatted.items[0].value).toBe('Route Planned');
+  expect(decodeResult.formatted.items[1].label).toBe('Origin');
+  expect(decodeResult.formatted.items[1].value).toBe('KSEA');
+  expect(decodeResult.formatted.items[2].label).toBe('Destination');
+  expect(decodeResult.formatted.items[2].value).toBe('KPHX');
+  expect(decodeResult.formatted.items[3].label).toBe('Departure Procedure');
+  expect(decodeResult.formatted.items[3].value).toBe('SUMMA2 starting at SUMMA');
+  expect(decodeResult.formatted.items[4].label).toBe('Aircraft Route');
+  expect(decodeResult.formatted.items[4].value).toBe('SUMMA(46.371 N, 121.593 W) >> LTJ(45.428 N, 121.061 W) >> IMB(44.389 N, 119.427 W) > Q35 >> CORKR(36.050 N, 112.240 W) >> TENTS(35.295 N, 112.271 W)');
+  expect(decodeResult.formatted.items[5].label).toBe('Arrival Procedure');
+  expect(decodeResult.formatted.items[5].value).toBe('BRUSR1 starting at TENTS');
+  expect(decodeResult.formatted.items[6].label).toBe('Message Checksum');
+  expect(decodeResult.formatted.items[6].value).toBe('0x5d16');
+
+});
 
 test('decodes Label H1 Preamble #M1BFPN', () => {
   const decoder = new MessageDecoder();
@@ -232,7 +263,6 @@ test('decodes Label H1 Preamble #M1BFPN', () => {
   expect(decodeResult.formatted.items[6].value).toBe('0x90e1');
 });
 
-
 // Does not match the preamble
 // This might move to a different parser, but while we're here...
 test('decodes Label H1 #M1BFPN No Preamble', () => {
@@ -245,7 +275,7 @@ test('decodes Label H1 #M1BFPN No Preamble', () => {
   console.log(JSON.stringify(decodeResult, null, 2));
 
   expect(decodeResult.decoded).toBe(true);
-  expect(decodeResult.decoder.decodeLevel).toBe('full'); // should be partial
+  expect(decodeResult.decoder.decodeLevel).toBe('partial');
   expect(decodeResult.decoder.name).toBe('label-h1-fpn');
   expect(decodeResult.raw.flight_number).toBe('AKL0767');
   expect(decodeResult.raw.message_timestamp).toBe(1708730408);
@@ -262,10 +292,10 @@ test('decodes Label H1 #M1BFPN No Preamble', () => {
   expect(decodeResult.formatted.items[4].label).toBe('Departure Procedure');
   expect(decodeResult.formatted.items[4].value).toBe('ADRI1F: >> IRLEP > A574 >> PJG');
   expect(decodeResult.formatted.items[5].label).toBe('Approach Procedure');
-  expect(decodeResult.formatted.items[5].value).toBe('RNV10(10O)/PR,,110,,183,7,13,,M7,25,,,P30,M40,36090,13,3455,300/DTTNCB,10O,119,234408'); /// TODO - Fix
+  expect(decodeResult.formatted.items[5].value).toBe('RNV10(10O)');
   expect(decodeResult.formatted.items[6].label).toBe('Message Checksum');
   expect(decodeResult.formatted.items[6].value).toBe('0x47c0');
-  // expect(decodeResult.remaining.text).toBe('F37AKL0767'); // KL0767 is the flight number
+  expect(decodeResult.remaining.text).toBe('F37#M1B/PR,,110,,183,7,13,,M7,25,,,P30,M40,36090,13,3455,300/DTTNCB,10O,119,234408');
 });
 
 test('decodes Label H1 Preamble FPN <invalid>', () => {

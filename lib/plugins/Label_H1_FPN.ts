@@ -17,12 +17,13 @@ export class Label_H1_FPN extends DecoderPlugin {
     decodeResult.decoder.name = this.name;
     decodeResult.formatted.description = 'Flight Plan';
     decodeResult.message = message;
+    decodeResult.remaining.text = '';
 
     const msg = message.text.replace(/\n|\r/g, "");
     const checksum = msg.slice(-4);
     const data = msg.slice(0, msg.length-4).split(':');
     if(data.length > 1) {
-      const fulllyDecoded = FlightPlanUtils.processFlightPlan(decodeResult, data)
+      const fulllyDecoded = FlightPlanUtils.processFlightPlan(decodeResult, [data.join(':')])
       addChecksum(decodeResult, checksum);
       decodeResult.decoded = true;
       decodeResult.decoder.decodeLevel = fulllyDecoded ? 'full' :  'partial';
