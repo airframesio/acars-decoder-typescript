@@ -48,13 +48,13 @@ export class RouteUtils {
 
         const waypoint = leg.split(',');
         if(waypoint.length ==2) {
-            const position = CoordinateUtils.decodeStringCoordinates(waypoint[1]);
+            const position = CoordinateUtils.decodeStringCoordinatesDecimalMinutes(waypoint[1]);
             if(position) {
                 return {name: waypoint[0], latitude: position.latitude, longitude: position.longitude};
             }
         }
         if(leg.length == 13 || leg.length == 14) { //looks like coordinates
-            const position = CoordinateUtils.decodeStringCoordinates(leg);
+            const position = CoordinateUtils.decodeStringCoordinatesDecimalMinutes(leg);
             const name = waypoint.length == 2 ? waypoint[0] : '';
             if(position) {
                 return {name: name, latitude: position.latitude, longitude: position.longitude};
