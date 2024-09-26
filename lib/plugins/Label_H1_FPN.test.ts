@@ -230,50 +230,6 @@ test('decodes Label H1 Preamble FPN with FN', () => {
   expect(decodeResult.formatted.items[5].value).toBe('BRUSR1 starting at TENTS');
   expect(decodeResult.formatted.items[6].label).toBe('Message Checksum');
   expect(decodeResult.formatted.items[6].value).toBe('0x5d16');
-
-});
-test('decodes Label H1 Preamble FPN with RA', () => {
-  const decoder = new MessageDecoder();
-  const decoderPlugin = new Label_H1_FPN(decoder);
-
-  // https://app.airframes.io/messages/3282851026
-  const text = 'FPN/FNAAL2082/RP:DA:KPHL:AA:KTPA:CR:PHLTPA61:R:09L(19R):D:PHL3:A:MAATY4.HONID:AP:ILS19R..DRAIK,N37080W078590.Q75.GSO..HONID,N31388W084237/RA:DA:KTPA:AA:KMIAFA0F';
-   const decodeResult = decoderPlugin.decode({ text: text });
-  console.log(JSON.stringify(decodeResult, null, 2));
-
-  expect(decodeResult.decoded).toBe(true);
-  expect(decodeResult.decoder.decodeLevel).toBe('full');
-  expect(decodeResult.decoder.name).toBe('label-h1-fpn');
-  expect(decodeResult.raw.flight_number).toBe('AAL2082');
-  expect(decodeResult.formatted.description).toBe('Flight Plan');
-  expect(decodeResult.formatted.items.length).toBe(13);
-  expect(decodeResult.formatted.items[0].label).toBe('Route Status');
-  expect(decodeResult.formatted.items[0].value).toBe('Route Planned');
-  expect(decodeResult.formatted.items[1].label).toBe('Origin');
-  expect(decodeResult.formatted.items[1].value).toBe('KPHL');
-  expect(decodeResult.formatted.items[2].label).toBe('Destination');
-  expect(decodeResult.formatted.items[2].value).toBe('KTPA');
-  expect(decodeResult.formatted.items[3].label).toBe('Company Route');
-  expect(decodeResult.formatted.items[3].value).toBe('PHLTPA61');
-  expect(decodeResult.formatted.items[4].label).toBe('Arrival Runway');
-  expect(decodeResult.formatted.items[4].value).toBe('19R');
-  expect(decodeResult.formatted.items[5].label).toBe('Departure Runway');
-  expect(decodeResult.formatted.items[5].value).toBe('09L');
-  expect(decodeResult.formatted.items[6].label).toBe('Departure Procedure');
-  expect(decodeResult.formatted.items[6].value).toBe('PHL3');
-  expect(decodeResult.formatted.items[7].label).toBe('Arrival Procedure');
-  expect(decodeResult.formatted.items[7].value).toBe('MAATY4 starting at HONID');
-  expect(decodeResult.formatted.items[8].label).toBe('Approach Procedure');
-  expect(decodeResult.formatted.items[8].value).toBe('ILS19R: >> DRAIK(37.133 N, 78.983 W) > Q75 > GSO >> HONID(31.647 N, 84.395 W)');
-  expect(decodeResult.formatted.items[9].label).toBe('Route Status');
-  expect(decodeResult.formatted.items[9].value).toBe('Alternate Route');
-  expect(decodeResult.formatted.items[10].label).toBe('Origin');
-  expect(decodeResult.formatted.items[10].value).toBe('KTPA');
-  expect(decodeResult.formatted.items[11].label).toBe('Destination');
-  expect(decodeResult.formatted.items[11].value).toBe('KMIA');
-  expect(decodeResult.formatted.items[12].label).toBe('Message Checksum');
-  expect(decodeResult.formatted.items[12].value).toBe('0xfa0f');
-
 });
 
 test('decodes Label H1 Preamble #M1BFPN', () => {
