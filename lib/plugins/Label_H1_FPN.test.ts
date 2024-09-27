@@ -81,7 +81,7 @@ test('decodes Label H1 Preamble FPN full flight', () => {
   expect(decodeResult.formatted.items[7].label).toBe('Arrival Procedure');
   expect(decodeResult.formatted.items[7].value).toBe('EAGUL6 starting at ZUN');
   expect(decodeResult.formatted.items[8].label).toBe('Approach Procedure');
-  expect(decodeResult.formatted.items[8].value).toBe('ILS26: >> AIR(40.010 N, 80.490 W) > J110 > BOWRR >> VLA(39.056 N, 89.097 W) >> STL(38.516 N, 90.289 W) >> GIBSN(38.430 N, 92.244 W) >> TYGER(38.410 N, 94.050 W) >> GCK(37.551 N, 100.435 W) >> DIXAN(36.169 N, 105.573 W) >> ZUN(34.579 N, 109.093 W)');
+  expect(decodeResult.formatted.items[8].value).toBe('ILS26: >> AIR(40.017 N, 80.817 W) > J110 > BOWRR >> VLA(39.093 N, 89.162 W) >> STL(38.860 N, 90.482 W) >> GIBSN(38.717 N, 92.407 W) >> TYGER(38.683 N, 94.083 W) >> GCK(37.918 N, 100.725 W) >> DIXAN(36.282 N, 105.955 W) >> ZUN(34.965 N, 109.155 W)');
   expect(decodeResult.formatted.items[9].label).toBe('Message Checksum');
   expect(decodeResult.formatted.items[9].value).toBe('0x293b');
 });
@@ -108,7 +108,7 @@ test('decodes Label H1 Preamble FPN in-flight', () => {
   expect(decodeResult.formatted.items[2].label).toBe('Destination');
   expect(decodeResult.formatted.items[2].value).toBe('KPHX');
   expect(decodeResult.formatted.items[3].label).toBe('Aircraft Route');
-  expect(decodeResult.formatted.items[3].value).toBe('KAYEX(36.292 N, 120.569 W) >> LOSHN(35.509 N, 120.000 W) >> BOILE(34.253 N, 118.016 W) >> BLH(33.358 N, 114.457 W)');
+  expect(decodeResult.formatted.items[3].value).toBe('KAYEX(36.487 N, 120.948 W) >> LOSHN(35.848 N, 120.000 W) >> BOILE(34.422 N, 118.027 W) >> BLH(33.597 N, 114.762 W)');
   expect(decodeResult.formatted.items[4].label).toBe('Message Checksum');
   expect(decodeResult.formatted.items[4].value).toBe('0xddfb');
 });
@@ -196,7 +196,7 @@ test('decodes Label H1 Preamble FPN with SN and TS', () => {
   expect(decodeResult.formatted.items[3].label).toBe('Departure Procedure');
   expect(decodeResult.formatted.items[3].value).toBe('MKK5 starting at KOLEA');
   expect(decodeResult.formatted.items[4].label).toBe('Aircraft Route');
-  expect(decodeResult.formatted.items[4].value).toBe('KOLEA(22.354 N, 155.133 W) >> CLUTS(23.002 N, 154.393 W) > R465 > CINNY(36.109 N, 124.456 W) >> OAL(38.002 N, 117.462 W) > J58 > ILC(38.150 N, 114.237 W) >> EYELO(38.455 N, 110.469 W) >> SAKES(38.500 N, 110.163 W) > J80 > DBL(39.264 N, 106.537 W)');
+  expect(decodeResult.formatted.items[4].value).toBe('KOLEA(22.590 N, 155.222 W) >> CLUTS(23.003 N, 154.655 W) > R465 > CINNY(36.182 N, 124.760 W) >> OAL(38.003 N, 117.770 W) > J58 > ILC(38.250 N, 114.395 W) >> EYELO(38.758 N, 110.782 W) >> SAKES(38.833 N, 110.272 W) > J80 > DBL(39.440 N, 106.895 W)');
   expect(decodeResult.formatted.items[5].label).toBe('Message Checksum');
   expect(decodeResult.formatted.items[5].value).toBe('0xf5e1');
 });
@@ -225,12 +225,11 @@ test('decodes Label H1 Preamble FPN with FN', () => {
   expect(decodeResult.formatted.items[3].label).toBe('Departure Procedure');
   expect(decodeResult.formatted.items[3].value).toBe('SUMMA2 starting at SUMMA');
   expect(decodeResult.formatted.items[4].label).toBe('Aircraft Route');
-  expect(decodeResult.formatted.items[4].value).toBe('SUMMA(46.371 N, 121.593 W) >> LTJ(45.428 N, 121.061 W) >> IMB(44.389 N, 119.427 W) > Q35 >> CORKR(36.050 N, 112.240 W) >> TENTS(35.295 N, 112.271 W)');
+  expect(decodeResult.formatted.items[4].value).toBe('SUMMA(46.618 N, 121.988 W) >> LTJ(45.713 N, 121.102 W) >> IMB(44.648 N, 119.712 W) > Q35 >> CORKR(36.083 N, 112.400 W) >> TENTS(35.492 N, 112.452 W)');
   expect(decodeResult.formatted.items[5].label).toBe('Arrival Procedure');
   expect(decodeResult.formatted.items[5].value).toBe('BRUSR1 starting at TENTS');
   expect(decodeResult.formatted.items[6].label).toBe('Message Checksum');
   expect(decodeResult.formatted.items[6].value).toBe('0x5d16');
-
 });
 
 test('decodes Label H1 Preamble #M1BFPN', () => {
