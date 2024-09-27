@@ -28,14 +28,20 @@ export class Label_H1_OHMA extends DecoderPlugin {
       decompress.flush(zlib.constants.Z_SYNC_FLUSH);
       const result = decompress.read();
       const jsonText = result.toString();
-      const json = JSON.parse(jsonText);
+      
       let formattedMsg;
+      let jsonMessage;
+      try {
+        jsonMessage = JSON.parse(jsonText).message;
+      } catch {
+        jsonMessage = jsonText;
+      }
 
-      if(json.message.startsWith('{')) {
-        const ohmaMsg = JSON.parse(json.message);
+      try {
+        const ohmaMsg = JSON.parse(jsonMessage);
         formattedMsg = JSON.stringify(ohmaMsg, null, 2);
-      } else {
-        formattedMsg = json.message;
+      } catch {
+        formattedMsg = jsonMessage;
       }
       decodeResult.decoded = true;
       decodeResult.decoder.decodeLevel = 'full';

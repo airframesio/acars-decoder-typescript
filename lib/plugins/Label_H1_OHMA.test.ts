@@ -80,6 +80,28 @@ xtest('decodes Label H1 Preamble OHMA partial', () => {
   expect(decodeResult.formatted.items[0].value).toBe('DO WE EVEN WANT IT FORMATTED?');
 }); 
 
+test('decodes Label H1 Preamble OHMA partial', () => {
+  const decoder = new MessageDecoder();
+  const decoderPlugin = new Label_H1_OHMA(decoder);
+
+  // https://app.airframes.io/messages/3284234176
+  const text = 'OHMAeJy1lF+PmkAUxb9Kw/MyGRj+v1HEYhaQ4OxqrI2Z6tSSIBpAk2bjd+8Aau3szCZ9qD4NnN899x7v+Kacad0Uh0rxFB1A5UnZ06YhO8rObytlUxa0aifbleKtlGmU+CvlaXWTjEhL+xc61A0Vuiq0MHQ90/UMBJBjL3vxlrSEqVgxUtTHklS0Ycev7NySokxP+++07qvMMj'
+  const decodeResult = decoderPlugin.decode({ text: text }, { debug: true });
+  console.log(JSON.stringify(decodeResult, null, 2));
+
+  expect(decodeResult.decoded).toBe(true);
+  expect(decodeResult.decoder.decodeLevel).toBe('full');
+  expect(decodeResult.decoder.name).toBe('label-h1-ohma');
+  expect(decodeResult.formatted.description).toBe('OHMA Message');
+  expect(decodeResult.message.text).toBe(text);
+  expect(decodeResult.raw.ohma).toBe('{\"version\":\"2.0\",\"message\":\"{\\\"clientId\\\":\\\"OHMA\\\",\\\"messageDate\\\":\\\"2024-09-06T09:59:43.387Z\\\",\\\"data\\\":{\\\"airplanes\\\":[{\\\"tailNumber\\\":\\\"SP');
+  expect(decodeResult.formatted.items.length).toBe(1);
+  expect(decodeResult.formatted.items[0].type).toBe('ohma');
+  expect(decodeResult.formatted.items[0].code).toBe('OHMA');
+  expect(decodeResult.formatted.items[0].label).toBe('OHMA Downlink');
+  expect(decodeResult.formatted.items[0].value).toBe('{\"version\":\"2.0\",\"message\":\"{\\\"clientId\\\":\\\"OHMA\\\",\\\"messageDate\\\":\\\"2024-09-06T09:59:43.387Z\\\",\\\"data\\\":{\\\"airplanes\\\":[{\\\"tailNumber\\\":\\\"SP');
+}); 
+
 test('decodes Label H1 Preamble OHMA invalid', () => {
   const decoder = new MessageDecoder();
   const decoderPlugin = new Label_H1_OHMA(decoder);
