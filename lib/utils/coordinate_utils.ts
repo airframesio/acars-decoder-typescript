@@ -55,7 +55,7 @@ export class CoordinateUtils {
 
     return results;
   }
-  public static coordinateString(coords: {latitude: number, longitude: number}) : String {
+  public static coordinateString(coords: {latitude: number, longitude: number}) : string {
     const latDir = coords.latitude > 0 ? 'N' : 'S';
     const lonDir = coords.longitude > 0 ? 'E' : 'W';
     return `${Math.abs(coords.latitude).toFixed(3)} ${latDir}, ${Math.abs(coords.longitude).toFixed(3)} ${lonDir}`;
