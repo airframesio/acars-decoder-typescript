@@ -1,5 +1,5 @@
-import { DateTimeUtils } from "../DateTimeUtils";
-import { CoordinateUtils } from "./coordinate_utils";
+import { DecodeResult } from "../DecoderPluginInterface";
+import { ResultFormatter } from "./result_formatter";
 import { RouteUtils } from "./route_utils";
 
 export class FlightPlanUtils {
@@ -12,7 +12,7 @@ export class FlightPlanUtils {
    * @param data - original message split by ':'
    * @returns whether all fields were processed or not
    */
-  public static processFlightPlan(decodeResult: any, data: string[]): boolean {
+  public static processFlightPlan(decodeResult: DecodeResult, data: string[]): boolean {
     let allKnownFields = FlightPlanUtils.parseHeader(decodeResult, data[0]);
     for (let i = 1; i < data.length; i += 2) {
       const key = data[i];
@@ -56,172 +56,61 @@ export class FlightPlanUtils {
     }
     return allKnownFields;
   }
-  public static parseHeader(decodeResult: any, header: string): boolean {
+  public static parseHeader(decodeResult: DecodeResult, header: string): boolean {
     let allKnownFields = true;
-    const fields = header.split('/');
-    allKnownFields = allKnownFields && parseMessageType(decodeResult, fields[0]);
-    for (let i = 1; i < fields.length; ++i) {
-      if (fields[i].startsWith('FN')) {
-        decodeResult.raw.flight_number = fields[i].substring(2); // Strip off 'FN'
-      } else if (fields[i].startsWith('SN')) {
-        decodeResult.raw.serial_number = fields[i].substring(2); // Strip off 'SN'
-      } else if (fields[i].startsWith('TS')) {
-        const ts = fields[i].substring(2).split(','); // Strip off PS
-        let time = DateTimeUtils.convertDateTimeToEpoch(ts[0], ts[1]);
-      
-        if(Number.isNaN(time)) {  // convert DDMMYY to MMDDYY - TODO figure out a better way to determine
-          const date = ts[1].substring(2,4) + ts[1].substring(0,2) + ts[1].substring(4,6);
-          time = DateTimeUtils.convertDateTimeToEpoch(ts[0], date);
-        }
-        decodeResult.raw.message_timestamp = time;
-      } else if (fields[i].startsWith('PS')) {
-        const pos = fields[i].substring(2); // Strip off PS
-        allKnownFields == allKnownFields && processPosition(decodeResult, pos);
-      } else if (fields[i].startsWith('DT')) {
-        const icao = fields[i].substring(2); // Strip off DT
-        if(!decodeResult.raw.arrival_icao) {
-          decodeResult.raw.arrival_icao = icao;
-          decodeResult.formatted.items.push({
-            type: 'destination',
-            code: 'DST',
-            label: 'Destination',
-            value: decodeResult.raw.arrival_icao,
-          });
-        } else if(decodeResult.raw.arrival_icao == icao ) {
-          continue;
-        }else {
-          decodeResult.remaining.text += '/' + fields[i];
-        }
-      }  else if (fields[i].startsWith('ID')) {
-        const tail = fields[i].substring(2); // Strip off ID
-        decodeResult.raw.tail = tail;
-        decodeResult.formatted.items.push({
-          type: 'tail',
-          label: 'Tail',
-          value: decodeResult.raw.tail,
-        });
-      } else if (fields[i].startsWith('RF')) {
-        decodeResult.formatted.items.push({
-          type: 'status',
-          code: 'ROUTE_STATUS',
-          label: 'Route Status',
-          value: 'Route Filed',
-        });
-        decodeResult.raw.route_status = 'RF';
-        if (fields[i].length > 2) {
-          addRoute(decodeResult, fields[i].substring(2));       
-        }
-      } else if (fields[i].startsWith('RP')) {
-        decodeResult.raw.route_status = 'RP';
-        decodeResult.formatted.items.push({
-          type: 'status',
-          code: 'ROUTE_STATUS',
-          label: 'Route Status',
-          value: 'Route Planned',
-        });
-        if (fields[i].length > 2) {
-          allKnownFields = allKnownFields && this.processFlightPlan(decodeResult, fields[i].split(':'));
-        }
-        decodeResult.raw.route_status = fields[i];
-      } else if (fields[i].startsWith('RI')) {
-        decodeResult.raw.route_status = 'RI';
-        decodeResult.formatted.items.push({
-          type: 'status',
-          code: 'ROUTE_STATUS',
-          label: 'Route Status',
-          value: 'Route Inactive',
-        });
-        if (fields[i].length > 2) {
-          allKnownFields = allKnownFields && this.processFlightPlan(decodeResult, fields[i].split(':'));
-        }
-      } else {
-          decodeResult.remaining.text += '/' + fields[i];
-          allKnownFields = false
+    if (header.startsWith('RF')) {
+      decodeResult.formatted.items.push({
+        type: 'status',
+        code: 'ROUTE_STATUS',
+        label: 'Route Status',
+        value: 'Route Filed',
+      });
+      decodeResult.raw.route_status = 'RF';
+      if (header.length > 2) {
+        addRoute(decodeResult, header.substring(2));
       }
+    } else if (header.startsWith('RP')) {
+      decodeResult.raw.route_status = 'RP';
+      decodeResult.formatted.items.push({
+        type: 'status',
+        code: 'ROUTE_STATUS',
+        label: 'Route Status',
+        value: 'Route Planned',
+      });
+      decodeResult.raw.route_status = header;
+    } else if (header.startsWith('RI')) {
+      decodeResult.raw.route_status = 'RI';
+      decodeResult.formatted.items.push({
+        type: 'status',
+        code: 'ROUTE_STATUS',
+        label: 'Route Status',
+        value: 'Route Inactive',
+      });
+    } else {
+      decodeResult.remaining.text += header;
+      allKnownFields = false
     }
     return allKnownFields;
   };
 }
 
-function parseMessageType(decodeResult: any, messageType: string): boolean {
-  let decoded = true;
-  const parts = messageType.split('#');
-  if (parts.length == 1) {
-    if (parts[0].startsWith('POS') && parts[0].length !== 3 && !(parts[0].startsWith('POS/'))) {
-      decoded = processPosition(decodeResult, parts[0].substring(3));
-    }
-    return decoded;
-  } else if (parts.length == 2) {
-    if (parts[0].length > 0) {
-      decodeResult.remaining.text += parts[0].substring(0, 3);
-      decodeResult.raw.flight_number = parts[0].substring(3);
-      decodeResult.remaining.text += '#' + parts[1].substring(0, 3);
-    }
-    if (parts[1].substring(3, 6) === 'POS' && parts[1].length !== 6 && parts[1].substring(3, 7) !== 'POS/') {
-      decoded = processPosition(decodeResult, parts[1].substring(6));
-    }
-
-    decodeResult.raw.message_type = messageType;
-    return decoded;
-  }
-
-  decodeResult.remaining.text += messageType;
-  return false;
-}
-
-function processPosition(decodeResult: any, value: string): boolean {
-  const position = CoordinateUtils.decodeStringCoordinates(value);
-  if (position) {
-    decodeResult.raw.position = position
-    decodeResult.formatted.items.push({
-      type: 'aircraft_position',
-      code: 'POS',
-      label: 'Aircraft Position',
-      value: CoordinateUtils.coordinateString(position),
-    });
-  }
-  return !!position;
-}
-
-function addArrivalAirport(decodeResult: any, value: string) {
-  decodeResult.raw.arrival_icao = value;
-  decodeResult.formatted.items.push({
-    type: 'destination',
-    code: 'DST',
-    label: 'Destination',
-    value: decodeResult.raw.arrival_icao,
-  });
+function addArrivalAirport(decodeResult: DecodeResult, value: string) {
+  ResultFormatter.arrivalAirport(decodeResult, value);
 };
 
-function addDepartureAirport(decodeResult: any, value: string) {
-  decodeResult.raw.departure_icao = value;
-  decodeResult.formatted.items.push({
-    type: 'origin',
-    code: 'ORG',
-    label: 'Origin',
-    value: decodeResult.raw.departure_icao,
-  });
+function addDepartureAirport(decodeResult: DecodeResult, value: string) {
+  ResultFormatter.departureAirport(decodeResult, value);
 };
-function addRunway(decodeResult: any, value: string) {
+function addRunway(decodeResult: DecodeResult, value: string) {
   // xxx(yyy) where xxx is the departure runway and yyy is the arrival runway
-  if(value.length === 8) {
-    decodeResult.raw.arrival_runway = value.substring(4, 7);
-    decodeResult.formatted.items.push({
-      type: 'runway',
-      label: 'Arrival Runway',
-      value: decodeResult.raw.arrival_runway,
-    });
+  if (value.length === 8) {
+    ResultFormatter.arrivalRunway(decodeResult, value.substring(4, 7));
   }
 
-  decodeResult.raw.departure_runway = value.substring(0, 3);
-  decodeResult.formatted.items.push({
-    type: 'runway',
-    label: 'Departure Runway',
-    value: decodeResult.raw.departure_runway,
-  });
+  ResultFormatter.departureRunway(decodeResult, value.substring(0, 3));
 };
 
-function addRoute(decodeResult: any, value: string) {
+function addRoute(decodeResult: DecodeResult, value: string) {
   const route = value.split('.');
   decodeResult.raw.route = { waypoints: route.map((leg) => RouteUtils.getWaypoint(leg)) };
   decodeResult.formatted.items.push({
@@ -232,7 +121,7 @@ function addRoute(decodeResult: any, value: string) {
   });
 };
 
-function addProcedure(decodeResult: any, value: string, type: string) {
+function addProcedure(decodeResult: DecodeResult, value: string, type: string) {
   if (decodeResult.raw.procedures === undefined) {
     decodeResult.raw.procedures = [];
   }
@@ -253,7 +142,7 @@ function addProcedure(decodeResult: any, value: string, type: string) {
   });
 };
 
-function addCompanyRoute(decodeResult: any, value: string) {
+function addCompanyRoute(decodeResult: DecodeResult, value: string) {
   const segments = value.split('.');
   const parens_idx = segments[0].indexOf('(');
   let name;
