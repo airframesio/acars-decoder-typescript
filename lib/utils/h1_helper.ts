@@ -19,6 +19,8 @@ export class H1Helper {
                 decodeResult.raw.flight_number = fields[i].substring(2); // Strip off 'FN'
             } else if (fields[i].startsWith('SN')) {
                 decodeResult.raw.serial_number = fields[i].substring(2); // Strip off 'SN'
+            } else if (fields[i].startsWith('DC')) {
+                processDC(decodeResult, fields[i].substring(2).split(',')); // Strip off 'DC'
             } else if (fields[i].startsWith('TS')) {
                 const ts = fields[i].substring(2).split(','); // Strip off PS
                 let time = DateTimeUtils.convertDateTimeToEpoch(ts[0], ts[1]);
@@ -153,6 +155,22 @@ function parseMessageType(decodeResult: DecodeResult, messageType: string): bool
 
     decodeResult.remaining.text += messageType;
     return false;
+}
+function processDC(decodeResult: DecodeResult, data: string[]): boolean {
+    decodeResult.raw.message_date = data[0]; // DDMMYYYY;
+
+    if(data.length === 1){
+        // noop?
+    } else if (data.length === 2){
+         // convert DDMMYY to MMDDYY - TODO figure out a better way to determine
+         const date = data[0].substring(2, 4) + data[0].substring(0, 2) + data[0].substring(4, 6);
+        const time = DateTimeUtils.convertDateTimeToEpoch(data[1], data[0]); // HHMMSS
+
+        decodeResult.raw.message_timestamp = time;
+    } else {
+        return false
+    }
+    return true;
 }
 
 function processPS(decodeResult: DecodeResult, data: string[]): boolean {

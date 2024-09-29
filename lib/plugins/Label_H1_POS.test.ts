@@ -328,6 +328,7 @@ test('decodes Label H1 Preamble POS variant 7', () => {
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
   expect(decodeResult.decoder.name).toBe('label-h1-pos');
   expect(decodeResult.formatted.description).toBe('Position Report');
+  expect(decodeResult.raw.message_timestamp).toBe(1709476093);
   expect(decodeResult.raw.flight_number).toBe('BANKR31');
   expect(decodeResult.formatted.items.length).toBe(6);
   expect(decodeResult.formatted.items[0].label).toBe('Tail');
@@ -342,7 +343,7 @@ test('decodes Label H1 Preamble POS variant 7', () => {
   expect(decodeResult.formatted.items[4].value).toBe('-28');
   expect(decodeResult.formatted.items[5].label).toBe('Message Checksum');
   expect(decodeResult.formatted.items[5].value).toBe('0x9071');
-  expect(decodeResult.remaining.text).toBe(',/DC03032024,142813/MR64,0/ET31539,27619,MT370/CG311,160,350/FB732/VR32');
+  expect(decodeResult.remaining.text).toBe(',/MR64,0/ET31539,27619,MT370/CG311,160,350/FB732/VR32');
 });
 
 test('decodes Label H1 Preamble #M1BPOS variant 7', () => {
@@ -358,6 +359,7 @@ test('decodes Label H1 Preamble #M1BPOS variant 7', () => {
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
   expect(decodeResult.decoder.name).toBe('label-h1-pos');
   expect(decodeResult.formatted.description).toBe('Position Report');
+  expect(decodeResult.raw.message_timestamp).toBe(1709487127);
   expect(decodeResult.raw.flight_number).toBe('');
   expect(decodeResult.formatted.items.length).toBe(6);
   expect(decodeResult.formatted.items[0].label).toBe('Tail');
@@ -372,7 +374,7 @@ test('decodes Label H1 Preamble #M1BPOS variant 7', () => {
   expect(decodeResult.formatted.items[4].value).toBe('-49');
   expect(decodeResult.formatted.items[5].label).toBe('Message Checksum');
   expect(decodeResult.formatted.items[5].value).toBe('0x4e17');
-  expect(decodeResult.remaining.text).toBe('F37#M1B,/DC03032024,173207/MR1,/ET031846,267070,T468/CG264,110,360/FB742/VR32');
+  expect(decodeResult.remaining.text).toBe('F37#M1B,/MR1,/ET031846,267070,T468/CG264,110,360/FB742/VR32');
 });
 
 test('decodes Label H1 Preamble POS variant 8', () => {
@@ -554,6 +556,7 @@ test('decodes Label 4J Preamble POS variant 7', () => {
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
   expect(decodeResult.decoder.name).toBe('label-h1-pos');
   expect(decodeResult.formatted.description).toBe('Position Report');
+  expect(decodeResult.raw.message_timestamp).toBe(1725804426);
   expect(decodeResult.raw.flight_number).toBe('WIDE21');
   expect(decodeResult.formatted.items.length).toBe(6);
   expect(decodeResult.formatted.items[0].label).toBe('Tail');
@@ -568,7 +571,7 @@ test('decodes Label 4J Preamble POS variant 7', () => {
   expect(decodeResult.formatted.items[4].value).toBe('-26');
   expect(decodeResult.formatted.items[5].label).toBe('Message Checksum');
   expect(decodeResult.formatted.items[5].value).toBe('0xc696');
-  expect(decodeResult.remaining.text).toBe(',7PZWTCP21222/DC09082024,140706/MR238,2/ET91456,21329,M080T490/CG293,160,350/FB583/VR32');
+  expect(decodeResult.remaining.text).toBe(',7PZWTCP21222/MR238,2/ET91456,21329,M080T490/CG293,160,350/FB583/VR32');
 });
 
 test('decodes Label H1 Preamble #M1BPOS <invalid>', () => {
