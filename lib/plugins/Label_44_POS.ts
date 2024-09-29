@@ -29,7 +29,7 @@ export class Label_44_POS extends DecoderPlugin {
         console.log(results.groups);
       }
 
-      decodeResult.raw.position = CoordinateUtils.decodeStringCoordinates(results.groups.unsplit_coords);
+      decodeResult.raw.position = CoordinateUtils.decodeStringCoordinatesDecimalMinutes(results.groups.unsplit_coords);
       decodeResult.raw.flight_level = results.groups.flight_level_or_ground == 'GRD' || results.groups.flight_level_or_ground == '***' ? '0' : Number(results.groups.flight_level_or_ground);
       decodeResult.raw.departure_icao = results.groups.departure_icao;
       decodeResult.raw.arrival_icao = results.groups.arrival_icao;
@@ -54,9 +54,9 @@ export class Label_44_POS extends DecoderPlugin {
 
       if(decodeResult.raw.position) {
         decodeResult.formatted.items.push({
-          type: 'position',
+          type: 'aircraft_position',
           code: 'POS' ,
-          label: 'Position',
+          label: 'Aircraft Position',
           value: CoordinateUtils.coordinateString(decodeResult.raw.position),
         });
       }
