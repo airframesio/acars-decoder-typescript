@@ -67,11 +67,10 @@ test('decodes Label H1 Preamble PRG/LR', () => {
   expect(decodeResult.formatted.items[2].value).toBe('04R');
   expect(decodeResult.formatted.items[3].label).toBe('Message Checksum');
   expect(decodeResult.formatted.items[3].value).toBe('0x1483');
-  expect(decodeResult.remaining.text).toBe('/LR,000855,25,1285,1192,93,1284,P4,001004,8,141K,D713,000950,2,29');
+  expect(decodeResult.remaining.text).toBe(',000855,25,1285,1192,93,1284,P4,001004,8,141K,D713,000950,2,29');
 });
 
-// TODO - figure out comma in the timestamp
-xtest('decodes Label H1 Preamble #M1BPRG', () => {
+test('decodes Label H1 Preamble #M1BPRG', () => {
   const decoder = new MessageDecoder();
   const decoderPlugin = new Label_H1_PRG(decoder);
 
@@ -98,10 +97,10 @@ xtest('decodes Label H1 Preamble #M1BPRG', () => {
   expect(decodeResult.formatted.items[4].label).toBe('Fuel Remaining');
   expect(decodeResult.formatted.items[4].value).toBe('42');
   expect(decodeResult.formatted.items[5].label).toBe('Message Checksum');
-  expect(decodeResult.formatted.items[5].value).toBe('0x6784');});
+  expect(decodeResult.formatted.items[5].value).toBe('0x6784');
+});
 
-// TODO - figure out how to handle commas in the flightplan
-xtest('decodes Label H1 PRG with flightplan', () => {
+test('decodes Label H1 PRG with flightplan', () => {
   const decoder = new MessageDecoder();
   const decoderPlugin = new Label_H1_PRG(decoder);
 
@@ -114,22 +113,28 @@ xtest('decodes Label H1 PRG with flightplan', () => {
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
   expect(decodeResult.decoder.name).toBe('label-h1-prg');
   expect(decodeResult.formatted.description).toBe('Progress Report');
-  expect(decodeResult.formatted.items.length).toBe(7);
+  expect(decodeResult.formatted.items.length).toBe(10);
   expect(decodeResult.formatted.items[0].label).toBe('Destination');
   expect(decodeResult.formatted.items[0].value).toBe('GCRR');
   expect(decodeResult.formatted.items[1].label).toBe('Arrival Runway');
-  expect(decodeResult.formatted.items[1].value).toBe('030');
-  expect(decodeResult.formatted.items[2].label).toBe('Route Status');
-  expect(decodeResult.formatted.items[2].value).toBe('Route Planned');
-  expect(decodeResult.formatted.items[3].label).toBe('Origin');
-  expect(decodeResult.formatted.items[3].value).toBe('EDDB');
-  expect(decodeResult.formatted.items[4].label).toBe('Arrival Procedure');
-  expect(decodeResult.formatted.items[4].value).toBe('TERT1P');
-  expect(decodeResult.formatted.items[5].label).toBe('Approach Procedure');
-  expect(decodeResult.formatted.items[5].value).toBe('ILSZ03 starting at BAPAL(03O)');
-  expect(decodeResult.formatted.items[6].label).toBe('Message Checksum');
-  expect(decodeResult.formatted.items[6].value).toBe('0x226d');
-  expect(decodeResult.remaining.text).toBe('<a lot of text>');
+  expect(decodeResult.formatted.items[1].value).toBe('03O');
+  expect(decodeResult.formatted.items[2].label).toBe('Fuel On Board');
+  expect(decodeResult.formatted.items[2].value).toBe('62');
+  expect(decodeResult.formatted.items[3].label).toBe('Estimated Time of Arrival');
+  expect(decodeResult.formatted.items[3].value).toBe('16:30:55');
+  expect(decodeResult.formatted.items[4].label).toBe('Route Status');
+  expect(decodeResult.formatted.items[4].value).toBe('Route Planned');
+  expect(decodeResult.formatted.items[5].label).toBe('Origin');
+  expect(decodeResult.formatted.items[5].value).toBe('EDDB');
+  expect(decodeResult.formatted.items[6].label).toBe('Destination');
+  expect(decodeResult.formatted.items[6].value).toBe('GCRR..N50059E004552..N49588E004338..N49241E002528..N49122E002199..PON.UN872..ERIGA..FUJTI'); // TODO - pull out route
+  expect(decodeResult.formatted.items[7].label).toBe('Arrival Procedure');
+  expect(decodeResult.formatted.items[7].value).toBe('TERT1P');
+  expect(decodeResult.formatted.items[8].label).toBe('Approach Procedure');
+  expect(decodeResult.formatted.items[8].value).toBe('ILSZ03 starting at BAPAL(03O)');
+  expect(decodeResult.formatted.items[9].label).toBe('Message Checksum');
+  expect(decodeResult.formatted.items[9].value).toBe('0x226d');
+  expect(decodeResult.remaining.text).toBe(':WS:FUJTI,360..BAKUP..BATAX..TAKAV..VEDOD');
 });
 
 test('decodes Label H1 Preamble PRG <invalid>', () => {
@@ -143,5 +148,5 @@ test('decodes Label H1 Preamble PRG <invalid>', () => {
   expect(decodeResult.decoder.decodeLevel).toBe('none');
   expect(decodeResult.decoder.name).toBe('label-h1-prg');
   expect(decodeResult.formatted.description).toBe('Progress Report');
-  expect(decodeResult.formatted.items.length).toBe(0); 
+  expect(decodeResult.formatted.items.length).toBe(0);
 });
