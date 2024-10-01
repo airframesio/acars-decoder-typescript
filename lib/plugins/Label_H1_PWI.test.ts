@@ -35,7 +35,7 @@ describe('Label_H1_PWI', () => {
         expect(decodeResult.formatted.items[1].code).toBe('WIND');
         expect(decodeResult.formatted.items[1].label).toBe('Wind Data');
         expect(decodeResult.formatted.items[1].value).toBe('AWYAT at FL390: 252° at 71kt');
-        expect(decodeResult.formatted.items[24].label).toBe('Checksum');
+        expect(decodeResult.formatted.items[24].label).toBe('Message Checksum');
         expect(decodeResult.formatted.items[24].value).toBe('0x0338');
     });
 
