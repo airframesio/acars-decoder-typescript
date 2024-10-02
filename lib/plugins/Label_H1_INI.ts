@@ -15,7 +15,7 @@ export class Label_H1_INI extends DecoderPlugin { // eslint-disable-line camelca
   decode(message: Message, options: Options = {}): DecodeResult {
     const decodeResult: any = this.defaultResult();
     decodeResult.decoder.name = this.name;
-    decodeResult.formatted.description = '??? Report';
+    decodeResult.formatted.description = 'Flight Plan Initial Report';
     decodeResult.message = message;
     decodeResult.remaining.text = '';
 
