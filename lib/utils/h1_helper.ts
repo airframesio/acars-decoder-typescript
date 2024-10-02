@@ -71,6 +71,12 @@ export class H1Helper {
                 // process position data
                 allKnownFields = false
                 decodeResult.remaining.text += fields[i];
+            } else if (fields[i].startsWith('AF')) {
+                const data = fields[i].substring(2).split(','); // Strip off AF
+                if(data.length === 2){
+                    ResultFormatter.departureAirport(decodeResult, data[0]);
+                    ResultFormatter.arrivalAirport(decodeResult, data[1]);
+                }
             } else {
                 decodeResult.remaining.text += '/' + fields[i];
                 allKnownFields = false
