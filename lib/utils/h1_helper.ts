@@ -39,21 +39,7 @@ export class H1Helper {
                 const dt = processDT(decodeResult, data);
                 allKnownFields = allKnownFields && dt;
             } else if (fields[i].startsWith('ID')) {
-                const data = fields[i].substring(2).split(','); // Strip off ID
-                decodeResult.raw.tail = data[0];
-                decodeResult.formatted.items.push({
-                    type: 'tail',
-                    code: "TAIL",
-                    label: 'Tail',
-                    value: decodeResult.raw.tail,
-                });
-                if (data.length > 1) {
-                    decodeResult.raw.flight_number = data[1];
-                }
-                if (data.length > 2) {//TODO: figure out what this is
-                    allKnownFields = false;
-                    decodeResult.remaining.text += ',' + data.slice(2).join(',');
-                }
+                processIdentification(decodeResult, fields[i].substring(2).split(',')); // Strip off ID
             } else if (fields[i].startsWith('LR')) {
                 const data = fields[i].substring(2).split(','); // Strip off LR
                 const lr = processLR(decodeResult, data);
@@ -71,6 +57,12 @@ export class H1Helper {
                 // process position data
                 allKnownFields = false
                 decodeResult.remaining.text += fields[i];
+            } else if (fields[i].startsWith('AF')) {
+                const af = processAirField(decodeResult, fields[i].substring(2).split(',')); // Strip off AF
+                allKnownFields = allKnownFields && af;
+            } else if (fields[i].startsWith('TD')) {
+                const td = processTimeOfDeparture(decodeResult, fields[i].substring(2).split(',')); // Strip off TD
+                allKnownFields = allKnownFields && td;
             } else {
                 decodeResult.remaining.text += '/' + fields[i];
                 allKnownFields = false
@@ -80,6 +72,54 @@ export class H1Helper {
             ResultFormatter.checksum(decodeResult, checksum);
         }
         return allKnownFields;
+    }
+}
+
+function processAirField(decodeResult: DecodeResult, data: string[]) {
+    if (data.length === 2) {
+        ResultFormatter.departureAirport(decodeResult, data[0]);
+        ResultFormatter.arrivalAirport(decodeResult, data[1]);
+        return true;
+    }
+    decodeResult.remaining.text += 'AF/' + data.join(',');
+    return false;
+}
+function processTimeOfDeparture(decodeResult: DecodeResult, data: string[]) {
+    if (data.length === 2) {
+        decodeResult.raw.plannedDepartureTime = data[0]; //DDHHMM
+        decodeResult.formatted.items.push({
+            type: 'ptd',
+            code: "ptd",
+            label: 'Planned Departure Time',
+            value: `YYYY-MM-${data[0].substring(0,2)}T${data[0].substring(2,4)}:${data[0].substring(4)}:00Z`,
+        });
+    
+        decodeResult.raw.plannedDepartureTime = data[1]; //HHMM
+        decodeResult.formatted.items.push({
+            type: 'etd',
+            code: "etd",
+            label: 'Estimated Departure Time',
+            value: `${data[1].substring(0,2)}:${data[1].substring(2)}`,
+        });
+        return true;
+    }
+    decodeResult.remaining.text += '/TD' + data.join(',');
+    return false;
+}
+
+function processIdentification(decodeResult: DecodeResult, data: string[]) {
+    decodeResult.raw.tail = data[0];
+    decodeResult.formatted.items.push({
+        type: 'tail',
+        code: "TAIL",
+        label: 'Tail',
+        value: decodeResult.raw.tail,
+    });
+    if (data.length > 1) {
+        decodeResult.raw.flight_number = data[1];
+    }
+    if (data.length > 2) { //TODO: figure out what this is
+        decodeResult.raw.mission_number = data[2];
     }
 }
 
