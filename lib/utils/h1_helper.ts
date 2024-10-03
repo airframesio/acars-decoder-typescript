@@ -71,6 +71,14 @@ export class H1Helper {
                 // process position data
                 allKnownFields = false
                 decodeResult.remaining.text += fields[i];
+            } else if (fields[i].startsWith('FX')) {
+                decodeResult.raw.free_text = fields[i].substring(2); // Strip off 'FX'
+                decodeResult.formatted.items.push({
+                    type: 'text',
+                    code: "TEXT",
+                    label: 'Free Text',
+                    value: decodeResult.raw.free_text,
+                });
             } else {
                 decodeResult.remaining.text += '/' + fields[i];
                 allKnownFields = false
