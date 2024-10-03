@@ -199,11 +199,11 @@ function parseMessageType(decodeResult: DecodeResult, messageType: string): bool
 function processDC(decodeResult: DecodeResult, data: string[]): boolean {
     decodeResult.raw.message_date = data[0]; // DDMMYYYY;
 
-    if(data.length === 1){
+    if (data.length === 1) {
         // noop?
-    } else if (data.length === 2){
-         // convert DDMMYY to MMDDYY - TODO figure out a better way to determine
-         const date = data[0].substring(2, 4) + data[0].substring(0, 2) + data[0].substring(4, 6);
+    } else if (data.length === 2) {
+        // convert DDMMYY to MMDDYY - TODO figure out a better way to determine
+        const date = data[0].substring(2, 4) + data[0].substring(0, 2) + data[0].substring(4, 6);
         const time = DateTimeUtils.convertDateTimeToEpoch(data[1], data[0]); // HHMMSS
 
         decodeResult.raw.message_timestamp = time;
@@ -215,7 +215,7 @@ function processDC(decodeResult: DecodeResult, data: string[]): boolean {
 
 function processPS(decodeResult: DecodeResult, data: string[]): boolean {
     let allKnownFields = true;
-    const position = CoordinateUtils.decodeStringCoordinates(data[0]);
+    const position = CoordinateUtils.decodeStringCoordinatesDecimalMinutes(data[0]);
     if (position) {
         decodeResult.raw.position = position
         decodeResult.formatted.items.push({
@@ -251,7 +251,7 @@ function processPS(decodeResult: DecodeResult, data: string[]): boolean {
 }
 function processPosition(decodeResult: DecodeResult, data: string[]): boolean {
     let allKnownFields = true;
-    const position = CoordinateUtils.decodeStringCoordinates(data[0]);
+    const position = CoordinateUtils.decodeStringCoordinatesDecimalMinutes(data[0]);
     if (position) {
         decodeResult.raw.position = position
         decodeResult.formatted.items.push({
