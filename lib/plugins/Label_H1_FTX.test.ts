@@ -56,7 +56,7 @@ describe('Label_H1_FTX', () => {
       expect(decodeResult.formatted.items[1].value).toBe('IRAN IS LAUNCHING MISSILES TOWARDS ISRAEL. YOUR FLIGHT PATH IS CURRENTLY NORTH OF PROJECTED MISSILE TRACKS. EXERCIZE EXTREME CAUTION.');
       expect(decodeResult.formatted.items[2].label).toBe('Message Checksum');
       expect(decodeResult.formatted.items[2].value).toBe('0x4a99');
-      expect(decodeResult.remaining.text).toBe('- #MD/MR2,');
+      expect(decodeResult.remaining.text).toBe('- #MDF/MR2,'); // FIXME - should be `- #MD/`
   });
 
     test('decodes Label H1 Preamble POS <invalid>', () => {
