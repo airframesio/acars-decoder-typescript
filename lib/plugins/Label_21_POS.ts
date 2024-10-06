@@ -14,7 +14,7 @@ export class Label_21_POS extends DecoderPlugin {
   }
 
   decode(message: Message, options: Options = {}) : DecodeResult {
-    const decodeResult: any = this.defaultResult();
+    const decodeResult = this.defaultResult();
     decodeResult.decoder.name = this.name;
     decodeResult.formatted.description = 'Position Report';
     decodeResult.message = message;
@@ -34,7 +34,7 @@ export class Label_21_POS extends DecoderPlugin {
       processTemp(decodeResult, fields[6]);
       processArrvApt(decodeResult, fields[8]);
 
-      decodeResult.raw.remaining = [
+      decodeResult.remaining.text = [
         fields[1],
         fields[2],
         fields[4],
@@ -53,7 +53,7 @@ export class Label_21_POS extends DecoderPlugin {
     return decodeResult;
   }
 }
-function processPosition(decodeResult: any, value: string): boolean {
+function processPosition(decodeResult: DecodeResult, value: string): boolean {
   // N 39.841W 75.790
   if(value.length !== 16 && value[0] !== 'N' && value[0] !== 'S' && value[8] !== 'W' && value[8] !== 'E') {
     return false;
@@ -76,7 +76,7 @@ function processPosition(decodeResult: any, value: string): boolean {
   return !!position;
 }
 
-function processAlt(decodeResult: any, value: string) {
+function processAlt(decodeResult: DecodeResult, value: string) {
   decodeResult.raw.altitude = Number(value);
   decodeResult.formatted.items.push({
     type: 'altitude',
@@ -85,7 +85,7 @@ function processAlt(decodeResult: any, value: string) {
     value: `${decodeResult.raw.altitude} feet`,
   });
 }
-function processTemp(decodeResult: any, value: string) {
+function processTemp(decodeResult: DecodeResult, value: string) {
   decodeResult.raw.outside_air_temperature = Number(value.substring(1)) * (value.charAt(0) === 'M' ? -1 : 1);
   decodeResult.formatted.items.push({
     type: 'outside_air_temperature',
@@ -94,7 +94,7 @@ function processTemp(decodeResult: any, value: string) {
     value: `${decodeResult.raw.outside_air_temperature}`,
   });
 }
-function processArrvApt(decodeResult: any, value: string) {
+function processArrvApt(decodeResult: DecodeResult, value: string) {
   decodeResult.raw.arrival_icao = value;
   decodeResult.formatted.items.push({
     type: 'destination',

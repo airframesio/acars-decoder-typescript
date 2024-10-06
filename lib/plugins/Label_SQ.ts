@@ -11,7 +11,7 @@ export class Label_SQ extends DecoderPlugin {
   }
 
   decode(message: Message, options: Options = {}) : DecodeResult {
-    const decodeResult: any = this.defaultResult();
+    const decodeResult = this.defaultResult();
     decodeResult.decoder.name = this.name;
 
     decodeResult.raw.preamble = message.text.substring(0, 4);
@@ -47,11 +47,13 @@ export class Label_SQ extends DecoderPlugin {
     decodeResult.formatted.items = [
       {
         type: 'network',
+        code: 'NETT',
         label: 'Network',
         value: formattedNetwork,
       },
       {
         type: 'version',
+        code: 'VER',
         label: 'Version',
         value: decodeResult.raw.version,
       }
@@ -61,6 +63,7 @@ export class Label_SQ extends DecoderPlugin {
       if (decodeResult.raw.groundStation.icaoCode && decodeResult.raw.groundStation.number) {
         decodeResult.formatted.items.push({
           type: 'ground_station',
+          code: 'GNDSTN',
           label: 'Ground Station',
           value: `${decodeResult.raw.groundStation.icaoCode}${decodeResult.raw.groundStation.number}`,
         });
@@ -68,6 +71,7 @@ export class Label_SQ extends DecoderPlugin {
       if (decodeResult.raw.groundStation.iataCode) {
         decodeResult.formatted.items.push({
           type: 'iataCode',
+          code: 'IATA',
           label: 'IATA',
           value: decodeResult.raw.groundStation.iataCode,
         });
@@ -75,6 +79,7 @@ export class Label_SQ extends DecoderPlugin {
       if (decodeResult.raw.groundStation.icaoCode) {
         decodeResult.formatted.items.push({
           type: 'icaoCode',
+          code: 'ICAO',
           label: 'ICAO',
           value: decodeResult.raw.groundStation.icaoCode,
         });
@@ -82,6 +87,7 @@ export class Label_SQ extends DecoderPlugin {
       if (decodeResult.raw.groundStation.coordinates.latitude) {
         decodeResult.formatted.items.push({
           type: 'coordinates',
+          code: 'COORD',
           label: 'Ground Station Location',
           value: `${decodeResult.raw.groundStation.coordinates.latitude}, ${decodeResult.raw.groundStation.coordinates.longitude}`,
         });
@@ -89,6 +95,7 @@ export class Label_SQ extends DecoderPlugin {
       if (decodeResult.raw.groundStation.airport) {
         decodeResult.formatted.items.push({
           type: 'airport',
+          code: 'APT',
           label: 'Airport',
           value: `${decodeResult.raw.groundStation.airport.name} (${decodeResult.raw.groundStation.airport.icao}) in ${decodeResult.raw.groundStation.airport.location}`,
         });
@@ -98,6 +105,7 @@ export class Label_SQ extends DecoderPlugin {
     if (decodeResult.raw.vdlFrequency) {
       decodeResult.formatted.items.push({
         type: 'vdlFrequency',
+        code: 'VDLFRQ',
         label: 'VDL Frequency',
         value: `${decodeResult.raw.vdlFrequency} MHz`
       });

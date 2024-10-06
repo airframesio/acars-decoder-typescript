@@ -51,7 +51,7 @@ export abstract class DecoderPlugin implements DecoderPluginInterface {
   }
 
   decode(message: Message) : DecodeResult { // eslint-disable-line class-methods-use-this
-    const decodeResult: any = this.defaultResult();
+    const decodeResult = this.defaultResult();
     decodeResult.remaining.text = message.text;
     return decodeResult;
   }
