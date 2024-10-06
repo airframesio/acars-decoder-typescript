@@ -291,7 +291,7 @@ function processPosition(decodeResult: DecodeResult, data: string[]): boolean {
 }
 
 
-function processRoute(decodeResult: any, last: string, time: string, next: string, eta: string, then?: string, date?: string) {
+function processRoute(decodeResult: DecodeResult, last: string, time: string, next: string, eta: string, then?: string, date?: string) {
     const lastTime = date ? DateTimeUtils.convertDateTimeToEpoch(time, date) : DateTimeUtils.convertHHMMSSToTod(time);
     const nextTime = date ? DateTimeUtils.convertDateTimeToEpoch(eta, date) : DateTimeUtils.convertHHMMSSToTod(eta);
     const timeFormat = date ? 'epoch' : 'tod';

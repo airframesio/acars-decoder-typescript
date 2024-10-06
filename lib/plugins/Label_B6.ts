@@ -13,7 +13,7 @@ export class Label_B6_Forwardslash extends DecoderPlugin {
   }
 
   decode(message: Message, options: Options = {}) : DecodeResult {
-    const decodeResult: any = this.defaultResult();
+    const decodeResult = this.defaultResult();
     decodeResult.decoder.name = this.name;
     decodeResult.formatted.description = 'CPDLC Message';
     decodeResult.message = message;
