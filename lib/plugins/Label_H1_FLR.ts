@@ -13,7 +13,7 @@ export class Label_H1_FLR extends DecoderPlugin {
   }
 
   decode(message: Message, options: Options = {}) : DecodeResult {
-    let decodeResult: any = this.defaultResult();
+    let decodeResult = this.defaultResult();
     decodeResult.decoder.name = this.name;
     decodeResult.formatted.description = 'Fault Log Report';
     decodeResult.message = message;
@@ -69,6 +69,6 @@ export class Label_H1_FLR extends DecoderPlugin {
 
 export default {};
 
-function processUnknown(decodeResult: any, value: string) {
+function processUnknown(decodeResult, value: string) {
   decodeResult.remaining.text += value;
 }

@@ -42,7 +42,7 @@ describe('Label_21_POS', () => {
         expect(decodeResult.formatted.items[3].code).toBe('DST');
         expect(decodeResult.formatted.items[3].label).toBe('Destination');
         expect(decodeResult.formatted.items[3].value).toBe('KTPA');
-        expect(decodeResult.raw.remaining).toBe(' 220,184218,22051,  34,204748');
+        expect(decodeResult.remaining.text).toBe(' 220,184218,22051,  34,204748');
     });
 
     test('decodes Label 21 Preamble POS <invalid>', () => {

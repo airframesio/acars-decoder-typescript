@@ -26,15 +26,15 @@ test('decodes Label H1 Preamble POS variant 1', () => {
   expect(decodeResult.decoder.name).toBe('label-h1-pos');
   expect(decodeResult.formatted.description).toBe('Position Report');
   expect(decodeResult.message.text).toBe(text);
-  expect(decodeResult.raw.position.latitude).toBe(43.312);
-  expect(decodeResult.raw.position.longitude).toBe(-123.174);
+  expect(decodeResult.raw.position.latitude).toBe(43.52);
+  expect(decodeResult.raw.position.longitude).toBe(-123.29);
   expect(decodeResult.raw.altitude).toBe(37000);
   expect(decodeResult.raw.outside_air_temperature).toBe(-48);
   expect(decodeResult.formatted.items.length).toBe(5);
   expect(decodeResult.formatted.items[0].type).toBe('aircraft_position');
   expect(decodeResult.formatted.items[0].code).toBe('POS');
   expect(decodeResult.formatted.items[0].label).toBe('Aircraft Position');
-  expect(decodeResult.formatted.items[0].value).toBe('43.312 N, 123.174 W');
+  expect(decodeResult.formatted.items[0].value).toBe('43.520 N, 123.290 W');
   expect(decodeResult.formatted.items[1].type).toBe('altitude');
   expect(decodeResult.formatted.items[1].code).toBe('ALT');
   expect(decodeResult.formatted.items[1].label).toBe('Altitude');
@@ -64,8 +64,8 @@ test('decodes Label H1 Preamble POS variant 2', () => {
   expect(decodeResult.decoder.name).toBe('label-h1-pos');
   expect(decodeResult.formatted.description).toBe('Position Report');
   expect(decodeResult.message.text).toBe(text);
-  expect(decodeResult.raw.position.latitude).toBe(45.209);
-  expect(decodeResult.raw.position.longitude).toBe(-122.55);
+  expect(decodeResult.raw.position.latitude).toBe(45.348333333333336);
+  expect(decodeResult.raw.position.longitude).toBe(-122.91666666666667);
   expect(decodeResult.raw.altitude).toBe(13400);
   expect(decodeResult.raw.groundspeed).toBe(366);
   expect(decodeResult.raw.outside_air_temperature).toBe(-6);
@@ -73,7 +73,7 @@ test('decodes Label H1 Preamble POS variant 2', () => {
   expect(decodeResult.formatted.items[0].type).toBe('aircraft_position');
   expect(decodeResult.formatted.items[0].code).toBe('POS');
   expect(decodeResult.formatted.items[0].label).toBe('Aircraft Position');
-  expect(decodeResult.formatted.items[0].value).toBe('45.209 N, 122.550 W');
+  expect(decodeResult.formatted.items[0].value).toBe('45.348 N, 122.917 W');
   expect(decodeResult.formatted.items[1].type).toBe('altitude');
   expect(decodeResult.formatted.items[1].code).toBe('ALT');
   expect(decodeResult.formatted.items[1].label).toBe('Altitude');
@@ -107,15 +107,15 @@ test('decodes Label H1 Preamble POS variant 3', () => {
   expect(decodeResult.decoder.name).toBe('label-h1-pos');
   expect(decodeResult.formatted.description).toBe('Position Report');
   expect(decodeResult.message.text).toBe(text);
-  expect(decodeResult.raw.position.latitude).toBe(43.03);
-  expect(decodeResult.raw.position.longitude).toBe(-122.406);
+  expect(decodeResult.raw.position.latitude).toBe(43.05);
+  expect(decodeResult.raw.position.longitude).toBe(-122.67666666666666);
   expect(decodeResult.raw.altitude).toBe(38000);
   expect(decodeResult.raw.outside_air_temperature).toBe(-47);
   expect(decodeResult.formatted.items.length).toBe(5);
   expect(decodeResult.formatted.items[0].type).toBe('aircraft_position');
   expect(decodeResult.formatted.items[0].code).toBe('POS');
   expect(decodeResult.formatted.items[0].label).toBe('Aircraft Position');
-  expect(decodeResult.formatted.items[0].value).toBe('43.030 N, 122.406 W');
+  expect(decodeResult.formatted.items[0].value).toBe('43.050 N, 122.677 W');
   expect(decodeResult.formatted.items[1].type).toBe('altitude');
   expect(decodeResult.formatted.items[1].code).toBe('ALT');
   expect(decodeResult.formatted.items[1].label).toBe('Altitude');
@@ -145,15 +145,15 @@ test('decodes Label H1 Preamble POS variant 4', () => {
   expect(decodeResult.decoder.name).toBe('label-h1-pos');
   expect(decodeResult.formatted.description).toBe('Position Report');
   expect(decodeResult.message.text).toBe(text);
-  expect(decodeResult.raw.position.latitude).toBe(33.225);
-  expect(decodeResult.raw.position.longitude).toBe(-79.428);
+  expect(decodeResult.raw.position.latitude).toBe(33.375);
+  expect(decodeResult.raw.position.longitude).toBe(-79.71333333333334);
   expect(decodeResult.raw.altitude).toBe(34000);
   expect(decodeResult.raw.outside_air_temperature).toBe(-42);
   expect(decodeResult.formatted.items.length).toBe(5);
   expect(decodeResult.formatted.items[0].type).toBe('aircraft_position');
   expect(decodeResult.formatted.items[0].code).toBe('POS');
   expect(decodeResult.formatted.items[0].label).toBe('Aircraft Position');
-  expect(decodeResult.formatted.items[0].value).toBe('33.225 N, 79.428 W');
+  expect(decodeResult.formatted.items[0].value).toBe('33.375 N, 79.713 W');
   expect(decodeResult.formatted.items[1].type).toBe('altitude');
   expect(decodeResult.formatted.items[1].code).toBe('ALT');
   expect(decodeResult.formatted.items[1].label).toBe('Altitude');
@@ -185,7 +185,7 @@ test('decodes Label H1 Preamble POS variant 5', () => {
   expect(decodeResult.decoder.name).toBe('label-h1-pos');
   expect(decodeResult.formatted.description).toBe('Position Report');
   expect(decodeResult.message.text).toBe(text);
-  expect(decodeResult.raw.position.latitude).toBe(38.531);
+  expect(decodeResult.raw.position.latitude).toBe(38.885);
   expect(decodeResult.raw.position.longitude).toBe(-78.000);
   expect(decodeResult.raw.altitude).toBe(31000);
   expect(decodeResult.raw.outside_air_temperature).toBe(-40);
@@ -193,7 +193,7 @@ test('decodes Label H1 Preamble POS variant 5', () => {
   expect(decodeResult.formatted.items[0].type).toBe('aircraft_position');
   expect(decodeResult.formatted.items[0].code).toBe('POS');
   expect(decodeResult.formatted.items[0].label).toBe('Aircraft Position');
-  expect(decodeResult.formatted.items[0].value).toBe('38.531 N, 78.000 W');
+  expect(decodeResult.formatted.items[0].value).toBe('38.885 N, 78.000 W');
   expect(decodeResult.formatted.items[1].type).toBe('altitude');
   expect(decodeResult.formatted.items[1].code).toBe('ALT');
   expect(decodeResult.formatted.items[1].label).toBe('Altitude');
@@ -264,7 +264,7 @@ test('decodes Label H1 Preamble #M1BPOS short variant', () => {
   expect(decodeResult.formatted.description).toBe('Position Report');
   expect(decodeResult.formatted.items.length).toBe(5);
   expect(decodeResult.formatted.items[0].label).toBe('Aircraft Position');
-  expect(decodeResult.formatted.items[0].value).toBe('37.533 N, 96.476 W');
+  expect(decodeResult.formatted.items[0].value).toBe('37.888 N, 96.793 W');
   expect(decodeResult.formatted.items[1].label).toBe('Altitude');
   expect(decodeResult.formatted.items[1].value).toBe('33000 feet');
   expect(decodeResult.formatted.items[2].label).toBe('Aircraft Route');
@@ -330,11 +330,12 @@ test('decodes Label H1 Preamble POS variant 7', () => {
   expect(decodeResult.formatted.description).toBe('Position Report');
   expect(decodeResult.raw.message_timestamp).toBe(1709476093);
   expect(decodeResult.raw.flight_number).toBe('BANKR31');
+  expect(decodeResult.raw.mission_number).toBe('');
   expect(decodeResult.formatted.items.length).toBe(6);
   expect(decodeResult.formatted.items[0].label).toBe('Tail');
   expect(decodeResult.formatted.items[0].value).toBe('91459S');
   expect(decodeResult.formatted.items[1].label).toBe('Aircraft Position');
-  expect(decodeResult.formatted.items[1].value).toBe('39.277 N, 77.359 W');
+  expect(decodeResult.formatted.items[1].value).toBe('39.462 N, 77.598 W');
   expect(decodeResult.formatted.items[2].label).toBe('Aircraft Route');
   expect(decodeResult.formatted.items[2].value).toBe('(39.500 N, 77.183 W)@14:28:00 > (38.933 N, 77.250 W)@03:14:30 > ?');
   expect(decodeResult.formatted.items[3].label).toBe('Altitude');
@@ -343,7 +344,7 @@ test('decodes Label H1 Preamble POS variant 7', () => {
   expect(decodeResult.formatted.items[4].value).toBe('-28');
   expect(decodeResult.formatted.items[5].label).toBe('Message Checksum');
   expect(decodeResult.formatted.items[5].value).toBe('0x9071');
-  expect(decodeResult.remaining.text).toBe(',/MR64,0/ET31539,27619,MT370/CG311,160,350/FB732/VR32');
+  expect(decodeResult.remaining.text).toBe('/MR64,0/ET31539,27619,MT370/CG311,160,350/FB732/VR32');
 });
 
 test('decodes Label H1 Preamble #M1BPOS variant 7', () => {
@@ -361,11 +362,12 @@ test('decodes Label H1 Preamble #M1BPOS variant 7', () => {
   expect(decodeResult.formatted.description).toBe('Position Report');
   expect(decodeResult.raw.message_timestamp).toBe(1709487127);
   expect(decodeResult.raw.flight_number).toBe('');
+  expect(decodeResult.raw.mission_number).toBe('');
   expect(decodeResult.formatted.items.length).toBe(6);
   expect(decodeResult.formatted.items[0].label).toBe('Tail');
   expect(decodeResult.formatted.items[0].value).toBe('746026');
   expect(decodeResult.formatted.items[1].label).toBe('Aircraft Position');
-  expect(decodeResult.formatted.items[1].value).toBe('42.579 N, 108.090 W');
+  expect(decodeResult.formatted.items[1].value).toBe('42.965 N, 108.150 W');
   expect(decodeResult.formatted.items[2].label).toBe('Aircraft Route');
   expect(decodeResult.formatted.items[2].value).toBe('WAIDE@17:32:07 > WEDAK@03:17:59 > ?');
   expect(decodeResult.formatted.items[3].label).toBe('Altitude');
@@ -374,7 +376,7 @@ test('decodes Label H1 Preamble #M1BPOS variant 7', () => {
   expect(decodeResult.formatted.items[4].value).toBe('-49');
   expect(decodeResult.formatted.items[5].label).toBe('Message Checksum');
   expect(decodeResult.formatted.items[5].value).toBe('0x4e17');
-  expect(decodeResult.remaining.text).toBe('F37#M1B,/MR1,/ET031846,267070,T468/CG264,110,360/FB742/VR32');
+  expect(decodeResult.remaining.text).toBe('F37#M1B/MR1,/ET031846,267070,T468/CG264,110,360/FB742/VR32');
 });
 
 test('decodes Label H1 Preamble POS variant 8', () => {
@@ -433,7 +435,7 @@ test('decodes Label H1 Preamble POS variant 1 with offset', () => {
   expect(decodeResult.formatted.description).toBe('Position Report');
   expect(decodeResult.formatted.items.length).toBe(5);
   expect(decodeResult.formatted.items[0].label).toBe('Aircraft Position');
-  expect(decodeResult.formatted.items[0].value).toBe('33.204 N, 114.082 W');
+  expect(decodeResult.formatted.items[0].value).toBe('33.340 N, 114.137 W');
   expect(decodeResult.formatted.items[1].label).toBe('Altitude');
   expect(decodeResult.formatted.items[1].value).toBe('33000 feet');
   expect(decodeResult.formatted.items[2].label).toBe('Aircraft Route');
@@ -460,7 +462,7 @@ test('decodes Label H1 Preamble POS variant 9', () => {
   expect(decodeResult.formatted.description).toBe('Position Report');
   expect(decodeResult.formatted.items.length).toBe(5);
   expect(decodeResult.formatted.items[0].label).toBe('Aircraft Position');
-  expect(decodeResult.formatted.items[0].value).toBe('39.164 N, 77.259 W');
+  expect(decodeResult.formatted.items[0].value).toBe('39.273 N, 77.432 W');
   expect(decodeResult.formatted.items[1].label).toBe('Altitude');
   expect(decodeResult.formatted.items[1].value).toBe('5100 feet');
   expect(decodeResult.formatted.items[2].label).toBe('Aircraft Route');
@@ -487,7 +489,7 @@ test('decodes Label H1 Preamble POS variant 10', () => {
   expect(decodeResult.formatted.description).toBe('Position Report');
   expect(decodeResult.formatted.items.length).toBe(12);
   expect(decodeResult.formatted.items[0].label).toBe('Aircraft Position');
-  expect(decodeResult.formatted.items[0].value).toBe('51.194 N, 4.527 E');
+  expect(decodeResult.formatted.items[0].value).toBe('51.323 N, 4.878 E');
   expect(decodeResult.formatted.items[1].label).toBe('Altitude');
   expect(decodeResult.formatted.items[1].value).toBe('17400 feet');
   expect(decodeResult.formatted.items[2].label).toBe('Aircraft Route');
@@ -529,7 +531,7 @@ test('decodes Label H1 Preamble /.POS variant 2', () => {
   expect(decodeResult.raw.message_timestamp).toBe(1711015396);
   expect(decodeResult.formatted.items.length).toBe(6);
   expect(decodeResult.formatted.items[0].label).toBe('Aircraft Position');
-  expect(decodeResult.formatted.items[0].value).toBe('35.333 S, 58.220 W');
+  expect(decodeResult.formatted.items[0].value).toBe('35.555 S, 58.367 W');
   expect(decodeResult.formatted.items[1].label).toBe('Altitude');
   expect(decodeResult.formatted.items[1].value).toBe('25000 feet');
   expect(decodeResult.formatted.items[2].label).toBe('Aircraft Route');
@@ -558,11 +560,12 @@ test('decodes Label 4J Preamble POS variant 7', () => {
   expect(decodeResult.formatted.description).toBe('Position Report');
   expect(decodeResult.raw.message_timestamp).toBe(1725804426);
   expect(decodeResult.raw.flight_number).toBe('WIDE21');
+  expect(decodeResult.raw.mission_number).toBe('7PZWTCP21222');
   expect(decodeResult.formatted.items.length).toBe(6);
   expect(decodeResult.formatted.items[0].label).toBe('Tail');
   expect(decodeResult.formatted.items[0].value).toBe('91517S');
   expect(decodeResult.formatted.items[1].label).toBe('Aircraft Position');
-  expect(decodeResult.formatted.items[1].value).toBe('37.375 N, 77.368 W');
+  expect(decodeResult.formatted.items[1].value).toBe('37.625 N, 77.613 W');
   expect(decodeResult.formatted.items[2].label).toBe('Aircraft Route');
   expect(decodeResult.formatted.items[2].value).toBe('JAXSN@14:07:00 > LOOEY@09:14:17 > ?');
   expect(decodeResult.formatted.items[3].label).toBe('Altitude');
@@ -571,7 +574,7 @@ test('decodes Label 4J Preamble POS variant 7', () => {
   expect(decodeResult.formatted.items[4].value).toBe('-26');
   expect(decodeResult.formatted.items[5].label).toBe('Message Checksum');
   expect(decodeResult.formatted.items[5].value).toBe('0xc696');
-  expect(decodeResult.remaining.text).toBe(',7PZWTCP21222/MR238,2/ET91456,21329,M080T490/CG293,160,350/FB583/VR32');
+  expect(decodeResult.remaining.text).toBe('/MR238,2/ET91456,21329,M080T490/CG293,160,350/FB583/VR32');
 });
 
 test('decodes Label H1 Preamble #M1BPOS <invalid>', () => {

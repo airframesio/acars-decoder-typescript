@@ -15,11 +15,11 @@ export class ResultFormatter {
         });
     }
 
-    public static flightNumber(decodeResult: any, value: string) {
+    public static flightNumber(decodeResult: DecodeResult, value: string) {
         decodeResult.raw.flight_number = value;
     };
 
-    public static departureAirport(decodeResult: any, value: string) {
+    public static departureAirport(decodeResult: DecodeResult, value: string) {
         decodeResult.raw.departure_icao = value;
         decodeResult.formatted.items.push({
             type: 'origin',
@@ -39,7 +39,7 @@ export class ResultFormatter {
         });
     }
 
-    public static arrivalAirport(decodeResult: any, value: string) {
+    public static arrivalAirport(decodeResult: DecodeResult, value: string) {
         decodeResult.raw.arrival_icao = value;
         decodeResult.formatted.items.push({
             type: 'destination',
@@ -58,17 +58,18 @@ export class ResultFormatter {
         });
     }
 
-    public static arrivalRunway(decodeResult: any, value: string) {
+    public static arrivalRunway(decodeResult: DecodeResult, value: string) {
         decodeResult.raw.arrival_runway = value;
         decodeResult.formatted.items.push({
             type: 'runway',
+            code: 'ARWY',
             label: 'Arrival Runway',
             value: decodeResult.raw.arrival_runway,
         });
     };
 
 
-    public static currentFuel(decodeResult: any, value: number) {
+    public static currentFuel(decodeResult: DecodeResult, value: number) {
         decodeResult.raw.fuel_on_board = value;
         decodeResult.formatted.items.push({
             type: 'fuel_on_board',
@@ -77,10 +78,11 @@ export class ResultFormatter {
             value: decodeResult.raw.fuel_on_board.toString(),
         });
     };
-    public static remainingFuel(decodeResult: any, value: number) {
+    public static remainingFuel(decodeResult: DecodeResult, value: number) {
         decodeResult.raw.fuel_remaining = value;
         decodeResult.formatted.items.push({
             type: 'fuel_remaining',
+            code: 'FUEL',
             label: 'Fuel Remaining',
             value: decodeResult.raw.fuel_remaining.toString(),
         });
@@ -97,7 +99,7 @@ export class ResultFormatter {
         });
     };
 
-    public static groundspeed(decodeResult: any, value: number) {
+    public static groundspeed(decodeResult: DecodeResult, value: number) {
         decodeResult.raw.groundspeed = value;
         decodeResult.formatted.items.push({
             type: 'aircraft_groundspeed',
@@ -108,7 +110,7 @@ export class ResultFormatter {
     }
 
 
-    public static temperature(decodeResult: any, value: string) {
+    public static temperature(decodeResult: DecodeResult, value: string) {
         decodeResult.raw.outside_air_temperature = Number(value.substring(1)) * (value.charAt(0) === 'M' ? -1 : 1);
         decodeResult.formatted.items.push({
             type: 'outside_air_temperature',
@@ -117,7 +119,7 @@ export class ResultFormatter {
             value: `${decodeResult.raw.outside_air_temperature}`,
         });
     }
-    public static unknown(decodeResult: any, value: string) {
+    public static unknown(decodeResult: DecodeResult, value: string) {
         decodeResult.remaining.text += ',' + value;
     };
 }

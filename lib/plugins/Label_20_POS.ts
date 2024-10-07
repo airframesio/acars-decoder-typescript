@@ -14,7 +14,7 @@ export class Label_20_POS extends DecoderPlugin {
   }
 
   decode(message: Message, options: Options = {}) : DecodeResult {
-    const decodeResult: any = this.defaultResult();
+    const decodeResult = this.defaultResult();
     decodeResult.decoder.name = this.name;
     decodeResult.formatted.description = 'Position Report';
     decodeResult.message = message;
@@ -37,6 +37,7 @@ export class Label_20_POS extends DecoderPlugin {
       if(decodeResult.raw.position) {
         decodeResult.formatted.items.push({
           type: 'position',
+          code: 'POS',
           label: 'Position',
           value: CoordinateUtils.coordinateString(decodeResult.raw.position),
         });
@@ -54,6 +55,7 @@ export class Label_20_POS extends DecoderPlugin {
       if(decodeResult.raw.position) {
         decodeResult.formatted.items.push({
           type: 'position',
+          code: 'POS',
           label: 'Position',
           value: CoordinateUtils.coordinateString(decodeResult.raw.position),
         });
