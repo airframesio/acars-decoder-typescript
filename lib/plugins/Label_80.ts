@@ -1,6 +1,7 @@
 import { DecoderPlugin } from '../DecoderPlugin';
 import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
 import { CoordinateUtils } from '../utils/coordinate_utils';
+import { ResultFormatter } from '../utils/result_formatter';
 
 // Airline Defined
 // 3N01 POSRPT
@@ -115,13 +116,9 @@ export class Label_80 extends DecoderPlugin {
               break;
             }
             case 'FL': {
-              decodeResult.raw.flight_level = match.groups.value;
-              decodeResult.formatted.items.push({
-                type: 'flight_level',
-                code: 'FL',
-                label: this.descriptions[match.groups.field],
-                value: decodeResult.raw.flight_level,
-              });
+              const flight_level = match.groups.value;
+              decodeResult.raw.altitude = flight_level * 100;
+              ResultFormatter.altitude(decodeResult, decodeResult.raw.altitude);
               break;
             }
             case 'FOB': {
