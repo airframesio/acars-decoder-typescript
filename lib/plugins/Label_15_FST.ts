@@ -54,7 +54,7 @@ export class Label_15_FST extends DecoderPlugin {
     ResultFormatter.altitude(decodeResult, decodeResult.raw.altitude);
     ResultFormatter.departureAirport(decodeResult, decodeResult.raw.departure_icao);
     ResultFormatter.arrivalAirport(decodeResult, decodeResult.raw.arrival_icao);
-    decodeResult.remaining.text += parts.slice(1).join(' ');
+    decodeResult.remaining.text = parts.slice(1).join(' ');
 
     decodeResult.decoded = true;
     decodeResult.decoder.decodeLevel = 'partial';
