@@ -36,8 +36,8 @@ export class Label_15_FST extends DecoderPlugin {
 
     if ((firstChar === 'N' || firstChar === 'S') && (middleChar === 'W' || middleChar === 'E')) {
       decodeResult.raw.position.latitude = (Number(stringCoords.substring(1, 7)) / 10000) * (firstChar === 'S' ? -1 : 1);
-      decodeResult.raw.position.longitude = (Number(stringCoords.substring(8, 14)) / 1000) * (middleChar === 'W' ? -1 : 1);
-      decodeResult.remaining.text = stringCoords.substring(14);
+      decodeResult.raw.position.longitude = (Number(stringCoords.substring(8, 15)) / 10000) * (middleChar === 'W' ? -1 : 1);
+      decodeResult.raw.altitude = Number(stringCoords.substring(15)) * 100;
     } else {
       decodeResult.decoded = false;
       decodeResult.decoder.decodeLevel = 'none';
@@ -51,9 +51,10 @@ export class Label_15_FST extends DecoderPlugin {
       value: CoordinateUtils.coordinateString(decodeResult.raw.position)
     });
 
+    ResultFormatter.altitude(decodeResult, decodeResult.raw.altitude);
     ResultFormatter.departureAirport(decodeResult, decodeResult.raw.departure_icao);
     ResultFormatter.arrivalAirport(decodeResult, decodeResult.raw.arrival_icao);
-    decodeResult.remaining.text += ' ' + parts.slice(1).join(' ');
+    decodeResult.remaining.text += parts.slice(1).join(' ');
 
     decodeResult.decoded = true;
     decodeResult.decoder.decodeLevel = 'partial';

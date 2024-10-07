@@ -14,37 +14,40 @@ describe('Label_15_FST', () => {
         expect(plugin.name).toBe('label-15-fst');
         expect(plugin.qualifiers).toBeDefined();
         expect(plugin.qualifiers()).toEqual({
-          labels: ['15'],
-          preambles: ['FST01'],
+            labels: ['15'],
+            preambles: ['FST01'],
         });
-      });
-    
+    });
 
-      test('decodes Label 15 Preamble FST valid', () => {
+
+    test('decodes Label 15 Preamble FST variant 1', () => {
         const text = 'FST01EGKKKMCON373488W0756927380 156 495 M53C 4427422721045313002518521710'
         const decodeResult = plugin.decode({ text: text });
+        console.log(JSON.stringify(decodeResult, null, 2));
 
         expect(decodeResult.decoded).toBe(true);
         expect(decodeResult.decoder.decodeLevel).toBe('partial');
-        expect(decodeResult.formatted.items.length).toBe(3);
+        expect(decodeResult.formatted.items.length).toBe(4);
         expect(decodeResult.formatted.items[0].label).toBe('Aircraft Position');
-        expect(decodeResult.formatted.items[0].value).toBe('37.349 N, 75.692 W');
-        expect(decodeResult.formatted.items[1].label).toBe('Origin');
-        expect(decodeResult.formatted.items[1].value).toBe('EGKK');
-        expect(decodeResult.formatted.items[2].label).toBe('Destination');
-        expect(decodeResult.formatted.items[2].value).toBe('KMCO');
-        expect(decodeResult.remaining.text).toBe('7380 156 495 M53C 4427422721045313002518521710');
+        expect(decodeResult.formatted.items[0].value).toBe('37.349 N, 75.693 W');
+        expect(decodeResult.formatted.items[1].label).toBe('Altitude');
+        expect(decodeResult.formatted.items[1].value).toBe('38000 feet');
+        expect(decodeResult.formatted.items[2].label).toBe('Origin');
+        expect(decodeResult.formatted.items[2].value).toBe('EGKK');
+        expect(decodeResult.formatted.items[3].label).toBe('Destination');
+        expect(decodeResult.formatted.items[3].value).toBe('KMCO');
+        expect(decodeResult.remaining.text).toBe('156 495 M53C 4427422721045313002518521710');
     });
 
     test('decodes Label 15 Preamble FST <invalid>', () => {
-      
+
         const text = 'INI Bogus message';
         const decodeResult = plugin.decode({ text: text });
-      
+
         expect(decodeResult.decoded).toBe(false);
         expect(decodeResult.decoder.decodeLevel).toBe('none');
         expect(decodeResult.decoder.name).toBe('label-15-fst');
         expect(decodeResult.formatted.description).toBe('Position Report');
         expect(decodeResult.message.text).toBe(text);
-      });
+    });
 });
