@@ -24,16 +24,16 @@ test('decodes Label 16 variant 1', () => {
   expect(decodeResult.message.text).toBe(text);
   expect(decodeResult.raw.position.latitude).toBe(44.203);
   expect(decodeResult.raw.position.longitude).toBe(-86.546);
-  expect(decodeResult.raw.flight_level).toBe(31965);
+  expect(decodeResult.raw.altitude).toBe(31965);
   expect(decodeResult.formatted.items.length).toBe(2);
   expect(decodeResult.formatted.items[0].type).toBe('aircraft_position');
   expect(decodeResult.formatted.items[0].code).toBe('POS');
   expect(decodeResult.formatted.items[0].label).toBe('Aircraft Position');
   expect(decodeResult.formatted.items[0].value).toBe('44.203 N, 86.546 W');
-  expect(decodeResult.formatted.items[1].type).toBe('flight_level');
-  expect(decodeResult.formatted.items[1].code).toBe('FL');
-  expect(decodeResult.formatted.items[1].label).toBe('Flight Level');
-  expect(decodeResult.formatted.items[1].value).toBe(31965);
+  expect(decodeResult.formatted.items[1].type).toBe('altitude');
+  expect(decodeResult.formatted.items[1].code).toBe('ALT');
+  expect(decodeResult.formatted.items[1].label).toBe('Altitude');
+  expect(decodeResult.formatted.items[1].value).toBe('31965 feet');
 });
 
 test('decodes Label 16 variant 2', () => {
@@ -89,16 +89,16 @@ test('decodes Label 16 variant 3', () => {
   expect(decodeResult.message.text).toBe(text);
   expect(decodeResult.raw.position.latitude).toBe(44.988);
   expect(decodeResult.raw.position.longitude).toBe(-121.644);
-  expect(decodeResult.raw.flight_level).toBe(35940);
+  expect(decodeResult.raw.altitude).toBe(35940);
   expect(decodeResult.formatted.items.length).toBe(2);
   expect(decodeResult.formatted.items[0].type).toBe('aircraft_position');
   expect(decodeResult.formatted.items[0].code).toBe('POS');
   expect(decodeResult.formatted.items[0].label).toBe('Aircraft Position');
   expect(decodeResult.formatted.items[0].value).toBe('44.988 N, 121.644 W');
-  expect(decodeResult.formatted.items[1].type).toBe('flight_level');
-  expect(decodeResult.formatted.items[1].code).toBe('FL');
-  expect(decodeResult.formatted.items[1].label).toBe('Flight Level');
-  expect(decodeResult.formatted.items[1].value).toBe(35940);
+  expect(decodeResult.formatted.items[1].type).toBe('altitude');
+  expect(decodeResult.formatted.items[1].code).toBe('ALT');
+  expect(decodeResult.formatted.items[1].label).toBe('Altitude');
+  expect(decodeResult.formatted.items[1].value).toBe('35940 feet');
 });
 
 test('decodes Label 16 variant <invalid>', () => {

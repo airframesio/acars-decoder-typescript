@@ -114,10 +114,10 @@ test('decodes Label 80 variant 2', () => {
   expect(decodeResult.formatted.items[8].code).toBe('POS');
   expect(decodeResult.formatted.items[8].label).toBe('Position');
   expect(decodeResult.formatted.items[8].value).toBe('35.392 N, 79.372 W');
-  expect(decodeResult.formatted.items[9].type).toBe('flight_level');
-  expect(decodeResult.formatted.items[9].code).toBe('FL');
-  expect(decodeResult.formatted.items[9].label).toBe('Flight Level');
-  expect(decodeResult.formatted.items[9].value).toBe('360');
+  expect(decodeResult.formatted.items[9].type).toBe('altitude');
+  expect(decodeResult.formatted.items[9].code).toBe('ALT');
+  expect(decodeResult.formatted.items[9].label).toBe('Altitude');
+  expect(decodeResult.formatted.items[9].value).toBe('36000 feet');
   expect(decodeResult.formatted.items[10].type).toBe('TAS');
   expect(decodeResult.formatted.items[10].code).toBe('TAS');
   expect(decodeResult.formatted.items[10].label).toBe('True Airspeed');

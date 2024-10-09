@@ -50,6 +50,7 @@ export class ResultFormatter {
     };
 
     public static eta(decodeResult: DecodeResult, value: string) {
+        decodeResult.raw.eta_time = value;
         decodeResult.formatted.items.push({
             type: 'eta',
             code: 'ETA',

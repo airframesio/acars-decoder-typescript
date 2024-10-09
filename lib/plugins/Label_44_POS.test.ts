@@ -29,7 +29,7 @@ test('decodes Label 44 Preamble POS02 variant 1', () => {
   expect(decodeResult.message.text).toBe(text);
   expect(decodeResult.raw.position.latitude).toBe(38.285);
   expect(decodeResult.raw.position.longitude).toBe(-77.845);
-  expect(decodeResult.raw.flight_level).toBe(319);
+  expect(decodeResult.raw.altitude).toBe(31900);
   expect(decodeResult.raw.departure_icao).toBe('KJFK');
   expect(decodeResult.raw.arrival_icao).toBe('KUZA');
   expect(decodeResult.raw.current_time).toBe(1727318700000);
@@ -48,10 +48,10 @@ test('decodes Label 44 Preamble POS02 variant 1', () => {
   expect(decodeResult.formatted.items[2].code).toBe('DST');
   expect(decodeResult.formatted.items[2].label).toBe('Destination');
   expect(decodeResult.formatted.items[2].value).toBe('KUZA');
-  expect(decodeResult.formatted.items[3].type).toBe('flight_level');
-  expect(decodeResult.formatted.items[3].code).toBe('FL');
-  expect(decodeResult.formatted.items[3].label).toBe('Flight Level');
-  expect(decodeResult.formatted.items[3].value).toBe(319);
+  expect(decodeResult.formatted.items[3].type).toBe('altitude');
+  expect(decodeResult.formatted.items[3].code).toBe('ALT');
+  expect(decodeResult.formatted.items[3].label).toBe('Altitude');
+  expect(decodeResult.formatted.items[3].value).toBe('31900 feet');
 });
 
 // disabled because current parser decodes 'full'

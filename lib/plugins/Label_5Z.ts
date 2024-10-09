@@ -1,5 +1,6 @@
 import { DecoderPlugin } from '../DecoderPlugin';
 import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
+import { ResultFormatter } from '../utils/result_formatter';
 
 export class Label_5Z extends DecoderPlugin {
   name = 'label-5z';
@@ -71,34 +72,10 @@ export class Label_5Z extends DecoderPlugin {
         results = remainder.match(rdcRegex);
 
         if (results) {
-          decodeResult.raw.origin = results.groups.from;
-          decodeResult.formatted.items.push({
-            type: 'origin',
-            label: 'Origin',
-            value: `${results.groups.from}`,
-          });
-          decodeResult.raw.destination = results.groups.to;
-          decodeResult.formatted.items.push({
-            type: 'destination',
-            label: 'Destination',
-            value: `${results.groups.to}`,
-          });
-          decodeResult.formatted.items.push({
-            type: 'unknown1',
-            label: 'Unknown Field 1',
-            value: `${results.groups.unknown1}`,
-          });
-          decodeResult.raw.runway = results.groups.runway;
-          decodeResult.formatted.items.push({
-            type: 'runway',
-            label: 'Runway',
-            value: `${results.groups.runway}`,
-          });
-          decodeResult.formatted.items.push({
-            type: 'unknown2',
-            label: 'Unknown Field 2',
-            value: `${results.groups.unknown2}`,
-          });
+          ResultFormatter.departureAirport(decodeResult, results.groups.from);
+          ResultFormatter.arrivalAirport(decodeResult, results.groups.to);
+          ResultFormatter.arrivalRunway(decodeResult, results.groups.runway);
+          
         } else {
           if (options.debug) {
             console.log(`Decoder: Unkown 5Z RDC format: ${remainder}`);
