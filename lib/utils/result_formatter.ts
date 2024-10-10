@@ -1,9 +1,19 @@
 import { DecodeResult } from "../DecoderPluginInterface";
+import { CoordinateUtils } from "./coordinate_utils";
 
 /**
  * Class to format the results of common fields
  */
 export class ResultFormatter {
+    static position(decodeResult: DecodeResult, value:{latitude: number, longitude: number}) {
+        decodeResult.raw.position = value;
+        decodeResult.formatted.items.push({
+          type: 'aircraft_position',
+          code: 'POS',
+          label: 'Aircraft Position',
+          value: CoordinateUtils.coordinateString(value),
+        });
+      }
 
     static altitude(decodeResult: DecodeResult, value: number) {
         decodeResult.raw.altitude = value;
@@ -110,7 +120,6 @@ export class ResultFormatter {
         });
     }
 
-
     public static temperature(decodeResult: DecodeResult, value: string) {
         decodeResult.raw.outside_air_temperature = Number(value.substring(1)) * (value.charAt(0) === 'M' ? -1 : 1);
         decodeResult.formatted.items.push({
@@ -120,6 +129,17 @@ export class ResultFormatter {
             value: `${decodeResult.raw.outside_air_temperature}`,
         });
     }
+
+    public static heading(decodeResult: DecodeResult, value: number) {
+        decodeResult.raw.heading = value;
+        decodeResult.formatted.items.push({
+            type: 'heading',
+            code: 'HDG',
+            label: 'Heading',
+            value: `${decodeResult.raw.heading}`,
+        });
+    }
+
     public static unknown(decodeResult: DecodeResult, value: string) {
         decodeResult.remaining.text += ',' + value;
     };
