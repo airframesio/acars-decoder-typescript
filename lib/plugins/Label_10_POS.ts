@@ -1,6 +1,5 @@
 import { DecoderPlugin } from '../DecoderPlugin';
 import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
-import { CoordinateUtils } from '../utils/coordinate_utils';
 import { ResultFormatter } from '../utils/result_formatter';
 
 export class Label_10_POS extends DecoderPlugin { // eslint-disable-line camelcase

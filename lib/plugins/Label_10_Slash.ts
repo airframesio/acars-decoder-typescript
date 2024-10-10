@@ -2,7 +2,6 @@ import { DateTimeUtils } from '../DateTimeUtils';
 import { DecoderPlugin } from '../DecoderPlugin';
 import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
 import { Waypoint } from '../types/waypoint';
-import { CoordinateUtils } from '../utils/coordinate_utils';
 import { ResultFormatter } from '../utils/result_formatter';
 import { RouteUtils } from '../utils/route_utils';
 
