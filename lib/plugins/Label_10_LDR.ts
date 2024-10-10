@@ -39,7 +39,7 @@ export class Label_10_LDR extends DecoderPlugin { // eslint-disable-line camelca
       latitude: (lat[0] === 'N' ? 1 : -1) * Number(lat.substring(1).trim()),
       longitude: (lon[0] === 'E' ? 1 : -1) * Number(lon.substring(1).trim()),
     }
-    processPosition(decodeResult, position);
+    ResultFormatter.position(decodeResult, position);
     ResultFormatter.altitude(decodeResult, Number(parts[7]));
     ResultFormatter.departureAirport(decodeResult, parts[9]);
     ResultFormatter.arrivalAirport(decodeResult, parts[10]);
@@ -52,15 +52,6 @@ export class Label_10_LDR extends DecoderPlugin { // eslint-disable-line camelca
     decodeResult.decoder.decodeLevel = 'partial';
     return decodeResult;
   }
-}
-
-function processPosition(decodeResult: DecodeResult, value:{latitude: number, longitude: number}) {
-  decodeResult.formatted.items.push({
-    type: 'aircraft_position',
-    code: 'POS',
-    label: 'Aircraft Position',
-    value: CoordinateUtils.coordinateString(value),
-  });
 }
 
 export default {};

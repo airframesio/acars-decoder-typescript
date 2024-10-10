@@ -1,9 +1,19 @@
 import { DecodeResult } from "../DecoderPluginInterface";
+import { CoordinateUtils } from "./coordinate_utils";
 
 /**
  * Class to format the results of common fields
  */
 export class ResultFormatter {
+    static position(decodeResult: DecodeResult, value:{latitude: number, longitude: number}) {
+        decodeResult.raw.position = value;
+        decodeResult.formatted.items.push({
+          type: 'aircraft_position',
+          code: 'POS',
+          label: 'Aircraft Position',
+          value: CoordinateUtils.coordinateString(value),
+        });
+      }
 
     static altitude(decodeResult: DecodeResult, value: number) {
         decodeResult.raw.altitude = value;

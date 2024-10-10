@@ -39,7 +39,7 @@ export class Label_10_Slash extends DecoderPlugin { // eslint-disable-line camel
       latitude: (lat[0] === 'N' ? 1 : -1) * Number(lat.substring(1)),
       longitude: (lon[0] === 'E' ? 1 : -1) * Number(lon.substring(1)),
     }
-    processPosition(decodeResult, position);
+    ResultFormatter.position(decodeResult, position);
     ResultFormatter.heading(decodeResult, Number(parts[5]));
     ResultFormatter.altitude(decodeResult, 100*Number(parts[6]));
     ResultFormatter.arrivalAirport(decodeResult, parts[7]);
@@ -73,15 +73,6 @@ export class Label_10_Slash extends DecoderPlugin { // eslint-disable-line camel
     decodeResult.decoder.decodeLevel = 'partial';
     return decodeResult;
   }
-}
-
-function processPosition(decodeResult: DecodeResult, value:{latitude: number, longitude: number}) {
-  decodeResult.formatted.items.push({
-    type: 'aircraft_position',
-    code: 'POS',
-    label: 'Aircraft Position',
-    value: CoordinateUtils.coordinateString(value),
-  });
 }
 
 export default {};
