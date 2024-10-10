@@ -33,8 +33,8 @@ export class Label_QQ extends DecoderPlugin {
         let londeg = Number(message.text.substring(35, 38));
         let lonmin = Number(message.text.substring(38, 42));
         decodeResult.raw.position = {
-            latitude: (latdeg + latmin/60).toFixed(3) * (latdir === 'N' ? 1 : -1),
-            longitude: (londeg + lonmin/60).toFixed(3) * (londir === 'E' ? 1 : -1),
+            latitude: (latdeg + latmin/60) * (latdir === 'N' ? 1 : -1),
+            longitude: (londeg + lonmin/60) * (londir === 'E' ? 1 : -1),
         };
         decodeResult.remaining.text = message.text.substring(42, 45);
         if (decodeResult.remaining.text !== "---") {

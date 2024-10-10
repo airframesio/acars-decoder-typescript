@@ -30,8 +30,8 @@ export class Label_HX extends DecoderPlugin {
         let londeg = Number(parts[4].substring(1, 4));
         let lonmin = Number(parts[4].substring(4, 8));
         decodeResult.raw.position = {
-            latitude: (latdeg + latmin/60).toFixed(3) * (latdir === 'N' ? 1 : -1),
-            longitude: (londeg + lonmin/60).toFixed(3) * (londir === 'E' ? 1 : -1),
+            latitude: (latdeg + latmin/60) * (latdir === 'N' ? 1 : -1),
+            longitude: (londeg + lonmin/60) * (londir === 'E' ? 1 : -1),
         };
         decodeResult.remaining.text = parts.slice(5).join(' ');
     } else if (parts[2] === "43") {

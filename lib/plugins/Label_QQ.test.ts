@@ -28,7 +28,7 @@ test('decodes Label QQ variant 1', () => {
   expect(decodeResult.raw.wheels_off).toBe('002543');
   expect(decodeResult.raw.day_of_month).toBe('09');
   expect(decodeResult.raw.position.latitude).toBe(33.61);
-  expect(decodeResult.raw.position.longitude).toBe(-111.932);
+  expect(decodeResult.raw.position.longitude).toBe(-111.93166666666667);
   expect(decodeResult.raw.groundspeed).toBe('175');
   expect(decodeResult.remaining.text).toBe('028,0042');
   expect(decodeResult.formatted.items.length).toBe(5);
@@ -73,7 +73,7 @@ test('decodes Label QQ variant 2', () => {
   expect(decodeResult.raw.wheels_off).toBe('000444');
   expect(decodeResult.raw.day_of_month).toBe('07');
   expect(decodeResult.raw.position.latitude).toBe(33.83);
-  expect(decodeResult.raw.position.longitude).toBe(-118.168);
+  expect(decodeResult.raw.position.longitude).toBe(-118.16833333333334);
   expect(decodeResult.remaining.text).toBe('---,020,0009');
   expect(decodeResult.formatted.items.length).toBe(4);
   expect(decodeResult.formatted.items[0].type).toBe('origin');
