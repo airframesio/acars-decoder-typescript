@@ -27,6 +27,7 @@ export * from './Label_H1_OHMA';
 export * from './Label_H1_PRG';
 export * from './Label_H1_POS';
 export * from './Label_H1_WRN';
+export * from './Label_HX';
 export * from './Label_SQ';
 export * from './Label_QR';
 export * from './Label_QP';
