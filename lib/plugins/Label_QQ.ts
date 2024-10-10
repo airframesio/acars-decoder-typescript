@@ -15,6 +15,8 @@ export class Label_QQ extends DecoderPlugin {
   decode(message: Message, options: Options = {}) : DecodeResult {
     const decodeResult = this.defaultResult();
     decodeResult.decoder.name = this.name;
+    decodeResult.message = message;
+    decodeResult.formatted.description = 'OFF Report';
     
     ResultFormatter.departureAirport(decodeResult, message.text.substring(0, 4));
     ResultFormatter.arrivalAirport(decodeResult, message.text.substring(4, 8));
@@ -24,8 +26,16 @@ export class Label_QQ extends DecoderPlugin {
     if (message.text.substring(12, 19) === "\r\n001FE") {
         decodeResult.raw.day_of_month = message.text.substring(19, 21);
         decodeResult.raw.wheels_off = message.text.substring(21, 27);
-        decodeResult.raw.position.latitude = message.text.substring(27, 34);
-        decodeResult.raw.position.longitude = message.text.substring(34, 42);
+        let latdir = message.text.substring(27, 28);
+        let latdeg = Number(message.text.substring(28, 30));
+        let latmin = Number(message.text.substring(30, 34));
+        let londir = message.text.substring(34, 35);
+        let londeg = Number(message.text.substring(35, 38));
+        let lonmin = Number(message.text.substring(38, 42));
+        decodeResult.raw.position = {
+            latitude: (latdeg + latmin/60).toFixed(3) * (latdir === 'N' ? 1 : -1),
+            longitude: (londeg + lonmin/60).toFixed(3) * (londir === 'E' ? 1 : -1),
+        };
         decodeResult.remaining.text = message.text.substring(42, 45);
         if (decodeResult.remaining.text !== "---") {
             ResultFormatter.groundspeed(decodeResult, message.text.substring(45, 48));
@@ -37,8 +47,6 @@ export class Label_QQ extends DecoderPlugin {
         decodeResult.remaining.text = message.text.substring(12);
     }
 
-    decodeResult.formatted.description = 'OFF Report';
-
     decodeResult.formatted.items.push({
         type: 'wheels_off',
         code: 'WOFF',
@@ -46,7 +54,7 @@ export class Label_QQ extends DecoderPlugin {
         value: decodeResult.raw.wheels_off,
     });
 
-    if (decodeResult.raw.position.latitude) {
+    if (decodeResult.raw.position) {
         decodeResult.formatted.items.push({
             type: 'aircraft_position',
             code: 'POS',
@@ -56,10 +64,10 @@ export class Label_QQ extends DecoderPlugin {
     }
 
     decodeResult.decoded = true;
-    if(decodeResult.remaining.text === "") 
-	decodeResult.decoder.decodeLevel = 'full';
+    if(decodeResult.remaining.text === "")
+        decodeResult.decoder.decodeLevel = 'full';
     else
-	decodeResult.decoder.decodeLevel = 'partial';
+        decodeResult.decoder.decodeLevel = 'partial';
 
     return decodeResult;
   }

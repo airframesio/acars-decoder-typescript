@@ -3,7 +3,7 @@ import { Label_HX } from './Label_HX';
 
 test('matches Label HX qualifiers', () => {
   const decoder = new MessageDecoder();
-  const decoderPlugin = new Label_QQ(decoder);
+  const decoderPlugin = new Label_HX(decoder);
 
   expect(decoderPlugin.decode).toBeDefined();
   expect(decoderPlugin.name).toBe('label-hx');
@@ -23,8 +23,8 @@ test('decodes Label HX variant 1', () => {
   expect(decodeResult.decoder.name).toBe('label-hx');
   expect(decodeResult.formatted.description).toBe('Undelivered Uplink Report');
   expect(decodeResult.message.text).toBe(text);
-  expect(decodeResult.raw.position.latitude).toBe('N4009.6');
-  expect(decodeResult.raw.position.longitude).toBe('W07540.8');
+  expect(decodeResult.raw.position.latitude).toBe(40.16);
+  expect(decodeResult.raw.position.longitude).toBe(-75.68);
   expect(decodeResult.formatted.items.length).toBe(1);
   expect(decodeResult.formatted.items[0].type).toBe('aircraft_position');
   expect(decodeResult.formatted.items[0].code).toBe('POS');
@@ -46,8 +46,8 @@ test('decodes Label HX variant 2', () => {
   expect(decodeResult.decoder.name).toBe('label-hx');
   expect(decodeResult.formatted.description).toBe('Undelivered Uplink Report');
   expect(decodeResult.message.text).toBe(text);
-  expect(decodeResult.raw.origin).toBe('GSP');
-  expect(decodeResult.remaining).toBe('B02');
+  expect(decodeResult.raw.departure_icao).toBe('GSP');
+  expect(decodeResult.remaining.text).toBe('B02');
   expect(decodeResult.formatted.items.length).toBe(1);
   expect(decodeResult.formatted.items[0].type).toBe('origin');
   expect(decodeResult.formatted.items[0].code).toBe('ORG');
@@ -55,12 +55,11 @@ test('decodes Label HX variant 2', () => {
   expect(decodeResult.formatted.items[0].value).toBe('GSP');
 });
 
-// disabled because current parser decodes 'full'
-xtest('decodes Label HX <invalid>', () => {
+test('decodes Label HX <invalid>', () => {
   const decoder = new MessageDecoder();
   const decoderPlugin = new Label_HX(decoder);
 
-  const text = 'QQ Bogus message';
+  const text = 'HX Bogus message';
   const decodeResult = decoderPlugin.decode({ text: text });
   console.log(JSON.stringify(decodeResult, null, 2));
 

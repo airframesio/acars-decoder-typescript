@@ -23,14 +23,14 @@ test('decodes Label QQ variant 1', () => {
   expect(decodeResult.decoder.name).toBe('label-qq');
   expect(decodeResult.formatted.description).toBe('OFF Report');
   expect(decodeResult.message.text).toBe(text);
-  expect(decodeResult.raw.origin).toBe('KSDL');
-  expect(decodeResult.raw.destination).toBe('KLAS');
+  expect(decodeResult.raw.departure_icao).toBe('KSDL');
+  expect(decodeResult.raw.arrival_icao).toBe('KLAS');
   expect(decodeResult.raw.wheels_off).toBe('002543');
-  expect(decodeResult.message.day_of_month).toBe('09');
-  expect(decodeResult.raw.position.latitude).toBe('N3336.6');
-  expect(decodeResult.raw.position.longitude).toBe('W11155.9');
+  expect(decodeResult.raw.day_of_month).toBe('09');
+  expect(decodeResult.raw.position.latitude).toBe(33.61);
+  expect(decodeResult.raw.position.longitude).toBe(-111.932);
   expect(decodeResult.raw.groundspeed).toBe('175');
-  expect(decodeResult.remaining).toBe('028,0042');
+  expect(decodeResult.remaining.text).toBe('028,0042');
   expect(decodeResult.formatted.items.length).toBe(5);
   expect(decodeResult.formatted.items[0].type).toBe('origin');
   expect(decodeResult.formatted.items[0].code).toBe('ORG');
@@ -68,13 +68,13 @@ test('decodes Label QQ variant 2', () => {
   expect(decodeResult.decoder.name).toBe('label-qq');
   expect(decodeResult.formatted.description).toBe('OFF Report');
   expect(decodeResult.message.text).toBe(text);
-  expect(decodeResult.raw.origin).toBe('KLGB');
-  expect(decodeResult.raw.destination).toBe('KLAX');
+  expect(decodeResult.raw.departure_icao).toBe('KLGB');
+  expect(decodeResult.raw.arrival_icao).toBe('KLAX');
   expect(decodeResult.raw.wheels_off).toBe('000444');
-  expect(decodeResult.message.day_of_month).toBe('07');
-  expect(decodeResult.raw.position.latitude).toBe('N3349.8');
-  expect(decodeResult.raw.position.longitude).toBe('W11810.1');
-  expect(decodeResult.remaining).toBe('---,020,0009');
+  expect(decodeResult.raw.day_of_month).toBe('07');
+  expect(decodeResult.raw.position.latitude).toBe(33.83);
+  expect(decodeResult.raw.position.longitude).toBe(-118.168);
+  expect(decodeResult.remaining.text).toBe('---,020,0009');
   expect(decodeResult.formatted.items.length).toBe(4);
   expect(decodeResult.formatted.items[0].type).toBe('origin');
   expect(decodeResult.formatted.items[0].code).toBe('ORG');
@@ -108,10 +108,10 @@ test('decodes Label QQ variant 3', () => {
   expect(decodeResult.decoder.name).toBe('label-qq');
   expect(decodeResult.formatted.description).toBe('OFF Report');
   expect(decodeResult.message.text).toBe(text);
-  expect(decodeResult.raw.origin).toBe('CYOW');
-  expect(decodeResult.raw.destination).toBe('KMEM');
+  expect(decodeResult.raw.departure_icao).toBe('CYOW');
+  expect(decodeResult.raw.arrival_icao).toBe('KMEM');
   expect(decodeResult.raw.wheels_off).toBe('0058');
-  expect(decodeResult.remaining).toBe('/OFFRPT/090155');
+  expect(decodeResult.remaining.text).toBe('/OFFRPT/090155');
   expect(decodeResult.formatted.items.length).toBe(3);
   expect(decodeResult.formatted.items[0].type).toBe('origin');
   expect(decodeResult.formatted.items[0].code).toBe('ORG');
@@ -127,7 +127,7 @@ test('decodes Label QQ variant 3', () => {
   expect(decodeResult.formatted.items[2].value).toBe('0058');
 });
 
-// disabled because current parser decodes 'full'
+// disabled because all messages should decode
 xtest('decodes Label QQ <invalid>', () => {
   const decoder = new MessageDecoder();
   const decoderPlugin = new Label_QQ(decoder);
