@@ -5,6 +5,17 @@ import { CoordinateUtils } from "./coordinate_utils";
  * Class to format the results of common fields
  */
 export class ResultFormatter {
+    static wheelsUp(decodeResult: DecodeResult, time: number) {
+      decodeResult.raw.wheels_off_time = time;
+      const date = new Date(time * 1000);
+      decodeResult.formatted.items.push({
+        type: 'time_of_day',
+        code: 'WHEELS_OFF',
+        label: 'Wheels Off Time',
+        value: date.toISOString().slice(11, 19),
+    });
+    }
+
     static position(decodeResult: DecodeResult, value:{latitude: number, longitude: number}) {
         decodeResult.raw.position = value;
         decodeResult.formatted.items.push({
@@ -59,6 +70,7 @@ export class ResultFormatter {
         });
     };
 
+    // FIXME - make seconds since midnight for time of day
     public static eta(decodeResult: DecodeResult, value: string) {
         decodeResult.raw.eta_time = value;
         decodeResult.formatted.items.push({
