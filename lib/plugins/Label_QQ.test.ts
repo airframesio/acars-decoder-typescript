@@ -16,8 +16,7 @@ test('decodes Label QQ variant 1', () => {
   // https://app.airframes.io/messages/3409269161
   const text = 'KSDLKLAS0025\r\n001FE09002543N3336.6W11155.90281750042';
   const decodeResult = decoderPlugin.decode({ text: text });
-  console.log(JSON.stringify(decodeResult, null, 2));
-
+  
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
   expect(decodeResult.decoder.name).toBe('label-qq');
@@ -61,8 +60,7 @@ test('decodes Label QQ variant 2', () => {
   // https://app.airframes.io/messages/3406443370
   const text = 'KLGBKLAX0004\r\n001FE07000444N3349.8W11810.1---0200009';
   const decodeResult = decoderPlugin.decode({ text: text });
-  console.log(JSON.stringify(decodeResult, null, 2));
-
+  
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
   expect(decodeResult.decoder.name).toBe('label-qq');
@@ -101,8 +99,7 @@ test('decodes Label QQ variant 3', () => {
   // https://app.airframes.io/messages/3409293914
   const text = 'CYOWKMEM0058/OFFRPT/090155';
   const decodeResult = decoderPlugin.decode({ text: text });
-  console.log(JSON.stringify(decodeResult, null, 2));
-
+  
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
   expect(decodeResult.decoder.name).toBe('label-qq');
@@ -134,8 +131,7 @@ xtest('decodes Label QQ <invalid>', () => {
 
   const text = 'QQ Bogus message';
   const decodeResult = decoderPlugin.decode({ text: text });
-  console.log(JSON.stringify(decodeResult, null, 2));
-
+  
   expect(decodeResult.decoded).toBe(false);
   expect(decodeResult.decoder.decodeLevel).toBe('none');
   expect(decodeResult.decoder.name).toBe('label-qq');

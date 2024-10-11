@@ -24,8 +24,7 @@ describe('Label_H1_FTX', () => {
         // https://app.airframes.io/messages/3402014738
         const text = 'FTX/ID23544S,HIFI21,7VZ007B1S276/MR2,/FXFYI .. TAF KSUX 021720Z 0218 0318 20017G28KT P6SM SKC FM022200 22012G18KT P6SM SKC .. PUTS YOUR CXWIND AT 26KT ON RWY 13 .. REDUCES TO 18KT AT 22Z4FEF'
         const decodeResult = plugin.decode({ text: text });
-        console.log(JSON.stringify(decodeResult, null, 2));
-
+        
         expect(decodeResult.decoded).toBe(true);
         expect(decodeResult.decoder.decodeLevel).toBe('partial');
         expect(decodeResult.raw.flight_number).toBe('HIFI21');

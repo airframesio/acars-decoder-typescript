@@ -49,8 +49,7 @@ describe('Label_21_POS', () => {
       
         const text = 'POS Bogus message';
         const decodeResult = plugin.decode({ text: text });
-        console.log(JSON.stringify(decodeResult, null, 2));
-      
+              
         expect(decodeResult.decoded).toBe(false);
         expect(decodeResult.decoder.decodeLevel).toBe('none');
         expect(decodeResult.decoder.name).toBe('label-21-pos');

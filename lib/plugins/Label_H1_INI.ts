@@ -23,7 +23,7 @@ export class Label_H1_INI extends DecoderPlugin { // eslint-disable-line camelca
     decodeResult.decoded = true;
     decodeResult.decoder.decodeLevel = fulllyDecoded ? 'full' : 'partial';
     if (decodeResult.formatted.items.length === 0) {
-      if (options?.debug) {
+      if (options.debug) {
         console.log(`Decoder: Unknown H1 message: ${message.text}`);
       }
       decodeResult.remaining.text = message.text;

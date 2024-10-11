@@ -16,8 +16,7 @@ test('decodes Label HX variant 1', () => {
   // https://globe.adsbexchange.com/?icao=A41722&showTrace=2024-09-24&timestamp=1727202494
   const text = 'RA FMT LOCATION N4009.6 W07540.8';
   const decodeResult = decoderPlugin.decode({ text: text });
-  console.log(JSON.stringify(decodeResult, null, 2));
-
+  
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('full');
   expect(decodeResult.decoder.name).toBe('label-hx');
@@ -39,8 +38,7 @@ test('decodes Label HX variant 2', () => {
   // https://globe.adsbexchange.com/?icao=A92EA0&showTrace=2024-09-22&timestamp=1727038330
   const text = 'RA FMT 43 GSP B02';
   const decodeResult = decoderPlugin.decode({ text: text });
-  console.log(JSON.stringify(decodeResult, null, 2));
-
+  
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
   expect(decodeResult.decoder.name).toBe('label-hx');
@@ -61,8 +59,7 @@ test('decodes Label HX <invalid>', () => {
 
   const text = 'HX Bogus message';
   const decodeResult = decoderPlugin.decode({ text: text });
-  console.log(JSON.stringify(decodeResult, null, 2));
-
+  
   expect(decodeResult.decoded).toBe(false);
   expect(decodeResult.decoder.decodeLevel).toBe('none');
   expect(decodeResult.decoder.name).toBe('label-hx');

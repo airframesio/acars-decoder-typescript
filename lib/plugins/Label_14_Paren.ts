@@ -5,26 +5,26 @@ import { Waypoint } from '../types/waypoint';
 import { ResultFormatter } from '../utils/result_formatter';
 import { RouteUtils } from '../utils/route_utils';
 
-export class Label_10_Slash extends DecoderPlugin { // eslint-disable-line camelcase
-  name = 'label-10-slash';
+export class Label_14_Paren extends DecoderPlugin { // eslint-disable-line camelcase
+  name = 'label-14-paren';
 
   qualifiers() { // eslint-disable-line class-methods-use-this
     return {
-      labels: ['10'],
-      preambles: ['/'],
+      labels: ['14'],
+      preambles: ['(2'],
     };
   }
 
   decode(message: Message, options: Options = {}): DecodeResult {
     const decodeResult = this.defaultResult();
     decodeResult.decoder.name = this.name;
-    decodeResult.formatted.description = 'Position Report';
+    decodeResult.formatted.description = 'Wheels Off Report';
     decodeResult.message = message;
 
     const parts = message.text.split('/');
     if (parts.length < 17) {
       if (options.debug) {
-        console.log(`Decoder: Unknown 10 message: ${message.text}`);
+        console.log(`Decoder: Unknown 14 message: ${message.text}`);
       }
       decodeResult.remaining.text = message.text;
       decodeResult.decoded = false;

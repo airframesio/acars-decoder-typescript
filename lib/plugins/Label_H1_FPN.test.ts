@@ -20,8 +20,7 @@ test('decodes Label H1 Preamble FPN landing', () => {
 
   const text = 'FPN/RI:DA:KEWR:AA:KDFW:CR:EWRDFW01(17L)..SAAME.J6.HVQ.Q68.LITTR..MEEOW..FEWWW:A:SEEVR4.FEWWW:F:VECTOR..DISCO..RIVET:AP:ILS 17L.RIVET:F:TACKEC8B5';
   const decodeResult = decoderPlugin.decode({ text: text });
-  console.log(JSON.stringify(decodeResult, null, 2));
-
+  
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('full');
   expect(decodeResult.decoder.name).toBe('label-h1-fpn');
@@ -55,8 +54,7 @@ test('decodes Label H1 Preamble FPN full flight', () => {
   // https://app.airframes.io/messages/2161768398
   const text = 'FPN/FNAAL1956/RP:DA:KPHL:AA:KPHX:CR:PHLPHX61:R:27L(26O):D:PHL3:A:EAGUL6.ZUN:AP:ILS26..AIR,N40010W080490.J110.BOWRR..VLA,N39056W089097..STL,N38516W090289..GIBSN,N38430W092244..TYGER,N38410W094050..GCK,N37551W100435..DIXAN,N36169W105573..ZUN,N34579W109093293B';
   const decodeResult = decoderPlugin.decode({ text: text });
-  console.log(JSON.stringify(decodeResult, null, 2));
-
+  
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('full');
   expect(decodeResult.decoder.name).toBe('label-h1-fpn');
@@ -93,8 +91,7 @@ test('decodes Label H1 Preamble FPN in-flight', () => {
   // https://app.airframes.io/messages/2161761202
   const text = 'FPN/FNUAL1187/RP:DA:KSFO:AA:KPHX:F:KAYEX,N36292W120569..LOSHN,N35509W120000..BOILE,N34253W118016..BLH,N33358W114457DDFB';
   const decodeResult = decoderPlugin.decode({ text: text });
-  console.log(JSON.stringify(decodeResult, null, 2));
-
+  
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('full');
   expect(decodeResult.decoder.name).toBe('label-h1-fpn');
@@ -120,8 +117,7 @@ test('decodes Label H1 Preamble FPN with WS', () => {
   // https://app.airframes.io/messages/2372685289
   const text = 'FPN/TS140017,021724/RP:DA:EHAM:AA:KMSP..N55064W000477..N55163W001141..ERAKA..N60000W020000..N61000W030000:WS:N61000W030000,370..N61000W040000..N60000W050000..URTAK:WS:URTAK,380..LAKES:WS:LAKES,400..N57000W070000..N54300W080000..N49000W090000..DLH..COLDD:A:BAINY3:AP:ILS30L(30L)/PR4356,344,360,1060,,,13,,,30,,,P50,M40,36090,,3296,292/DTKMSP,30L,172,215117156D';
   const decodeResult = decoderPlugin.decode({ text: text });
-  console.log(JSON.stringify(decodeResult, null, 2));
-
+  
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
   expect(decodeResult.decoder.name).toBe('label-h1-fpn');
@@ -156,8 +152,7 @@ test('decodes Label H1 Preamble FPN with newlines', () => {
   // https://app.airframes.io/messages/2381936957
   const text = 'FPN/SN2125/FNQFA780/RI:DA:YPPH:CR:PERMEL001:AA:YMML..MEMUP,S33451E\r\n120525.Y53.WENDY0560'
   const decodeResult = decoderPlugin.decode({ text: text });
-  console.log(JSON.stringify(decodeResult, null, 2));
-
+  
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('full');
   expect(decodeResult.decoder.name).toBe('label-h1-fpn');
@@ -184,8 +179,7 @@ test('decodes Label H1 Preamble FPN with SN and TS', () => {
   // https://app.airframes.io/messages/2372685289
   const text = 'FPN/TS155631,170224/SN155631/RP:DA:PHNL:AA:KASE:D:MKK5.KOLEA:F:KOLEA,N22354W155133..CLUTS,N23002W154393.R465.CINNY,N36109W124456..OAL,N38002W117462.J58.ILC,N38150W114237..EYELO,N38455W110469..SAKES,N38500W110163.J80.DBL,N39264W106537F5E1'
   const decodeResult = decoderPlugin.decode({ text: text });
-  console.log(JSON.stringify(decodeResult, null, 2));
-
+  
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('full');
   expect(decodeResult.decoder.name).toBe('label-h1-fpn');
@@ -214,8 +208,7 @@ test('decodes Label H1 Preamble FPN with FN', () => {
   // https://app.airframes.io/messages/3281723743
   const text = 'FPN/RP:DA:KSEA:AA:KPHX:D:SUMMA2.SUMMA:F:SUMMA,N46371W121593..LTJ,N45428W121061..IMB,N44389W119427.Q35..CORKR,N36050W112240..TENTS,N35295W112271:A:BRUSR1.TENTS/FNFFT17245D16';
   const decodeResult = decoderPlugin.decode({ text: text });
-  console.log(JSON.stringify(decodeResult, null, 2));
-
+  
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('full');
   expect(decodeResult.decoder.name).toBe('label-h1-fpn');
@@ -245,8 +238,7 @@ test('decodes Label H1 Preamble #M1BFPN', () => {
   // https://app.airframes.io/messages/2400593101
   const text = '#M1BFPN/RI:DA:KJFK:AA:KPHX:CR:JFKPHX20..KG701..KG702..KP702..KP703..KD601..KD602..PUB..ALS.J102.GUP:A:EAGUL6.GUP:F:HOMRR90E1';
   const decodeResult = decoderPlugin.decode({ text: text });
-  console.log(JSON.stringify(decodeResult, null, 2));
-
+  
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('full');
   expect(decodeResult.decoder.name).toBe('label-h1-fpn');
@@ -277,8 +269,7 @@ test('decodes Label H1 #M1BFPN No Preamble', () => {
   // https://app.airframes.io/messages/2400409588
   const text = 'F37AKL0767#M1BFPN/TS232008,022324/RP:DA:TNCA:AA:TNCB:R:11O:D:ADRI1F..IRLEP.A574..PJG:AP:RNV10(10O)/PR,,110,,183,7,13,,M7,25,,,P30,M40,36090,13,3455,300/DTTNCB,10O,119,23440847C0';
   const decodeResult = decoderPlugin.decode({ text: text });
-  console.log(JSON.stringify(decodeResult, null, 2));
-
+  
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
   expect(decodeResult.decoder.name).toBe('label-h1-fpn');
@@ -315,8 +306,7 @@ test('decodes Label H1 Preamble FPN <invalid>', () => {
 
   const text = 'FPN Bogus message';
   const decodeResult = decoderPlugin.decode({ text: text });
-  console.log(JSON.stringify(decodeResult, null, 2));
-
+  
   expect(decodeResult.decoded).toBe(false);
   expect(decodeResult.decoder.decodeLevel).toBe('none');
   expect(decodeResult.decoder.name).toBe('label-h1-fpn');

@@ -21,8 +21,7 @@ test('decodes Label 80 variant 1', () => {
   // https://app.airframes.io/messages/377573108
   const text = '3N01 POSRPT 5891/04 KIAH/MMGL .XA-VOI\r\n/POS N29395W095133/ALT +15608/MCH 558/FOB 0100/ETA 0410';
   const decodeResult = decoderPlugin.decode({ text: text });
-  console.log(JSON.stringify(decodeResult, null, 2));
-
+  
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('none'); //FIXME: full
   expect(decodeResult.decoder.name).toBe('label-80');
@@ -70,8 +69,7 @@ test('decodes Label 80 variant 2', () => {
   // https://app.airframes.io/messages/2416917371
   const text = '3N01 POSRPT 0581/27 KIAD/MSLP .N962AV/04H 11:02\r\n/NWYP CIGAR /HDG 233/MCH 782\r\n/POS N3539.2W07937.2/FL 360/TAS 445/SAT -060\r\n/SWND 110/DWND 306/FOB N009414/ETA 14:26.0 ';
   const decodeResult = decoderPlugin.decode({ text: text });
-  console.log(JSON.stringify(decodeResult, null, 2));
-
+  
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('none'); //FIXME: full
   expect(decodeResult.decoder.name).toBe('label-80');
@@ -150,8 +148,7 @@ test('decodes Label 80 <invalid>', () => {
 
   const text = '3N01 POSRPT Bogus message';
   const decodeResult = decoderPlugin.decode({ text: text });
-  console.log(JSON.stringify(decodeResult, null, 2));
-
+  
   expect(decodeResult.decoded).toBe(false);
   expect(decodeResult.decoder.decodeLevel).toBe('none');
   expect(decodeResult.decoder.name).toBe('label-80');

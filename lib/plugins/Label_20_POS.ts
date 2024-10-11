@@ -22,15 +22,13 @@ export class Label_20_POS extends DecoderPlugin {
     decodeResult.raw.preamble = message.text.substring(0, 3);
 
     const content = message.text.substring(3);
-    console.log('Content: ' + content);
-
     const fields = content.split(',');
-    console.log('Field Count: ' + fields.length);
 
     if (fields.length == 11) {
       // N38160W077075,,211733,360,OTT,212041,,N42,19689,40,544
-      console.log(`DEBUG: ${this.name}: Variation 1 detected`);
-
+      if(options.debug) {
+        console.log(`DEBUG: ${this.name}: Variation 1 detected`);
+      }
       // Field 1: Coordinates
       const rawCoords = fields[0];
       decodeResult.raw.position = CoordinateUtils.decodeStringCoordinates(rawCoords);
@@ -47,8 +45,9 @@ export class Label_20_POS extends DecoderPlugin {
       decodeResult.decoder.decodeLevel = 'full';
     } else if (fields.length == 5) {
       // N38160W077075,,211733,360,OTT
-      console.log(`DEBUG: ${this.name}: Variation 2 detected`);
-
+      if(options.debug) {
+        console.log(`DEBUG: ${this.name}: Variation 2 detected`);
+      }
       // Field 1: Coordinates
       const rawCoords = fields[0];
       decodeResult.raw.position = CoordinateUtils.decodeStringCoordinates(rawCoords);
@@ -64,7 +63,9 @@ export class Label_20_POS extends DecoderPlugin {
       decodeResult.decoder.decodeLevel = 'full';
     } else {
       // Unknown!
-      console.log(`DEBUG: ${this.name}: Unknown variation. Field count: ${fields.length}, content: ${content}`);
+      if(options.debug) {
+        console.log(`DEBUG: ${this.name}: Unknown variation. Field count: ${fields.length}, content: ${content}`);
+      }
       decodeResult.decoded = false;
       decodeResult.decoder.decodeLevel = 'none';
     }

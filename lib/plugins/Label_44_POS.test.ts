@@ -20,8 +20,7 @@ test('decodes Label 44 Preamble POS02 variant 1', () => {
   // https://app.airframes.io/messages/3389060301
   const text = 'POS02,N38171W077507,319,KJFK,KUZA,0926,0245,0327,004.6';
   const decodeResult = decoderPlugin.decode({ text: text });
-  console.log(JSON.stringify(decodeResult, null, 2));
-
+  
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('full');
   expect(decodeResult.decoder.name).toBe('label-44-pos');
@@ -61,8 +60,7 @@ xtest('decodes Label 44 Preamble POS02 <invalid>', () => {
 
   const text = 'POS02 Bogus message';
   const decodeResult = decoderPlugin.decode({ text: text });
-  console.log(JSON.stringify(decodeResult, null, 2));
-
+  
   expect(decodeResult.decoded).toBe(false);
   expect(decodeResult.decoder.decodeLevel).toBe('none');
   expect(decodeResult.decoder.name).toBe('label-44-pos');

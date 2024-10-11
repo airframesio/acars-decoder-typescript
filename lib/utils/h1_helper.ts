@@ -235,8 +235,6 @@ function processPS(decodeResult: DecodeResult, data: string[]): boolean {
     } else {
         allKnownFields = false;
     }
-    console.log('PS data.length: ', data.length);
-    console.log('PS data: ', data);
     if (data.length === 9) { // variant 7
         processRoute(decodeResult, data[3], data[1], data[5], data[4], undefined);
         ResultFormatter.altitude(decodeResult, Number(data[2]) * 100);
@@ -271,8 +269,6 @@ function processPosition(decodeResult: DecodeResult, data: string[]): boolean {
     } else {
         allKnownFields = false;
     }
-    console.log('data.length: ', data.length);
-    console.log('data: ', data);
     if (data.length >= 10) { // variant 1, short
         ResultFormatter.altitude(decodeResult, Number(data[3]) * 100);
         processRoute(decodeResult, data[1], data[2], data[4], data[5], data[6]);
