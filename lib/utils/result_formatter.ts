@@ -8,12 +8,12 @@ export class ResultFormatter {
     static position(decodeResult: DecodeResult, value:{latitude: number, longitude: number}) {
         decodeResult.raw.position = value;
         decodeResult.formatted.items.push({
-          type: 'aircraft_position',
-          code: 'POS',
-          label: 'Aircraft Position',
-          value: CoordinateUtils.coordinateString(value),
+            type: 'aircraft_position',
+            code: 'POS',
+            label: 'Aircraft Position',
+            value: CoordinateUtils.coordinateString(value),
         });
-      }
+    }
 
     static altitude(decodeResult: DecodeResult, value: number) {
         decodeResult.raw.altitude = value;
@@ -137,6 +137,16 @@ export class ResultFormatter {
             code: 'HDG',
             label: 'Heading',
             value: `${decodeResult.raw.heading}`,
+        });
+    }
+
+    public static tail(decodeResult: DecodeResult, value: string) {
+        decodeResult.raw.tail = value;
+        decodeResult.formatted.items.push({
+            type: 'tail',
+            code: "TAIL",
+            label: 'Tail',
+            value: decodeResult.raw.tail,
         });
     }
 

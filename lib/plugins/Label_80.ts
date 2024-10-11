@@ -41,29 +41,16 @@ export class Label_80 extends DecoderPlugin {
 
     let posRptRegex = /^3N01 POSRPT \d\d\d\d\/\d\d (?<orig>\w+)\/(?<dest>\w+) \.(?<tail>[\w-]+)(\/(?<agate>.+) (?<sta>\w+:\w+))*/; // eslint-disable-line max-len
     let results = parts[0].match(posRptRegex);
+
+    if(!results?.groups) {
+      decodeResult.decoded = false;
+      decodeResult.decoder.decodeLevel = 'none';
+      return decodeResult;
+    }
     if (results && results.length > 0) {
-      decodeResult.raw.origin = results.groups.orig;
-      decodeResult.formatted.items.push({
-        type: 'origin',
-        code: 'ORG',
-        label: 'Origin',
-        value: `${results.groups.orig}`,
-      });
-
-      decodeResult.raw.destination = results.groups.dest;
-      decodeResult.formatted.items.push({
-        type: 'destination',
-        code: 'DST',
-        label: 'Destination',
-        value: `${results.groups.dest}`,
-      });
-
-      decodeResult.raw.tail = results.groups.tail;
-      decodeResult.formatted.items.push({
-        type: 'tail',
-        label: 'Tail',
-        value: `${results.groups.tail}`,
-      });
+      ResultFormatter.departureAirport(decodeResult, results.groups.orig);
+      ResultFormatter.arrivalAirport(decodeResult, results.groups.dest);
+      ResultFormatter.tail(decodeResult, results.groups.tail);
 
       if (results.groups.agate) {
         decodeResult.raw.arrival_gate = results.groups.agate;
@@ -94,15 +81,9 @@ export class Label_80 extends DecoderPlugin {
         // console.log('Matches:', matches);
         for (const match of matches) { // eslint-disable-line no-restricted-syntax
           // console.log('Match:', match);
-          switch (match.groups.field) {
+          switch (match.groups?.field) {
             case 'ALT': {
-              decodeResult.raw.altitude = match.groups.value;
-              decodeResult.formatted.items.push({
-                type: 'altitude',
-                code: 'ALT',
-                label: this.descriptions[match.groups.field],
-                value: `${decodeResult.raw.altitude} feet`,
-              });
+              ResultFormatter.altitude(decodeResult, Number(match.groups.value));
               break;
             }
             case 'DWND': {
@@ -116,9 +97,8 @@ export class Label_80 extends DecoderPlugin {
               break;
             }
             case 'FL': {
-              const flight_level = match.groups.value;
-              decodeResult.raw.altitude = flight_level * 100;
-              ResultFormatter.altitude(decodeResult, decodeResult.raw.altitude);
+              const flight_level = Number(match.groups.value);
+              ResultFormatter.altitude(decodeResult, flight_level * 100);
               break;
             }
             case 'FOB': {
@@ -142,7 +122,7 @@ export class Label_80 extends DecoderPlugin {
               break;
             }
             case 'MCH': {
-              decodeResult.raw.mach = match.groups.value / 1000;
+              decodeResult.raw.mach = Number(match.groups.value) / 1000;
               decodeResult.formatted.items.push({
                 type: 'mach',
                 code: 'MCH',
@@ -165,20 +145,13 @@ export class Label_80 extends DecoderPlugin {
 	      // don't use decodeStringCoordinates because of different position format
 	      const posRegex = /^(?<latd>[NS])(?<lat>.+)(?<lngd>[EW])(?<lng>.+)/;
               const posResult = match.groups.value.match(posRegex);
-              const lat = Number(posResult.groups.lat) * (posResult.groups.lngd === 'S' ? -1 : 1);
-              const lon = Number(posResult.groups.lng) * (posResult.groups.lngd === 'W' ? -1 : 1);
-              const latitude = Number.isInteger(lat) ? lat/1000 : lat/100;
-              const longitude = Number.isInteger(lon) ? lon/1000 : lon/100;
-              decodeResult.raw.position = {
-                latitude: latitude,
-                longitude: longitude,
+              const lat = Number(posResult?.groups?.lat) * (posResult?.groups?.lngd === 'S' ? -1 : 1);
+              const lon = Number(posResult?.groups?.lng) * (posResult?.groups?.lngd === 'W' ? -1 : 1);
+              const position = {
+                latitude: Number.isInteger(lat) ? lat/1000 : lat/100,
+                longitude: Number.isInteger(lon) ? lon/1000 : lon/100,
               };
-              decodeResult.formatted.items.push({
-               type: 'position',
-               code: 'POS' ,
-               label: 'Position',
-               value: CoordinateUtils.coordinateString(decodeResult.raw.position),
-              });
+              ResultFormatter.position(decodeResult, position);
               break;
             }
             case 'SWND': {
@@ -192,7 +165,7 @@ export class Label_80 extends DecoderPlugin {
               break;
             }
             default: {
-              if (match.groups.field != undefined) {
+              if (match.groups?.field != undefined) {
                 const description = this.descriptions[match.groups.field] ? this.descriptions[match.groups.field] : 'Unknown';
                 decodeResult.formatted.items.push({
                   type: match.groups.field,
@@ -207,7 +180,7 @@ export class Label_80 extends DecoderPlugin {
       }
 
       decodeResult.decoded = true;
-      decodeResult.decodeLevel = 'partial';
+      decodeResult.decoder.decodeLevel = 'partial';
     }
 
     return decodeResult;

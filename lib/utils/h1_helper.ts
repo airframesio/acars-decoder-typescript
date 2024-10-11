@@ -116,13 +116,7 @@ function processTimeOfDeparture(decodeResult: DecodeResult, data: string[]) {
 }
 
 function processIdentification(decodeResult: DecodeResult, data: string[]) {
-    decodeResult.raw.tail = data[0];
-    decodeResult.formatted.items.push({
-        type: 'tail',
-        code: "TAIL",
-        label: 'Tail',
-        value: decodeResult.raw.tail,
-    });
+    ResultFormatter.tail(decodeResult, data[0])
     if (data.length > 1) {
         decodeResult.raw.flight_number = data[1];
     }
