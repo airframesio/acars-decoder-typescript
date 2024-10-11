@@ -15,8 +15,7 @@ test('decodes Label 30 sample 1', () => {
 
   const text = '/EA1719/DSKSFO/SK23';
   const decodeResult = decoderPlugin.decode({ text: text });
-  console.log(JSON.stringify(decodeResult, null, 2));
-
+  
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
   expect(decodeResult.decoder.name).toBe('label-30-slash-ea');

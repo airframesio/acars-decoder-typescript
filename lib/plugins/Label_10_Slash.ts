@@ -23,7 +23,7 @@ export class Label_10_Slash extends DecoderPlugin { // eslint-disable-line camel
 
     const parts = message.text.split('/');
     if (parts.length < 17) {
-      if (options?.debug) {
+      if (options.debug) {
         console.log(`Decoder: Unknown 10 message: ${message.text}`);
       }
       decodeResult.remaining.text = message.text;

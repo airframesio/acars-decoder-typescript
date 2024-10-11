@@ -15,8 +15,7 @@ test('decodes Label 12 variant 1', () => {
 
   const text = 'N 42.150,W121.187,39000,161859, 109,.C-GWSO,1742';
   const decodeResult = decoderPlugin.decode({ text: text });
-  console.log(JSON.stringify(decodeResult, null, 2));
-
+  
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
   expect(decodeResult.decoder.name).toBe('label-12-n-space');
@@ -50,8 +49,7 @@ test('decodes Label 12 variant 2', () => {
 
   const text = 'N 28.371,W 80.458,38000,170546, 100,.C-GVWJ,1736';
   const decodeResult = decoderPlugin.decode({ text: text });
-  console.log(JSON.stringify(decodeResult, null, 2));
-
+  
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
   expect(decodeResult.decoder.name).toBe('label-12-n-space');
@@ -85,8 +83,7 @@ test('decodes Label 12 variant <invalid>', () => {
 
   const text = 'N Bogus message';
   const decodeResult = decoderPlugin.decode({ text: text });
-  console.log(JSON.stringify(decodeResult, null, 2));
-
+  
   expect(decodeResult.decoded).toBe(false);
   expect(decodeResult.decoder.decodeLevel).toBe('none');
   expect(decodeResult.decoder.name).toBe('label-12-n-space');

@@ -22,10 +22,7 @@ export class Label_21_POS extends DecoderPlugin {
     decodeResult.raw.preamble = message.text.substring(0, 3);
 
     const content = message.text.substring(3);
-    console.log('Content: ' + content);
-
     const fields = content.split(',');
-    console.log('Field Count: ' + fields.length);
 
     if (fields.length == 9) {
       // POSN 37.550W 76.436,  98,110800,23961,25820,  65,-23,114212,KRDU
@@ -46,7 +43,9 @@ export class Label_21_POS extends DecoderPlugin {
       decodeResult.decoder.decodeLevel = 'partial';
     } else {
       // Unknown!
-      console.log(`DEBUG: ${this.name}: Unknown variation. Field count: ${fields.length}, content: ${content}`);
+      if(options.debug) {
+        console.log(`DEBUG: ${this.name}: Unknown variation. Field count: ${fields.length}, content: ${content}`);
+      }
       decodeResult.decoded = false;
       decodeResult.decoder.decodeLevel = 'none';
     }

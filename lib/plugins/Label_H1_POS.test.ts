@@ -19,8 +19,7 @@ test('decodes Label H1 Preamble POS variant 1', () => {
 
   const text = 'POSN43312W123174,EASON,215754,370,EBINY,220601,ELENN,M48,02216,185/TS215754,0921227A40';
   const decodeResult = decoderPlugin.decode({ text: text });
-  console.log(JSON.stringify(decodeResult, null, 2));
-
+  
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
   expect(decodeResult.decoder.name).toBe('label-h1-pos');
@@ -57,8 +56,7 @@ test('decodes Label H1 Preamble POS variant 2', () => {
 
   const text = 'POSN45209W122550,PEGTY,220309,134,MINNE,220424,HISKU,M6,060013,269,366,355K,292K,730A5B';
   const decodeResult = decoderPlugin.decode({ text: text });
-  console.log(JSON.stringify(decodeResult, null, 2));
-
+  
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
   expect(decodeResult.decoder.name).toBe('label-h1-pos');
@@ -100,8 +98,7 @@ test('decodes Label H1 Preamble POS variant 3', () => {
 
   const text = 'POSN43030W122406,IBALL,220516,380,AARON,220816,MOXEE,M47,0047,86/TS220516,092122BF64';
   const decodeResult = decoderPlugin.decode({ text: text });
-  console.log(JSON.stringify(decodeResult, null, 2));
-
+  
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
   expect(decodeResult.decoder.name).toBe('label-h1-pos');
@@ -138,8 +135,7 @@ test('decodes Label H1 Preamble POS variant 4', () => {
 
   const text = 'POSN33225W079428,SCOOB,232933,340,ENEME,235712,FETAL,M42,003051,15857F6';
   const decodeResult = decoderPlugin.decode({ text: text });
-  console.log(JSON.stringify(decodeResult, null, 2));
-
+  
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
   expect(decodeResult.decoder.name).toBe('label-h1-pos');
@@ -178,8 +174,7 @@ test('decodes Label H1 Preamble POS variant 5', () => {
   // https://app.airframes.io/messages/2184441420
   const text = 'POSN38531W078000,CSN-01,112309,310,CYN-02,114151,ACK,M40,26067,22479226';
   const decodeResult = decoderPlugin.decode({ text: text });
-  console.log(JSON.stringify(decodeResult, null, 2));
-
+  
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
   expect(decodeResult.decoder.name).toBe('label-h1-pos');
@@ -217,8 +212,7 @@ test('decodes Label H1 Preamble POS variant 6', () => {
   // https://app.airframes.io/messages/2295027018
   const text = 'POS/RFSCOOB.KEMPR.ECG.OHPEA.TOMMZ.OXANA.ZZTOP.OMALA.WILYY.KANUX.GALVN.KASAR.LNHOM.SLUKA.FIPEK.PUYYA.PLING.KOLAO.JETSSF2FC';
   const decodeResult = decoderPlugin.decode({ text: text });
-  console.log(JSON.stringify(decodeResult, null, 2));
-
+  
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('full');
   expect(decodeResult.decoder.name).toBe('label-h1-pos');
@@ -240,8 +234,7 @@ test('decodes Label H1 Preamble POS <invalid>', () => {
 
   const text = 'POS Bogus message';
   const decodeResult = decoderPlugin.decode({ text: text });
-  console.log(JSON.stringify(decodeResult, null, 2));
-
+  
   expect(decodeResult.decoded).toBe(false);
   expect(decodeResult.decoder.decodeLevel).toBe('none');
   expect(decodeResult.decoder.name).toBe('label-h1-pos');
@@ -256,8 +249,7 @@ test('decodes Label H1 Preamble #M1BPOS short variant', () => {
   // https://app.airframes.io/messages/2368445399
   const text = '#M1BPOSN37533W096476,ROKNE,185212,330,DOSOA,190059,BUM,M50,272100,1571541'
   const decodeResult = decoderPlugin.decode({ text: text });
-  console.log(JSON.stringify(decodeResult, null, 2));
-
+  
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
   expect(decodeResult.decoder.name).toBe('label-h1-pos');
@@ -285,8 +277,7 @@ xtest('decodes Label H1 Preamble #M1BPOS long variant', () => {
   // https://app.airframes.io/messages/2366921571
   const text = '#M1BPOSN29510W098448,RW04,140407,188,TATAR,4,140445,ALISS,M12,246048,374K,282K,1223,133,KSAT,KELP,,70,151437,415,73/PR1223,222,240,133,,44,40,252074,M22,180,P0,P0/RI:DA:KSAT:AA:KELP..TATAR:D:ALISS6:F:ALISS..FST';
   const decodeResult = decoderPlugin.decode({ text: text });
-  console.log(JSON.stringify(decodeResult, null, 2));
-
+  
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
   expect(decodeResult.decoder.name).toBe('label-h1-pos');
@@ -322,8 +313,7 @@ test('decodes Label H1 Preamble POS variant 7', () => {
   // https://app.airframes.io/messages/2434848463
   const text = 'POS/ID91459S,BANKR31,/DC03032024,142813/MR64,0/ET31539/PSN39277W077359,142800,240,N39300W077110,031430,N38560W077150,M28,27619,MT370/CG311,160,350/FB732/VR329071';
   const decodeResult = decoderPlugin.decode({ text: text });
-  console.log(JSON.stringify(decodeResult, null, 2));
-
+  
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
   expect(decodeResult.decoder.name).toBe('label-h1-pos');
@@ -354,8 +344,7 @@ test('decodes Label H1 Preamble #M1BPOS variant 7', () => {
   // https://app.airframes.io/messages/2434835903
   const text = 'F37AMCLL93#M1BPOS/ID746026,,/DC03032024,173207/MR1,/ET031846/PSN42579W108090,173207,320,WAIDE,031759,WEDAK,M49,267070,T468/CG264,110,360/FB742/VR324E17';
   const decodeResult = decoderPlugin.decode({ text: text });
-  console.log(JSON.stringify(decodeResult, null, 2));
-
+  
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
   expect(decodeResult.decoder.name).toBe('label-h1-pos');
@@ -386,8 +375,7 @@ test('decodes Label H1 Preamble POS variant 8', () => {
   // https://app.airframes.io/messages/2500335076
   const text = 'POS/TS080616,210324/DTMMGL,29O,64,103316/PR1754,231,350,189,,0,0,,M45,185,,,P16,P0,36000,,1565,250/RP:DA:MMTJ:AA:MMGL:R:27O:D:TUMA2B..SANFE.UT4..LMM:A:LONV1D:AP:ILSZ29.PLADE(29O)9D1C';
   const decodeResult = decoderPlugin.decode({ text: text });
-  console.log(JSON.stringify(decodeResult, null, 2));
-
+  
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
   expect(decodeResult.decoder.name).toBe('label-h1-pos');
@@ -427,8 +415,7 @@ test('decodes Label H1 Preamble POS variant 1 with offset', () => {
   // https://app.airframes.io/messages/2500335076
   const text = 'POSN33204W114082,BLH176-0093,062056,330,SALOM180-0127,062211,KOFFA180-0148,M49,30628,3201251';
   const decodeResult = decoderPlugin.decode({ text: text });
-  console.log(JSON.stringify(decodeResult, null, 2));
-
+  
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
   expect(decodeResult.decoder.name).toBe('label-h1-pos');
@@ -454,8 +441,7 @@ test('decodes Label H1 Preamble POS variant 9', () => {
   // https://app.airframes.io/messages/3110992692
   const text = 'POSN39164W077259,FORKL,231828,51,THRET,231917,TOOPR,P16,1726,167,/TS231828,2807244841';
   const decodeResult = decoderPlugin.decode({ text: text });
-  console.log(JSON.stringify(decodeResult, null, 2));
-
+  
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
   expect(decodeResult.decoder.name).toBe('label-h1-pos');
@@ -481,8 +467,7 @@ test('decodes Label H1 Preamble POS variant 10', () => {
   // https://app.airframes.io/messages/3393214562
   const text = 'POSN51194E004527,EH556,104241,174,CIV,105208,MEDIL,M20,290016,191/RP:DA:EHEH:AA:LEIB..CIV.N872.MEDIL.UN872.KOVIN.UM728.RESMI.UN857.DISAK..DIRMO..ETAMO..ADEKA..MOKDI..MEN..BADAM..KANIG..KENAS.N855.POS/PR1496,150,370,191,,55,10,248028,M47,30,P19,P0/FHCIV,105208,273K,3226,175,M41,252027,450,N,221,62.MEDIL,105411,267K,3439,172,M44,250028,459,N,203,15.PITHI,105533,259K,3584,170,M47,249028,456,N,203,10.LESDO,105859,252K,3700,167,M47,248028,456,N,203,25.KOVIN,110153,252K,3700,164,M47,248028,456,N,203,21.DUCRA,110705,252K,3700,160,M47,248028,456,N,213,37.RESMI,111101,251K,3700,156,M47,248028,455,N,213,28.DEKOD,111325,251K,3700,154,M47,248028,455,N,192,17.DISAK,111438,251K,3700,153,M47,248028,454,N,172,9.DIRMO,112306,251K,3700,145,M47,248028,454,N,178,63.ETAMO,112514,250K,3700,143,M47,248028,453,N,158,16.ADEKA,113339,250K,3700,136,M47,248028,454,N,147,64.MOKDI,114139,251K,3700,129,M47,248028,454,N,181,59.MEN,114429,251K,3700,127,M47,248028,454,N,181,21.BADAM,114843,251K,3700,123,M47,248028,454,N,179,31.KANIG,120154,250K,3700,111,M47,248028,453,N,185,97.KENAS,121800,250K,3700,98,M47,248028,453,N,177,119.POS,122257,250K,3018,96,M45,248023,395,N,182,34.LEIB,124503,150K,2,89,P15,000000,161,N,231,103/DTLEIB,,89,124503,7353B2';
   const decodeResult = decoderPlugin.decode({ text: text });
-  console.log(JSON.stringify(decodeResult, null, 2));
-
+  
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
   expect(decodeResult.decoder.name).toBe('label-h1-pos');
@@ -522,8 +507,7 @@ test('decodes Label H1 Preamble /.POS variant 2', () => {
   // https://app.airframes.io/messages/2500488708
   const text = '/.POS/TS100316,210324/PSS35333W058220,,100316,250,S37131W059150,101916,S39387W060377,M23,27282,241,780,MANUAL,0,813E711';
   const decodeResult = decoderPlugin.decode({ text: text });
-  console.log(JSON.stringify(decodeResult, null, 2));
-
+  
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
   expect(decodeResult.decoder.name).toBe('label-h1-pos');
@@ -552,8 +536,7 @@ test('decodes Label 4J Preamble POS variant 7', () => {
   // https://app.airframes.io/messages/3157551384
   const text = 'POS/ID91517S,WIDE21,7PZWTCP21222/DC09082024,140706/MR238,2/ET91456/PSN37375W077368,140700,300,JAXSN,091417,LOOEY,M26,21329,M080T490/CG293,160,350/FB583/VR32C696';
   const decodeResult = decoderPlugin.decode({ text: text });
-  console.log(JSON.stringify(decodeResult, null, 2));
-
+  
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
   expect(decodeResult.decoder.name).toBe('label-h1-pos');
@@ -583,8 +566,7 @@ test('decodes Label H1 Preamble #M1BPOS <invalid>', () => {
 
   const text = '#M1BPOS Bogus message';
   const decodeResult = decoderPlugin.decode({ text: text });
-  console.log(JSON.stringify(decodeResult, null, 2));
-
+  
   expect(decodeResult.decoded).toBe(false);
   expect(decodeResult.decoder.decodeLevel).toBe('none');
   expect(decodeResult.decoder.name).toBe('label-h1-pos');

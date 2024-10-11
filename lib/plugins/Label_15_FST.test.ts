@@ -23,8 +23,7 @@ describe('Label_15_FST', () => {
     test('decodes Label 15 Preamble FST variant 1', () => {
         const text = 'FST01EGKKKMCON373488W0756927380 156 495 M53C 4427422721045313002518521710'
         const decodeResult = plugin.decode({ text: text });
-        console.log(JSON.stringify(decodeResult, null, 2));
-
+        
         expect(decodeResult.decoded).toBe(true);
         expect(decodeResult.decoder.decodeLevel).toBe('partial');
         expect(decodeResult.formatted.items.length).toBe(4);

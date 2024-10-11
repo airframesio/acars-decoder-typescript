@@ -15,8 +15,7 @@ test('decodes Label 16 variant 1', () => {
 
   const text = 'N 44.203,W 86.546,31965,6, 290';
   const decodeResult = decoderPlugin.decode({ text: text });
-  console.log(JSON.stringify(decodeResult, null, 2));
-
+  
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
   expect(decodeResult.decoder.name).toBe('label-16-n-space');
@@ -50,8 +49,7 @@ test('decodes Label 16 variant 2', () => {
 
   const text = 'N 28.177/W 96.055';
   const decodeResult = decoderPlugin.decode({ text: text });
-  console.log(JSON.stringify(decodeResult, null, 2));
-
+  
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('full');
   expect(decodeResult.decoder.name).toBe('label-16-n-space');
@@ -80,8 +78,7 @@ test('decodes Label 16 variant 3', () => {
 
   const text = 'N 44.988,W121.644,35940,6, 170';
   const decodeResult = decoderPlugin.decode({ text: text });
-  console.log(JSON.stringify(decodeResult, null, 2));
-
+  
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
   expect(decodeResult.decoder.name).toBe('label-16-n-space');
@@ -115,8 +112,7 @@ test('decodes Label 16 variant <invalid>', () => {
 
   const text = 'N Bogus message';
   const decodeResult = decoderPlugin.decode({ text: text });
-  console.log(JSON.stringify(decodeResult, null, 2));
-
+  
   expect(decodeResult.decoded).toBe(false);
   expect(decodeResult.decoder.decodeLevel).toBe('none');
   expect(decodeResult.decoder.name).toBe('label-16-n-space');

@@ -21,8 +21,7 @@ test('decodes Label H1 Preamble OHMA valid', () => {
   // https://app.airframes.io/messages/3126721669
   const text = 'OHMAeJy1Ul2PojAU/SubPiuhlA/ljQHMkAElgDuTXTakqx2nCaAp1WQz8b/vFXTGEcw+LX26veece88p7+jARMO3NbKRpqhohCrWNHTDoH7P0arkrJbBOkd2jhaPkZOjUX6BeFSytqGpmj5WJ2NVyzC2ydTWiWJN9B8teE0lBRSIUS52Ja1ZA+VPqCXl5Xxf/WaiVZkTyzD0bsB2zcr2si1fS755kxfamu2okHvBHNDbCukCuMU+PSzSFk+F4Ada9vqLxLvSuxq9dELDtK56IdukEqZkvOpbVG0VXIJFYnYW2QFCuqzXFm5Jm+YcG2xLKyYFX32CB3V70XXQPzv2EX8R+Vn3BrxuJK1XH2HW9KxYyRgWv5gDJCSx72CnOH8dR1/RLhXl9+4f6MF1xRhgJPuSNUzeI1nE+hY5L7ZtO4/RmFjRQwj+4MNqCJf4pNhp/reosggXbhjEke8Fzrxwk2WQ+kUSZ8U/wgNi5kcxhpy9G2PENBVtqt+kcSZoQ4QJViyTDBO8YDYb4GBDwQTfUOIIx4mfpsvEH1xMhzHmfc7gbkTR1R7HcZ9m4eL53m5YmeAhTjA/jbrDMhULT08P3p0jOv4FG0dfvQ==';
   const decodeResult = decoderPlugin.decode({ text: text });
-  console.log(JSON.stringify(decodeResult, null, 2));
-
+  
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('full');
   expect(decodeResult.decoder.name).toBe('label-h1-ohma');
@@ -43,8 +42,7 @@ test('decodes Label H1 Preamble OHMA RTN', () => {
   // https://app.airframes.io/messages/3125950763
   const text = '/RTNBOCR.OHMAeJyrVipLLSrOzM9TslIy0jNQ0lHKTS0uTkxPBfJL81JS0zLzUlOUagH7TQzW'
   const decodeResult = decoderPlugin.decode({ text: text }, { debug: true });
-  console.log(JSON.stringify(decodeResult, null, 2));
-
+  
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('full');
   expect(decodeResult.decoder.name).toBe('label-h1-ohma');
@@ -65,8 +63,7 @@ xtest('decodes Label H1 Preamble OHMA partial', () => {
   // https://app.airframes.io/messages/3126673935
   const text = '#T1B/RTNBOCR.OHMAeJy1km+vmjAUxr/K0tfSlPLXvuMi5pJRL0Hc3MZCOu0cSUFTqsly43dfBb3zKmavBq9O+3uec84Dr+DAZVttG0AAhgiMQM3blm24rl8LsBIVb1S8LgApwMszDQowKi7IhCneXWCEbQP5BsI58gmyiWVD3/S+dvCaKaYpbcYquROs4a0uv+lasUrM9vUPLjuXZ'
   const decodeResult = decoderPlugin.decode({ text: text }, { debug: true });
-  console.log(JSON.stringify(decodeResult, null, 2));
-
+  
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('full');
   expect(decodeResult.decoder.name).toBe('label-h1-ohma');
@@ -87,8 +84,7 @@ test('decodes Label H1 Preamble OHMA partial', () => {
   // https://app.airframes.io/messages/3284234176
   const text = 'OHMAeJy1lF+PmkAUxb9Kw/MyGRj+v1HEYhaQ4OxqrI2Z6tSSIBpAk2bjd+8Aau3szCZ9qD4NnN899x7v+Kacad0Uh0rxFB1A5UnZ06YhO8rObytlUxa0aifbleKtlGmU+CvlaXWTjEhL+xc61A0Vuiq0MHQ90/UMBJBjL3vxlrSEqVgxUtTHklS0Ycev7NySokxP+++07qvMMj'
   const decodeResult = decoderPlugin.decode({ text: text }, { debug: true });
-  console.log(JSON.stringify(decodeResult, null, 2));
-
+  
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('full');
   expect(decodeResult.decoder.name).toBe('label-h1-ohma');
@@ -108,8 +104,7 @@ test('decodes Label H1 Preamble OHMA invalid', () => {
 
   const text = 'OHMA <Invalid text>';
   const decodeResult = decoderPlugin.decode({ text: text });
-  console.log(JSON.stringify(decodeResult, null, 2));
-
+  
   expect(decodeResult.decoded).toBe(false);
   expect(decodeResult.decoder.decodeLevel).toBe('none');
   expect(decodeResult.decoder.name).toBe('label-h1-ohma');
