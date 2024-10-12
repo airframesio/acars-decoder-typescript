@@ -27,6 +27,7 @@ export class Label_83 extends DecoderPlugin {
 
     decodeResult.decoded = true;
     if (text.substring(0, 10) === "4DH3 ETAT2") {
+        // variant 2
         const fields = text.split(/\s+/);
         if (fields[2].length > 5) {
             decodeResult.raw.day_of_month = fields[2].substring(5);
@@ -35,8 +36,10 @@ export class Label_83 extends DecoderPlugin {
         const subfields = fields[3].split("/");
         ResultFormatter.departureAirport(decodeResult, subfields[0]);
         ResultFormatter.arrivalAirport(decodeResult, subfields[1]);
+        ResultFormatter.tail(decodeResult, fields[4].replace(/\./g, ""));
         ResultFormatter.eta(decodeResult, fields[6] + "00");
     } else if (text.substring(0, 5) === "001PR") {
+        // variant 3
         decodeResult.raw.day_of_month = text.substring(5, 7);
         ResultFormatter.position(decodeResult, CoordinateUtils.decodeStringCoordinatesDecimalMinutes(text.substring(13, 28).replace(/\./g, "")));
         ResultFormatter.altitude(decodeResult, Number(text.substring(28, 33)));
@@ -44,6 +47,7 @@ export class Label_83 extends DecoderPlugin {
     } else {
         const fields = text.replace(/\s/g, "").split(',');
         if (fields.length === 9) {
+            // variant 1
             ResultFormatter.departureAirport(decodeResult, fields[0]);
             ResultFormatter.arrivalAirport(decodeResult, fields[1]);
             decodeResult.raw.day_of_month = fields[2].substring(0,2);

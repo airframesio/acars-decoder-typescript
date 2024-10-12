@@ -87,7 +87,7 @@ test('decodes Label H1 Preamble POS variant 2', () => {
   expect(decodeResult.formatted.items[4].type).toBe('aircraft_groundspeed');
   expect(decodeResult.formatted.items[4].code).toBe('GSPD');
   expect(decodeResult.formatted.items[4].label).toBe('Aircraft Groundspeed');
-  expect(decodeResult.formatted.items[4].value).toBe('366');
+  expect(decodeResult.formatted.items[4].value).toBe('366 knots');
   expect(decodeResult.formatted.items[5].label).toBe('Message Checksum');
   expect(decodeResult.formatted.items[5].value).toBe('0x0a5b');
 });
@@ -523,7 +523,7 @@ test('decodes Label H1 Preamble /.POS variant 2', () => {
   expect(decodeResult.formatted.items[3].label).toBe('Outside Air Temperature (C)');
   expect(decodeResult.formatted.items[3].value).toBe('-23');
   expect(decodeResult.formatted.items[4].label).toBe('Aircraft Groundspeed');
-  expect(decodeResult.formatted.items[4].value).toBe('780');
+  expect(decodeResult.formatted.items[4].value).toBe('780 knots');
   expect(decodeResult.formatted.items[5].label).toBe('Message Checksum');
   expect(decodeResult.formatted.items[5].value).toBe('0xe711');
   expect(decodeResult.remaining.text).toBe('/.POS,,27282,241,MANUAL,0,813');
