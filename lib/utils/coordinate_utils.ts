@@ -60,4 +60,17 @@ export class CoordinateUtils {
     const lonDir = coords.longitude > 0 ? 'E' : 'W';
     return `${Math.abs(coords.latitude).toFixed(3)} ${latDir}, ${Math.abs(coords.longitude).toFixed(3)} ${lonDir}`;
   }
+
+  public static getDirection(coord: string):number {
+    if(coord.startsWith('N') || coord.startsWith('E')) {
+      return 1;
+    } else if(coord.startsWith('S') || coord.startsWith('W')) {
+      return -1;
+    }
+    return NaN;
+  }
+
+  public static dmsToDecimalDegrees(degrees: number, minutes: number, seconds: number ) : number {
+    return degrees + minutes / 60 + seconds / 3600;
+  }
 }
