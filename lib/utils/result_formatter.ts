@@ -128,7 +128,7 @@ export class ResultFormatter {
             type: 'aircraft_groundspeed',
             code: 'GSPD',
             label: 'Aircraft Groundspeed',
-            value: `${decodeResult.raw.groundspeed}`
+            value: `${decodeResult.raw.groundspeed} knots`
         });
     }
 

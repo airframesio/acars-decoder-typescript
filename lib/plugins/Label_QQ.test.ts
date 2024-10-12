@@ -42,7 +42,7 @@ test('decodes Label QQ variant 1', () => {
   expect(decodeResult.formatted.items[2].type).toBe('aircraft_groundspeed');
   expect(decodeResult.formatted.items[2].code).toBe('GSPD');
   expect(decodeResult.formatted.items[2].label).toBe('Aircraft Groundspeed');
-  expect(decodeResult.formatted.items[2].value).toBe('175');
+  expect(decodeResult.formatted.items[2].value).toBe('175 knots');
   expect(decodeResult.formatted.items[3].type).toBe('wheels_off');
   expect(decodeResult.formatted.items[3].code).toBe('WOFF');
   expect(decodeResult.formatted.items[3].label).toBe('Wheels OFF');
