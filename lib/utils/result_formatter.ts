@@ -5,18 +5,8 @@ import { CoordinateUtils } from "./coordinate_utils";
  * Class to format the results of common fields
  */
 export class ResultFormatter {
-    static wheelsUp(decodeResult: DecodeResult, time: number) {
-      decodeResult.raw.wheels_off_time = time;
-      const date = new Date(time * 1000);
-      decodeResult.formatted.items.push({
-        type: 'time_of_day',
-        code: 'WHEELS_OFF',
-        label: 'Wheels Off Time',
-        value: date.toISOString().slice(11, 19),
-    });
-    }
 
-    static position(decodeResult: DecodeResult, value:{latitude: number, longitude: number}) {
+    static position(decodeResult: DecodeResult, value: { latitude: number, longitude: number }) {
         decodeResult.raw.position = value;
         decodeResult.formatted.items.push({
             type: 'aircraft_position',
@@ -36,11 +26,11 @@ export class ResultFormatter {
         });
     }
 
-    public static flightNumber(decodeResult: DecodeResult, value: string) {
+    static flightNumber(decodeResult: DecodeResult, value: string) {
         decodeResult.raw.flight_number = value;
     };
 
-    public static departureAirport(decodeResult: DecodeResult, value: string) {
+    static departureAirport(decodeResult: DecodeResult, value: string) {
         decodeResult.raw.departure_icao = value;
         decodeResult.formatted.items.push({
             type: 'origin',
@@ -60,7 +50,7 @@ export class ResultFormatter {
         });
     }
 
-    public static arrivalAirport(decodeResult: DecodeResult, value: string) {
+    static arrivalAirport(decodeResult: DecodeResult, value: string) {
         decodeResult.raw.arrival_icao = value;
         decodeResult.formatted.items.push({
             type: 'destination',
@@ -71,7 +61,7 @@ export class ResultFormatter {
     };
 
     // FIXME - make seconds since midnight for time of day
-    public static eta(decodeResult: DecodeResult, value: string) {
+    static eta(decodeResult: DecodeResult, value: string) {
         decodeResult.raw.eta_time = value;
         decodeResult.formatted.items.push({
             type: 'eta',
@@ -81,7 +71,7 @@ export class ResultFormatter {
         });
     }
 
-    public static arrivalRunway(decodeResult: DecodeResult, value: string) {
+    static arrivalRunway(decodeResult: DecodeResult, value: string) {
         decodeResult.raw.arrival_runway = value;
         decodeResult.formatted.items.push({
             type: 'runway',
@@ -92,7 +82,7 @@ export class ResultFormatter {
     };
 
 
-    public static currentFuel(decodeResult: DecodeResult, value: number) {
+    static currentFuel(decodeResult: DecodeResult, value: number) {
         decodeResult.raw.fuel_on_board = value;
         decodeResult.formatted.items.push({
             type: 'fuel_on_board',
@@ -101,7 +91,7 @@ export class ResultFormatter {
             value: decodeResult.raw.fuel_on_board.toString(),
         });
     };
-    public static remainingFuel(decodeResult: DecodeResult, value: number) {
+    static remainingFuel(decodeResult: DecodeResult, value: number) {
         decodeResult.raw.fuel_remaining = value;
         decodeResult.formatted.items.push({
             type: 'fuel_remaining',
@@ -112,7 +102,7 @@ export class ResultFormatter {
     };
 
 
-    public static checksum(decodeResult: DecodeResult, value: string) {
+    static checksum(decodeResult: DecodeResult, value: string) {
         decodeResult.raw.checksum = Number("0x" + value);
         decodeResult.formatted.items.push({
             type: 'message_checksum',
@@ -122,7 +112,7 @@ export class ResultFormatter {
         });
     };
 
-    public static groundspeed(decodeResult: DecodeResult, value: number) {
+    static groundspeed(decodeResult: DecodeResult, value: number) {
         decodeResult.raw.groundspeed = value;
         decodeResult.formatted.items.push({
             type: 'aircraft_groundspeed',
@@ -132,7 +122,7 @@ export class ResultFormatter {
         });
     }
 
-    public static temperature(decodeResult: DecodeResult, value: string) {
+    static temperature(decodeResult: DecodeResult, value: string) {
         decodeResult.raw.outside_air_temperature = Number(value.substring(1)) * (value.charAt(0) === 'M' ? -1 : 1);
         decodeResult.formatted.items.push({
             type: 'outside_air_temperature',
@@ -142,7 +132,7 @@ export class ResultFormatter {
         });
     }
 
-    public static heading(decodeResult: DecodeResult, value: number) {
+    static heading(decodeResult: DecodeResult, value: number) {
         decodeResult.raw.heading = value;
         decodeResult.formatted.items.push({
             type: 'heading',
@@ -152,7 +142,7 @@ export class ResultFormatter {
         });
     }
 
-    public static tail(decodeResult: DecodeResult, value: string) {
+    static tail(decodeResult: DecodeResult, value: string) {
         decodeResult.raw.tail = value;
         decodeResult.formatted.items.push({
             type: 'tail',
@@ -162,7 +152,51 @@ export class ResultFormatter {
         });
     }
 
-    public static unknown(decodeResult: DecodeResult, value: string) {
+    static out(decodeResult: DecodeResult, time: number) {
+        decodeResult.raw.out_time = time;
+        const date = new Date(time * 1000);
+        decodeResult.formatted.items.push({
+            type: 'time_of_day',
+            code: 'OUT',
+            label: 'Out of Gate Time',
+            value: date.toISOString().slice(11, 19),
+        });
+    }
+
+    static off(decodeResult: DecodeResult, time: number) {
+        decodeResult.raw.off_time = time;
+        const date = new Date(time * 1000);
+        decodeResult.formatted.items.push({
+            type: 'time_of_day',
+            code: 'OFF',
+            label: 'Takeoff Time',
+            value: date.toISOString().slice(11, 19),
+        });
+    }
+
+    static on(decodeResult: DecodeResult, time: number) {
+        decodeResult.raw.on_time = time;
+        const date = new Date(time * 1000);
+        decodeResult.formatted.items.push({
+            type: 'time_of_day',
+            code: 'ON',
+            label: 'Landing Time',
+            value: date.toISOString().slice(11, 19),
+        });
+    }
+
+    static in(decodeResult: DecodeResult, time: number) {
+        decodeResult.raw.in_time = time;
+        const date = new Date(time * 1000);
+        decodeResult.formatted.items.push({
+            type: 'time_of_day',
+            code: 'IN',
+            label: 'In Gate Time',
+            value: date.toISOString().slice(11, 19),
+        });
+    }
+
+    static unknown(decodeResult: DecodeResult, value: string) {
         decodeResult.remaining.text += ',' + value;
     };
 }
