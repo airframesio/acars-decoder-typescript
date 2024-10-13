@@ -39,10 +39,13 @@ export class Label_10_LDR extends DecoderPlugin { // eslint-disable-line camelca
     ResultFormatter.altitude(decodeResult, Number(parts[7]));
     ResultFormatter.departureAirport(decodeResult, parts[9]);
     ResultFormatter.arrivalAirport(decodeResult, parts[10]);
-    // parts[11] is the alternate airport
+    ResultFormatter.alternateAirport(decodeResult, parts[11]);
     ResultFormatter.arrivalRunway(decodeResult, parts[12].split('/')[0]); // TODO: find out if anything comes after `/` sometimes
-    // parts[13] and parts[14] are alternate runways
-    decodeResult.remaining.text = [...parts.slice(0,5), parts[11], ...parts.slice(13)].join(',');
+    const altRwy = [parts[13].split('/')[0], parts[14].split('/')[0]].filter((r) => r != "").join(",");
+    if (altRwy != "") {
+        ResultFormatter.alternateRunway(decodeResult, altRwy); // TODO: find out if anything comes after `/` sometimes
+    }
+    decodeResult.remaining.text = [...parts.slice(0,5), ...parts.slice(15)].join(',');
 
     decodeResult.decoded = true;
     decodeResult.decoder.decodeLevel = 'partial';

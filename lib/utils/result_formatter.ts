@@ -60,6 +60,16 @@ export class ResultFormatter {
         });
     };
 
+    static alternateAirport(decodeResult: DecodeResult, value: string) {
+        decodeResult.raw.alternate_icao = value;
+        decodeResult.formatted.items.push({
+            type: 'destination',
+            code: 'ALT_DST',
+            label: 'Alternate Destination',
+            value: decodeResult.raw.alternate_icao,
+        });
+    };
+
     // FIXME - make seconds since midnight for time of day
     static eta(decodeResult: DecodeResult, value: string) {
         decodeResult.raw.eta_time = value;
@@ -81,6 +91,15 @@ export class ResultFormatter {
         });
     };
 
+    static alternateRunway(decodeResult: DecodeResult, value: string) {
+        decodeResult.raw.alternate_runway = value;
+        decodeResult.formatted.items.push({
+            type: 'runway',
+            code: 'ALT_ARWY',
+            label: 'Alternate Runway',
+            value: decodeResult.raw.alternate_runway,
+        });
+    };
 
     static currentFuel(decodeResult: DecodeResult, value: number) {
         decodeResult.raw.fuel_on_board = value;
@@ -91,6 +110,7 @@ export class ResultFormatter {
             value: decodeResult.raw.fuel_on_board.toString(),
         });
     };
+
     static remainingFuel(decodeResult: DecodeResult, value: number) {
         decodeResult.raw.fuel_remaining = value;
         decodeResult.formatted.items.push({
