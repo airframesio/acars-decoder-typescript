@@ -44,16 +44,13 @@ export class Label_4N extends DecoderPlugin {
         }
         ResultFormatter.departureAirport(decodeResult, fields[8]);
         ResultFormatter.arrivalAirport(decodeResult, fields[9]);
+        ResultFormatter.alternateAirport(decodeResult, fields[10]);
         ResultFormatter.arrivalRunway(decodeResult, fields[11].split("/")[0]);
+        if (fields[12].length > 1) {
+            ResultFormatter.alternateRunway(decodeResult, fields[12].split("/")[0]);
+        }
         ResultFormatter.checksum(decodeResult, fields[32]);
-        let remaining = [];
-        const idxs = [0, 3, 4, 5, 6, 8, 9, 10, 11, 12, 32];
-        for (let i = 0; i < fields.length; i++) {
-            if (fields[i] !== "" && !idxs.includes(i)) {
-                remaining = remaining.concat(fields[i]);
-            }
-        } 
-        decodeResult.remaining.text = remaining.join(",");
+        decodeResult.remaining.text = [...fields.slice(1,3), fields[7], ...fields.slice(13, 32)].filter((f) => f != "").join(",");
     } else {
         decodeResult.decoded = false;
         decodeResult.remaining.text = text;

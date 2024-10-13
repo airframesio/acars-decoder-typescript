@@ -50,7 +50,7 @@ test('decodes Label 4N variant 2B', () => {
   expect(decodeResult.message.text).toBe(text);
   expect(decodeResult.raw.date).toBe('10/12');
   expect(decodeResult.remaining.text).toBe('B,69005074-507,002.3,0,0,0,0,0,0,1,247.0,014.2,261.2');
-  expect(decodeResult.formatted.items.length).toBe(6);
+  expect(decodeResult.formatted.items.length).toBe(8);
   expect(decodeResult.formatted.items[0].code).toBe('POS');
   expect(decodeResult.formatted.items[0].value).toBe('36.081 N, 94.810 W');
   expect(decodeResult.formatted.items[1].code).toBe('ALT');
@@ -59,10 +59,14 @@ test('decodes Label 4N variant 2B', () => {
   expect(decodeResult.formatted.items[2].value).toBe('ELP');
   expect(decodeResult.formatted.items[3].code).toBe('DST');
   expect(decodeResult.formatted.items[3].value).toBe('SDF');
-  expect(decodeResult.formatted.items[4].code).toBe('ARWY');
-  expect(decodeResult.formatted.items[4].value).toBe('17R');
-  expect(decodeResult.formatted.items[5].code).toBe('CHECKSUM');
-  expect(decodeResult.formatted.items[5].value).toBe('0x421a');
+  expect(decodeResult.formatted.items[4].code).toBe('ALT_DST');
+  expect(decodeResult.formatted.items[4].value).toBe('SDF');
+  expect(decodeResult.formatted.items[5].code).toBe('ARWY');
+  expect(decodeResult.formatted.items[5].value).toBe('17R');
+  expect(decodeResult.formatted.items[6].code).toBe('ALT_ARWY');
+  expect(decodeResult.formatted.items[6].value).toBe('17L');
+  expect(decodeResult.formatted.items[7].code).toBe('CHECKSUM');
+  expect(decodeResult.formatted.items[7].value).toBe('0x421a');
 });
 
 test('decodes Label 4N variant 2C', () => {
@@ -80,15 +84,17 @@ test('decodes Label 4N variant 2C', () => {
   expect(decodeResult.message.text).toBe(text);
   expect(decodeResult.raw.date).toBe('09/24');
   expect(decodeResult.remaining.text).toBe('C,0,0,1,0,0,0,1,0,0,0,198.5,014.5,213.0');
-  expect(decodeResult.formatted.items.length).toBe(4);
+  expect(decodeResult.formatted.items.length).toBe(5);
   expect(decodeResult.formatted.items[0].code).toBe('ORG');
   expect(decodeResult.formatted.items[0].value).toBe('EWR');
   expect(decodeResult.formatted.items[1].code).toBe('DST');
   expect(decodeResult.formatted.items[1].value).toBe('PHL');
-  expect(decodeResult.formatted.items[2].code).toBe('ARWY');
-  expect(decodeResult.formatted.items[2].value).toBe('09R');
-  expect(decodeResult.formatted.items[3].code).toBe('CHECKSUM');
-  expect(decodeResult.formatted.items[3].value).toBe('0x9bcd');
+  expect(decodeResult.formatted.items[2].code).toBe('ALT_DST');
+  expect(decodeResult.formatted.items[2].value).toBe('PHL');
+  expect(decodeResult.formatted.items[3].code).toBe('ARWY');
+  expect(decodeResult.formatted.items[3].value).toBe('09R');
+  expect(decodeResult.formatted.items[4].code).toBe('CHECKSUM');
+  expect(decodeResult.formatted.items[4].value).toBe('0x9bcd');
 });
 
 test('decodes Label 4N variant 2C (C-band)', () => {
@@ -107,15 +113,19 @@ test('decodes Label 4N variant 2C (C-band)', () => {
   expect(decodeResult.raw.flight_number).toBe('UP109');
   expect(decodeResult.raw.date).toBe('10/12');
   expect(decodeResult.remaining.text).toBe('C,0,0,0,0,0,0,1,0,0,0,709.8,048.7,758.5');
-  expect(decodeResult.formatted.items.length).toBe(4);
+  expect(decodeResult.formatted.items.length).toBe(6);
   expect(decodeResult.formatted.items[0].code).toBe('ORG');
   expect(decodeResult.formatted.items[0].value).toBe('NRT');
   expect(decodeResult.formatted.items[1].code).toBe('DST');
   expect(decodeResult.formatted.items[1].value).toBe('ANC');
-  expect(decodeResult.formatted.items[2].code).toBe('ARWY');
-  expect(decodeResult.formatted.items[2].value).toBe('07R');
-  expect(decodeResult.formatted.items[3].code).toBe('CHECKSUM');
-  expect(decodeResult.formatted.items[3].value).toBe('0x75f3');
+  expect(decodeResult.formatted.items[2].code).toBe('ALT_DST');
+  expect(decodeResult.formatted.items[2].value).toBe('ANC');
+  expect(decodeResult.formatted.items[3].code).toBe('ARWY');
+  expect(decodeResult.formatted.items[3].value).toBe('07R');
+  expect(decodeResult.formatted.items[4].code).toBe('ALT_ARWY');
+  expect(decodeResult.formatted.items[4].value).toBe('33');
+  expect(decodeResult.formatted.items[5].code).toBe('CHECKSUM');
+  expect(decodeResult.formatted.items[5].value).toBe('0x75f3');
 });
 
 test('decodes Label 4N <invalid>', () => {
