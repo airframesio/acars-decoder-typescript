@@ -21,7 +21,7 @@ export class Label_4N extends DecoderPlugin {
     // Inmarsat C-band seems to prefix normal messages with a message number and flight number
     let text = message.text;
     if (text.match(/^M\d{2}A\w{6}/)) {
-        ResultFormatter.flightNumber(decodeResult, message.text.substring(4, 10).replace(/([A-Z]+)0*/g, "$1"));
+        ResultFormatter.flightNumber(decodeResult, message.text.substring(4, 10).replace(/^([A-Z]+)0*/g, "$1"));
         text = text.substring(10);
     }
 
