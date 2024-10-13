@@ -25,7 +25,7 @@ describe('Label_10_LDR', () => {
 
         expect(decodeResult.decoded).toBe(true);
         expect(decodeResult.decoder.decodeLevel).toBe('partial');
-        expect(decodeResult.formatted.items.length).toBe(5);
+        expect(decodeResult.formatted.items.length).toBe(6);
         expect(decodeResult.formatted.items[0].label).toBe('Aircraft Position');
         expect(decodeResult.formatted.items[0].value).toBe('38.151 N, 76.623 W');
         expect(decodeResult.formatted.items[1].label).toBe('Altitude');
@@ -34,9 +34,11 @@ describe('Label_10_LDR', () => {
         expect(decodeResult.formatted.items[2].value).toBe('KATL');
         expect(decodeResult.formatted.items[3].label).toBe('Destination');
         expect(decodeResult.formatted.items[3].value).toBe('KLGA');
-        expect(decodeResult.formatted.items[4].label).toBe('Arrival Runway');
-        expect(decodeResult.formatted.items[4].value).toBe('22');
-        expect(decodeResult.remaining.text).toBe('LDR01,189,C,SWA-2600-016,0,KLGA,/,/,0,0,,,,,,,0,0,0,00,,135.1,08.6,143.7,,,');
+        expect(decodeResult.formatted.items[4].label).toBe('Alternate Destination');
+        expect(decodeResult.formatted.items[4].value).toBe('KLGA');
+        expect(decodeResult.formatted.items[5].label).toBe('Arrival Runway');
+        expect(decodeResult.formatted.items[5].value).toBe('22');
+        expect(decodeResult.remaining.text).toBe('LDR01,189,C,SWA-2600-016,0,0,0,,,,,,,0,0,0,00,,135.1,08.6,143.7,,,');
     });
 
     test('decodes Label 10 Preamble LDR variant 2', () => {
@@ -45,7 +47,7 @@ describe('Label_10_LDR', () => {
 
       expect(decodeResult.decoded).toBe(true);
       expect(decodeResult.decoder.decodeLevel).toBe('partial');
-      expect(decodeResult.formatted.items.length).toBe(5);
+      expect(decodeResult.formatted.items.length).toBe(7);
       expect(decodeResult.formatted.items[0].label).toBe('Aircraft Position');
       expect(decodeResult.formatted.items[0].value).toBe('37.873 N, 79.541 W');
       expect(decodeResult.formatted.items[1].label).toBe('Altitude');
@@ -54,9 +56,13 @@ describe('Label_10_LDR', () => {
       expect(decodeResult.formatted.items[2].value).toBe('KBNA');
       expect(decodeResult.formatted.items[3].label).toBe('Destination');
       expect(decodeResult.formatted.items[3].value).toBe('KBOS');
-      expect(decodeResult.formatted.items[4].label).toBe('Arrival Runway');
-      expect(decodeResult.formatted.items[4].value).toBe('27');
-      expect(decodeResult.remaining.text).toBe('LDR01,189,C,SWA-2600-016,0,KBOS,33L/,22L/,0,1,,,,,,,0,0,0,00,,131.2,11.4,142.6,,,');
+      expect(decodeResult.formatted.items[4].label).toBe('Alternate Destination');
+      expect(decodeResult.formatted.items[4].value).toBe('KBOS');
+      expect(decodeResult.formatted.items[5].label).toBe('Arrival Runway');
+      expect(decodeResult.formatted.items[5].value).toBe('27');
+      expect(decodeResult.formatted.items[6].label).toBe('Alternate Runway');
+      expect(decodeResult.formatted.items[6].value).toBe('33L,22L');
+      expect(decodeResult.remaining.text).toBe('LDR01,189,C,SWA-2600-016,0,0,1,,,,,,,0,0,0,00,,131.2,11.4,142.6,,,');
   });
 
 
