@@ -21,7 +21,7 @@ export class Label_4N extends DecoderPlugin {
     // Inmarsat C-band seems to prefix normal messages with a message number and flight number
     let text = message.text;
     if (text.match(/^M\d{2}A\w{6}/)) {
-        ResultFormatter.flightNumber(decodeResult, message.text.substring(4, 10).replace(/0/g, ""));
+        ResultFormatter.flightNumber(decodeResult, message.text.substring(4, 10).replace(/([A-Z]+)0*/g, "$1"));
         text = text.substring(10);
     }
 
@@ -29,26 +29,29 @@ export class Label_4N extends DecoderPlugin {
     const fields = text.split(",");
     if (text.length === 51) {
         // variant 1
-        decodeResult.day_of_month = text.substring(0, 2);
+        decodeResult.raw.day_of_month = text.substring(0, 2);
         ResultFormatter.departureAirport(decodeResult, text.substring(8, 11));
         ResultFormatter.arrivalAirport(decodeResult, text.substring(13, 16));
-        ResultFormatter.position(decodeResult, CoordinateUtils.decodeStringCoordinatesDecimalMinutes(text.substring(30, 45)));
+        ResultFormatter.position(decodeResult, CoordinateUtils.decodeStringCoordinatesDecimalMinutes(text.substring(30, 45).replace(/^(.)0/, "$1")));
         ResultFormatter.altitude(decodeResult, text.substring(48, 51) * 100);
         decodeResult.remaining.text = [text.substring(2, 4), text.substring(19, 29)].join(" ");
     } else if (fields.length === 33) {
         // variant 2
-        decodeResult.date = fields[3];
-        ResultFormatter.position(decodeResult, {latitude: Number(fields[4]), longitude: Number(fields[5])});
-        ResultFormatter.altitude(decodeResult, fields[6]);
+        decodeResult.raw.date = fields[3];
+        if (fields[1] === "B") {
+            ResultFormatter.position(decodeResult, {latitude: Number(fields[4]), longitude: Number(fields[5])});
+            ResultFormatter.altitude(decodeResult, fields[6]);
+        }
         ResultFormatter.departureAirport(decodeResult, fields[8]);
         ResultFormatter.arrivalAirport(decodeResult, fields[9]);
         ResultFormatter.arrivalRunway(decodeResult, fields[11].split("/")[0]);
         ResultFormatter.checksum(decodeResult, fields[32]);
         let remaining = [];
-        const idxs = [0, 3, 4, 5, 6, 8, 9, 10, 11, 32];
+        const idxs = [0, 3, 4, 5, 6, 8, 9, 10, 11, 12, 32];
         for (let i = 0; i < fields.length; i++) {
-            if (fields[i] !== "" && !idxs.includes(i))
-                remaining.concat(fields[i]);
+            if (fields[i] !== "" && !idxs.includes(i)) {
+                remaining = remaining.concat(fields[i]);
+            }
         } 
         decodeResult.remaining.text = remaining.join(",");
     } else {
