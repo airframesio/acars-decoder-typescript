@@ -6,7 +6,7 @@ import { CoordinateUtils } from '../utils/coordinate_utils';
 import { ResultFormatter } from '../utils/result_formatter';
 import { RouteUtils } from '../utils/route_utils';
 
-export class Label_13_18_Slash extends DecoderPlugin { // eslint-disable-line camelcase
+export class Label_13Through18_Slash extends DecoderPlugin { // eslint-disable-line camelcase
   name = 'label-13-18-slash';
 
   qualifiers() { // eslint-disable-line class-methods-use-this

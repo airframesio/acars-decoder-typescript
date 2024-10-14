@@ -1,12 +1,12 @@
 import { MessageDecoder } from '../MessageDecoder';
-import { Label_13_18_Slash } from './Label_13_18_Slash';
+import { Label_13Through18_Slash } from './Label_13Through18_Slash';
 
-describe('Label_13_18_Slash', () => {
-  let plugin: Label_13_18_Slash;
+describe('Label_13Through18_Slash', () => {
+  let plugin: Label_13Through18_Slash;
 
   beforeEach(() => {
     const decoder = new MessageDecoder();
-    plugin = new Label_13_18_Slash(decoder);
+    plugin = new Label_13Through18_Slash(decoder);
   });
 
   test('matches Label 13-18 Preamble slash qualifiers', () => {
