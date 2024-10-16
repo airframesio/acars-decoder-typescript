@@ -1,6 +1,7 @@
 import { decode } from "punycode";
 import { DecodeResult } from "../DecoderPluginInterface";
 import { CoordinateUtils } from "./coordinate_utils";
+import { DateTimeUtils } from "../DateTimeUtils";
 
 /**
  * Class to format the results of common fields
@@ -71,14 +72,13 @@ export class ResultFormatter {
         });
     };
 
-    // FIXME - make seconds since midnight for time of day
-    static eta(decodeResult: DecodeResult, value: string) {
-        decodeResult.raw.eta_time = value;
+    static eta(decodeResult: DecodeResult, time: number) {
+        decodeResult.raw.eta_time = time;
         decodeResult.formatted.items.push({
             type: 'time_of_day',
             code: 'ETA',
             label: 'Estimated Time of Arrival',
-            value: value.substring(0, 2) + ':' + value.substring(2, 4) + ':' + value.substring(4, 6),
+            value: DateTimeUtils.timestampToString(time, 'tod'),
         });
     }
 
@@ -175,56 +175,51 @@ export class ResultFormatter {
 
     static out(decodeResult: DecodeResult, time: number) {
         decodeResult.raw.out_time = time;
-        const date = new Date(time * 1000);
         decodeResult.formatted.items.push({
             type: 'time_of_day',
             code: 'OUT',
             label: 'Out of Gate Time',
-            value: date.toISOString().slice(11, 19),
+            value: DateTimeUtils.timestampToString(time, 'tod'),
         });
     }
 
     static off(decodeResult: DecodeResult, time: number) {
         decodeResult.raw.off_time = time;
-        const date = new Date(time * 1000);
         decodeResult.formatted.items.push({
             type: 'time_of_day',
             code: 'OFF',
             label: 'Takeoff Time',
-            value: date.toISOString().slice(11, 19),
+            value: DateTimeUtils.timestampToString(time, 'tod'),
         });
     }
 
     static on(decodeResult: DecodeResult, time: number) {
         decodeResult.raw.on_time = time;
-        const date = new Date(time * 1000);
         decodeResult.formatted.items.push({
             type: 'time_of_day',
             code: 'ON',
             label: 'Landing Time',
-            value: date.toISOString().slice(11, 19),
+            value: DateTimeUtils.timestampToString(time, 'tod'),
         });
     }
 
     static in(decodeResult: DecodeResult, time: number) {
         decodeResult.raw.in_time = time;
-        const date = new Date(time * 1000);
         decodeResult.formatted.items.push({
             type: 'time_of_day',
             code: 'IN',
             label: 'In Gate Time',
-            value: date.toISOString().slice(11, 19),
+            value: DateTimeUtils.timestampToString(time, 'tod'),
         });
     }
 
     static time_of_day(decodeResult: DecodeResult, time: number) {
         decodeResult.raw.time_of_day = time;
-        const date = new Date(time * 1000);
         decodeResult.formatted.items.push({
             type: 'time_of_day',
             code: 'MSG_TOD',
             label: 'Message Timestamp',
-            value: date.toISOString().slice(11, 19),
+            value: DateTimeUtils.timestampToString(time, 'tod'),
         });
     }
 

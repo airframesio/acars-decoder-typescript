@@ -101,7 +101,7 @@ test('decodes Label 83 variant 2', () => {
   expect(decodeResult.raw.arrival_icao).toBe('KEWR');
   expect(decodeResult.raw.day_of_month).toBe('22');
   expect(decodeResult.raw.tail).toBe('LN-RKO');
-  expect(decodeResult.raw.eta_time).toBe('164100');
+  expect(decodeResult.raw.eta_time).toBe(60060);
   expect(decodeResult.remaining.text).toBe('0907');
   expect(decodeResult.formatted.items.length).toBe(4);
   expect(decodeResult.formatted.items[0].code).toBe('ORG');

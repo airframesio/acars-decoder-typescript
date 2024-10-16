@@ -32,7 +32,7 @@ export class Label_21_POS extends DecoderPlugin {
       ResultFormatter.time_of_day(decodeResult, DateTimeUtils.convertHHMMSSToTod(fields[2]));
       ResultFormatter.altitude( decodeResult, Number(fields[3]));
       ResultFormatter.temperature(decodeResult, fields[6]);
-      ResultFormatter.eta(decodeResult, fields[7]);
+      ResultFormatter.eta(decodeResult, DateTimeUtils.convertHHMMSSToTod(fields[7]));
       ResultFormatter.arrivalAirport(decodeResult, fields[8]);
 
       decodeResult.remaining.text = [

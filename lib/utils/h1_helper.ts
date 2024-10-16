@@ -141,7 +141,7 @@ function processDT(decodeResult: DecodeResult, data: string[]): boolean {
         ResultFormatter.currentFuel(decodeResult, Number(data[2]));
     }
     if (data.length > 3) {
-        ResultFormatter.eta(decodeResult, data[3]);
+        ResultFormatter.eta(decodeResult, DateTimeUtils.convertHHMMSSToTod(data[3]));
     }
     if (data.length > 4) {
         ResultFormatter.remainingFuel(decodeResult, Number(data[4]));
