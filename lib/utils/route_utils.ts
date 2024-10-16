@@ -65,7 +65,8 @@ export class RouteUtils {
 
     // move out if we want public
     private static timestampToString(time: number, format: 'tod' | 'epoch'): string {
-        const date = new Date(time * 1000);        if(format == 'tod') {
+        const date = new Date(time * 1000);
+        if(format == 'tod') {
             return date.toISOString().slice(11, 19);
         }
         //strip off millis
