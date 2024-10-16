@@ -1,3 +1,4 @@
+import { decode } from "punycode";
 import { DecodeResult } from "../DecoderPluginInterface";
 import { CoordinateUtils } from "./coordinate_utils";
 
@@ -74,7 +75,7 @@ export class ResultFormatter {
     static eta(decodeResult: DecodeResult, value: string) {
         decodeResult.raw.eta_time = value;
         decodeResult.formatted.items.push({
-            type: 'eta',
+            type: 'time_of_day',
             code: 'ETA',
             label: 'Estimated Time of Arrival',
             value: value.substring(0, 2) + ':' + value.substring(2, 4) + ':' + value.substring(4, 6),
@@ -212,6 +213,17 @@ export class ResultFormatter {
             type: 'time_of_day',
             code: 'IN',
             label: 'In Gate Time',
+            value: date.toISOString().slice(11, 19),
+        });
+    }
+
+    static time_of_day(decodeResult: DecodeResult, time: number) {
+        decodeResult.raw.time_of_day = time;
+        const date = new Date(time * 1000);
+        decodeResult.formatted.items.push({
+            type: 'time_of_day',
+            code: 'MSG_TOD',
+            label: 'Message Timestamp',
             value: date.toISOString().slice(11, 19),
         });
     }

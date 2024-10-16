@@ -104,13 +104,13 @@ test('decodes Label 83 variant 2', () => {
   expect(decodeResult.raw.eta_time).toBe('164100');
   expect(decodeResult.remaining.text).toBe('0907');
   expect(decodeResult.formatted.items.length).toBe(4);
-  expect(decodeResult.formatted.items[0].type).toBe('origin');
+  expect(decodeResult.formatted.items[0].code).toBe('ORG');
   expect(decodeResult.formatted.items[0].value).toBe('ENGM');
-  expect(decodeResult.formatted.items[1].type).toBe('destination');
+  expect(decodeResult.formatted.items[1].code).toBe('DST');
   expect(decodeResult.formatted.items[1].value).toBe('KEWR');
-  expect(decodeResult.formatted.items[2].type).toBe('tail');
+  expect(decodeResult.formatted.items[2].code).toBe('TAIL');
   expect(decodeResult.formatted.items[2].value).toBe('LN-RKO');
-  expect(decodeResult.formatted.items[3].type).toBe('eta');
+  expect(decodeResult.formatted.items[3].code).toBe('ETA');
   expect(decodeResult.formatted.items[3].value).toBe('16:41:00');
 });
 

@@ -1,3 +1,4 @@
+import { DateTimeUtils } from "../DateTimeUtils";
 import { Route } from "../types/route";
 import { Waypoint } from "../types/waypoint";
 import { CoordinateUtils } from "./coordinate_utils";
@@ -35,7 +36,7 @@ export class RouteUtils {
             s += `[${waypoint.offset.bearing}° ${waypoint.offset.distance}nm]`;
         }
         if(waypoint.time && waypoint.timeFormat) {
-            s +=`@${RouteUtils.timestampToString(waypoint.time, waypoint.timeFormat)}`;
+            s +=`@${DateTimeUtils.timestampToString(waypoint.time, waypoint.timeFormat)}`;
         }
         return s;
     }
@@ -61,15 +62,6 @@ export class RouteUtils {
             }
         }
         return {name: leg};
-    }
-
-    // move out if we want public
-    private static timestampToString(time: number, format: 'tod' | 'epoch'): string {
-        const date = new Date(time * 1000);        if(format == 'tod') {
-            return date.toISOString().slice(11, 19);
-        }
-        //strip off millis
-        return date.toISOString().slice(0,-5)+"Z";
     }
 
     private static waypointsToString(waypoints: Waypoint[]): string {
