@@ -1,3 +1,4 @@
+import { DateTimeUtils } from '../DateTimeUtils';
 import { DecoderPlugin } from '../DecoderPlugin';
 import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
 import { CoordinateUtils } from '../utils/coordinate_utils';
@@ -37,11 +38,14 @@ export class Label_83 extends DecoderPlugin {
         ResultFormatter.departureAirport(decodeResult, subfields[0]);
         ResultFormatter.arrivalAirport(decodeResult, subfields[1]);
         ResultFormatter.tail(decodeResult, fields[4].replace(/\./g, ""));
-        ResultFormatter.eta(decodeResult, fields[6] + "00");
+        ResultFormatter.eta(decodeResult, DateTimeUtils.convertHHMMSSToTod(fields[6] + "00"));
     } else if (text.substring(0, 5) === "001PR") {
         // variant 3
         decodeResult.raw.day_of_month = text.substring(5, 7);
-        ResultFormatter.position(decodeResult, CoordinateUtils.decodeStringCoordinatesDecimalMinutes(text.substring(13, 28).replace(/\./g, "")));
+        const position = CoordinateUtils.decodeStringCoordinatesDecimalMinutes(text.substring(13, 28).replace(/\./g, ""))
+        if (position) {
+            ResultFormatter.position(decodeResult, position);
+        }
         ResultFormatter.altitude(decodeResult, Number(text.substring(28, 33)));
         decodeResult.remaining.text = text.substring(33);
     } else {
