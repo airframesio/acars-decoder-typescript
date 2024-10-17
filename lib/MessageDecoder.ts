@@ -33,13 +33,10 @@ export class MessageDecoder {
     this.registerPlugin(new Plugins.Label_44_POS(this));
     this.registerPlugin(new Plugins.Label_4N(this));
     this.registerPlugin(new Plugins.Label_B6_Forwardslash(this));
-    this.registerPlugin(new Plugins.Label_H1_FPN(this));
     this.registerPlugin(new Plugins.Label_H1_FLR(this));
-    this.registerPlugin(new Plugins.Label_H1_FTX(this));
-    this.registerPlugin(new Plugins.Label_H1_INI(this));
     this.registerPlugin(new Plugins.Label_H1_OHMA(this));
-    this.registerPlugin(new Plugins.Label_H1_POS(this));
     this.registerPlugin(new Plugins.Label_H1_WRN(this));
+    this.registerPlugin(new Plugins.Label_H1(this));
     this.registerPlugin(new Plugins.Label_HX(this));
     this.registerPlugin(new Plugins.Label_80(this));
     this.registerPlugin(new Plugins.Label_83(this));
@@ -106,29 +103,32 @@ export class MessageDecoder {
       console.log(usablePlugins);
     }
 
-    let result : DecodeResult;
-    if (usablePlugins.length > 0) {
-      const plugin: DecoderPluginInterface = usablePlugins[0];
+    let result: DecodeResult = {
+      decoded: false,
+      error: 'No known decoder plugin for this message',
+      decoder: {
+        name: 'none',
+        type: 'none',
+        decodeLevel: 'none',
+      },
+      message: message,
+      remaining: {
+        text: message.text,
+      },
+      raw: {},
+      formatted: {
+        description: 'Not Decoded',
+        items: [],
+      },
+    };
+
+    // for-in is not happy. doing it the old way
+    for (let i = 0; i < usablePlugins.length; i++) {
+      const plugin = usablePlugins[i];
       result = plugin.decode(message);
-    } else {
-      result = {
-        decoded: false,
-        error: 'No known decoder plugin for this message',
-        decoder: {
-          name: 'none',
-          type: 'none',
-          decodeLevel: 'none',
-        },
-        message: message,
-        remaining: {
-          text: message.text,
-        },
-        raw: {},
-        formatted: {
-          description: 'Not Decoded',
-          items: [],
-        },
-      };
+      if (result.decoded) {
+        break;
+      }
     }
 
     if (options.debug) {
