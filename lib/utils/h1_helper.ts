@@ -7,13 +7,13 @@ import { ResultFormatter } from "./result_formatter";
 import { RouteUtils } from "./route_utils";
 
 export class H1Helper {
-    public static decodeH1Message(decodeResult: DecodeResult, message: String) {
-        let allKnownFields = true;
+    public static decodeH1Message(decodeResult: DecodeResult, message: string) {
         const checksum = message.slice(-4);
         const data = message.slice(0, message.length - 4);
 
         const fields = data.split('/');
-        allKnownFields = allKnownFields && parseMessageType(decodeResult, fields[0]);
+        parseMessageType(decodeResult, fields[0]);
+
         for (let i = 1; i < fields.length; ++i) {
             if (fields[i].startsWith('FN')) {
                 decodeResult.raw.flight_number = fields[i].substring(2); // Strip off 'FN'
@@ -33,36 +33,24 @@ export class H1Helper {
                 decodeResult.raw.message_timestamp = time;
             } else if (fields[i].startsWith('PS')) {
                 const pos = processPS(decodeResult, fields[i].substring(2).split(',')); // Strip off PS
-                allKnownFields == allKnownFields && pos;
             } else if (fields[i].startsWith('DT')) {
                 const data = fields[i].substring(2).split(','); // Strip off DT
-                const dt = processDT(decodeResult, data);
-                allKnownFields = allKnownFields && dt;
+                processDT(decodeResult, data);
             } else if (fields[i].startsWith('ID')) {
                 processIdentification(decodeResult, fields[i].substring(2).split(',')); // Strip off ID
             } else if (fields[i].startsWith('LR')) {
                 const data = fields[i].substring(2).split(','); // Strip off LR
-                const lr = processLR(decodeResult, data);
-                allKnownFields = allKnownFields && lr;
+                processLR(decodeResult, data);
             } else if (fields[i].startsWith('RI') || fields[i].startsWith('RF') || fields[i].startsWith('RP')) {
-                const fp = FlightPlanUtils.processFlightPlan(decodeResult, fields[i].split(':'));
-                allKnownFields = allKnownFields && fp;
+                FlightPlanUtils.processFlightPlan(decodeResult, fields[i].split(':'));
             } else if (fields[i].startsWith('PR')) {
                 // process PR data
                 // data[8] is temperature
-                allKnownFields = false
                 decodeResult.remaining.text += '/' + fields[i];
-
-            } else if (fields[i].startsWith('PS')) {
-                // process position data
-                allKnownFields = false
-                decodeResult.remaining.text += fields[i];
             } else if (fields[i].startsWith('AF')) {
-                const af = processAirField(decodeResult, fields[i].substring(2).split(',')); // Strip off AF
-                allKnownFields = allKnownFields && af;
+                processAirField(decodeResult, fields[i].substring(2).split(',')); // Strip off AF
             } else if (fields[i].startsWith('TD')) {
-                const td = processTimeOfDeparture(decodeResult, fields[i].substring(2).split(',')); // Strip off TD
-                allKnownFields = allKnownFields && td;
+                processTimeOfDeparture(decodeResult, fields[i].substring(2).split(',')); // Strip off TD
             } else if (fields[i].startsWith('FX')) {
                 decodeResult.raw.free_text = fields[i].substring(2); // Strip off 'FX'
                 decodeResult.formatted.items.push({
@@ -73,13 +61,12 @@ export class H1Helper {
                 });
             } else {
                 decodeResult.remaining.text += '/' + fields[i];
-                allKnownFields = false
             }
         }
         if (decodeResult.formatted.items.length > 0) {
             ResultFormatter.checksum(decodeResult, checksum);
         }
-        return allKnownFields;
+        return true;
     }
 }
 
@@ -87,10 +74,9 @@ function processAirField(decodeResult: DecodeResult, data: string[]) {
     if (data.length === 2) {
         ResultFormatter.departureAirport(decodeResult, data[0]);
         ResultFormatter.arrivalAirport(decodeResult, data[1]);
-        return true;
+    } else {
+        decodeResult.remaining.text += 'AF/' + data.join(',');
     }
-    decodeResult.remaining.text += 'AF/' + data.join(',');
-    return false;
 }
 function processTimeOfDeparture(decodeResult: DecodeResult, data: string[]) {
     if (data.length === 2) {
@@ -99,20 +85,19 @@ function processTimeOfDeparture(decodeResult: DecodeResult, data: string[]) {
             type: 'ptd',
             code: "ptd",
             label: 'Planned Departure Time',
-            value: `YYYY-MM-${data[0].substring(0,2)}T${data[0].substring(2,4)}:${data[0].substring(4)}:00Z`,
+            value: `YYYY-MM-${data[0].substring(0, 2)}T${data[0].substring(2, 4)}:${data[0].substring(4)}:00Z`,
         });
-    
+
         decodeResult.raw.plannedDepartureTime = data[1]; //HHMM
         decodeResult.formatted.items.push({
             type: 'etd',
             code: "etd",
             label: 'Estimated Departure Time',
-            value: `${data[1].substring(0,2)}:${data[1].substring(2)}`,
+            value: `${data[1].substring(0, 2)}:${data[1].substring(2)}`,
         });
-        return true;
+    } else {
+        decodeResult.remaining.text += '/TD' + data.join(',');
     }
-    decodeResult.remaining.text += '/TD' + data.join(',');
-    return false;
 }
 
 function processIdentification(decodeResult: DecodeResult, data: string[]) {
@@ -125,8 +110,7 @@ function processIdentification(decodeResult: DecodeResult, data: string[]) {
     }
 }
 
-function processDT(decodeResult: DecodeResult, data: string[]): boolean {
-    let allKnownFields = true;
+function processDT(decodeResult: DecodeResult, data: string[]) {
     if (!decodeResult.raw.arrival_icao) {
         ResultFormatter.arrivalAirport(decodeResult, data[0]);
     } else if (decodeResult.raw.arrival_icao != data[0]) {
@@ -147,16 +131,11 @@ function processDT(decodeResult: DecodeResult, data: string[]): boolean {
         ResultFormatter.remainingFuel(decodeResult, Number(data[4]));
     }
     if (data.length > 5) {//TODO: figure out what this is
-        allKnownFields = false
         decodeResult.remaining.text += ',' + data.slice(5).join(',');
     }
-
-
-    return allKnownFields;
 };
 
-function processLR(decodeResult: DecodeResult, data: string[]): boolean {
-    let allKnownFields = true;
+function processLR(decodeResult: DecodeResult, data: string[]) {
     if (data.length === 19) {
         ResultFormatter.unknown(decodeResult, data[1]);
         ResultFormatter.flightNumber(decodeResult, data[2]);
@@ -164,41 +143,55 @@ function processLR(decodeResult: DecodeResult, data: string[]): boolean {
         ResultFormatter.arrivalAirport(decodeResult, data[4]);
         ResultFormatter.arrivalRunway(decodeResult, data[5]);
         ResultFormatter.unknown(decodeResult, data.slice(6, 19).join(','));
-        allKnownFields = false;
     } else {
-        allKnownFields = false;
+        ResultFormatter.unknown(decodeResult, data.join(','));
     }
-
-    return allKnownFields;
 };
 
 
-function parseMessageType(decodeResult: DecodeResult, messageType: string): boolean {
-    let decoded = true;
+function parseMessageType(decodeResult: DecodeResult, messageType: string) {
     const parts = messageType.split('#');
     if (parts.length == 1) {
-        if (parts[0].startsWith('POS') && parts[0].length !== 3 && !(parts[0].startsWith('POS/'))) {
-            decoded = processPosition(decodeResult, parts[0].substring(3).split(','));
+        const type = parts[0].substring(0, 3);
+        if (type === 'POS' && parts[0].length !== 3) {
+            processPosition(decodeResult, parts[0].substring(3).split(','));
         }
-        return decoded;
+        return processMessageType(decodeResult, type);
     } else if (parts.length == 2) {
         if (parts[0].length > 0) {
-            decodeResult.remaining.text += parts[0].substring(0, 3);
+            decodeResult.remaining.text += parts[0].substring(0, 3); //message number?
             decodeResult.raw.flight_number = parts[0].substring(3);
-            decodeResult.remaining.text += '#' + parts[1].substring(0, 3);
+            decodeResult.remaining.text += '#' + (parts[1].length == 5 ? parts[1].substring(0, 2) : parts[1].substring(0, 3));
         }
-        if (parts[1].substring(3, 6) === 'POS' && parts[1].length !== 6 && parts[1].substring(3, 7) !== 'POS/') {
-            decoded = processPosition(decodeResult, parts[1].substring(6).split(','));
+        // TODO - see if there's a better way to determine the type
+        const type = parts[1].length == 5 ? parts[1].substring(2, 5) : parts[1].substring(3, 6);
+        if (parts[1].substring(3, 6) === 'POS' && parts[1].length > 6) {
+            processPosition(decodeResult, parts[1].substring(6).split(','));
         }
-
-        decodeResult.raw.message_type = messageType;
-        return decoded;
+        processMessageType(decodeResult, type);
     }
-
-    decodeResult.remaining.text += messageType;
-    return false;
+    else {
+        decodeResult.remaining.text += messageType;
+    }
 }
-function processDC(decodeResult: DecodeResult, data: string[]): boolean {
+
+function processMessageType(decodeResult: DecodeResult, type: string) {
+    if (type === 'FPN') {
+        decodeResult.formatted.description = 'Flight Plan';
+    } else if (type === 'FTX') {
+        decodeResult.formatted.description = 'Free Text';
+    } else if (type === 'INI') {
+        decodeResult.formatted.description = 'Flight Plan Initial Report';
+    } else if (type === 'POS') {
+        decodeResult.formatted.description = 'Position Report';
+    } else if (type === 'PRG') {
+        decodeResult.formatted.description = 'Progress Report';
+    } else {
+        decodeResult.formatted.description = 'Unknown H1 Message';
+    }
+}
+
+function processDC(decodeResult: DecodeResult, data: string[]) {
     decodeResult.raw.message_date = data[0]; // DDMMYYYY;
 
     if (data.length === 1) {
@@ -209,14 +202,10 @@ function processDC(decodeResult: DecodeResult, data: string[]): boolean {
         const time = DateTimeUtils.convertDateTimeToEpoch(data[1], data[0]); // HHMMSS
 
         decodeResult.raw.message_timestamp = time;
-    } else {
-        return false
     }
-    return true;
 }
 
-function processPS(decodeResult: DecodeResult, data: string[]): boolean {
-    let allKnownFields = true;
+function processPS(decodeResult: DecodeResult, data: string[]) {
     const position = CoordinateUtils.decodeStringCoordinatesDecimalMinutes(data[0]);
     if (position) {
         decodeResult.raw.position = position
@@ -226,8 +215,6 @@ function processPS(decodeResult: DecodeResult, data: string[]): boolean {
             label: 'Aircraft Position',
             value: CoordinateUtils.coordinateString(position),
         });
-    } else {
-        allKnownFields = false;
     }
     if (data.length === 9) { // variant 7
         processRoute(decodeResult, data[3], data[1], data[5], data[4], undefined);
@@ -246,11 +233,8 @@ function processPS(decodeResult: DecodeResult, data: string[]): boolean {
         ResultFormatter.unknown(decodeResult, data[9]);
         ResultFormatter.unknown(decodeResult, data.slice(11).join(','));
     }
-    allKnownFields = false;
-    return allKnownFields;
 }
-function processPosition(decodeResult: DecodeResult, data: string[]): boolean {
-    let allKnownFields = true;
+function processPosition(decodeResult: DecodeResult, data: string[]) {
     const position = CoordinateUtils.decodeStringCoordinatesDecimalMinutes(data[0]);
     if (position) {
         decodeResult.raw.position = position
@@ -260,8 +244,6 @@ function processPosition(decodeResult: DecodeResult, data: string[]): boolean {
             label: 'Aircraft Position',
             value: CoordinateUtils.coordinateString(position),
         });
-    } else {
-        allKnownFields = false;
     }
     if (data.length >= 10) { // variant 1, short
         ResultFormatter.altitude(decodeResult, Number(data[3]) * 100);
@@ -276,8 +258,6 @@ function processPosition(decodeResult: DecodeResult, data: string[]): boolean {
         ResultFormatter.unknown(decodeResult, data[12]);
         ResultFormatter.unknown(decodeResult, data[13]);
     }
-    allKnownFields = false;
-    return allKnownFields;
 }
 
 
