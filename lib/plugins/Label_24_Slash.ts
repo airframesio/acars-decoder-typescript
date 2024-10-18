@@ -43,7 +43,7 @@ export class Label_24_Slash extends DecoderPlugin {
     } else {
       // Unknown!
       if(options.debug) {
-        console.log(`DEBUG: ${this.name}: Unknown variation. Field count: ${fields.length}`);
+        console.log(`DEBUG: ${this.name}: Unknown variation. Field count: ${fields.length}. Message: ${message.text}`);
       }
       decodeResult.decoded = false;
       decodeResult.decoder.decodeLevel = 'none';

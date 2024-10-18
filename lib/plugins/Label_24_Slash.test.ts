@@ -33,6 +33,13 @@ describe('Label_24_Slash', () => {
     expect(decodeResult.raw.position.longitude).toBe(1.33);
     expect(decodeResult.raw.eta_time).toBe(39360);
     expect(decodeResult.formatted.items.length).toBe(3);
+    expect(decodeResult.formatted.items[0].label).toBe('Altitude');
+    expect(decodeResult.formatted.items[0].value).toBe('34962 feet');
+    expect(decodeResult.formatted.items[1].label).toBe('Aircraft Position');
+    expect(decodeResult.formatted.items[1].value).toBe('53.130 N, 1.330 E');
+    expect(decodeResult.formatted.items[2].label).toBe('Estimated Time of Arrival');
+    expect(decodeResult.formatted.items[2].value).toBe('10:56:00');
+
     expect(decodeResult.remaining.text).toBe('3374');
   });
 
