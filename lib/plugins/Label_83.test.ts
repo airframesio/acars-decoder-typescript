@@ -32,9 +32,9 @@ test('decodes Label 83 variant 1', () => {
   expect(decodeResult.raw.heading).toBe('140.0');
   expect(decodeResult.remaining.text).toBe('19700');
   expect(decodeResult.formatted.items.length).toBe(6);
-  expect(decodeResult.formatted.items[0].type).toBe('origin');
+  expect(decodeResult.formatted.items[0].type).toBe('icao');
   expect(decodeResult.formatted.items[0].value).toBe('KLAX');
-  expect(decodeResult.formatted.items[1].type).toBe('destination');
+  expect(decodeResult.formatted.items[1].type).toBe('icao');
   expect(decodeResult.formatted.items[1].value).toBe('KEWR');
   expect(decodeResult.formatted.items[2].type).toBe('aircraft_position');
   expect(decodeResult.formatted.items[2].value).toBe('40.530 N, 74.470 W');
@@ -70,9 +70,9 @@ test('decodes Label 83 variant 1 (C-band)', () => {
   expect(decodeResult.raw.heading).toBe('-107.6');
   expect(decodeResult.remaining.text).toBe('64900');
   expect(decodeResult.formatted.items.length).toBe(6);
-  expect(decodeResult.formatted.items[0].type).toBe('origin');
+  expect(decodeResult.formatted.items[0].type).toBe('icao');
   expect(decodeResult.formatted.items[0].value).toBe('KIAH');
-  expect(decodeResult.formatted.items[1].type).toBe('destination');
+  expect(decodeResult.formatted.items[1].type).toBe('icao');
   expect(decodeResult.formatted.items[1].value).toBe('RJAA');
   expect(decodeResult.formatted.items[2].type).toBe('aircraft_position');
   expect(decodeResult.formatted.items[2].value).toBe('39.120 N, 175.100 W');

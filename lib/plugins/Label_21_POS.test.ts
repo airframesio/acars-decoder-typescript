@@ -46,7 +46,7 @@ describe('Label_21_POS', () => {
         expect(decodeResult.formatted.items[4].code).toBe('ETA');
         expect(decodeResult.formatted.items[4].label).toBe('Estimated Time of Arrival');
         expect(decodeResult.formatted.items[4].value).toBe('20:47:48');
-        expect(decodeResult.formatted.items[5].type).toBe('destination');
+        expect(decodeResult.formatted.items[5].type).toBe('icao');
         expect(decodeResult.formatted.items[5].code).toBe('DST');
         expect(decodeResult.formatted.items[5].label).toBe('Destination');
         expect(decodeResult.formatted.items[5].value).toBe('KTPA');

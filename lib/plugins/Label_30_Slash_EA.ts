@@ -1,6 +1,7 @@
 import { DateTimeUtils } from '../DateTimeUtils';
 import { DecoderPlugin } from '../DecoderPlugin';
 import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
+import { ResultFormatter } from '../utils/result_formatter';
 
 export class Label_30_Slash_EA extends DecoderPlugin {
   name = 'label-30-slash-ea';
@@ -28,24 +29,10 @@ export class Label_30_Slash_EA extends DecoderPlugin {
       }
     }
 
-    decodeResult.formatted.items.push({
-      type: 'eta',
-      code: 'ETA',
-      label: 'Estimated Time of Arrival',
-      value: DateTimeUtils.UTCToString(results[0].substr(2, 4)),
-    });
+    ResultFormatter.eta(decodeResult, DateTimeUtils.convertHHMMSSToTod(results[0].substr(2, 4)+'00'));
 
-    if (results[1].substr(0, 2) === "DS") {
-        decodeResult.raw.arrival_icao = results[1].substr(2, 4);
-	decodeResult.formatted.items.push({
-          type: 'destination',
-          code: 'DST',
-          label: 'Destination',
-          value: decodeResult.raw.arrival_icao,
-        });
-
-      // We don't know what the /SK section means. We have seen various numbers
-      // after the /SK.
+    if (results[1].substring(0,2) === "DS") {
+      ResultFormatter.arrivalAirport(decodeResult, results[1].substring(2, 6));
       decodeResult.remaining.text = "/".concat(results[2]);
     } else {
       decodeResult.remaining.text = "/".concat(results[1], "/", results[2])

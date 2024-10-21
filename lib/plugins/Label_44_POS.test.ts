@@ -39,11 +39,11 @@ test('decodes Label 44 Preamble POS02 variant 1', () => {
   expect(decodeResult.formatted.items[0].code).toBe('POS');
   expect(decodeResult.formatted.items[0].label).toBe('Aircraft Position');
   expect(decodeResult.formatted.items[0].value).toBe('38.285 N, 77.845 W');
-  expect(decodeResult.formatted.items[1].type).toBe('origin');
+  expect(decodeResult.formatted.items[1].type).toBe('icao');
   expect(decodeResult.formatted.items[1].code).toBe('ORG');
   expect(decodeResult.formatted.items[1].label).toBe('Origin');
   expect(decodeResult.formatted.items[1].value).toBe('KJFK');
-  expect(decodeResult.formatted.items[2].type).toBe('destination');
+  expect(decodeResult.formatted.items[2].type).toBe('icao');
   expect(decodeResult.formatted.items[2].code).toBe('DST');
   expect(decodeResult.formatted.items[2].label).toBe('Destination');
   expect(decodeResult.formatted.items[2].value).toBe('KUZA');
