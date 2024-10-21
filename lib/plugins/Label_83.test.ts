@@ -69,19 +69,21 @@ test('decodes Label 83 variant 1 (C-band)', () => {
   expect(decodeResult.raw.groundspeed).toBe('265');
   expect(decodeResult.raw.heading).toBe('-107.6');
   expect(decodeResult.remaining.text).toBe('64900');
-  expect(decodeResult.formatted.items.length).toBe(6);
-  expect(decodeResult.formatted.items[0].type).toBe('icao');
-  expect(decodeResult.formatted.items[0].value).toBe('KIAH');
+  expect(decodeResult.formatted.items.length).toBe(7);
+  expect(decodeResult.formatted.items[0].type).toBe('flight_number');
+  expect(decodeResult.formatted.items[0].value).toBe('UA7');
   expect(decodeResult.formatted.items[1].type).toBe('icao');
-  expect(decodeResult.formatted.items[1].value).toBe('RJAA');
-  expect(decodeResult.formatted.items[2].type).toBe('aircraft_position');
-  expect(decodeResult.formatted.items[2].value).toBe('39.120 N, 175.100 W');
-  expect(decodeResult.formatted.items[3].type).toBe('altitude');
-  expect(decodeResult.formatted.items[3].value).toBe('39001 feet');
-  expect(decodeResult.formatted.items[4].type).toBe('aircraft_groundspeed');
-  expect(decodeResult.formatted.items[4].value).toBe('265 knots');
-  expect(decodeResult.formatted.items[5].type).toBe('heading');
-  expect(decodeResult.formatted.items[5].value).toBe('-107.6');
+  expect(decodeResult.formatted.items[1].value).toBe('KIAH');
+  expect(decodeResult.formatted.items[2].type).toBe('icao');
+  expect(decodeResult.formatted.items[2].value).toBe('RJAA');
+  expect(decodeResult.formatted.items[3].type).toBe('aircraft_position');
+  expect(decodeResult.formatted.items[3].value).toBe('39.120 N, 175.100 W');
+  expect(decodeResult.formatted.items[4].type).toBe('altitude');
+  expect(decodeResult.formatted.items[4].value).toBe('39001 feet');
+  expect(decodeResult.formatted.items[5].type).toBe('aircraft_groundspeed');
+  expect(decodeResult.formatted.items[5].value).toBe('265 knots');
+  expect(decodeResult.formatted.items[6].type).toBe('heading');
+  expect(decodeResult.formatted.items[6].value).toBe('-107.6');
 });
 
 test('decodes Label 83 variant 2', () => {
@@ -158,11 +160,13 @@ test('decodes Label 83 variant 3 (C-band)', () => {
   expect(decodeResult.raw.position.longitude).toBe(116.05);
   expect(decodeResult.raw.altitude).toBe(0);
   expect(decodeResult.remaining.text).toBe('0----');
-  expect(decodeResult.formatted.items.length).toBe(2);
-  expect(decodeResult.formatted.items[0].type).toBe('aircraft_position');
-  expect(decodeResult.formatted.items[0].value).toBe('5.943 N, 116.050 E');
-  expect(decodeResult.formatted.items[1].type).toBe('altitude');
-  expect(decodeResult.formatted.items[1].value).toBe('0 feet');
+  expect(decodeResult.formatted.items.length).toBe(3);
+  expect(decodeResult.formatted.items[0].type).toBe('flight_number');
+  expect(decodeResult.formatted.items[0].value).toBe('XA1');
+  expect(decodeResult.formatted.items[1].type).toBe('aircraft_position');
+  expect(decodeResult.formatted.items[1].value).toBe('5.943 N, 116.050 E');
+  expect(decodeResult.formatted.items[2].type).toBe('altitude');
+  expect(decodeResult.formatted.items[2].value).toBe('0 feet');
 });
 
 test('decodes Label 83 <invalid>', () => {

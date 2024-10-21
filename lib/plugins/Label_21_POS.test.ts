@@ -41,7 +41,7 @@ describe('Label_21_POS', () => {
         expect(decodeResult.formatted.items[3].type).toBe('outside_air_temperature');
         expect(decodeResult.formatted.items[3].code).toBe('OATEMP');
         expect(decodeResult.formatted.items[3].label).toBe('Outside Air Temperature (C)');
-        expect(decodeResult.formatted.items[3].value).toBe('4');
+        expect(decodeResult.formatted.items[3].value).toBe('-4');
         expect(decodeResult.formatted.items[4].type).toBe('time_of_day');
         expect(decodeResult.formatted.items[4].code).toBe('ETA');
         expect(decodeResult.formatted.items[4].label).toBe('Estimated Time of Arrival');

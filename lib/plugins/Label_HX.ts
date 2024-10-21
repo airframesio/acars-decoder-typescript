@@ -51,7 +51,7 @@ export class Label_HX extends DecoderPlugin {
     }
 
     if (decodeResult.decoded) {
-        if(decodeResult.remaining.text === "")
+        if(!decodeResult.remaining.text)
             decodeResult.decoder.decodeLevel = 'full';
         else
             decodeResult.decoder.decodeLevel = 'partial';

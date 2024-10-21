@@ -8,6 +8,30 @@ import { DateTimeUtils } from "../DateTimeUtils";
  */
 export class ResultFormatter {
 
+    static freetext(decodeResult: DecodeResult, value: string) {
+        decodeResult.raw.freetext = value;
+        decodeResult.formatted.items.push({
+            type: 'freetext',
+            code: 'FREE_TEXT',
+            label: 'Free Text',
+            value: value,
+        });
+    }
+
+    static door_event(decodeResult: DecodeResult, name: string, state: string) {
+        decodeResult.raw.door_event = {
+            door: name,
+            state: state,
+        };
+
+        decodeResult.formatted.items.push({
+            type: 'door_event',
+            code: 'DOOR',
+            label: 'Door Event',
+            value: `${name} ${state}`,
+        });
+    }
+
     static position(decodeResult: DecodeResult, value: { latitude: number, longitude: number }) {
         decodeResult.raw.position = value;
         decodeResult.formatted.items.push({
@@ -30,6 +54,22 @@ export class ResultFormatter {
 
     static flightNumber(decodeResult: DecodeResult, value: string) {
         decodeResult.raw.flight_number = value;
+        decodeResult.formatted.items.push({
+            type: 'flight_number',
+            code: 'FLIGHT',
+            label: 'Flight Number',
+            value: decodeResult.raw.flight_number,
+        });
+    };
+
+    static callsign(decodeResult: DecodeResult, value: string) {
+        decodeResult.raw.callsign = value;
+        decodeResult.formatted.items.push({
+            type: 'callsign',
+            code: 'CALLSIGN',
+            label: 'Callsign',
+            value: decodeResult.raw.callsign,
+        });
     };
 
     static departureAirport(decodeResult: DecodeResult, value: string, type: 'IATA' | 'ICAO' = 'ICAO') {
@@ -174,7 +214,7 @@ export class ResultFormatter {
     }
 
     static temperature(decodeResult: DecodeResult, value: string) {
-        decodeResult.raw.outside_air_temperature = Number(value.substring(1)) * (value.charAt(0) === 'M' ? -1 : 1);
+        decodeResult.raw.outside_air_temperature = Number(value.replace("M", "-").replace("P", "+"));
         decodeResult.formatted.items.push({
             type: 'outside_air_temperature',
             code: 'OATEMP',
