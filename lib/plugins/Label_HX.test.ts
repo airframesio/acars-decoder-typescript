@@ -47,7 +47,7 @@ test('decodes Label HX variant 2', () => {
   expect(decodeResult.raw.departure_icao).toBe('GSP');
   expect(decodeResult.remaining.text).toBe('B02');
   expect(decodeResult.formatted.items.length).toBe(1);
-  expect(decodeResult.formatted.items[0].type).toBe('origin');
+  expect(decodeResult.formatted.items[0].type).toBe('icao');
   expect(decodeResult.formatted.items[0].code).toBe('ORG');
   expect(decodeResult.formatted.items[0].label).toBe('Origin');
   expect(decodeResult.formatted.items[0].value).toBe('GSP');

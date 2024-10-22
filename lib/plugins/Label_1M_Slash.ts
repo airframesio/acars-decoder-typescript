@@ -1,6 +1,7 @@
 import { DateTimeUtils } from '../DateTimeUtils';
 import { DecoderPlugin } from '../DecoderPlugin';
 import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
+import { ResultFormatter } from '../utils/result_formatter';
 
 export class Label_1M_Slash extends DecoderPlugin {
   name = 'label-1m-slash';
@@ -30,34 +31,17 @@ export class Label_1M_Slash extends DecoderPlugin {
       decodeResult.raw.flight_number = results[0];
       // results[1]: ETA01 (???)
       // results[2]: 230822 - UTC date of eta
-      decodeResult.raw.departure_icao = results[3];
-      decodeResult.raw.arrival_icao = results[4];
-      decodeResult.raw.alternate_icao = results[5];
+      ResultFormatter.departureAirport(decodeResult, results[3]);
+      ResultFormatter.arrivalAirport(decodeResult, results[4]);
+      ResultFormatter.alternateAirport(decodeResult, results[5]);
       // results[6]: 2JK0 (???)
       // results[7] 1940 - UTC eta
-      decodeResult.raw.arrival_runway = results[8].replace(decodeResult.raw.arrival_icao, ""); // results[8] EGLL27L
+      ResultFormatter.arrivalRunway(decodeResult, results[8].replace(results[4], "")); // results[8] EGLL27L
       // results[9]: 10(space) (???)
 
-      decodeResult.formatted.items.push({
-        type: 'eta',
-        code: 'ETA',
-        label: 'Estimated Time of Arrival',
-        value: DateTimeUtils.UTCDateTimeToString(results[2], results[7]),
-      });
-
-      decodeResult.formatted.items.push({
-        type: 'destination',
-        code: 'DST',
-        label: 'Destination',
-        value: decodeResult.raw.arrival_icao,
-      });
-
-      decodeResult.formatted.items.push({
-        type: 'origin',
-        code: 'ORG',
-        label: 'Origin',
-        value: decodeResult.raw.departure_icao,
-      });
+      const yymmdd = results[2];
+      ResultFormatter.eta(decodeResult, DateTimeUtils.convertDateTimeToEpoch(results[7]+'00', yymmdd.substring(2,4)+yymmdd.substring(4,6)+yymmdd.substring(0,2)), 'epoch')
+      
     }
 
     decodeResult.decoded = true;

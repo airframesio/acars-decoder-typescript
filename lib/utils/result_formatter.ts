@@ -32,14 +32,24 @@ export class ResultFormatter {
         decodeResult.raw.flight_number = value;
     };
 
-    static departureAirport(decodeResult: DecodeResult, value: string) {
-        decodeResult.raw.departure_icao = value;
-        decodeResult.formatted.items.push({
-            type: 'origin',
-            code: 'ORG',
-            label: 'Origin',
-            value: decodeResult.raw.departure_icao,
-        });
+    static departureAirport(decodeResult: DecodeResult, value: string, type: 'IATA' | 'ICAO' = 'ICAO') {
+        if (type === 'ICAO') {
+            decodeResult.raw.departure_icao = value;
+            decodeResult.formatted.items.push({
+                type: 'icao',
+                code: 'ORG',
+                label: 'Origin',
+                value: value,
+            });
+        } else {
+            decodeResult.raw.departure_iata = value;
+            decodeResult.formatted.items.push({
+                type: 'iata',
+                code: 'ORG',
+                label: 'Origin',
+                value: value,
+            });
+        }
     };
 
     static departureRunway(decodeResult: DecodeResult, value: string) {
@@ -52,34 +62,54 @@ export class ResultFormatter {
         });
     }
 
-    static arrivalAirport(decodeResult: DecodeResult, value: string) {
-        decodeResult.raw.arrival_icao = value;
-        decodeResult.formatted.items.push({
-            type: 'destination',
-            code: 'DST',
-            label: 'Destination',
-            value: decodeResult.raw.arrival_icao,
-        });
+    static arrivalAirport(decodeResult: DecodeResult, value: string, type: 'IATA' | 'ICAO' = 'ICAO') {
+        if (type === 'ICAO') {
+            decodeResult.raw.arrival_icao = value;
+            decodeResult.formatted.items.push({
+                type: 'icao',
+                code: 'DST',
+                label: 'Destination',
+                value: value,
+            });
+        } else {
+            decodeResult.raw.arrival_iata = value;
+            decodeResult.formatted.items.push({
+                type: 'iata',
+                code: 'DST',
+                label: 'Destination',
+                value: value,
+            });
+        }
     };
 
     static alternateAirport(decodeResult: DecodeResult, value: string) {
         decodeResult.raw.alternate_icao = value;
         decodeResult.formatted.items.push({
-            type: 'destination',
+            type: 'icao',
             code: 'ALT_DST',
             label: 'Alternate Destination',
             value: decodeResult.raw.alternate_icao,
         });
     };
 
-    static eta(decodeResult: DecodeResult, time: number) {
-        decodeResult.raw.eta_time = time;
-        decodeResult.formatted.items.push({
-            type: 'time_of_day',
-            code: 'ETA',
-            label: 'Estimated Time of Arrival',
-            value: DateTimeUtils.timestampToString(time, 'tod'),
-        });
+    static eta(decodeResult: DecodeResult, time: number, type: 'tod' | 'epoch' = 'tod') {
+        if (type === 'tod') {
+            decodeResult.raw.eta_time = time;
+            decodeResult.formatted.items.push({
+                type: 'time_of_day',
+                code: 'ETA',
+                label: 'Estimated Time of Arrival',
+                value: DateTimeUtils.timestampToString(time, 'tod'),
+            });
+        } else {
+            decodeResult.raw.eta_date = time;
+            decodeResult.formatted.items.push({
+                type: 'epoch',
+                code: 'ETA',
+                label: 'Estimated Time of Arrival',
+                value: DateTimeUtils.timestampToString(time, 'epoch'),
+            });
+        }
     }
 
     static arrivalRunway(decodeResult: DecodeResult, value: string) {
@@ -220,6 +250,16 @@ export class ResultFormatter {
             code: 'MSG_TOD',
             label: 'Message Timestamp',
             value: DateTimeUtils.timestampToString(time, 'tod'),
+        });
+    }
+
+    static text(decodeResult: DecodeResult, text: string) {
+        decodeResult.raw.text = text;
+        decodeResult.formatted.items.push({
+            type: 'text',
+            code: 'TEXT',
+            label: 'Text Message',
+            value: text,
         });
     }
 

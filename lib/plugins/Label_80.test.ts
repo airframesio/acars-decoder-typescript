@@ -30,11 +30,11 @@ test('decodes Label 80 variant 1', () => {
   expect(decodeResult.raw.position.longitude).toBe(-95.133);
   expect(decodeResult.raw.altitude).toBe(15608);
   expect(decodeResult.formatted.items.length).toBe(8);
-  expect(decodeResult.formatted.items[0].type).toBe('origin');
+  expect(decodeResult.formatted.items[0].type).toBe('icao');
   expect(decodeResult.formatted.items[0].code).toBe('ORG');
   expect(decodeResult.formatted.items[0].label).toBe('Origin');
   expect(decodeResult.formatted.items[0].value).toBe('KIAH');
-  expect(decodeResult.formatted.items[1].type).toBe('destination');
+  expect(decodeResult.formatted.items[1].type).toBe('icao');
   expect(decodeResult.formatted.items[1].code).toBe('DST');
   expect(decodeResult.formatted.items[1].label).toBe('Destination');
   expect(decodeResult.formatted.items[1].value).toBe('MMGL');
@@ -77,11 +77,11 @@ test('decodes Label 80 variant 2', () => {
   expect(decodeResult.raw.position.latitude).toBe(35.391999999999996); // FIXME?: 35.392
   expect(decodeResult.raw.position.longitude).toBe(-79.372);
   expect(decodeResult.formatted.items.length).toBe(16);
-  expect(decodeResult.formatted.items[0].type).toBe('origin');
+  expect(decodeResult.formatted.items[0].type).toBe('icao');
   expect(decodeResult.formatted.items[0].code).toBe('ORG');
   expect(decodeResult.formatted.items[0].label).toBe('Origin');
   expect(decodeResult.formatted.items[0].value).toBe('KIAD');
-  expect(decodeResult.formatted.items[1].type).toBe('destination');
+  expect(decodeResult.formatted.items[1].type).toBe('icao');
   expect(decodeResult.formatted.items[1].code).toBe('DST');
   expect(decodeResult.formatted.items[1].label).toBe('Destination');
   expect(decodeResult.formatted.items[1].value).toBe('MSLP');
