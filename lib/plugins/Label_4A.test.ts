@@ -142,12 +142,12 @@ test('decodes Label 4A, variant 3', () => {
   expect(decodeResult.formatted.items[3].value).toBe('41.093 N, 72.677 W');
 });
 
-// disabled because all messages should decode
-test('decodes Label 4A <invalid>', () => {
+test('decodes Label 4A_DIS <invalid>', () => {
   const decoder = new MessageDecoder();
   const decoderPlugin = new Label_4A(decoder);
 
-  const text = '4A Bogus message';
+  // https://app.airframes.io/messages/3449413366
+  const text = 'DIS01,182103,WEN3100,WRONG CREW HAHAHA';
   const decodeResult = decoderPlugin.decode({ text: text });
   
   expect(decodeResult.decoded).toBe(false);
