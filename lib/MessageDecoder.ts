@@ -14,7 +14,7 @@ export class MessageDecoder {
     this.debug = false;
 
     this.registerPlugin(new Plugins.Label_ColonComma(this));
-    this.registerPlugin(new Plugins.Label_5Z(this));
+    this.registerPlugin(new Plugins.Label_5Z_Slash(this));
     this.registerPlugin(new Plugins.Label_10_LDR(this));
     this.registerPlugin(new Plugins.Label_10_POS(this));
     this.registerPlugin(new Plugins.Label_10_Slash(this));
