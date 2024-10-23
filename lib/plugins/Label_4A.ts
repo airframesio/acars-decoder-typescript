@@ -34,7 +34,8 @@ export class Label_4A extends DecoderPlugin {
         // variant 1
         ResultFormatter.time_of_day(decodeResult, DateTimeUtils.convertHHMMSSToTod(fields[0]));
         ResultFormatter.tail(decodeResult, fields[2].replace(".", ""));
-        ResultFormatter.callsign(decodeResult, fields[3]);
+        if (fields[3])
+            ResultFormatter.callsign(decodeResult, fields[3]);
         ResultFormatter.departureAirport(decodeResult, fields[4]);
         ResultFormatter.arrivalAirport(decodeResult, fields[5]);
         ResultFormatter.altitude(decodeResult, text.substring(48, 51) * 100);
@@ -46,13 +47,13 @@ export class Label_4A extends DecoderPlugin {
             let wp1 = {
                 name: fields[0].substring(13).trim(),
                 time: DateTimeUtils.convertHHMMSSToTod(fields[1].substring(0, 6)),
-                timeformat: 'tod',
+                timeFormat: 'tod',
             };
             ResultFormatter.altitude(decodeResult, fields[1].substring(6, 9) * 100);
             let wp2 = {
                 name: fields[1].substring(9).trim(),
                 time: DateTimeUtils.convertHHMMSSToTod(fields[2]),
-                timeformat: 'tod',
+                timeFormat: 'tod',
             };
             decodeResult.raw.route = {waypoints: [wp1, wp2]};
             decodeResult.formatted.items.push({
@@ -67,8 +68,9 @@ export class Label_4A extends DecoderPlugin {
             // variant 3
             ResultFormatter.time_of_day(decodeResult, DateTimeUtils.convertHHMMSSToTod(fields[0]));
             ResultFormatter.eta(decodeResult, DateTimeUtils.convertHHMMSSToTod(fields[1]));
+            decodeResult.remaining.text = fields[2];
             ResultFormatter.altitude(decodeResult, fields[3]);
-            ResultFormatter.position(decodeResult, CoordinateUtils.decodeStringCoordinates((fields[4]+fields[5]).replace(/[ \.]/, "")));
+            ResultFormatter.position(decodeResult, CoordinateUtils.decodeStringCoordinates((fields[4]+fields[5]).replace(/[ \.]/g, "")));
         }
     } else {
         decodeResult.decoded = false;
