@@ -39,7 +39,7 @@ describe('Label_H1 POS', () => {
     expect(decodeResult.formatted.items[3].type).toBe('outside_air_temperature');
     expect(decodeResult.formatted.items[3].code).toBe('OATEMP');
     expect(decodeResult.formatted.items[3].label).toBe('Outside Air Temperature (C)');
-    expect(decodeResult.formatted.items[3].value).toBe('-48');
+    expect(decodeResult.formatted.items[3].value).toBe('-48 degrees');
     expect(decodeResult.formatted.items[4].label).toBe('Message Checksum');
     expect(decodeResult.formatted.items[4].value).toBe('0x7a40');
   });
@@ -74,7 +74,7 @@ describe('Label_H1 POS', () => {
     expect(decodeResult.formatted.items[3].type).toBe('outside_air_temperature');
     expect(decodeResult.formatted.items[3].code).toBe('OATEMP');
     expect(decodeResult.formatted.items[3].label).toBe('Outside Air Temperature (C)');
-    expect(decodeResult.formatted.items[3].value).toBe('-6');
+    expect(decodeResult.formatted.items[3].value).toBe('-6 degrees');
     expect(decodeResult.formatted.items[4].type).toBe('aircraft_groundspeed');
     expect(decodeResult.formatted.items[4].code).toBe('GSPD');
     expect(decodeResult.formatted.items[4].label).toBe('Aircraft Groundspeed');
@@ -112,7 +112,7 @@ describe('Label_H1 POS', () => {
     expect(decodeResult.formatted.items[3].type).toBe('outside_air_temperature');
     expect(decodeResult.formatted.items[3].code).toBe('OATEMP');
     expect(decodeResult.formatted.items[3].label).toBe('Outside Air Temperature (C)');
-    expect(decodeResult.formatted.items[3].value).toBe('-47');
+    expect(decodeResult.formatted.items[3].value).toBe('-47 degrees');
     expect(decodeResult.formatted.items[4].label).toBe('Message Checksum');
     expect(decodeResult.formatted.items[4].value).toBe('0xbf64');
   });
@@ -146,7 +146,7 @@ describe('Label_H1 POS', () => {
     expect(decodeResult.formatted.items[3].type).toBe('outside_air_temperature');
     expect(decodeResult.formatted.items[3].code).toBe('OATEMP');
     expect(decodeResult.formatted.items[3].label).toBe('Outside Air Temperature (C)');
-    expect(decodeResult.formatted.items[3].value).toBe('-42');
+    expect(decodeResult.formatted.items[3].value).toBe('-42 degrees');
     expect(decodeResult.formatted.items[4].label).toBe('Message Checksum');
     expect(decodeResult.formatted.items[4].value).toBe('0x57f6');
   });
@@ -182,7 +182,7 @@ describe('Label_H1 POS', () => {
     expect(decodeResult.formatted.items[3].type).toBe('outside_air_temperature');
     expect(decodeResult.formatted.items[3].code).toBe('OATEMP');
     expect(decodeResult.formatted.items[3].label).toBe('Outside Air Temperature (C)');
-    expect(decodeResult.formatted.items[3].value).toBe('-40');
+    expect(decodeResult.formatted.items[3].value).toBe('-40 degrees');
     expect(decodeResult.formatted.items[4].label).toBe('Message Checksum');
     expect(decodeResult.formatted.items[4].value).toBe('0x9226');
   });
@@ -235,7 +235,7 @@ describe('Label_H1 POS', () => {
     expect(decodeResult.formatted.items[2].label).toBe('Aircraft Route');
     expect(decodeResult.formatted.items[2].value).toBe('ROKNE@18:52:12 > DOSOA@19:00:59 > BUM');
     expect(decodeResult.formatted.items[3].label).toBe('Outside Air Temperature (C)');
-    expect(decodeResult.formatted.items[3].value).toBe('-50');
+    expect(decodeResult.formatted.items[3].value).toBe('-50 degrees');
     expect(decodeResult.formatted.items[4].label).toBe('Message Checksum');
     expect(decodeResult.formatted.items[4].value).toBe('0x1541');
 
@@ -298,7 +298,7 @@ describe('Label_H1 POS', () => {
     expect(decodeResult.formatted.items[3].label).toBe('Altitude');
     expect(decodeResult.formatted.items[3].value).toBe('24000 feet');
     expect(decodeResult.formatted.items[4].label).toBe('Outside Air Temperature (C)');
-    expect(decodeResult.formatted.items[4].value).toBe('-28');
+    expect(decodeResult.formatted.items[4].value).toBe('-28 degrees');
     expect(decodeResult.formatted.items[5].label).toBe('Message Checksum');
     expect(decodeResult.formatted.items[5].value).toBe('0x9071');
     expect(decodeResult.remaining.text).toBe('/MR64,0/ET31539,27619,MT370/CG311,160,350/FB732/VR32');
@@ -326,7 +326,7 @@ describe('Label_H1 POS', () => {
     expect(decodeResult.formatted.items[3].label).toBe('Altitude');
     expect(decodeResult.formatted.items[3].value).toBe('32000 feet');
     expect(decodeResult.formatted.items[4].label).toBe('Outside Air Temperature (C)');
-    expect(decodeResult.formatted.items[4].value).toBe('-49');
+    expect(decodeResult.formatted.items[4].value).toBe('-49 degrees');
     expect(decodeResult.formatted.items[5].label).toBe('Message Checksum');
     expect(decodeResult.formatted.items[5].value).toBe('0x4e17');
     expect(decodeResult.remaining.text).toBe('F37#M1B/MR1,/ET031846,267070,T468/CG264,110,360/FB742/VR32');
@@ -386,7 +386,7 @@ describe('Label_H1 POS', () => {
     expect(decodeResult.formatted.items[2].label).toBe('Aircraft Route');
     expect(decodeResult.formatted.items[2].value).toBe('BLH[176° 9.3nm]@06:20:56 > SALOM[180° 12.7nm]@06:22:11 > KOFFA[180° 14.8nm]');
     expect(decodeResult.formatted.items[3].label).toBe('Outside Air Temperature (C)');
-    expect(decodeResult.formatted.items[3].value).toBe('-49');
+    expect(decodeResult.formatted.items[3].value).toBe('-49 degrees');
     expect(decodeResult.formatted.items[4].label).toBe('Message Checksum');
     expect(decodeResult.formatted.items[4].value).toBe('0x1251');
     expect(decodeResult.remaining.text).toBe(',30628,320');
@@ -409,7 +409,7 @@ describe('Label_H1 POS', () => {
     expect(decodeResult.formatted.items[2].label).toBe('Aircraft Route');
     expect(decodeResult.formatted.items[2].value).toBe('FORKL@23:18:28 > THRET@23:19:17 > TOOPR');
     expect(decodeResult.formatted.items[3].label).toBe('Outside Air Temperature (C)');
-    expect(decodeResult.formatted.items[3].value).toBe('16');
+    expect(decodeResult.formatted.items[3].value).toBe('16 degrees');
     expect(decodeResult.formatted.items[4].label).toBe('Message Checksum');
     expect(decodeResult.formatted.items[4].value).toBe('0x4841');
     expect(decodeResult.remaining.text).toBe(',1726,167');
@@ -432,7 +432,7 @@ describe('Label_H1 POS', () => {
     expect(decodeResult.formatted.items[2].label).toBe('Aircraft Route');
     expect(decodeResult.formatted.items[2].value).toBe('EH556@10:42:41 > CIV@10:52:08 > MEDIL');
     expect(decodeResult.formatted.items[3].label).toBe('Outside Air Temperature (C)');
-    expect(decodeResult.formatted.items[3].value).toBe('-20');
+    expect(decodeResult.formatted.items[3].value).toBe('-20 degrees');
     expect(decodeResult.formatted.items[4].label).toBe('Route Status');
     expect(decodeResult.formatted.items[4].value).toBe('Route Planned');
     expect(decodeResult.formatted.items[5].label).toBe('Origin');
@@ -470,7 +470,7 @@ describe('Label_H1 POS', () => {
     expect(decodeResult.formatted.items[2].label).toBe('Aircraft Route');
     expect(decodeResult.formatted.items[2].value).toBe('(37.218 S, 59.250 W)@10:03:16 > (39.645 S, 60.628 W)@10:19:16 > ?');
     expect(decodeResult.formatted.items[3].label).toBe('Outside Air Temperature (C)');
-    expect(decodeResult.formatted.items[3].value).toBe('-23');
+    expect(decodeResult.formatted.items[3].value).toBe('-23 degrees');
     expect(decodeResult.formatted.items[4].label).toBe('Aircraft Groundspeed');
     expect(decodeResult.formatted.items[4].value).toBe('780 knots');
     expect(decodeResult.formatted.items[5].label).toBe('Message Checksum');
@@ -500,7 +500,7 @@ describe('Label_H1 POS', () => {
     expect(decodeResult.formatted.items[3].label).toBe('Altitude');
     expect(decodeResult.formatted.items[3].value).toBe('30000 feet');
     expect(decodeResult.formatted.items[4].label).toBe('Outside Air Temperature (C)');
-    expect(decodeResult.formatted.items[4].value).toBe('-26');
+    expect(decodeResult.formatted.items[4].value).toBe('-26 degrees');
     expect(decodeResult.formatted.items[5].label).toBe('Message Checksum');
     expect(decodeResult.formatted.items[5].value).toBe('0xc696');
     expect(decodeResult.remaining.text).toBe('/MR238,2/ET91456,21329,M080T490/CG293,160,350/FB583/VR32');

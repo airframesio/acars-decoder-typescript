@@ -42,7 +42,7 @@ test('decodes Label 4A_01', () => {
   expect(decodeResult.formatted.items[5].code).toBe('ALT');
   expect(decodeResult.formatted.items[5].value).toBe("1418 feet");
   expect(decodeResult.formatted.items[6].code).toBe('OATEMP');
-  expect(decodeResult.formatted.items[6].value).toBe('24.8');
+  expect(decodeResult.formatted.items[6].value).toBe('24.8 degrees');
 });
 
 // disabled because all messages should decode

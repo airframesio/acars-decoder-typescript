@@ -235,7 +235,7 @@ export class ResultFormatter {
             type: 'outside_air_temperature',
             code: 'OATEMP',
             label: 'Outside Air Temperature (C)',
-            value: `${decodeResult.raw.outside_air_temperature}`,
+            value: `${decodeResult.raw.outside_air_temperature} degrees`,
         });
     }
 

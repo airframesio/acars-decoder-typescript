@@ -35,7 +35,7 @@ test('decodes Label 4A', () => {
   expect(decodeResult.formatted.items[2].code).toBe('ROUTE');
   expect(decodeResult.formatted.items[2].value).toBe('MSP/07 > VECTORS');
   expect(decodeResult.formatted.items[3].code).toBe('OATEMP');
-  expect(decodeResult.formatted.items[3].value).toBe('4');
+  expect(decodeResult.formatted.items[3].value).toBe('4 degrees');
 });
 
 // disabled because all messages should decode
