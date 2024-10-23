@@ -2,11 +2,27 @@ import { decode } from "punycode";
 import { DecodeResult } from "../DecoderPluginInterface";
 import { CoordinateUtils } from "./coordinate_utils";
 import { DateTimeUtils } from "../DateTimeUtils";
+import { RouteUtils } from "./route_utils";
 
 /**
  * Class to format the results of common fields
  */
 export class ResultFormatter {
+
+    static state_change(decodeResult: DecodeResult, from: string, to: string) {
+        decodeResult.raw.state_change = {
+            from: from,
+            to: to,
+        };
+        from = RouteUtils.formatFlightState(from);
+        to = RouteUtils.formatFlightState(to);
+        decodeResult.formatted.items.push({
+            type: 'state_change',
+            code: 'STATE_CHANGE',
+            label: 'State Change',
+            value: `${from} -> ${to}`,
+        });
+    }
 
     static freetext(decodeResult: DecodeResult, value: string) {
         decodeResult.raw.freetext = value;

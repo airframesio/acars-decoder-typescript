@@ -4,6 +4,18 @@ import { Waypoint } from "../types/waypoint";
 import { CoordinateUtils } from "./coordinate_utils";
 
 export class RouteUtils {
+
+    public static formatFlightState(state: string): string {
+        switch (state) {
+            case "TO": return "Takeoff";
+            case "IC": return "Initial Climb";
+            case "CL": return "Climb";
+            case "ER": return "En Route";
+            case "DC": return "Descent";
+            case "AP": return "Approach";
+            default: return `Unknown ${state}`;
+        }
+    }
     
     public static routeToString(route: Route): string {
         let str = '';
