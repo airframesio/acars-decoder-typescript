@@ -160,7 +160,7 @@ describe('Label 5Z', () => {
   test('/C3 Request', () => {
     const text = '/C3 GATE REQ       / KBNA KEWR 22 115400 0554 ---- ---- ---- ----';
     const decodeResult = plugin.decode({ text: text });
-    console.log(JSON.stringify(decodeResult, null, 2));
+
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.raw.airline).toBe('United Airlines');

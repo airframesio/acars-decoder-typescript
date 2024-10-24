@@ -43,7 +43,7 @@ export class Label_QP extends DecoderPlugin {
     ];
 
     decodeResult.decoded = true;
-    if(decodeResult.remaining.text === "") 
+    if(!decodeResult.remaining.text) 
 	decodeResult.decoder.decodeLevel = 'full';
     else
 	decodeResult.decoder.decodeLevel = 'partial';

@@ -44,15 +44,17 @@ describe('Label_H1 POS', () => {
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.raw.flight_number).toBe('SWA786');
     expect(decodeResult.formatted.description).toBe('Progress Report');
-    expect(decodeResult.formatted.items.length).toBe(4);
-    expect(decodeResult.formatted.items[0].label).toBe('Origin');
-    expect(decodeResult.formatted.items[0].value).toBe('KBWI');
-    expect(decodeResult.formatted.items[1].label).toBe('Destination');
-    expect(decodeResult.formatted.items[1].value).toBe('KBOS');
-    expect(decodeResult.formatted.items[2].label).toBe('Arrival Runway');
-    expect(decodeResult.formatted.items[2].value).toBe('04R');
-    expect(decodeResult.formatted.items[3].label).toBe('Message Checksum');
-    expect(decodeResult.formatted.items[3].value).toBe('0x1483');
+    expect(decodeResult.formatted.items.length).toBe(5);
+    expect(decodeResult.formatted.items[0].label).toBe('Flight Number');
+    expect(decodeResult.formatted.items[0].value).toBe('SWA786');
+    expect(decodeResult.formatted.items[1].label).toBe('Origin');
+    expect(decodeResult.formatted.items[1].value).toBe('KBWI');
+    expect(decodeResult.formatted.items[2].label).toBe('Destination');
+    expect(decodeResult.formatted.items[2].value).toBe('KBOS');
+    expect(decodeResult.formatted.items[3].label).toBe('Arrival Runway');
+    expect(decodeResult.formatted.items[3].value).toBe('04R');
+    expect(decodeResult.formatted.items[4].label).toBe('Message Checksum');
+    expect(decodeResult.formatted.items[4].value).toBe('0x1483');
     expect(decodeResult.remaining.text).toBe(',000855,25,1285,1192,93,1284,P4,001004,8,141K,D713,000950,2,29');
   });
 
