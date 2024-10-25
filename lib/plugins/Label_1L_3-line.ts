@@ -77,7 +77,9 @@ export class Label_1L_3Line extends DecoderPlugin { // eslint-disable-line camel
         latitude: CoordinateUtils.getDirection(lat[0]) * Number(lat.substring(1)),
         longitude: CoordinateUtils.getDirection(lon[0]) * Number(lon.substring(1)),
       }
-      ResultFormatter.position(decodeResult, position);
+      if(!isNaN(position.latitude) && !isNaN(position.longitude)) {
+        ResultFormatter.position(decodeResult, position);
+      }
       data.delete('LAT');
       data.delete('LON');
     }

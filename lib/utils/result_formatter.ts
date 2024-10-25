@@ -3,6 +3,7 @@ import { DecodeResult } from "../DecoderPluginInterface";
 import { CoordinateUtils } from "./coordinate_utils";
 import { DateTimeUtils } from "../DateTimeUtils";
 import { RouteUtils } from "./route_utils";
+import { Waypoint } from "../types/waypoint";
 
 /**
  * Class to format the results of common fields
@@ -316,6 +317,16 @@ export class ResultFormatter {
             code: 'TEXT',
             label: 'Text Message',
             value: text,
+        });
+    }
+
+    static route(decodeResult: DecodeResult, route: Waypoint[]) {
+        decodeResult.raw.route = { waypoints: route };
+        decodeResult.formatted.items.push({
+            type: 'aircraft_route',
+            code: 'ROUTE',
+            label: 'Aircraft Route',
+            value: RouteUtils.routeToString(decodeResult.raw.route),
         });
     }
 

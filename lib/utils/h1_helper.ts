@@ -277,11 +277,5 @@ function processRoute(decodeResult: DecodeResult, last: string, time: string, ne
     const thenWaypoint = RouteUtils.getWaypoint(then || '?');
 
     const waypoints: Waypoint[] = [lastWaypoint, nextWaypoint, thenWaypoint];
-    decodeResult.raw.route = { waypoints: waypoints };
-    decodeResult.formatted.items.push({
-        type: 'aircraft_route',
-        code: 'ROUTE',
-        label: 'Aircraft Route',
-        value: RouteUtils.routeToString(decodeResult.raw.route),
-    });
+    ResultFormatter.route(decodeResult, waypoints);
 }

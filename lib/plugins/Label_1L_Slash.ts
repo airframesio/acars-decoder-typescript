@@ -3,7 +3,7 @@ import { DecoderPlugin } from '../DecoderPlugin';
 import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
 import { ResultFormatter } from '../utils/result_formatter';
 
-export class Label_1L_1Line extends DecoderPlugin { // eslint-disable-line camelcase
+export class Label_1L_Slash extends DecoderPlugin { // eslint-disable-line camelcase
   name = 'label-1l-1-line';
 
   qualifiers() { // eslint-disable-line class-methods-use-this
