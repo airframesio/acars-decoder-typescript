@@ -65,7 +65,7 @@ export class Label_1L_3Line extends DecoderPlugin { // eslint-disable-line camel
     const day = data.get('DAY');
     const utc = data.get('UTC');
     if (day && utc) {
-      decodeResult.raw.message_timestamp = (Date.parse(day) / 1000) + DateTimeUtils.convertHHMMSSToTod(utc);
+      decodeResult.raw.message_timestamp = (Date.parse(day + ' GMT+0000') / 1000) + DateTimeUtils.convertHHMMSSToTod(utc);
       data.delete('DAY');
       data.delete('UTC');
     }

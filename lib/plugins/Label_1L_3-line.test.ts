@@ -32,7 +32,7 @@ describe('Label_1L 3-line', () => {
     expect(decodeResult.raw.eta_time).toBe(4800);
     expect(decodeResult.raw.altitude).toBe(39002);
     expect(decodeResult.raw.flight_number).toBe('SWG9040');
-    expect(decodeResult.raw.message_timestamp).toBe(1729571234);
+    expect(decodeResult.raw.message_timestamp).toBe(1729556834);
     expect(decodeResult.raw.position.latitude).toBe(39.556);
     expect(decodeResult.raw.position.longitude).toBe(-78.289);
     expect(decodeResult.formatted.items.length).toBe(6);
@@ -64,7 +64,7 @@ describe('Label_1L 3-line', () => {
     expect(decodeResult.raw.eta_time).toBe(61500);
     expect(decodeResult.raw.altitude).toBe(37002);
     expect(decodeResult.raw.flight_number).toBe('SWG4426');
-    expect(decodeResult.raw.message_timestamp).toBe(1727373099);
+    expect(decodeResult.raw.message_timestamp).toBe(1727358699);
     expect(decodeResult.raw.position).toBeUndefined();
     expect(decodeResult.formatted.items.length).toBe(5);
     expect(decodeResult.formatted.items[0].label).toBe('Origin');
