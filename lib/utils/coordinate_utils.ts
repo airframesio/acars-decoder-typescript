@@ -16,8 +16,8 @@ export class CoordinateUtils {
       longitudeChars = stringCoords.substring(8, 14);
     }
     if ((firstChar === 'N' || firstChar === 'S') && (middleChar === 'W' || middleChar === 'E')) {
-      results.latitude = (Number(stringCoords.substring(1, 6)) / 1000) * (firstChar === 'S' ? -1 : 1);
-      results.longitude = (Number(longitudeChars) / 1000) * (middleChar === 'W' ? -1 : 1);
+      results.latitude = (Number(stringCoords.substring(1, 6)) / 1000) * CoordinateUtils.getDirection(firstChar);
+      results.longitude = (Number(longitudeChars) / 1000) * CoordinateUtils.getDirection(middleChar);
     } else {
       return;
     }
@@ -47,8 +47,8 @@ export class CoordinateUtils {
     const lonMin = (Number(longitudeChars) % 1000) / 10;
 
     if ((firstChar === 'N' || firstChar === 'S') && (middleChar === 'W' || middleChar === 'E')) {
-      results.latitude = (latDeg +  (latMin / 60)) * (firstChar === 'S' ? -1 : 1);
-      results.longitude = (lonDeg + (lonMin / 60)) * (middleChar === 'W' ? -1 : 1);
+      results.latitude = (latDeg +  (latMin / 60)) * CoordinateUtils.getDirection(firstChar);
+      results.longitude = (lonDeg + (lonMin / 60)) * CoordinateUtils.getDirection(middleChar);
     } else {
       return;
     }
