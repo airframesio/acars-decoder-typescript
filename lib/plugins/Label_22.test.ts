@@ -23,13 +23,13 @@ describe('Label 22', () => {
     const decodeResult = plugin.decode({ text: text });
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
-    expect(decodeResult.raw.position.latitude).toBe(37.140);
-    expect(decodeResult.raw.position.longitude).toBe(-76.00277777777778);
+    expect(decodeResult.raw.position.latitude).toBe(37.0824);
+    expect(decodeResult.raw.position.longitude).toBe(-76.001);
     expect(decodeResult.raw.time_of_day).toBe(71376);
     expect(decodeResult.raw.altitude).toBe(30418);
     expect(decodeResult.formatted.items.length).toBe(3);
     expect(decodeResult.formatted.items[0].label).toBe('Aircraft Position');
-    expect(decodeResult.formatted.items[0].value).toBe('37.140 N, 76.003 W');
+    expect(decodeResult.formatted.items[0].value).toBe('37.082 N, 76.001 W');
     expect(decodeResult.formatted.items[1].label).toBe('Message Timestamp');
     expect(decodeResult.formatted.items[1].value).toBe('19:49:36');
     expect(decodeResult.formatted.items[2].label).toBe('Altitude');

@@ -31,10 +31,10 @@ export class Label_22 extends DecoderPlugin {
       return decodeResult;
     }
 
-    const latDMS = fields[0].substring(1, 8);
-    const lonDMS = fields[0].substring(9);
-    const lat = CoordinateUtils.dmsToDecimalDegrees(Number(latDMS.substring(0, 3)), Number(latDMS.substring(3, 5)), Number(latDMS.substring(5)));
-    const lon = CoordinateUtils.dmsToDecimalDegrees(Number(lonDMS.substring(0, 3)), Number(lonDMS.substring(3, 5)), Number(lonDMS.substring(5)));
+    const latStr = fields[0].substring(1, 8);
+    const lonStr = fields[0].substring(9);
+    const lat = Number(latStr) / 10000;
+    const lon = Number(lonStr) / 10000;
     if (!isNaN(lat) || !isNaN(lon)) {
       ResultFormatter.position(decodeResult, {
         latitude: CoordinateUtils.getDirection(fields[0][0]) * lat, 
