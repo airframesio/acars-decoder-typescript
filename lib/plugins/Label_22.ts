@@ -24,7 +24,7 @@ export class Label_22 extends DecoderPlugin {
 
     if (fields.length !== 11) {
       if (options.debug) {
-        console.log(`DEBUG: ${this.name}: Unknown variation. Field count: ${fields.length}, content: ${content}`);
+        console.log(`DEBUG: ${this.name}: Unknown variation. Field count: ${fields.length}, content: ${fields.join(',')}`);
       }
       decodeResult.decoded = false;
       decodeResult.decoder.decodeLevel = 'none';
