@@ -18,7 +18,7 @@ export class Label_QR extends DecoderPlugin {
     ResultFormatter.departureAirport(decodeResult, message.text.substring(0, 4));
     ResultFormatter.arrivalAirport(decodeResult, message.text.substring(4, 8));
     ResultFormatter.on(decodeResult, message.text.substring(8, 12));
-    decodeResult.remaining.text = message.text.substring(12);
+    ResultFormatter.unknown(decodeResult, message.text.substring(12));
 
     decodeResult.decoded = true;
     if(!decodeResult.remaining.text) 

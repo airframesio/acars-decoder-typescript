@@ -35,7 +35,7 @@ export class Label_QQ extends DecoderPlugin {
             latitude: (latdeg + latmin/60) * (latdir === 'N' ? 1 : -1),
             longitude: (londeg + lonmin/60) * (londir === 'E' ? 1 : -1),
         };
-        decodeResult.remaining.text = message.text.substring(42, 45);
+        ResultFormatter.unknown(decodeResult, message.text.substring(42, 45));
         ResultFormatter.position(decodeResult, pos);
 
         if (decodeResult.remaining.text !== "---") {
@@ -46,7 +46,7 @@ export class Label_QQ extends DecoderPlugin {
         ResultFormatter.unknown(decodeResult, message.text.substring(48));
     } else {
         ResultFormatter.off(decodeResult, DateTimeUtils.convertHHMMSSToTod(message.text.substring(8, 12) + "00"));
-        decodeResult.remaining.text = message.text.substring(12);
+        ResultFormatter.unknown(decodeResult, message.text.substring(12));
     }
 
     decodeResult.decoded = true;

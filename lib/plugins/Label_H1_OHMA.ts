@@ -1,5 +1,6 @@
 import { DecoderPlugin } from '../DecoderPlugin';
 import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
+import { ResultFormatter } from '../utils/result_formatter';
 
 import * as zlib  from "minizlib";
 
@@ -18,7 +19,6 @@ export class Label_H1_OHMA extends DecoderPlugin {
     decodeResult.decoder.name = this.name;
     decodeResult.formatted.description = 'OHMA Message';
     decodeResult.message = message;
-    decodeResult.remaining.text = '';
 
     const data = message.text.split('OHMA')[1]; // throw out '/RTNOCR.' - even though it means something
     try {
@@ -57,7 +57,7 @@ export class Label_H1_OHMA extends DecoderPlugin {
       if (options.debug) {
         console.log(`Decoder: Unknown H1 OHMA message: ${message.text}`, e);
       }
-      decodeResult.remaining.text += message.text;
+      ResultFormatter.unknown(decodeResult, message.text);
       decodeResult.decoded = false;
       decodeResult.decoder.decodeLevel = 'none';
     }

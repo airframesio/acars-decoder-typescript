@@ -36,7 +36,7 @@ export class Label_24_Slash extends DecoderPlugin {
       };
       ResultFormatter.position(decodeResult, position);
       ResultFormatter.eta(decodeResult, DateTimeUtils.convertHHMMSSToTod(fields[8]+'00'));
-      decodeResult.remaining.text = fields[7];
+      ResultFormatter.unknown(decodeResult, fields[7]);
 
       decodeResult.decoded = true;
       decodeResult.decoder.decodeLevel = 'partial';

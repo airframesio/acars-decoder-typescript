@@ -329,11 +329,14 @@ export class ResultFormatter {
         });
     }
 
-    static unknown(decodeResult: DecodeResult, value: string) {
-        if (decodeResult.remaining.text) {
-            decodeResult.remaining.text += ',' + value;
-        } else {
-            decodeResult.remaining.text = ',' + value;
-        }
+    static unknown(decodeResult: DecodeResult, value: string, sep: string = ',') {
+        if (!decodeResult.remaining.text)
+            decodeResult.remaining.text = value;
+        else
+            decodeResult.remaining.text += sep + value;
+    };
+
+    static unknownArr(decodeResult: DecodeResult, value: string[], sep: string = ',') {
+        this.unknown(decodeResult, value.join(sep), sep);
     };
 }

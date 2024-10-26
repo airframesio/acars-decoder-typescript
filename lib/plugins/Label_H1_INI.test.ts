@@ -32,7 +32,7 @@ describe('Label_H1 INI', () => {
     expect(decodeResult.formatted.items[4].value).toBe('13:15');
     expect(decodeResult.formatted.items[5].label).toBe('Message Checksum');
     expect(decodeResult.formatted.items[5].value).toBe('0x45ee');
-    expect(decodeResult.remaining.text).toBe('/MR2,000');
+    expect(decodeResult.remaining.text).toBe('MR2,000');
   });
 
   test('#MD valid', () => {

@@ -26,7 +26,7 @@ export class Label_10_Slash extends DecoderPlugin { // eslint-disable-line camel
       if (options.debug) {
         console.log(`Decoder: Unknown 10 message: ${message.text}`);
       }
-      decodeResult.remaining.text = message.text;
+      ResultFormatter.unknown(decodeResult, message.text);
       decodeResult.decoded = false;
       decodeResult.decoder.decodeLevel = 'none';
       return decodeResult;
@@ -60,7 +60,7 @@ export class Label_10_Slash extends DecoderPlugin { // eslint-disable-line camel
       ResultFormatter.departureAirport(decodeResult, parts[16]);
     }
 
-    decodeResult.remaining.text = [parts[3], parts[4], ...parts.slice(9,11), ...parts.slice(17)].join('/');
+    ResultFormatter.unknownArr(decodeResult, [parts[3], parts[4], ...parts.slice(9,11), ...parts.slice(17)], '/');
 
     decodeResult.decoded = true;
     decodeResult.decoder.decodeLevel = 'partial';

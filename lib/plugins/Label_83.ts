@@ -33,7 +33,7 @@ export class Label_83 extends DecoderPlugin {
         if (fields[2].length > 5) {
             decodeResult.raw.day_of_month = fields[2].substring(5);
         }
-        decodeResult.remaining.text = fields[2].substring(0, 4);
+        ResultFormatter.unknown(decodeResult, fields[2].substring(0, 4));
         const subfields = fields[3].split("/");
         ResultFormatter.departureAirport(decodeResult, subfields[0]);
         ResultFormatter.arrivalAirport(decodeResult, subfields[1]);
@@ -47,7 +47,7 @@ export class Label_83 extends DecoderPlugin {
             ResultFormatter.position(decodeResult, position);
         }
         ResultFormatter.altitude(decodeResult, Number(text.substring(28, 33)));
-        decodeResult.remaining.text = text.substring(33);
+        ResultFormatter.unknown(decodeResult, text.substring(33));
     } else {
         const fields = text.replace(/\s/g, "").split(',');
         if (fields.length === 9) {
@@ -64,10 +64,10 @@ export class Label_83 extends DecoderPlugin {
             ResultFormatter.altitude(decodeResult, Number(fields[5]));
             ResultFormatter.groundspeed(decodeResult, fields[6]);
             ResultFormatter.heading(decodeResult, fields[7]);
-            decodeResult.remaining.text = fields[8];
+            ResultFormatter.unknown(decodeResult, fields[8]);
         } else {
             decodeResult.decoded = false;
-            decodeResult.remaining.text = message.text;
+            ResultFormatter.unknown(decodeResult, message.text);
         }
     }
 

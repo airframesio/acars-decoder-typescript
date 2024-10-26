@@ -45,7 +45,7 @@ export class Label_15_FST extends DecoderPlugin {
     ResultFormatter.departureAirport(decodeResult, header.substring(5,9));
     ResultFormatter.arrivalAirport(decodeResult, header.substring(9,13));
 
-    decodeResult.remaining.text = parts.slice(1).join(' ');
+    ResultFormatter.unknownArr(decodeResult, parts.slice(1), ' ');
 
     decodeResult.decoded = true;
     decodeResult.decoder.decodeLevel = 'partial';

@@ -23,7 +23,7 @@ export class Label_10_LDR extends DecoderPlugin { // eslint-disable-line camelca
       if (options.debug) {
         console.log(`Decoder: Unknown 10 message: ${message.text}`);
       }
-      decodeResult.remaining.text = message.text;
+      ResultFormatter.unknown(decodeResult, message.text);
       decodeResult.decoded = false;
       decodeResult.decoder.decodeLevel = 'none';
       return decodeResult;
@@ -45,7 +45,7 @@ export class Label_10_LDR extends DecoderPlugin { // eslint-disable-line camelca
     if (altRwy != "") {
         ResultFormatter.alternateRunway(decodeResult, altRwy); // TODO: find out if anything comes after `/` sometimes
     }
-    decodeResult.remaining.text = [...parts.slice(0,5), ...parts.slice(15)].join(',');
+    ResultFormatter.unknownArr(decodeResult, [...parts.slice(0,5), ...parts.slice(15)]);
 
     decodeResult.decoded = true;
     decodeResult.decoder.decodeLevel = 'partial';

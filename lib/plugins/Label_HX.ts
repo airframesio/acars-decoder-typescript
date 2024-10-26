@@ -33,11 +33,11 @@ export class Label_HX extends DecoderPlugin {
             latitude: (latdeg + latmin/60) * (latdir === 'N' ? 1 : -1),
             longitude: (londeg + lonmin/60) * (londir === 'E' ? 1 : -1),
         };
-        decodeResult.remaining.text = parts.slice(5).join(' ');
+        ResultFormatter.unknownArr(decodeResult, parts.slice(5), ' ');
         ResultFormatter.position(decodeResult, pos);
     } else if (parts[2] === "43") {
         ResultFormatter.departureAirport(decodeResult, parts[3]);
-        decodeResult.remaining.text = parts.slice(4).join(' ');
+        ResultFormatter.unknownArr(decodeResult, parts.slice(4), ' ');
     } else {
         decodeResult.decoded = false;
     }
