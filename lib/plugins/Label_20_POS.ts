@@ -1,6 +1,7 @@
 import { DecoderPlugin } from '../DecoderPlugin';
 import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
 import { CoordinateUtils } from '../utils/coordinate_utils';
+import { ResultFormatter } from '../utils/result_formatter';
 
 // Position Report
 export class Label_20_POS extends DecoderPlugin {
@@ -31,15 +32,7 @@ export class Label_20_POS extends DecoderPlugin {
       }
       // Field 1: Coordinates
       const rawCoords = fields[0];
-      decodeResult.raw.position = CoordinateUtils.decodeStringCoordinates(rawCoords);
-      if(decodeResult.raw.position) {
-        decodeResult.formatted.items.push({
-          type: 'position',
-          code: 'POS',
-          label: 'Position',
-          value: CoordinateUtils.coordinateString(decodeResult.raw.position),
-        });
-      }
+      ResultFormatter.position(decodeResult, CoordinateUtils.decodeStringCoordinates(rawCoords));
 
       decodeResult.decoded = true;
       decodeResult.decoder.decodeLevel = 'full';
@@ -50,15 +43,7 @@ export class Label_20_POS extends DecoderPlugin {
       }
       // Field 1: Coordinates
       const rawCoords = fields[0];
-      decodeResult.raw.position = CoordinateUtils.decodeStringCoordinates(rawCoords);
-      if(decodeResult.raw.position) {
-        decodeResult.formatted.items.push({
-          type: 'position',
-          code: 'POS',
-          label: 'Position',
-          value: CoordinateUtils.coordinateString(decodeResult.raw.position),
-        });
-      }
+      ResultFormatter.position(decodeResult, CoordinateUtils.decodeStringCoordinates(rawCoords));
       decodeResult.decoded = true;
       decodeResult.decoder.decodeLevel = 'full';
     } else {

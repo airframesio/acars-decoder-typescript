@@ -30,7 +30,7 @@ export class Label_44_POS extends DecoderPlugin {
         console.log(results.groups);
       }
 
-      decodeResult.raw.position = CoordinateUtils.decodeStringCoordinatesDecimalMinutes(results.groups.unsplit_coords);
+      ResultFormatter.position(decodeResult, CoordinateUtils.decodeStringCoordinatesDecimalMinutes(results.groups.unsplit_coords));
       const flight_level = results.groups.flight_level_or_ground == 'GRD' || results.groups.flight_level_or_ground == '***' ? 0 : Number(results.groups.flight_level_or_ground);
       decodeResult.raw.current_time = Date.parse(
         new Date().getFullYear() + "-" +
@@ -49,15 +49,6 @@ export class Label_44_POS extends DecoderPlugin {
 
       if (results.groups.fuel_in_tons != '***' && results.groups.fuel_in_tons != '****') {
         decodeResult.raw.fuel_in_tons = Number(results.groups.fuel_in_tons);
-      }
-
-      if(decodeResult.raw.position) {
-        decodeResult.formatted.items.push({
-          type: 'aircraft_position',
-          code: 'POS' ,
-          label: 'Aircraft Position',
-          value: CoordinateUtils.coordinateString(decodeResult.raw.position),
-        });
       }
 
       ResultFormatter.departureAirport(decodeResult, results.groups.departure_icao);

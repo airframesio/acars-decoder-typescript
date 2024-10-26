@@ -55,7 +55,7 @@ test('decodes Label 80 variant 1', () => {
   expect(decodeResult.formatted.items[5].value).toBe('0.558 Mach');
   expect(decodeResult.formatted.items[6].type).toBe('fuel_on_board');
   expect(decodeResult.formatted.items[6].code).toBe('FOB');
-  expect(decodeResult.formatted.items[6].label).toBe('Fuel on Board');
+  expect(decodeResult.formatted.items[6].label).toBe('Fuel On Board');
   expect(decodeResult.formatted.items[6].value).toBe('0100');
   expect(decodeResult.formatted.items[7].type).toBe('ETA');
   expect(decodeResult.formatted.items[7].code).toBe('ETA');
@@ -103,7 +103,7 @@ test('decodes Label 80 variant 2', () => {
   expect(decodeResult.formatted.items[6].type).toBe('heading');
   expect(decodeResult.formatted.items[6].code).toBe('HDG');
   expect(decodeResult.formatted.items[6].label).toBe('Heading');
-  expect(decodeResult.formatted.items[6].value).toBe(233); // FIXME: string
+  expect(decodeResult.formatted.items[6].value).toBe('233');
   expect(decodeResult.formatted.items[7].type).toBe('mach');
   expect(decodeResult.formatted.items[7].code).toBe('MCH');
   expect(decodeResult.formatted.items[7].label).toBe('Aircraft Speed');
@@ -134,7 +134,7 @@ test('decodes Label 80 variant 2', () => {
   expect(decodeResult.formatted.items[13].value).toBe(306); // FIXME: string
   expect(decodeResult.formatted.items[14].type).toBe('fuel_on_board');
   expect(decodeResult.formatted.items[14].code).toBe('FOB');
-  expect(decodeResult.formatted.items[14].label).toBe('Fuel on Board');
+  expect(decodeResult.formatted.items[14].label).toBe('Fuel On Board');
   expect(decodeResult.formatted.items[14].value).toBe('N009414');
   expect(decodeResult.formatted.items[15].type).toBe('ETA');
   expect(decodeResult.formatted.items[15].code).toBe('ETA');

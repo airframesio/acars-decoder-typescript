@@ -1,6 +1,7 @@
 import { DecoderPlugin } from '../DecoderPlugin';
 import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
 import { CoordinateUtils } from '../utils/coordinate_utils';
+import { ResultFormatter } from '../utils/result_formatter';
 
 // General Aviation Position Report
 export class Label_15 extends DecoderPlugin {
@@ -23,15 +24,7 @@ export class Label_15 extends DecoderPlugin {
     if (results) {
       // Style: (2N38111W 82211266 76400-64(Z
       // console.log(`Label 15 Position Report: between = ${results.groups.between}`);
-      decodeResult.raw.position = CoordinateUtils.decodeStringCoordinates(results.groups.between.substr(0,13));
-      if(decodeResult.raw.position) {
-	decodeResult.formatted.items.push({
-        type: 'position',
-	code: 'POS' ,
-        label: 'Position',
-        value: CoordinateUtils.coordinateString(decodeResult.raw.position),
-      });
-     }
+      ResultFormatter.position(decodeResult, CoordinateUtils.decodeStringCoordinates(results.groups.between.substr(0,13)));
     }
 
     decodeResult.decoded = true;
