@@ -54,13 +54,7 @@ export class Label_10_Slash extends DecoderPlugin { // eslint-disable-line camel
       time: DateTimeUtils.convertHHMMSSToTod(parts[15]+'00'),
       timeFormat: 'tod',
     },];
-    decodeResult.raw.route = { waypoints: waypoints };
-    decodeResult.formatted.items.push({
-        type: 'aircraft_route',
-        code: 'ROUTE',
-        label: 'Aircraft Route',
-        value: RouteUtils.routeToString(decodeResult.raw.route),
-    });
+    ResultFormatter.route(decodeResult, { waypoints: waypoints });
 
     if(parts[16]) {
       ResultFormatter.departureAirport(decodeResult, parts[16]);

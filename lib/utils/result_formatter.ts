@@ -9,6 +9,16 @@ import { RouteUtils } from "./route_utils";
  */
 export class ResultFormatter {
 
+    static route(decodeResult: DecodeResult, route: route) {
+        decodeResult.raw.route = route;
+        decodeResult.formatted.items.push({
+            type: 'aircraft_route',
+            code: 'ROUTE',
+            label: 'Aircraft Route',
+            value: RouteUtils.routeToString(route),
+        });
+    };
+
     static state_change(decodeResult: DecodeResult, from: string, to: string) {
         decodeResult.raw.state_change = {
             from: from,
@@ -320,6 +330,10 @@ export class ResultFormatter {
     }
 
     static unknown(decodeResult: DecodeResult, value: string) {
-        decodeResult.remaining.text += ',' + value;
+        if (decodeResult.remaining.text) {
+            decodeResult.remaining.text += ',' + value;
+        } else {
+            decodeResult.remaining.text = ',' + value;
+        }
     };
 }

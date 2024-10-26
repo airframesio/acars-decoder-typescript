@@ -1,6 +1,7 @@
 import { DecoderPlugin } from '../DecoderPlugin';
 import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
 import { H1Helper } from '../utils/h1_helper';
+import { ResultFormatter } from '../utils/result_formatter';
 
 export class Label_H1 extends DecoderPlugin {
   name = 'label-h1';

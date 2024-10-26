@@ -13,34 +13,12 @@ export class Label_QR extends DecoderPlugin {
   decode(message: Message, options: Options = {}) : DecodeResult {
     const decodeResult = this.defaultResult();
     decodeResult.decoder.name = this.name;
-    
-    decodeResult.raw.origin = message.text.substring(0, 4);
-    decodeResult.raw.destination = message.text.substring(4, 8);
-    decodeResult.raw.wheels_on = message.text.substring(8, 12);
-    decodeResult.remaining.text = message.text.substring(12);
-
     decodeResult.formatted.description = 'ON Report';
 
-    decodeResult.formatted.items = [
-      {
-        type: 'origin',
-        code: 'ORG',
-        label: 'Origin',
-        value: decodeResult.raw.origin,
-      },
-      {
-        type: 'destination',
-        code: 'DST',
-        label: 'Destination',
-        value: decodeResult.raw.destination,
-      },
-      {
-        type: 'wheels_on',
-        code: 'WON',
-        label: 'Wheels ON',
-        value: decodeResult.raw.wheels_on,
-      }
-    ];
+    ResultFormatter.departureAirport(decodeResult, message.text.substring(0, 4));
+    ResultFormatter.arrivalAirport(decodeResult, message.text.substring(4, 8));
+    ResultFormatter.on(decodeResult, message.text.substring(8, 12));
+    decodeResult.remaining.text = message.text.substring(12);
 
     decodeResult.decoded = true;
     if(!decodeResult.remaining.text) 

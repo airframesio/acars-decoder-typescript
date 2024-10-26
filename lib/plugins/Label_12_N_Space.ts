@@ -28,19 +28,12 @@ export class Label_12_N_Space extends DecoderPlugin {
         console.log(results);
       }
 
-      decodeResult.raw.position = {
+      ResultFormatter.position(decodeResult, {
         latitude: Number(results.groups.lat_coord) * (results.groups.lat == 'N' ? 1 : -1),
         longitude:  Number(results.groups.long_coord) * (results.groups.long == 'E' ? 1 : -1)
-      };
-      const altitude = results.groups.alt == 'GRD' || results.groups.alt == '***' ? 0 : Number(results.groups.alt);
-
-      decodeResult.formatted.items.push({
-        type: 'aircraft_position',
-        code: 'POS',
-        label: 'Aircraft Position',
-        value: CoordinateUtils.coordinateString(decodeResult.raw.position),
       });
 
+      const altitude = results.groups.alt == 'GRD' || results.groups.alt == '***' ? 0 : Number(results.groups.alt);
       ResultFormatter.altitude(decodeResult, altitude);
 
       decodeResult.remaining.text = `,${results.groups.unkwn1} ,${results.groups.unkwn2}, ${results.groups.unkwn3}`;

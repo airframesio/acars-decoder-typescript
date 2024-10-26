@@ -32,19 +32,13 @@ export class Label_16_N_Space extends DecoderPlugin {
         console.log(results);
       }
 
-      decodeResult.raw.position = {
+      let pos = {
         latitude: Number(results.groups.lat_coord) * (results.groups.lat == 'N' ? 1 : -1),
-       longitude: Number(results.groups.long_coord) * (results.groups.long == 'E' ? 1 : -1),
+        longitude: Number(results.groups.long_coord) * (results.groups.long == 'E' ? 1 : -1),
       };
       const altitude = results.groups.alt == 'GRD' || results.groups.alt == '***' ? 0 : Number(results.groups.alt);
 
-      decodeResult.formatted.items.push({
-        type: 'aircraft_position',
-        code: 'POS',
-        label: 'Aircraft Position',
-        value: CoordinateUtils.coordinateString(decodeResult.raw.position),
-      });
-
+      ResultFormatter.position(decodeResult, pos);
       ResultFormatter.altitude(decodeResult, altitude)
 
       decodeResult.remaining.text = `,${results.groups.unkwn1} ,${results.groups.unkwn2}`;
@@ -57,17 +51,12 @@ export class Label_16_N_Space extends DecoderPlugin {
         console.log(results);
       }
 
-      decodeResult.raw.position = {
+      let pos = {
         latitude: Number(results.groups.lat_coord) * (results.groups.lat == 'N' ? 1 : -1),
         longitude:  Number(results.groups.long_coord) * (results.groups.long == 'E' ? 1 : -1)
       };
-      
-      decodeResult.formatted.items.push({
-        type: 'aircraft_position',
-        code: 'POS',
-        label: 'Aircraft Position',
-        value: CoordinateUtils.coordinateString(decodeResult.raw.position),
-      });
+
+      ResultFormatter.position(decodeResult, pos);
 
       decodeResult.decoded = true;
       decodeResult.decoder.decodeLevel = 'full';

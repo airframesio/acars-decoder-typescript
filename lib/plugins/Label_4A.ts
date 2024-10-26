@@ -55,13 +55,7 @@ export class Label_4A extends DecoderPlugin {
                 time: DateTimeUtils.convertHHMMSSToTod(fields[2]),
                 timeFormat: 'tod',
             };
-            decodeResult.raw.route = {waypoints: [wp1, wp2]};
-            decodeResult.formatted.items.push({
-                type: 'aircraft_route',
-                code: 'ROUTE',
-                label: 'Aircraft Route',
-                value: RouteUtils.routeToString(decodeResult.raw.route),
-            });
+            ResultFormatter.route(decodeResult, {waypoints: [wp1, wp2]});
             ResultFormatter.temperature(decodeResult, fields[3]);
             decodeResult.remaining.text = fields.slice(4).join(",");
         } else {

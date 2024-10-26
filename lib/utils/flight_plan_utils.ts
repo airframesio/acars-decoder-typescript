@@ -101,6 +101,7 @@ function addArrivalAirport(decodeResult: DecodeResult, value: string) {
 function addDepartureAirport(decodeResult: DecodeResult, value: string) {
   ResultFormatter.departureAirport(decodeResult, value);
 };
+
 function addRunway(decodeResult: DecodeResult, value: string) {
   // xxx(yyy) where xxx is the departure runway and yyy is the arrival runway
   if (value.length === 8) {
@@ -112,13 +113,7 @@ function addRunway(decodeResult: DecodeResult, value: string) {
 
 function addRoute(decodeResult: DecodeResult, value: string) {
   const route = value.split('.');
-  decodeResult.raw.route = { waypoints: route.map((leg) => RouteUtils.getWaypoint(leg)) };
-  decodeResult.formatted.items.push({
-    type: 'aircraft_route',
-    code: 'ROUTE',
-    label: 'Aircraft Route',
-    value: RouteUtils.routeToString(decodeResult.raw.route),
-  });
+  ResultFormatter.route(decodeResult, { waypoints: route.map((leg) => RouteUtils.getWaypoint(leg)) });
 };
 
 function addProcedure(decodeResult: DecodeResult, value: string, type: string) {
