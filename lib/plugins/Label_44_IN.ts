@@ -29,10 +29,10 @@ export class Label_44_IN extends DecoderPlugin {
         console.log(results.groups);
       }
 
-     decodeResult.raw.position = CoordinateUtils.decodeStringCoordinates(results.groups.unsplit_coords);
+      ResultFormatter.position(decodeResult, CoordinateUtils.decodeStringCoordinates(results.groups.unsplit_coords));
+      ResultFormatter.departureAirport(decodeResult, results.groups.departure_icao);
+      ResultFormatter.arrivalAirport(decodeResult, results.groups.arrival_icao);
 
-      decodeResult.raw.departure_icao = results.groups.departure_icao;
-      decodeResult.raw.arrival_icao = results.groups.arrival_icao;
       decodeResult.raw.current_time = Date.parse(
         new Date().getFullYear() + "-" +
         results.groups.current_date.substr(0, 2) + "-" +
@@ -44,29 +44,6 @@ export class Label_44_IN extends DecoderPlugin {
       if (results.groups.fuel_in_tons != '***' && results.groups.fuel_in_tons != '****') {
         decodeResult.raw.fuel_in_tons = Number(results.groups.fuel_in_tons);
       }
-
-      if(decodeResult.raw.position) {
-        decodeResult.formatted.items.push({
-          type: 'position',
-          code: 'POS' ,
-          label: 'Position',
-          value: CoordinateUtils.coordinateString(decodeResult.raw.position),
-        });
-      }
-
-      decodeResult.formatted.items.push({
-        type: 'origin',
-        code: 'ORG',
-        label: 'Origin',
-        value: decodeResult.raw.departure_icao,
-      });
-
-      decodeResult.formatted.items.push({
-        type: 'destination',
-        code: 'DST',
-        label: 'Destination',
-        value: decodeResult.raw.arrival_icao,
-      });
 
     }
 

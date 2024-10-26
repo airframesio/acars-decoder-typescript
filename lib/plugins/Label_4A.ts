@@ -39,7 +39,7 @@ export class Label_4A extends DecoderPlugin {
         ResultFormatter.departureAirport(decodeResult, fields[4]);
         ResultFormatter.arrivalAirport(decodeResult, fields[5]);
         ResultFormatter.altitude(decodeResult, text.substring(48, 51) * 100);
-        decodeResult.remaining.text = fields.slice(8).join(",");
+        ResultFormatter.unknownArr(decodeResult, fields.slice(8));
     } else if (fields.length === 6) {
         if (fields[0].match(/^[NS]/)) {
             // variant 2
@@ -55,26 +55,20 @@ export class Label_4A extends DecoderPlugin {
                 time: DateTimeUtils.convertHHMMSSToTod(fields[2]),
                 timeFormat: 'tod',
             };
-            decodeResult.raw.route = {waypoints: [wp1, wp2]};
-            decodeResult.formatted.items.push({
-                type: 'aircraft_route',
-                code: 'ROUTE',
-                label: 'Aircraft Route',
-                value: RouteUtils.routeToString(decodeResult.raw.route),
-            });
+            ResultFormatter.route(decodeResult, {waypoints: [wp1, wp2]});
             ResultFormatter.temperature(decodeResult, fields[3]);
-            decodeResult.remaining.text = fields.slice(4).join(",");
+            ResultFormatter.unknownArr(decodeResult, fields.slice(4));
         } else {
             // variant 3
             ResultFormatter.time_of_day(decodeResult, DateTimeUtils.convertHHMMSSToTod(fields[0]));
             ResultFormatter.eta(decodeResult, DateTimeUtils.convertHHMMSSToTod(fields[1]));
-            decodeResult.remaining.text = fields[2];
+            ResultFormatter.unknown(decodeResult, fields[2]);
             ResultFormatter.altitude(decodeResult, fields[3]);
             ResultFormatter.position(decodeResult, CoordinateUtils.decodeStringCoordinates((fields[4]+fields[5]).replace(/[ \.]/g, "")));
         }
     } else {
         decodeResult.decoded = false;
-        decodeResult.remaining.text = text;
+        ResultFormatter.unknown(decodeResult, text);
     }
 
     if (decodeResult.decoded) {

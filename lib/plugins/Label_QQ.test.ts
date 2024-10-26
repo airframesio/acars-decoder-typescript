@@ -24,7 +24,6 @@ test('decodes Label QQ variant 1', () => {
   expect(decodeResult.message.text).toBe(text);
   expect(decodeResult.raw.departure_icao).toBe('KSDL');
   expect(decodeResult.raw.arrival_icao).toBe('KLAS');
-  expect(decodeResult.raw.wheels_off).toBe('002543');
   expect(decodeResult.raw.day_of_month).toBe('09');
   expect(decodeResult.raw.position.latitude).toBe(33.61);
   expect(decodeResult.raw.position.longitude).toBe(-111.93166666666667);
@@ -39,18 +38,18 @@ test('decodes Label QQ variant 1', () => {
   expect(decodeResult.formatted.items[1].code).toBe('DST');
   expect(decodeResult.formatted.items[1].label).toBe('Destination');
   expect(decodeResult.formatted.items[1].value).toBe('KLAS');
-  expect(decodeResult.formatted.items[2].type).toBe('aircraft_groundspeed');
-  expect(decodeResult.formatted.items[2].code).toBe('GSPD');
-  expect(decodeResult.formatted.items[2].label).toBe('Aircraft Groundspeed');
-  expect(decodeResult.formatted.items[2].value).toBe('175 knots');
-  expect(decodeResult.formatted.items[3].type).toBe('wheels_off');
-  expect(decodeResult.formatted.items[3].code).toBe('WOFF');
-  expect(decodeResult.formatted.items[3].label).toBe('Wheels OFF');
-  expect(decodeResult.formatted.items[3].value).toBe('002543');
-  expect(decodeResult.formatted.items[4].type).toBe('aircraft_position');
-  expect(decodeResult.formatted.items[4].code).toBe('POS');
-  expect(decodeResult.formatted.items[4].label).toBe('Aircraft Position');
-  expect(decodeResult.formatted.items[4].value).toBe('33.610 N, 111.932 W');
+  expect(decodeResult.formatted.items[2].type).toBe('time_of_day');
+  expect(decodeResult.formatted.items[2].code).toBe('OFF');
+  expect(decodeResult.formatted.items[2].label).toBe('Takeoff Time');
+  expect(decodeResult.formatted.items[2].value).toBe('00:25:43');
+  expect(decodeResult.formatted.items[3].type).toBe('aircraft_position');
+  expect(decodeResult.formatted.items[3].code).toBe('POS');
+  expect(decodeResult.formatted.items[3].label).toBe('Aircraft Position');
+  expect(decodeResult.formatted.items[3].value).toBe('33.610 N, 111.932 W');
+  expect(decodeResult.formatted.items[4].type).toBe('aircraft_groundspeed');
+  expect(decodeResult.formatted.items[4].code).toBe('GSPD');
+  expect(decodeResult.formatted.items[4].label).toBe('Aircraft Groundspeed');
+  expect(decodeResult.formatted.items[4].value).toBe('175 knots');
 });
 
 test('decodes Label QQ variant 2', () => {
@@ -68,7 +67,6 @@ test('decodes Label QQ variant 2', () => {
   expect(decodeResult.message.text).toBe(text);
   expect(decodeResult.raw.departure_icao).toBe('KLGB');
   expect(decodeResult.raw.arrival_icao).toBe('KLAX');
-  expect(decodeResult.raw.wheels_off).toBe('000444');
   expect(decodeResult.raw.day_of_month).toBe('07');
   expect(decodeResult.raw.position.latitude).toBe(33.83);
   expect(decodeResult.raw.position.longitude).toBe(-118.16833333333334);
@@ -82,10 +80,10 @@ test('decodes Label QQ variant 2', () => {
   expect(decodeResult.formatted.items[1].code).toBe('DST');
   expect(decodeResult.formatted.items[1].label).toBe('Destination');
   expect(decodeResult.formatted.items[1].value).toBe('KLAX');
-  expect(decodeResult.formatted.items[2].type).toBe('wheels_off');
-  expect(decodeResult.formatted.items[2].code).toBe('WOFF');
-  expect(decodeResult.formatted.items[2].label).toBe('Wheels OFF');
-  expect(decodeResult.formatted.items[2].value).toBe('000444');
+  expect(decodeResult.formatted.items[2].type).toBe('time_of_day');
+  expect(decodeResult.formatted.items[2].code).toBe('OFF');
+  expect(decodeResult.formatted.items[2].label).toBe('Takeoff Time');
+  expect(decodeResult.formatted.items[2].value).toBe('00:04:44');
   expect(decodeResult.formatted.items[3].type).toBe('aircraft_position');
   expect(decodeResult.formatted.items[3].code).toBe('POS');
   expect(decodeResult.formatted.items[3].label).toBe('Aircraft Position');
@@ -107,7 +105,6 @@ test('decodes Label QQ variant 3', () => {
   expect(decodeResult.message.text).toBe(text);
   expect(decodeResult.raw.departure_icao).toBe('CYOW');
   expect(decodeResult.raw.arrival_icao).toBe('KMEM');
-  expect(decodeResult.raw.wheels_off).toBe('0058');
   expect(decodeResult.remaining.text).toBe('/OFFRPT/090155');
   expect(decodeResult.formatted.items.length).toBe(3);
   expect(decodeResult.formatted.items[0].type).toBe('icao');
@@ -118,10 +115,10 @@ test('decodes Label QQ variant 3', () => {
   expect(decodeResult.formatted.items[1].code).toBe('DST');
   expect(decodeResult.formatted.items[1].label).toBe('Destination');
   expect(decodeResult.formatted.items[1].value).toBe('KMEM');
-  expect(decodeResult.formatted.items[2].type).toBe('wheels_off');
-  expect(decodeResult.formatted.items[2].code).toBe('WOFF');
-  expect(decodeResult.formatted.items[2].label).toBe('Wheels OFF');
-  expect(decodeResult.formatted.items[2].value).toBe('0058');
+  expect(decodeResult.formatted.items[2].type).toBe('time_of_day');
+  expect(decodeResult.formatted.items[2].code).toBe('OFF');
+  expect(decodeResult.formatted.items[2].label).toBe('Takeoff Time');
+  expect(decodeResult.formatted.items[2].value).toBe('00:58:00');
 });
 
 // disabled because all messages should decode

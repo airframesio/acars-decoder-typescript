@@ -55,7 +55,7 @@ test('decodes Label H1 Preamble WRN NAV', () => {
   expect(decodeResult.formatted.items[0].code).toBe('WRN');
   expect(decodeResult.formatted.items[0].label).toBe('Warning Message');
   expect(decodeResult.formatted.items[0].value).toBe('NAV ADS-B RPTG 1 FAULT ');
-  expect(decodeResult.remaining.text).toBe('/PNRC12860AA0734000006');
+  expect(decodeResult.remaining.text).toBe('PNRC12860AA07/34000006');
 });
 
 test('decodes Label H1 Preamble WRN F/CTL', () => {
@@ -77,7 +77,7 @@ test('decodes Label H1 Preamble WRN F/CTL', () => {
   expect(decodeResult.formatted.items[0].code).toBe('WRN');
   expect(decodeResult.formatted.items[0].label).toBe('Warning Message');
   expect(decodeResult.formatted.items[0].value).toBe('F/CTL ELAC 1 FAULT ');
-  expect(decodeResult.remaining.text).toBe('/PNRC12860AA0727000002');
+  expect(decodeResult.remaining.text).toBe('PNRC12860AA07/27000002');
 });
 
 test('decodes Label H1 Preamble WRN ENG', () => {
@@ -99,7 +99,7 @@ test('decodes Label H1 Preamble WRN ENG', () => {
   expect(decodeResult.formatted.items[0].code).toBe('WRN');
   expect(decodeResult.formatted.items[0].label).toBe('Warning Message');
   expect(decodeResult.formatted.items[0].value).toBe('ENG 1 A.ICE ');
-  expect(decodeResult.remaining.text).toBe('/PNRC12860AA0730210006');
+  expect(decodeResult.remaining.text).toBe('PNRC12860AA07/30210006');
 });
 
 test('decodes Label H1 Preamble #CFBWRN', () => {

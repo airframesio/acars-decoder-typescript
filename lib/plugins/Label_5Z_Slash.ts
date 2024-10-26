@@ -83,15 +83,14 @@ export class Label_5Z_Slash extends DecoderPlugin {
         decodeResult.raw.day_of_month = Number(info[3]);
         ResultFormatter.time_of_day(decodeResult, DateTimeUtils.convertHHMMSSToTod(info[4]));
         ResultFormatter.arrivalRunway(decodeResult, info[5].slice(1));
-        decodeResult.remaining.text = data.slice(3).join('/');
-
+        ResultFormatter.unknownArr(decodeResult, data.slice(3), '/');
       } else if (type === 'B3') {
         ResultFormatter.departureAirport(decodeResult, header[1].substring(0, 3), 'IATA');
         ResultFormatter.arrivalAirport(decodeResult, header[1].substring(3), 'IATA');
         decodeResult.raw.day_of_month = Number(header[2]);
         ResultFormatter.arrivalRunway(decodeResult, header[3].slice(1));
         if (header.length > 4) {
-          decodeResult.remaining.text = header.slice(4).join(' ');
+          ResultFormatter.unknownArr(decodeResult, header.slice(4), '/');
         }
       } else if (type === 'C3' && data[1] === 'C3 GATE REQ       ') {
         const info = data[2].split(' ');
@@ -100,7 +99,7 @@ export class Label_5Z_Slash extends DecoderPlugin {
         ResultFormatter.arrivalAirport(decodeResult, info[2]);
         decodeResult.raw.day_of_month = Number(info[3]);
         ResultFormatter.time_of_day(decodeResult, DateTimeUtils.convertHHMMSSToTod(info[4]));
-        decodeResult.remaining.text = info.slice(5).join(' ');
+        ResultFormatter.unknownArr(decodeResult, info.slice(5), ' ');
       } else if (type === 'C3') {
         ResultFormatter.departureAirport(decodeResult, header[1].substring(0, 3), 'IATA');
         ResultFormatter.arrivalAirport(decodeResult, header[1].substring(3), 'IATA');
@@ -114,7 +113,7 @@ export class Label_5Z_Slash extends DecoderPlugin {
 
         const estimates = data[3].split(' ');
         ResultFormatter.eta(decodeResult, DateTimeUtils.convertHHMMSSToTod(estimates[1]+'00'));
-        decodeResult.remaining.text = estimates[2];
+        ResultFormatter.unknown(decodeResult, estimates[2]);
       } else {
         if (options.debug) {
           console.log(`Decoder: Unkown 5Z RDC format: ${message.text}`);
@@ -127,7 +126,7 @@ export class Label_5Z_Slash extends DecoderPlugin {
       if (options.debug) {
         console.log(`Decoder: Unknown 5Z message: ${message.text}`);
       }
-      decodeResult.remaining.text = message.text;
+        ResultFormatter.unknown(decodeResult, message.text);
       decodeResult.decoded = false;
       decodeResult.decoder.decodeLevel = 'none';
     }

@@ -27,7 +27,7 @@ describe('Label_H1 FPN', () => {
     expect(decodeResult.formatted.items[1].value).toBe('FYI .. TAF KSUX 021720Z 0218 0318 20017G28KT P6SM SKC FM022200 22012G18KT P6SM SKC .. PUTS YOUR CXWIND AT 26KT ON RWY 13 .. REDUCES TO 18KT AT 22Z');
     expect(decodeResult.formatted.items[2].label).toBe('Message Checksum');
     expect(decodeResult.formatted.items[2].value).toBe('0x4fef');
-    expect(decodeResult.remaining.text).toBe('/MR2,');
+    expect(decodeResult.remaining.text).toBe('MR2,');
   });
 
   test('decodes Label H1 Preamble - #MDFTX valid', () => {

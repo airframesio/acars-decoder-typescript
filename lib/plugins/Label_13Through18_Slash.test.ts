@@ -115,7 +115,7 @@ describe('Label_13Through18_Slash', () => {
       expect(decodeResult.formatted.items[2].value).toBe('12:36:30');
       expect(decodeResult.formatted.items[3].label).toBe('Aircraft Position');
       expect(decodeResult.formatted.items[3].value).toBe('38.938 N, 77.473 W');
-      expect(decodeResult.remaining.text).toBe('\r\n/AU 08752167/AON 08716165/AIN 08717165/AOT 08744166');
+      expect(decodeResult.remaining.text).toBe('/AU 08752167/AON 08716165/AIN 08717165/AOT 08744166');
     });
 
     // Ignoring this test because the position is definteley invalid
@@ -208,7 +208,7 @@ describe('Label_13Through18_Slash', () => {
       expect(decodeResult.formatted.items[2].value).toBe('05:33:40');
       expect(decodeResult.formatted.items[3].label).toBe('Aircraft Position');
       expect(decodeResult.formatted.items[3].value).toBe('10.179 S, 153.107 W');
-      expect(decodeResult.remaining.text).toBe('\r\n/BR SET 0529');
+      expect(decodeResult.remaining.text).toBe('/BR SET 0529');
     });
   });
 
@@ -231,7 +231,7 @@ describe('Label_13Through18_Slash', () => {
       expect(decodeResult.formatted.items[0].value).toBe('KIAD');
       expect(decodeResult.formatted.items[1].label).toBe('Destination');
       expect(decodeResult.formatted.items[1].value).toBe('KSFO');
-      expect(decodeResult.remaining.text).toBe('\r\n/FOB 0215/LP U246680/OP        /CAT NR\r\n/AL NN/SUC  /SAV  /BR ACT NO REPORT/RWY 28R /PDOOR 0343 -----/CDOOR 0343/BR SET 0341');
+      expect(decodeResult.remaining.text).toBe('/FOB 0215/LP U246680/OP        /CAT NR\r\n/AL NN/SUC  /SAV  /BR ACT NO REPORT/RWY 28R /PDOOR 0343 -----/CDOOR 0343/BR SET 0341');
     });
     test('decodes 5-line', () => {
       // https://app.airframes.io/messages/3424453568
@@ -255,7 +255,7 @@ describe('Label_13Through18_Slash', () => {
       //expect(decodeResult.formatted.items[2].value).toBe('02:45:18');
       expect(decodeResult.formatted.items[2].label).toBe('Aircraft Position');
       expect(decodeResult.formatted.items[2].value).toBe('10.179 S, 153.107 W');
-      expect(decodeResult.remaining.text).toBe('\r\n/FOB 0074/LP U423108/MP U332185/CAT NR\r\n/AL N-/SUC -/SAV -/BR ACT NO REPORT/RWY ---\r\n/PDOOR 0533 MCD1 /CDOOR 0530/BR SET 0529');
+      expect(decodeResult.remaining.text).toBe('/FOB 0074/LP U423108/MP U332185/CAT NR\r\n/AL N-/SUC -/SAV -/BR ACT NO REPORT/RWY ---\r\n/PDOOR 0533 MCD1 /CDOOR 0530/BR SET 0529');
     });
   });
 

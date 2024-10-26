@@ -55,7 +55,7 @@ test('decodes Label H1 Preamble FLR CDSU', () => {
   expect(decodeResult.formatted.items[0].code).toBe('FR');
   expect(decodeResult.formatted.items[0].label).toBe('Fault Report');
   expect(decodeResult.formatted.items[0].value).toBe('CDSU(9RA)/DU SD(4WT2) /IDEIS 1 ');
-  expect(decodeResult.remaining.text).toBe('/PNRC12860AA0723723406');
+  expect(decodeResult.remaining.text).toBe('PNRC12860AA07/23723406');
 });
 
 test('decodes Label H1 Preamble FLR RA1', () => {

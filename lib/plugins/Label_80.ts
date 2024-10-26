@@ -102,23 +102,11 @@ export class Label_80 extends DecoderPlugin {
               break;
             }
             case 'FOB': {
-              decodeResult.raw.fuel_on_board = match.groups.value;
-              decodeResult.formatted.items.push({
-                type: 'fuel_on_board',
-                code: 'FOB',
-                label: this.descriptions[match.groups.field],
-                value: decodeResult.raw.fuel_on_board,
-              });
+              ResultFormatter.currentFuel(decodeResult, match.groups.value);
               break;
             }
             case 'HDG': {
-              decodeResult.raw.heading = Number(match.groups.value);
-              decodeResult.formatted.items.push({
-                type: 'heading',
-                code: 'HDG',
-                label: this.descriptions[match.groups.field],
-                value: decodeResult.raw.heading,
-              });
+              ResultFormatter.heading(decodeResult, match.groups.value);
               break;
             }
             case 'MCH': {

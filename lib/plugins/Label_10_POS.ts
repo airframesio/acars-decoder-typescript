@@ -23,7 +23,7 @@ export class Label_10_POS extends DecoderPlugin { // eslint-disable-line camelca
       if (options.debug) {
         console.log(`Decoder: Unknown 10 message: ${message.text}`);
       }
-      decodeResult.remaining.text = message.text;
+      ResultFormatter.unknown(decodeResult, message.text);
       decodeResult.decoded = false;
       decodeResult.decoder.decodeLevel = 'none';
       return decodeResult;
@@ -38,7 +38,7 @@ export class Label_10_POS extends DecoderPlugin { // eslint-disable-line camelca
     }
     ResultFormatter.position(decodeResult, position);
     ResultFormatter.altitude(decodeResult, Number(parts[7]));
-    decodeResult.remaining.text = [parts[0], ...parts.slice(3,7), ...parts.slice(8)].join(',');
+    ResultFormatter.unknownArr(decodeResult, [parts[0], ...parts.slice(3,7), ...parts.slice(8)]);
 
     decodeResult.decoded = true;
     decodeResult.decoder.decodeLevel = 'partial';

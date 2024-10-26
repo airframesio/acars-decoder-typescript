@@ -31,13 +31,12 @@ export class Label_13Through18_Slash extends DecoderPlugin { // eslint-disable-l
       if (options?.debug) {
         console.log(`Decoder: Unknown OOOI message: ${message.text}`);
       }
-      decodeResult.remaining.text = message.text;
+      ResultFormatter.unknown(decodeResult, message.text);
       decodeResult.decoded = false;
       decodeResult.decoder.decodeLevel = 'none';
       return decodeResult;
     }
 
-    decodeResult.remaining.text = '';
     // parts[0] === ''
     const data = parts[2].split(' ');
     ResultFormatter.departureAirport(decodeResult, data[1]);
@@ -55,7 +54,7 @@ export class Label_13Through18_Slash extends DecoderPlugin { // eslint-disable-l
     }
 
     if(parts.length === 7) {
-    decodeResult.remaining.text += parts.slice(4).join('/');
+        ResultFormatter.unknownArr(decodeResult, parts.slice(4), '/');
     }
 
     for (let i = 1; i < lines.length; i++) {
@@ -74,7 +73,7 @@ export class Label_13Through18_Slash extends DecoderPlugin { // eslint-disable-l
           ResultFormatter.position(decodeResult, position);
         }
       } else {
-        decodeResult.remaining.text += '\r\n' + lines[i];
+        ResultFormatter.unknown(decodeResult, lines[i], "\r\n");
       }
     }
 

@@ -21,10 +21,10 @@ export class Label_4A_Slash_01 extends DecoderPlugin {
 
     decodeResult.decoded = true;
     if (message.text.length === 5 && message.text.substring(0,4) === "/01-") {
-        decodeResult.remaining.text = message.text.substring(4);
+        ResultFormatter.unknown(decodeResult, message.text.substring(4));
     } else {
         decodeResult.decoded = false;
-        decodeResult.remaining.text = message.text;
+        ResultFormatter.unknown(decodeResult, message.text);
     }
 
     if (decodeResult.decoded) {

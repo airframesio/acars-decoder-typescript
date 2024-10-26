@@ -35,11 +35,7 @@ export class Label_21_POS extends DecoderPlugin {
       ResultFormatter.eta(decodeResult, DateTimeUtils.convertHHMMSSToTod(fields[7]));
       ResultFormatter.arrivalAirport(decodeResult, fields[8]);
 
-      decodeResult.remaining.text = [
-        fields[1],
-        fields[4],
-        fields[5],
-    ].join(',');
+      ResultFormatter.unknownArr(decodeResult, [fields[1], fields[4], fields[5]]);
 
       decodeResult.decoded = true;
       decodeResult.decoder.decodeLevel = 'partial';
