@@ -45,7 +45,8 @@ export class Label_22 extends DecoderPlugin {
     ResultFormatter.time_of_day(decodeResult, DateTimeUtils.convertHHMMSSToTod(fields[2]));
     ResultFormatter.altitude(decodeResult, Number(fields[3]));
 
-    decodeResult.remaining.text = [fields[1], ...fields.slice(4)].join(',');
+    ResultFormatter.unknownArr(decodeResult, [fields[1], ...fields.slice(4)]);
+    
     decodeResult.decoded = true;
     decodeResult.decoder.decodeLevel = 'partial';
     return decodeResult;
