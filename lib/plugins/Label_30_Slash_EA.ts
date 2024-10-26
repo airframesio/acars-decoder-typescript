@@ -33,9 +33,9 @@ export class Label_30_Slash_EA extends DecoderPlugin {
 
     if (results[1].substring(0,2) === "DS") {
       ResultFormatter.arrivalAirport(decodeResult, results[1].substring(2, 6));
-      decodeResult.remaining.text = "/".concat(results[2]);
+      ResultFormatter.unknown(decodeResult, "/".concat(results[2]));
     } else {
-      decodeResult.remaining.text = "/".concat(results[1], "/", results[2])
+      ResultFormatter.unknown(decodeResult, "/".concat(results[1], "/", results[2]));
     }
 
     decodeResult.decoded = true;

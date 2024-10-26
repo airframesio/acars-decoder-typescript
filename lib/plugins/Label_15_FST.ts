@@ -24,9 +24,6 @@ export class Label_15_FST extends DecoderPlugin {
     // FST01KMCOEGKKN505552W00118021
     const header = parts[0];
 
-    decodeResult.raw.departure_icao=header.substring(5,9);
-    decodeResult.raw.arrival_icao=header.substring(9,13);
-
     const stringCoords = header.substring(13)
     // Don't use decodeStringCoordinates here, because of different pos format
 
@@ -35,26 +32,20 @@ export class Label_15_FST extends DecoderPlugin {
     decodeResult.raw.position = {};
 
     if ((firstChar === 'N' || firstChar === 'S') && (middleChar === 'W' || middleChar === 'E')) {
-      decodeResult.raw.position.latitude = (Number(stringCoords.substring(1, 7)) / 10000) * (firstChar === 'S' ? -1 : 1);
-      decodeResult.raw.position.longitude = (Number(stringCoords.substring(8, 15)) / 10000) * (middleChar === 'W' ? -1 : 1);
-      decodeResult.raw.altitude = Number(stringCoords.substring(15)) * 100;
+      const lat = (Number(stringCoords.substring(1, 7)) / 10000) * (firstChar === 'S' ? -1 : 1);
+      const lon = (Number(stringCoords.substring(8, 15)) / 10000) * (middleChar === 'W' ? -1 : 1);
+      ResultFormatter.position(decodeResult, {latitude: lat, longitude: lon});
+      ResultFormatter.altitude(decodeResult, Number(stringCoords.substring(15)) * 100);
     } else {
       decodeResult.decoded = false;
       decodeResult.decoder.decodeLevel = 'none';
       return decodeResult;
     }
 
-    decodeResult.formatted.items.push({
-      type: 'aircraft_position',
-      code: 'POS',
-      label: 'Aircraft Position',
-      value: CoordinateUtils.coordinateString(decodeResult.raw.position)
-    });
+    ResultFormatter.departureAirport(decodeResult, header.substring(5,9));
+    ResultFormatter.arrivalAirport(decodeResult, header.substring(9,13));
 
-    ResultFormatter.altitude(decodeResult, decodeResult.raw.altitude);
-    ResultFormatter.departureAirport(decodeResult, decodeResult.raw.departure_icao);
-    ResultFormatter.arrivalAirport(decodeResult, decodeResult.raw.arrival_icao);
-    decodeResult.remaining.text = parts.slice(1).join(' ');
+    ResultFormatter.unknownArr(decodeResult, parts.slice(1), ' ');
 
     decodeResult.decoded = true;
     decodeResult.decoder.decodeLevel = 'partial';

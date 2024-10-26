@@ -46,21 +46,15 @@ export class H1Helper {
             } else if (fields[i].startsWith('PR')) {
                 // process PR data
                 // data[8] is temperature
-                decodeResult.remaining.text += '/' + fields[i];
+                ResultFormatter.unknown(decodeResult, fields[i], '/');
             } else if (fields[i].startsWith('AF')) {
                 processAirField(decodeResult, fields[i].substring(2).split(',')); // Strip off AF
             } else if (fields[i].startsWith('TD')) {
                 processTimeOfDeparture(decodeResult, fields[i].substring(2).split(',')); // Strip off TD
             } else if (fields[i].startsWith('FX')) {
-                decodeResult.raw.free_text = fields[i].substring(2); // Strip off 'FX'
-                decodeResult.formatted.items.push({
-                    type: 'text',
-                    code: "TEXT",
-                    label: 'Free Text',
-                    value: decodeResult.raw.free_text,
-                });
+                ResultFormatter.freetext(decodeResult, fields[i].substring(2));
             } else {
-                decodeResult.remaining.text += '/' + fields[i];
+                ResultFormatter.unknown(decodeResult, fields[i], '/');
             }
         }
         if (decodeResult.formatted.items.length > 0) {
@@ -75,7 +69,7 @@ function processAirField(decodeResult: DecodeResult, data: string[]) {
         ResultFormatter.departureAirport(decodeResult, data[0]);
         ResultFormatter.arrivalAirport(decodeResult, data[1]);
     } else {
-        decodeResult.remaining.text += 'AF/' + data.join(',');
+        ResultFormatter.unknown(decodeResult, data.join(','), 'AF/');
     }
 }
 function processTimeOfDeparture(decodeResult: DecodeResult, data: string[]) {
@@ -96,7 +90,7 @@ function processTimeOfDeparture(decodeResult: DecodeResult, data: string[]) {
             value: `${data[1].substring(0, 2)}:${data[1].substring(2)}`,
         });
     } else {
-        decodeResult.remaining.text += '/TD' + data.join(',');
+        ResultFormatter.unknown(decodeResult, data.join(','), '/TD');
     }
 }
 
@@ -114,7 +108,7 @@ function processDT(decodeResult: DecodeResult, data: string[]) {
     if (!decodeResult.raw.arrival_icao) {
         ResultFormatter.arrivalAirport(decodeResult, data[0]);
     } else if (decodeResult.raw.arrival_icao != data[0]) {
-        decodeResult.remaining.text += '/' + data;
+        ResultFormatter.unknownArr(decodeResult, data);
     } // else duplicate - don't do anything
 
 
@@ -131,7 +125,7 @@ function processDT(decodeResult: DecodeResult, data: string[]) {
         ResultFormatter.remainingFuel(decodeResult, Number(data[4]));
     }
     if (data.length > 5) {//TODO: figure out what this is
-        decodeResult.remaining.text += ',' + data.slice(5).join(',');
+        ResultFormatter.unknownArr(decodeResult, data);
     }
 };
 
@@ -159,9 +153,9 @@ function parseMessageType(decodeResult: DecodeResult, messageType: string) {
         return processMessageType(decodeResult, type);
     } else if (parts.length == 2) {
         if (parts[0].length > 0) {
-            decodeResult.remaining.text += parts[0].substring(0, 3); //message number?
+            ResultFormatter.unknown(decodeResult, parts[0].substring(0, 3));
             decodeResult.raw.flight_number = parts[0].substring(3);
-            decodeResult.remaining.text += '#' + (parts[1].length == 5 ? parts[1].substring(0, 2) : parts[1].substring(0, 3));
+            ResultFormatter.unknown(decodeResult, parts[1].length == 5 ? parts[1].substring(0, 2) : parts[1].substring(0, 3), '#');
         }
         // TODO - see if there's a better way to determine the type
         const type = parts[1].length == 5 ? parts[1].substring(2, 5) : parts[1].substring(3, 6);
@@ -171,7 +165,7 @@ function parseMessageType(decodeResult: DecodeResult, messageType: string) {
         processMessageType(decodeResult, type);
     }
     else {
-        decodeResult.remaining.text += messageType;
+        ResultFormatter.unknown(decodeResult, messageType);
     }
 }
 
@@ -277,5 +271,11 @@ function processRoute(decodeResult: DecodeResult, last: string, time: string, ne
     const thenWaypoint = RouteUtils.getWaypoint(then || '?');
 
     const waypoints: Waypoint[] = [lastWaypoint, nextWaypoint, thenWaypoint];
-    ResultFormatter.route(decodeResult, waypoints);
+    decodeResult.raw.route = { waypoints: waypoints };
+    decodeResult.formatted.items.push({
+        type: 'aircraft_route',
+        code: 'ROUTE',
+        label: 'Aircraft Route',
+        value: RouteUtils.routeToString(decodeResult.raw.route),
+    });
 }

@@ -4,11 +4,22 @@ import { CoordinateUtils } from "./coordinate_utils";
 import { DateTimeUtils } from "../DateTimeUtils";
 import { RouteUtils } from "./route_utils";
 import { Waypoint } from "../types/waypoint";
+import { Route } from "../types/route";
 
 /**
  * Class to format the results of common fields
  */
 export class ResultFormatter {
+
+    static route(decodeResult: DecodeResult, route: Route ) {
+        decodeResult.raw.route = route;
+        decodeResult.formatted.items.push({
+            type: 'aircraft_route',
+            code: 'ROUTE',
+            label: 'Aircraft Route',
+            value: RouteUtils.routeToString(route),
+        });
+    };
 
     static state_change(decodeResult: DecodeResult, from: string, to: string) {
         decodeResult.raw.state_change = {
@@ -320,17 +331,14 @@ export class ResultFormatter {
         });
     }
 
-    static route(decodeResult: DecodeResult, route: Waypoint[]) {
-        decodeResult.raw.route = { waypoints: route };
-        decodeResult.formatted.items.push({
-            type: 'aircraft_route',
-            code: 'ROUTE',
-            label: 'Aircraft Route',
-            value: RouteUtils.routeToString(decodeResult.raw.route),
-        });
-    }
+    static unknown(decodeResult: DecodeResult, value: string, sep: string = ',') {
+        if (!decodeResult.remaining.text)
+            decodeResult.remaining.text = value;
+        else
+            decodeResult.remaining.text += sep + value;
+    };
 
-    static unknown(decodeResult: DecodeResult, value: string) {
-        decodeResult.remaining.text += ',' + value;
+    static unknownArr(decodeResult: DecodeResult, value: string[], sep: string = ',') {
+        this.unknown(decodeResult, value.join(sep), sep);
     };
 }

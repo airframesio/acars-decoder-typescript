@@ -28,11 +28,11 @@ export class Label_4A_01 extends DecoderPlugin {
         ResultFormatter.departureAirport(decodeResult, rgx[5]);
         ResultFormatter.arrivalAirport(decodeResult, rgx[6]);
         ResultFormatter.altitude(decodeResult, Number(rgx[7].replace(/ /g, "")));
-        decodeResult.remaining.text = rgx[8];
+        ResultFormatter.unknown(decodeResult, rgx[8]);
         ResultFormatter.temperature(decodeResult, rgx[9].replace(/ /g, ""));
     } else {
         decodeResult.decoded = false;
-        decodeResult.remaining.text = message.text;
+        ResultFormatter.unknown(decodeResult, message.text);
     }
 
     if (decodeResult.decoded) {

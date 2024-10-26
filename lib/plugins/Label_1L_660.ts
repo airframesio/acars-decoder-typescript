@@ -44,15 +44,15 @@ export class Label_1L_660 extends DecoderPlugin { // eslint-disable-line camelca
     }
 
     const position = CoordinateUtils.decodeStringCoordinatesDecimalMinutes(parts[0]);
-    if(position) {
+    if (position) {
       ResultFormatter.position(decodeResult, position);
     }
     const hhmmss = parts[1].substring(0, 6);
     ResultFormatter.time_of_day(decodeResult, DateTimeUtils.convertHHMMSSToTod(hhmmss));
-    const fl = parts[1].substring(6,9);
+    const fl = parts[1].substring(6, 9);
     ResultFormatter.altitude(decodeResult, Number(fl) * 100);
     const next = parts[1].substring(9);
-    ResultFormatter.route(decodeResult, [{name: next.trim()}]);
+    ResultFormatter.route(decodeResult, { waypoints: [{ name: next.trim() }] });
 
     decodeResult.remaining.text = parts.slice(2).join(',');
 

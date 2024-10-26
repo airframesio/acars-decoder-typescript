@@ -55,7 +55,7 @@ describe('Label_H1 POS', () => {
     expect(decodeResult.formatted.items[3].value).toBe('04R');
     expect(decodeResult.formatted.items[4].label).toBe('Message Checksum');
     expect(decodeResult.formatted.items[4].value).toBe('0x1483');
-    expect(decodeResult.remaining.text).toBe(',000855,25,1285,1192,93,1284,P4,001004,8,141K,D713,000950,2,29');
+    expect(decodeResult.remaining.text).toBe('000855,25,1285,1192,93,1284,P4,001004,8,141K,D713,000950,2,29');
   });
 
   test('decodes Label H1 Preamble #M1BPRG', () => {

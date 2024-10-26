@@ -29,25 +29,17 @@ export class Label_HX extends DecoderPlugin {
         let londir = parts[4].substring(0, 1);
         let londeg = Number(parts[4].substring(1, 4));
         let lonmin = Number(parts[4].substring(4, 8));
-        decodeResult.raw.position = {
+        let pos = {
             latitude: (latdeg + latmin/60) * (latdir === 'N' ? 1 : -1),
             longitude: (londeg + lonmin/60) * (londir === 'E' ? 1 : -1),
         };
-        decodeResult.remaining.text = parts.slice(5).join(' ');
+        ResultFormatter.unknownArr(decodeResult, parts.slice(5), ' ');
+        ResultFormatter.position(decodeResult, pos);
     } else if (parts[2] === "43") {
         ResultFormatter.departureAirport(decodeResult, parts[3]);
-        decodeResult.remaining.text = parts.slice(4).join(' ');
+        ResultFormatter.unknownArr(decodeResult, parts.slice(4), ' ');
     } else {
         decodeResult.decoded = false;
-    }
-
-    if (decodeResult.raw.position) {
-        decodeResult.formatted.items.push({
-            type: 'aircraft_position',
-            code: 'POS',
-            label: 'Aircraft Position',
-            value: CoordinateUtils.coordinateString(decodeResult.raw.position),
-        });
     }
 
     if (decodeResult.decoded) {
