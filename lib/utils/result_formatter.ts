@@ -3,13 +3,15 @@ import { DecodeResult } from "../DecoderPluginInterface";
 import { CoordinateUtils } from "./coordinate_utils";
 import { DateTimeUtils } from "../DateTimeUtils";
 import { RouteUtils } from "./route_utils";
+import { Waypoint } from "../types/waypoint";
+import { Route } from "../types/route";
 
 /**
  * Class to format the results of common fields
  */
 export class ResultFormatter {
 
-    static route(decodeResult: DecodeResult, route: route) {
+    static route(decodeResult: DecodeResult, route: Route ) {
         decodeResult.raw.route = route;
         decodeResult.formatted.items.push({
             type: 'aircraft_route',

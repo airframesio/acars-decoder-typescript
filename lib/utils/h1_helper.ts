@@ -69,7 +69,7 @@ function processAirField(decodeResult: DecodeResult, data: string[]) {
         ResultFormatter.departureAirport(decodeResult, data[0]);
         ResultFormatter.arrivalAirport(decodeResult, data[1]);
     } else {
-        ResultFormatter.unknown(data.join(','), 'AF/');
+        ResultFormatter.unknown(decodeResult, data.join(','), 'AF/');
     }
 }
 function processTimeOfDeparture(decodeResult: DecodeResult, data: string[]) {
@@ -108,7 +108,7 @@ function processDT(decodeResult: DecodeResult, data: string[]) {
     if (!decodeResult.raw.arrival_icao) {
         ResultFormatter.arrivalAirport(decodeResult, data[0]);
     } else if (decodeResult.raw.arrival_icao != data[0]) {
-        ResultFormatter.unknown(decodeResult, data, '/');
+        ResultFormatter.unknownArr(decodeResult, data);
     } // else duplicate - don't do anything
 
 
@@ -125,7 +125,7 @@ function processDT(decodeResult: DecodeResult, data: string[]) {
         ResultFormatter.remainingFuel(decodeResult, Number(data[4]));
     }
     if (data.length > 5) {//TODO: figure out what this is
-        ResultFormatter.unknownArr(data);
+        ResultFormatter.unknownArr(decodeResult, data);
     }
 };
 
@@ -165,7 +165,7 @@ function parseMessageType(decodeResult: DecodeResult, messageType: string) {
         processMessageType(decodeResult, type);
     }
     else {
-        ResultFormatter.unknown(messageType);
+        ResultFormatter.unknown(decodeResult, messageType);
     }
 }
 

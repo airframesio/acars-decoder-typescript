@@ -121,7 +121,7 @@ describe('Label_H1 FPN', () => {
     expect(decodeResult.formatted.items[7].value).toBe('21:51:17');
     expect(decodeResult.formatted.items[8].label).toBe('Message Checksum');
     expect(decodeResult.formatted.items[8].value).toBe('0x156d');
-    expect(decodeResult.remaining.text).toBe(':WS:N61000W030000,370..N61000W040000..N60000W050000..URTAK:WS:URTAK,380..LAKES:WS:LAKES,400..N57000W070000..N54300W080000..N49000W090000..DLH..COLDD/PR4356,344,360,1060,,,13,,,30,,,P50,M40,36090,,3296,292/KMSP,30L,172,215117');
+    expect(decodeResult.remaining.text).toBe(':WS:N61000W030000,370..N61000W040000..N60000W050000..URTAK:WS:URTAK,380..LAKES:WS:LAKES,400..N57000W070000..N54300W080000..N49000W090000..DLH..COLDD/PR4356,344,360,1060,,,13,,,30,,,P50,M40,36090,,3296,292,KMSP,30L,172,215117');
   });
 
   test('decodes Label H1 Preamble FPN with newlines', () => {

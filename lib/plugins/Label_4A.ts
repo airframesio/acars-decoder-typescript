@@ -4,6 +4,7 @@ import { CoordinateUtils } from '../utils/coordinate_utils';
 import { DateTimeUtils } from '../DateTimeUtils';
 import { RouteUtils } from '../utils/route_utils';
 import { ResultFormatter } from '../utils/result_formatter';
+import { Waypoint } from '../types/waypoint';
 
 export class Label_4A extends DecoderPlugin {
   name = 'label-4a';
@@ -44,13 +45,13 @@ export class Label_4A extends DecoderPlugin {
         if (fields[0].match(/^[NS]/)) {
             // variant 2
             ResultFormatter.position(decodeResult, CoordinateUtils.decodeStringCoordinates(fields[0].substring(0, 13)));
-            let wp1 = {
+            let wp1: Waypoint = {
                 name: fields[0].substring(13).trim(),
                 time: DateTimeUtils.convertHHMMSSToTod(fields[1].substring(0, 6)),
                 timeFormat: 'tod',
             };
             ResultFormatter.altitude(decodeResult, fields[1].substring(6, 9) * 100);
-            let wp2 = {
+            let wp2: Waypoint = {
                 name: fields[1].substring(9).trim(),
                 time: DateTimeUtils.convertHHMMSSToTod(fields[2]),
                 timeFormat: 'tod',
