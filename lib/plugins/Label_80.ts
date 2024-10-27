@@ -102,11 +102,11 @@ export class Label_80 extends DecoderPlugin {
               break;
             }
             case 'FOB': {
-              ResultFormatter.currentFuel(decodeResult, match.groups.value);
+              ResultFormatter.currentFuel(decodeResult, Number(match.groups.value));
               break;
             }
             case 'HDG': {
-              ResultFormatter.heading(decodeResult, match.groups.value);
+              ResultFormatter.heading(decodeResult, Number(match.groups.value));
               break;
             }
             case 'MCH': {

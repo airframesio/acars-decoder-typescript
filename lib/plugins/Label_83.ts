@@ -62,8 +62,8 @@ export class Label_83 extends DecoderPlugin {
                     longitude: Number(fields[4].replace(/\s/g, "")),
                 });
             ResultFormatter.altitude(decodeResult, Number(fields[5]));
-            ResultFormatter.groundspeed(decodeResult, fields[6]);
-            ResultFormatter.heading(decodeResult, fields[7]);
+            ResultFormatter.groundspeed(decodeResult, Number(fields[6]));
+            ResultFormatter.heading(decodeResult, Number(fields[7]));
             ResultFormatter.unknown(decodeResult, fields[8]);
         } else {
             decodeResult.decoded = false;

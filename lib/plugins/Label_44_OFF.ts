@@ -1,6 +1,7 @@
 import { DecoderPlugin } from '../DecoderPlugin';
 import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
 import { CoordinateUtils } from '../utils/coordinate_utils';
+import { ResultFormatter } from '../utils/result_formatter';
 
 // Off Runway Report
 export class Label_44_OFF extends DecoderPlugin {
@@ -23,7 +24,7 @@ export class Label_44_OFF extends DecoderPlugin {
     // Match: OFF02,coords,departure_icao,arrival_icao,current_date,current_time,eta_time,fuel_in_tons
     const regex = /^.*,(?<unsplit_coords>.*),(?<departure_icao>.*),(?<arrival_icao>.*),(?<current_date>.*),(?<current_time>.*),(?<eta_time>.*),(?<fuel_in_tons>.*)$/;
     const results = message.text.match(regex);
-    if (results) {
+    if (results?.groups) {
       if (options.debug) {
         console.log(`Label 44 Off Runway Report: groups`);
         console.log(results.groups);

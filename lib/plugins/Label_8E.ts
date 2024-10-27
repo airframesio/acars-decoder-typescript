@@ -23,7 +23,7 @@ export class Label_8E extends DecoderPlugin {
     // Match: arrival_icao,arrival_eta
     const regex = /^(?<arrival_icao>\w{4}),(?<arrival_eta>\d{4})$/;
     const results = message.text.match(regex);
-    if (results) {
+    if (results?.groups) {
       if (options.debug) {
         console.log(`Label 8E ETA: groups`);
         console.log(results.groups);

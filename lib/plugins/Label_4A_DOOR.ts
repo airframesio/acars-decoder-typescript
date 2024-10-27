@@ -26,7 +26,7 @@ export class Label_4A_DOOR extends DecoderPlugin {
         ResultFormatter.time_of_day(decodeResult, DateTimeUtils.convertHHMMSSToTod(fields[2] + "00"));
     } else {
         decodeResult.decoded = false;
-        ResultFormatter.unknown(decodeResult, text);
+        ResultFormatter.unknown(decodeResult, message.text);
     }
     if (decodeResult.decoded) {
         if(!decodeResult.remaining.text)

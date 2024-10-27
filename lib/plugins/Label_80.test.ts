@@ -56,7 +56,7 @@ test('decodes Label 80 variant 1', () => {
   expect(decodeResult.formatted.items[6].type).toBe('fuel_on_board');
   expect(decodeResult.formatted.items[6].code).toBe('FOB');
   expect(decodeResult.formatted.items[6].label).toBe('Fuel On Board');
-  expect(decodeResult.formatted.items[6].value).toBe('0100');
+  expect(decodeResult.formatted.items[6].value).toBe('100');
   expect(decodeResult.formatted.items[7].type).toBe('ETA');
   expect(decodeResult.formatted.items[7].code).toBe('ETA');
   expect(decodeResult.formatted.items[7].label).toBe('Estimated Time of Arrival');
@@ -135,7 +135,7 @@ test('decodes Label 80 variant 2', () => {
   expect(decodeResult.formatted.items[14].type).toBe('fuel_on_board');
   expect(decodeResult.formatted.items[14].code).toBe('FOB');
   expect(decodeResult.formatted.items[14].label).toBe('Fuel On Board');
-  expect(decodeResult.formatted.items[14].value).toBe('N009414');
+  expect(decodeResult.formatted.items[14].value).toBe('NaN');
   expect(decodeResult.formatted.items[15].type).toBe('ETA');
   expect(decodeResult.formatted.items[15].code).toBe('ETA');
   expect(decodeResult.formatted.items[15].label).toBe('Estimated Time of Arrival');

@@ -21,6 +21,7 @@ export class Label_ColonComma extends DecoderPlugin {
       type: 'frequency',
       label: 'Frequency',
       value: `${decodeResult.raw.frequency} MHz`,
+      code: 'FREQ'
     });
 
     decodeResult.decoded = true;
