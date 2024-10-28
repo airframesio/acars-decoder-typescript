@@ -2,6 +2,7 @@ import { DecodeResult, DecoderPluginInterface, Message, Options } from './Decode
 
 import * as Plugins from './plugins/official';
 import { MIAMCoreUtils } from './utils/miam';
+import { ResultFormatter } from './utils/result_formatter';
 
 export class MessageDecoder {
   name: string;
@@ -95,6 +96,14 @@ export class MessageDecoder {
       }
     }
 
+    // C-Band puts a 10 char header in front of some message types
+    // First 4 chars are some kind of message number
+    // Last 6 chars are the flight number
+    let cband = message.text.match(/^(?<msgno>[A-Z]\d{2}[A-Z])(?<airline>[A-Z]{2})(?<number>[0-9]{4})/);
+    if (cband?.groups) {
+        message.text = message.text.substring(10);
+    }
+
     // console.log('All plugins');
     // console.log(this.plugins);
     const usablePlugins = this.plugins.filter((plugin) => {
@@ -148,6 +157,11 @@ export class MessageDecoder {
       if (result.decoded) {
         break;
       }
+    }
+
+    if (cband?.groups) {
+        ResultFormatter.flightNumber(result, cband.groups.airline + Number(cband.groups.number));
+        message.text = cband.input;
     }
 
     if (options.debug) {

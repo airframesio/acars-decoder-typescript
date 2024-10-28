@@ -18,23 +18,16 @@ export class Label_4N extends DecoderPlugin {
     decodeResult.message = message;
     decodeResult.formatted.description = 'Airline Defined';
 
-    // Inmarsat C-band seems to prefix normal messages with a message number and flight number
-    let text = message.text;
-    if (text.match(/^M\d{2}A\w{6}/)) {
-        ResultFormatter.flightNumber(decodeResult, message.text.substring(4, 10).replace(/^([A-Z]+)0*/g, "$1"));
-        text = text.substring(10);
-    }
-
     decodeResult.decoded = true;
-    const fields = text.split(",");
-    if (text.length === 51) {
+    const fields = message.text.split(",");
+    if (message.text.length === 51) {
         // variant 1
-        decodeResult.raw.day = text.substring(0, 2);
-        ResultFormatter.departureAirport(decodeResult, text.substring(8, 11));
-        ResultFormatter.arrivalAirport(decodeResult, text.substring(13, 16));
-        ResultFormatter.position(decodeResult, CoordinateUtils.decodeStringCoordinatesDecimalMinutes(text.substring(30, 45).replace(/^(.)0/, "$1")));
-        ResultFormatter.altitude(decodeResult, Number(text.substring(48, 51)) * 100);
-        ResultFormatter.unknownArr(decodeResult, [text.substring(2, 4), text.substring(19, 29)], " ");
+        decodeResult.raw.day = message.text.substring(0, 2);
+        ResultFormatter.departureAirport(decodeResult, message.text.substring(8, 11));
+        ResultFormatter.arrivalAirport(decodeResult, message.text.substring(13, 16));
+        ResultFormatter.position(decodeResult, CoordinateUtils.decodeStringCoordinatesDecimalMinutes(message.text.substring(30, 45).replace(/^(.)0/, "$1")));
+        ResultFormatter.altitude(decodeResult, Number(messge.text.substring(48, 51)) * 100);
+        ResultFormatter.unknownArr(decodeResult, [message.text.substring(2, 4), message.text.substring(19, 29)], " ");
     } else if (fields.length === 33) {
         // variant 2
         decodeResult.raw.date = fields[3];
@@ -53,7 +46,7 @@ export class Label_4N extends DecoderPlugin {
         ResultFormatter.unknownArr(decodeResult, [...fields.slice(1,3), fields[7], ...fields.slice(13, 32)].filter((f) => f != ""));
     } else {
         decodeResult.decoded = false;
-        ResultFormatter.unknown(decodeResult, text);
+        ResultFormatter.unknown(decodeResult, message.text);
     }
 
     if (decodeResult.decoded) {
