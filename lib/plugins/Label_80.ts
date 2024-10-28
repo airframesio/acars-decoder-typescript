@@ -31,7 +31,7 @@ export class Label_80 extends DecoderPlugin {
     };
   }
 
-  decode(message: Message, options: Options = {}) : DecodeResult {
+  decode(message: Message, options: Options = {}): DecodeResult {
     const decodeResult = this.defaultResult();
     decodeResult.decoder.name = this.name;
 
@@ -42,7 +42,7 @@ export class Label_80 extends DecoderPlugin {
     let posRptRegex = /^3N01 POSRPT \d\d\d\d\/\d\d (?<orig>\w+)\/(?<dest>\w+) \.(?<tail>[\w-]+)(\/(?<agate>.+) (?<sta>\w+:\w+))*/; // eslint-disable-line max-len
     let results = parts[0].match(posRptRegex);
 
-    if(!results?.groups) {
+    if (!results?.groups) {
       decodeResult.decoded = false;
       decodeResult.decoder.decodeLevel = 'none';
       return decodeResult;
@@ -102,7 +102,10 @@ export class Label_80 extends DecoderPlugin {
               break;
             }
             case 'FOB': {
-              ResultFormatter.currentFuel(decodeResult, Number(match.groups.value));
+              const fob = Number(match.groups.value);
+              if (!isNaN(fob)) {
+                ResultFormatter.currentFuel(decodeResult, fob);
+              }
               break;
             }
             case 'HDG': {
@@ -130,14 +133,14 @@ export class Label_80 extends DecoderPlugin {
               break;
             }
             case 'POS': {
-	      // don't use decodeStringCoordinates because of different position format
-	      const posRegex = /^(?<latd>[NS])(?<lat>.+)(?<lngd>[EW])(?<lng>.+)/;
+              // don't use decodeStringCoordinates because of different position format
+              const posRegex = /^(?<latd>[NS])(?<lat>.+)(?<lngd>[EW])(?<lng>.+)/;
               const posResult = match.groups.value.match(posRegex);
               const lat = Number(posResult?.groups?.lat) * (posResult?.groups?.lngd === 'S' ? -1 : 1);
               const lon = Number(posResult?.groups?.lng) * (posResult?.groups?.lngd === 'W' ? -1 : 1);
               const position = {
-                latitude: Number.isInteger(lat) ? lat/1000 : lat/100,
-                longitude: Number.isInteger(lon) ? lon/1000 : lon/100,
+                latitude: Number.isInteger(lat) ? lat / 1000 : lat / 100,
+                longitude: Number.isInteger(lon) ? lon / 1000 : lon / 100,
               };
               ResultFormatter.position(decodeResult, position);
               break;

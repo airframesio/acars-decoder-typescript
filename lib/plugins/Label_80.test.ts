@@ -76,7 +76,7 @@ test('decodes Label 80 variant 2', () => {
   expect(decodeResult.formatted.description).toBe('Airline Defined Position Report');
   expect(decodeResult.raw.position.latitude).toBe(35.391999999999996); // FIXME?: 35.392
   expect(decodeResult.raw.position.longitude).toBe(-79.372);
-  expect(decodeResult.formatted.items.length).toBe(16);
+  expect(decodeResult.formatted.items.length).toBe(15);
   expect(decodeResult.formatted.items[0].type).toBe('icao');
   expect(decodeResult.formatted.items[0].code).toBe('ORG');
   expect(decodeResult.formatted.items[0].label).toBe('Origin');
@@ -132,14 +132,10 @@ test('decodes Label 80 variant 2', () => {
   expect(decodeResult.formatted.items[13].code).toBe('DWND');
   expect(decodeResult.formatted.items[13].label).toBe('Wind Direction');
   expect(decodeResult.formatted.items[13].value).toBe(306); // FIXME: string
-  expect(decodeResult.formatted.items[14].type).toBe('fuel_on_board');
-  expect(decodeResult.formatted.items[14].code).toBe('FOB');
-  expect(decodeResult.formatted.items[14].label).toBe('Fuel On Board');
-  expect(decodeResult.formatted.items[14].value).toBe('NaN');
-  expect(decodeResult.formatted.items[15].type).toBe('ETA');
-  expect(decodeResult.formatted.items[15].code).toBe('ETA');
-  expect(decodeResult.formatted.items[15].label).toBe('Estimated Time of Arrival');
-  expect(decodeResult.formatted.items[15].value).toBe('14:26.0');
+  expect(decodeResult.formatted.items[14].type).toBe('ETA');
+  expect(decodeResult.formatted.items[14].code).toBe('ETA');
+  expect(decodeResult.formatted.items[14].label).toBe('Estimated Time of Arrival');
+  expect(decodeResult.formatted.items[14].value).toBe('14:26.0');
 });
 
 test('decodes Label 80 <invalid>', () => {
