@@ -159,7 +159,7 @@ export class MessageDecoder {
       }
     }
 
-    if (cband?.groups) {
+    if (cband?.groups && cband?.input) {
         ResultFormatter.flightNumber(result, cband.groups.airline + Number(cband.groups.number));
         message.text = cband.input;
     }
