@@ -321,6 +321,36 @@ export class ResultFormatter {
         });
     }
 
+    static day(decodeResult: DecodeResult, day: number) {
+        decodeResult.raw.day_of_month = day;
+        decodeResult.formatted.items.push({
+            type: 'day_of_month',
+            code: 'MSG_DOM',
+            label: 'Day of Month',
+            value: `${day}`,
+        });
+    }
+
+    static departureDay(decodeResult: DecodeResult, day: number) {
+        decodeResult.raw.departure_day_of_month = day;
+        decodeResult.formatted.items.push({
+            type: 'day_of_month',
+            code: 'DEP_DOM',
+            label: 'Departure Day',
+            value: `${day}`,
+        });
+    }
+
+    static arrivalDay(decodeResult: DecodeResult, day: number) {
+        decodeResult.raw.arrival_day_of_month = day;
+        decodeResult.formatted.items.push({
+            type: 'day_of_month',
+            code: 'ARR_DAY',
+            label: 'Arrival Day',
+            value: `${day}`,
+        });
+    }
+
     static text(decodeResult: DecodeResult, text: string) {
         decodeResult.raw.text = text;
         decodeResult.formatted.items.push({

@@ -1,20 +1,21 @@
 import { MessageDecoder } from '../MessageDecoder';
-import { Label_22 } from './Label_22';
+import { Label_22_POS } from './Label_22_POS';
 
 describe('Label 22', () => {
-  let plugin: Label_22;
+  let plugin: Label_22_POS;
 
   beforeEach(() => {
     const decoder = new MessageDecoder();
-    plugin = new Label_22(decoder);
+    plugin = new Label_22_POS(decoder);
   });
 
   test('matches qualifiers', () => {
     expect(plugin.decode).toBeDefined();
-    expect(plugin.name).toBe('label-22');
+    expect(plugin.name).toBe('label-22-pos');
     expect(plugin.qualifiers).toBeDefined();
     expect(plugin.qualifiers()).toEqual({
       labels: ['22'],
+      preambles: ['N', 'S'],
     });
   });
 
