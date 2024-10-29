@@ -325,7 +325,7 @@ export class ResultFormatter {
         decodeResult.raw.day_of_month = day;
         decodeResult.formatted.items.push({
             type: 'day_of_month',
-            code: 'MSG_DOM',
+            code: 'MSG_DAY',
             label: 'Day of Month',
             value: `${day}`,
         });
@@ -335,7 +335,7 @@ export class ResultFormatter {
         decodeResult.raw.departure_day_of_month = day;
         decodeResult.formatted.items.push({
             type: 'day_of_month',
-            code: 'DEP_DOM',
+            code: 'DEP_DAY',
             label: 'Departure Day',
             value: `${day}`,
         });
