@@ -99,7 +99,7 @@ export class MessageDecoder {
     // C-Band puts a 10 char header in front of some message types
     // First 4 chars are some kind of message number
     // Last 6 chars are the flight number
-    let cband = message.text.match(/^(?<msgno>[A-Z]\d{2}[A-Z])(?<airline>[A-Z]{2})(?<number>[0-9]{4})/);
+    let cband = message.text.match(/^(?<msgno>[A-Z]\d{2}[A-Z])(?<airline>[A-Z0-9]{2})(?<number>[0-9]{4})/);
     if (cband?.groups) {
         message.text = message.text.substring(10);
     }

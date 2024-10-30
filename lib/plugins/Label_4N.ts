@@ -26,7 +26,7 @@ export class Label_4N extends DecoderPlugin {
         ResultFormatter.departureAirport(decodeResult, message.text.substring(8, 11));
         ResultFormatter.arrivalAirport(decodeResult, message.text.substring(13, 16));
         ResultFormatter.position(decodeResult, CoordinateUtils.decodeStringCoordinatesDecimalMinutes(message.text.substring(30, 45).replace(/^(.)0/, "$1")));
-        ResultFormatter.altitude(decodeResult, Number(messge.text.substring(48, 51)) * 100);
+        ResultFormatter.altitude(decodeResult, Number(message.text.substring(48, 51)) * 100);
         ResultFormatter.unknownArr(decodeResult, [message.text.substring(2, 4), message.text.substring(19, 29)], " ");
     } else if (fields.length === 33) {
         // variant 2

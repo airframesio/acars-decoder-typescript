@@ -34,7 +34,7 @@ export class Label_83 extends DecoderPlugin {
         ResultFormatter.eta(decodeResult, DateTimeUtils.convertHHMMSSToTod(fields[6] + "00"));
     } else if (message.text.substring(0, 5) === "001PR") {
         // variant 3
-        decodeResult.raw.day = text.substring(5, 7);
+        decodeResult.raw.day = message.text.substring(5, 7);
         const position = CoordinateUtils.decodeStringCoordinatesDecimalMinutes(message.text.substring(13, 28).replace(/\./g, ""))
         if (position) {
             ResultFormatter.position(decodeResult, position);
