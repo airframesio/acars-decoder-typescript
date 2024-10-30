@@ -5,12 +5,13 @@ import { CoordinateUtils } from '../utils/coordinate_utils';
 import { ResultFormatter } from '../utils/result_formatter';
 
 // Position Report
-export class Label_22 extends DecoderPlugin {
-  name = 'label-22';
+export class Label_22_POS extends DecoderPlugin {
+  name = 'label-22-pos';
 
   qualifiers() { // eslint-disable-line class-methods-use-this
     return {
       labels: ['22'],
+      preambles: ['N', 'S'],
     };
   }
 
