@@ -43,6 +43,7 @@ export class MessageDecoder {
     this.registerPlugin(new Plugins.Label_4A_DIS(this));
     this.registerPlugin(new Plugins.Label_4A_DOOR(this));
     this.registerPlugin(new Plugins.Label_4A_Slash_01(this));
+    this.registerPlugin(new Plugins.Label_4J_POS(this));
     this.registerPlugin(new Plugins.Label_4N(this));
     this.registerPlugin(new Plugins.Label_B6_Forwardslash(this));
     this.registerPlugin(new Plugins.Label_H1_FLR(this));
