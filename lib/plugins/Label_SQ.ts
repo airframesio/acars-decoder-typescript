@@ -22,7 +22,7 @@ export class Label_SQ extends DecoderPlugin {
       const regex = /0(\d)X(?<org>\w)(?<iata>\w\w\w)(?<icao>\w\w\w\w)(?<station>\d)(?<lat>\d+)(?<latd>[NS])(?<lng>\d+)(?<lngd>[EW])V(?<vfreq>\d+)\/.*/;
       const result = message.text.match(regex);
 
-      if (result && result.length >= 8) {
+      if (result?.groups && result.length >= 8) {
         decodeResult.raw.groundStation = {
           number: result.groups.station,
           iataCode: result.groups.iata,
@@ -32,7 +32,7 @@ export class Label_SQ extends DecoderPlugin {
             longitude: (Number(result.groups.lng) / 100) * (result.groups.lngd === 'W' ? -1 : 1)
           }
         }
-        decodeResult.raw.vdlFrequency = result.groups.vfreq / 1000.0;
+        decodeResult.raw.vdlFrequency = Number(result.groups.vfreq) / 1000.0;
       }
     }
 

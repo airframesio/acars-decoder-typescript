@@ -25,8 +25,8 @@ export class Label_16_N_Space extends DecoderPlugin {
     // Style: N 28.177/W 96.055
     let variant2Regex = /^(?<lat>[NS])\s(?<lat_coord>.*)\/(?<long>[EW])\s*(?<long_coord>.*)$/;
 
-    let results;
-    if (results = message.text.match(variant1Regex)) {
+    let results = message.text.match(variant1Regex);
+    if (results?.groups) {
       if (options.debug) {
         console.log(`Label 16 N : results`);
         console.log(results);
@@ -45,7 +45,11 @@ export class Label_16_N_Space extends DecoderPlugin {
       decodeResult.decoded = true;
       decodeResult.decoder.decodeLevel = 'partial';
 
-    } else if (results = message.text.match(variant2Regex)) {
+      return decodeResult
+    }
+    
+    results = message.text.match(variant2Regex)
+    if (results?.groups) {
       if (options.debug) {
         console.log(`Label 16 N : results`);
         console.log(results);
@@ -60,16 +64,16 @@ export class Label_16_N_Space extends DecoderPlugin {
 
       decodeResult.decoded = true;
       decodeResult.decoder.decodeLevel = 'full';
+      return decodeResult;
+    } 
 
-    } else {
-      // Unknown
+    // Unknown
       if (options.debug) {
         console.log(`Decoder: Unknown 16 message: ${message.text}`);
       }
       ResultFormatter.unknown(decodeResult, message.text);
       decodeResult.decoded = false;
       decodeResult.decoder.decodeLevel = 'none';
-    }
 
     return decodeResult;
   }
