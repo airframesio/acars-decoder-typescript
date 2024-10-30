@@ -7,7 +7,7 @@ export class Label_4J_POS extends DecoderPlugin {
   name = 'label-4j-pos';
   qualifiers() { // eslint-disable-line class-methods-use-this
     return {
-      labels: ['4j'],
+      labels: ['4J'],
       preambles: ['POS/'],
     };
   }
