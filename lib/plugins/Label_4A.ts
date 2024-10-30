@@ -2,7 +2,6 @@ import { DecoderPlugin } from '../DecoderPlugin';
 import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
 import { CoordinateUtils } from '../utils/coordinate_utils';
 import { DateTimeUtils } from '../DateTimeUtils';
-import { RouteUtils } from '../utils/route_utils';
 import { ResultFormatter } from '../utils/result_formatter';
 import { Waypoint } from '../types/waypoint';
 
@@ -39,7 +38,7 @@ export class Label_4A extends DecoderPlugin {
             ResultFormatter.callsign(decodeResult, fields[3]);
         ResultFormatter.departureAirport(decodeResult, fields[4]);
         ResultFormatter.arrivalAirport(decodeResult, fields[5]);
-        ResultFormatter.altitude(decodeResult, text.substring(48, 51) * 100);
+        ResultFormatter.altitude(decodeResult, Number(text.substring(48, 51)) * 100);
         ResultFormatter.unknownArr(decodeResult, fields.slice(8));
     } else if (fields.length === 6) {
         if (fields[0].match(/^[NS]/)) {
@@ -50,7 +49,7 @@ export class Label_4A extends DecoderPlugin {
                 time: DateTimeUtils.convertHHMMSSToTod(fields[1].substring(0, 6)),
                 timeFormat: 'tod',
             };
-            ResultFormatter.altitude(decodeResult, fields[1].substring(6, 9) * 100);
+            ResultFormatter.altitude(decodeResult, Number(fields[1].substring(6, 9)) * 100);
             let wp2: Waypoint = {
                 name: fields[1].substring(9).trim(),
                 time: DateTimeUtils.convertHHMMSSToTod(fields[2]),
@@ -64,7 +63,7 @@ export class Label_4A extends DecoderPlugin {
             ResultFormatter.time_of_day(decodeResult, DateTimeUtils.convertHHMMSSToTod(fields[0]));
             ResultFormatter.eta(decodeResult, DateTimeUtils.convertHHMMSSToTod(fields[1]));
             ResultFormatter.unknown(decodeResult, fields[2]);
-            ResultFormatter.altitude(decodeResult, fields[3]);
+            ResultFormatter.altitude(decodeResult, Number(fields[3]));
             ResultFormatter.position(decodeResult, CoordinateUtils.decodeStringCoordinates((fields[4]+fields[5]).replace(/[ \.]/g, "")));
         }
     } else {

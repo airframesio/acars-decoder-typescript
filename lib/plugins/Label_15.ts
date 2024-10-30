@@ -21,7 +21,7 @@ export class Label_15 extends DecoderPlugin {
 
     const twoZeeRegex = /^\(2(?<between>.+)\(Z$/;
     const results = message.text.match(twoZeeRegex);
-    if (results) {
+    if (results?.groups) {
       // Style: (2N38111W 82211266 76400-64(Z
       // console.log(`Label 15 Position Report: between = ${results.groups.between}`);
       ResultFormatter.position(decodeResult, CoordinateUtils.decodeStringCoordinates(results.groups.between.substr(0,13)));

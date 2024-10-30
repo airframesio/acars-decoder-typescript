@@ -11,7 +11,7 @@ export class Label_13Through18_Slash extends DecoderPlugin { // eslint-disable-l
 
   qualifiers() { // eslint-disable-line class-methods-use-this
     return {
-      labels: ['13', '14', '15', '16', '17' , '18'],
+      labels: ['13', '14', '15', '16', '17', '18'],
       preambles: ['/'],
     };
   }
@@ -43,9 +43,9 @@ export class Label_13Through18_Slash extends DecoderPlugin { // eslint-disable-l
     ResultFormatter.arrivalAirport(decodeResult, data[2]);
     decodeResult.raw.day_of_month = Number(data[3]);
     const time = DateTimeUtils.convertHHMMSSToTod(data[4])
-    if(labelNumber === 13) {
+    if (labelNumber === 13) {
       ResultFormatter.out(decodeResult, time);
-    } else if(labelNumber === 14) {
+    } else if (labelNumber === 14) {
       ResultFormatter.off(decodeResult, time);
     } else if (labelNumber === 15) {
       ResultFormatter.on(decodeResult, time);
@@ -53,8 +53,8 @@ export class Label_13Through18_Slash extends DecoderPlugin { // eslint-disable-l
       ResultFormatter.in(decodeResult, time);
     }
 
-    if(parts.length === 7) {
-        ResultFormatter.unknownArr(decodeResult, parts.slice(4), '/');
+    if (parts.length === 7) {
+      ResultFormatter.unknownArr(decodeResult, parts.slice(4), '/');
     }
 
     for (let i = 1; i < lines.length; i++) {
@@ -66,12 +66,10 @@ export class Label_13Through18_Slash extends DecoderPlugin { // eslint-disable-l
         } else {
           position = {
             latitude: CoordinateUtils.getDirection(location[0][0]) * CoordinateUtils.dmsToDecimalDegrees(Number(location[0].substring(1, 3)), Number(location[0].substring(3, 5)), Number(location[0].substring(5, 7))),
-            longitude:CoordinateUtils.getDirection(location[1][0])  * CoordinateUtils.dmsToDecimalDegrees(Number(location[1].substring(1, 4)), Number(location[1].substring(4, 6)), Number(location[1].substring(6, 8))),
+            longitude: CoordinateUtils.getDirection(location[1][0]) * CoordinateUtils.dmsToDecimalDegrees(Number(location[1].substring(1, 4)), Number(location[1].substring(4, 6)), Number(location[1].substring(6, 8))),
           }
         }
-        if(!isNaN(position.latitude) && !isNaN(position.longitude)) {
-          ResultFormatter.position(decodeResult, position);
-        }
+        ResultFormatter.position(decodeResult, position);
       } else {
         ResultFormatter.unknown(decodeResult, lines[i], "\r\n");
       }
@@ -85,7 +83,7 @@ export class Label_13Through18_Slash extends DecoderPlugin { // eslint-disable-l
 
 export default {};
 
-function getMsgType(labelNumber : number): string {
+function getMsgType(labelNumber: number): string {
   if (labelNumber === 13) {
     return 'Out of Gate Report'
   }

@@ -33,14 +33,14 @@ export class Label_4N extends DecoderPlugin {
         ResultFormatter.departureAirport(decodeResult, text.substring(8, 11));
         ResultFormatter.arrivalAirport(decodeResult, text.substring(13, 16));
         ResultFormatter.position(decodeResult, CoordinateUtils.decodeStringCoordinatesDecimalMinutes(text.substring(30, 45).replace(/^(.)0/, "$1")));
-        ResultFormatter.altitude(decodeResult, text.substring(48, 51) * 100);
+        ResultFormatter.altitude(decodeResult, Number(text.substring(48, 51)) * 100);
         ResultFormatter.unknownArr(decodeResult, [text.substring(2, 4), text.substring(19, 29)], " ");
     } else if (fields.length === 33) {
         // variant 2
         decodeResult.raw.date = fields[3];
         if (fields[1] === "B") {
             ResultFormatter.position(decodeResult, {latitude: Number(fields[4]), longitude: Number(fields[5])});
-            ResultFormatter.altitude(decodeResult, fields[6]);
+            ResultFormatter.altitude(decodeResult, Number(fields[6]));
         }
         ResultFormatter.departureAirport(decodeResult, fields[8]);
         ResultFormatter.arrivalAirport(decodeResult, fields[9]);

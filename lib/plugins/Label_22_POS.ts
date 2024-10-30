@@ -36,18 +36,16 @@ export class Label_22_POS extends DecoderPlugin {
     const lonStr = fields[0].substring(9);
     const lat = Number(latStr) / 10000;
     const lon = Number(lonStr) / 10000;
-    if (!isNaN(lat) || !isNaN(lon)) {
-      ResultFormatter.position(decodeResult, {
-        latitude: CoordinateUtils.getDirection(fields[0][0]) * lat, 
-        longitude: CoordinateUtils.getDirection(fields[0][8]) * lon,
-      });
-    }
+    ResultFormatter.position(decodeResult, {
+      latitude: CoordinateUtils.getDirection(fields[0][0]) * lat,
+      longitude: CoordinateUtils.getDirection(fields[0][8]) * lon,
+    });
 
     ResultFormatter.time_of_day(decodeResult, DateTimeUtils.convertHHMMSSToTod(fields[2]));
     ResultFormatter.altitude(decodeResult, Number(fields[3]));
 
     ResultFormatter.unknownArr(decodeResult, [fields[1], ...fields.slice(4)]);
-    
+
     decodeResult.decoded = true;
     decodeResult.decoder.decodeLevel = 'partial';
     return decodeResult;

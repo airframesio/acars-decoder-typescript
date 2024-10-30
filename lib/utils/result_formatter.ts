@@ -60,7 +60,10 @@ export class ResultFormatter {
         });
     }
 
-    static position(decodeResult: DecodeResult, value: { latitude: number, longitude: number }) {
+    static position(decodeResult: DecodeResult, value: { latitude: number, longitude: number } | undefined) {
+        if(!value || isNaN(value.latitude) || isNaN(value.longitude)) {
+            return;
+        }
         decodeResult.raw.position = value;
         decodeResult.formatted.items.push({
             type: 'aircraft_position',
