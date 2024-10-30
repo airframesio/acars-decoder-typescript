@@ -53,6 +53,16 @@ export class H1Helper {
                 processTimeOfDeparture(decodeResult, fields[i].substring(2).split(',')); // Strip off TD
             } else if (fields[i].startsWith('FX')) {
                 ResultFormatter.freetext(decodeResult, fields[i].substring(2));
+            }  else if (fields[i].startsWith('ET')) {
+                if(fields[i].length === 7) { // 1 digit day
+                //ResultFormatter.dayOfMonth(decodeResult, Number(fields[i].substring(1, 3)));
+                ResultFormatter.eta(decodeResult, DateTimeUtils.convertHHMMSSToTod(fields[i].substring(3)+'00'));
+                } else if(fields[i].length === 8) { // 2 digit day
+                //ResultFormatter.dayOfMonth(decodeResult, Number(fields[i].substring(2, 4)));
+                ResultFormatter.eta(decodeResult, DateTimeUtils.convertHHMMSSToTod(fields[i].substring(4)+'00'));
+                } else {
+                    ResultFormatter.unknown(decodeResult, fields[i], '/');
+                }
             } else {
                 ResultFormatter.unknown(decodeResult, fields[i], '/');
             }
