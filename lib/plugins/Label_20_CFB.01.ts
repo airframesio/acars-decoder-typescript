@@ -1,6 +1,7 @@
 import { DecoderPlugin } from '../DecoderPlugin';
 import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
 import { CoordinateUtils } from '../utils/coordinate_utils';
+import { ResultFormatter } from '../utils/result_formatter';
 
 // In Air Report
 export class Label_20_CFB01 extends DecoderPlugin {
@@ -13,7 +14,7 @@ export class Label_20_CFB01 extends DecoderPlugin {
     };
   }
 
-  decode(message: Message, options: Options = {}) : DecodeResult {
+  decode(message: Message, options: Options = {}): DecodeResult {
     const decodeResult = this.defaultResult();
     decodeResult.decoder.name = this.name;
     decodeResult.formatted.description = 'Crew Flight Bag Message';
@@ -23,12 +24,11 @@ export class Label_20_CFB01 extends DecoderPlugin {
     // Match: IN02,coords,departure_icao,arrival_icao,current_date,current_time,fuel_in_tons
     const regex = /^IN02,(?<unsplit_coords>.*),(?<departure_icao>.*),(?<arrival_icao>.*),(?<current_date>.*),(?<current_time>.*),(?<fuel_in_tons>.*)$/;
     const results = message.text.match(regex);
-    if (results) {
+    if (results?.groups) {
       if (options.debug) {
         console.log(`Label 44 ETA Report: groups`);
         console.log(results.groups);
       }
-
 
       ResultFormatter.position(decodeResult, CoordinateUtils.decodeStringCoordinates(results.groups.unsplit_coords));
       ResultFormatter.departureAirport(decodeResult, results.groups.departure_icao);

@@ -39,7 +39,7 @@ export class Label_QQ extends DecoderPlugin {
         ResultFormatter.position(decodeResult, pos);
 
         if (decodeResult.remaining.text !== "---") {
-            ResultFormatter.groundspeed(decodeResult, message.text.substring(45, 48));
+            ResultFormatter.groundspeed(decodeResult, Number(message.text.substring(45, 48)));
         } else {
             ResultFormatter.unknown(decodeResult, message.text.substring(45, 48));
         }

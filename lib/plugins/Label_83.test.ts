@@ -28,8 +28,8 @@ test('decodes Label 83 variant 1', () => {
   expect(decodeResult.raw.position.latitude).toBe(40.53);
   expect(decodeResult.raw.position.longitude).toBe(-74.47);
   expect(decodeResult.raw.altitude).toBe(3836);
-  expect(decodeResult.raw.groundspeed).toBe('212');
-  expect(decodeResult.raw.heading).toBe('140.0');
+  expect(decodeResult.raw.groundspeed).toBe(212);
+  expect(decodeResult.raw.heading).toBe(140);
   expect(decodeResult.remaining.text).toBe('19700');
   expect(decodeResult.formatted.items.length).toBe(6);
   expect(decodeResult.formatted.items[0].type).toBe('icao');
@@ -43,7 +43,7 @@ test('decodes Label 83 variant 1', () => {
   expect(decodeResult.formatted.items[4].type).toBe('aircraft_groundspeed');
   expect(decodeResult.formatted.items[4].value).toBe('212 knots');
   expect(decodeResult.formatted.items[5].type).toBe('heading');
-  expect(decodeResult.formatted.items[5].value).toBe('140.0');
+  expect(decodeResult.formatted.items[5].value).toBe('140');
 });
 
 test('decodes Label 83 variant 1 (C-band)', () => {
@@ -66,8 +66,8 @@ test('decodes Label 83 variant 1 (C-band)', () => {
   expect(decodeResult.raw.position.latitude).toBe(39.12);
   expect(decodeResult.raw.position.longitude).toBe(-175.1);
   expect(decodeResult.raw.altitude).toBe(39001);
-  expect(decodeResult.raw.groundspeed).toBe('265');
-  expect(decodeResult.raw.heading).toBe('-107.6');
+  expect(decodeResult.raw.groundspeed).toBe(265);
+  expect(decodeResult.raw.heading).toBe(-107.6);
   expect(decodeResult.remaining.text).toBe('64900');
   expect(decodeResult.formatted.items.length).toBe(7);
   expect(decodeResult.formatted.items[0].type).toBe('flight_number');

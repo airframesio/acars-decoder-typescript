@@ -1,5 +1,7 @@
+import { DateTimeUtils } from '../DateTimeUtils';
 import { DecoderPlugin } from '../DecoderPlugin';
 import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
+import { ResultFormatter } from '../utils/result_formatter';
 
 export class Label_QP extends DecoderPlugin {
   name = 'label-qp';
@@ -17,7 +19,7 @@ export class Label_QP extends DecoderPlugin {
 
     ResultFormatter.departureAirport(decodeResult, message.text.substring(0, 4));
     ResultFormatter.arrivalAirport(decodeResult, message.text.substring(4, 8));
-    ResultFormatter.out(decodeResult, message.text.substring(8, 12));
+    ResultFormatter.out(decodeResult, DateTimeUtils.convertHHMMSSToTod(message.text.substring(8, 12)+'00'));
     ResultFormatter.unknown(decodeResult, message.text.substring(12));
 
     decodeResult.decoded = true;
