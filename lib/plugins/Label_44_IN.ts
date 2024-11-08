@@ -1,3 +1,4 @@
+import { DateTimeUtils } from '../DateTimeUtils';
 import { DecoderPlugin } from '../DecoderPlugin';
 import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
 import { CoordinateUtils } from '../utils/coordinate_utils';
@@ -14,38 +15,42 @@ export class Label_44_IN extends DecoderPlugin {
     };
   }
 
-  decode(message: Message, options: Options = {}) : DecodeResult {
+  decode(message: Message, options: Options = {}): DecodeResult {
     const decodeResult = this.defaultResult();
     decodeResult.decoder.name = this.name;
     decodeResult.formatted.description = 'In Air Report';
     decodeResult.message = message;
 
-    // Style: IN02,N38338W121179,KMHR,KPDX,0806,2355,005.1
-    // Match: IN02,coords,departure_icao,arrival_icao,current_date,current_time,fuel_in_tons
-    const regex = /^.*,(?<unsplit_coords>.*),(?<departure_icao>.*),(?<arrival_icao>.*),(?<current_date>.*),(?<current_time>.*),(?<fuel_in_tons>.*)$/;
-    const results = message.text.match(regex);
-    if (results?.groups) {
+    const data = message.text.split(',');
+    if (data.length >= 7) {
       if (options.debug) {
         console.log(`Label 44 In Air Report: groups`);
-        console.log(results.groups);
+        console.log(data);
       }
 
-      ResultFormatter.position(decodeResult, CoordinateUtils.decodeStringCoordinates(results.groups.unsplit_coords));
-      ResultFormatter.departureAirport(decodeResult, results.groups.departure_icao);
-      ResultFormatter.arrivalAirport(decodeResult, results.groups.arrival_icao);
-
-      decodeResult.raw.current_time = Date.parse(
-        new Date().getFullYear() + "-" +
-        results.groups.current_date.substr(0, 2) + "-" +
-        results.groups.current_date.substr(2, 2) + "T" +
-        results.groups.current_time.substr(0, 2) + ":" +
-        results.groups.current_time.substr(2, 2) + ":00Z"
-      );
-
-      if (results.groups.fuel_in_tons != '***' && results.groups.fuel_in_tons != '****') {
-        decodeResult.raw.fuel_in_tons = Number(results.groups.fuel_in_tons);
+      ResultFormatter.position(decodeResult, CoordinateUtils.decodeStringCoordinatesDecimalMinutes(data[1]));
+      ResultFormatter.departureAirport(decodeResult, data[2]);
+      ResultFormatter.arrivalAirport(decodeResult, data[3]);
+      ResultFormatter.month(decodeResult, Number(data[4].substring(0, 2)));
+      ResultFormatter.day(decodeResult, Number(data[4].substring(2, 4)));
+      ResultFormatter.in(decodeResult, DateTimeUtils.convertHHMMSSToTod(data[5]));
+      const fuel = Number(data[6]);
+      if (!isNaN(fuel)) {
+        ResultFormatter.remainingFuel(decodeResult, Number(fuel));
       }
 
+      if (data.length > 7) {
+        ResultFormatter.unknownArr(decodeResult, data.slice(7));
+      }
+
+    } else {
+      if (options.debug) {
+        console.log(`Decoder: Unknown 44 message: ${message.text}`);
+      }
+      ResultFormatter.unknown(decodeResult, message.text);
+      decodeResult.decoded = false;
+      decodeResult.decoder.decodeLevel = 'none';
+      return decodeResult;
     }
 
     decodeResult.decoded = true;
