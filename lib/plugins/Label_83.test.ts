@@ -24,7 +24,7 @@ test('decodes Label 83 variant 1', () => {
   expect(decodeResult.message.text).toBe(text);
   expect(decodeResult.raw.departure_icao).toBe('KLAX');
   expect(decodeResult.raw.arrival_icao).toBe('KEWR');
-  expect(decodeResult.raw.day_of_month).toBe('22');
+  expect(decodeResult.raw.day).toBe('22');
   expect(decodeResult.raw.position.latitude).toBe(40.53);
   expect(decodeResult.raw.position.longitude).toBe(-74.47);
   expect(decodeResult.raw.altitude).toBe(3836);
@@ -62,7 +62,7 @@ test('decodes Label 83 variant 1 (C-band)', () => {
   expect(decodeResult.raw.flight_number).toBe('UA7');
   expect(decodeResult.raw.departure_icao).toBe('KIAH');
   expect(decodeResult.raw.arrival_icao).toBe('RJAA');
-  expect(decodeResult.raw.day_of_month).toBe('11');
+  expect(decodeResult.raw.day).toBe('11');
   expect(decodeResult.raw.position.latitude).toBe(39.12);
   expect(decodeResult.raw.position.longitude).toBe(-175.1);
   expect(decodeResult.raw.altitude).toBe(39001);
@@ -101,7 +101,7 @@ test('decodes Label 83 variant 2', () => {
   expect(decodeResult.message.text).toBe(text);
   expect(decodeResult.raw.departure_icao).toBe('ENGM');
   expect(decodeResult.raw.arrival_icao).toBe('KEWR');
-  expect(decodeResult.raw.day_of_month).toBe('22');
+  expect(decodeResult.raw.day).toBe('22');
   expect(decodeResult.raw.tail).toBe('LN-RKO');
   expect(decodeResult.raw.eta_time).toBe(60060);
   expect(decodeResult.remaining.text).toBe('0907');
@@ -129,7 +129,7 @@ test('decodes Label 83 variant 3', () => {
   expect(decodeResult.decoder.name).toBe('label-83');
   expect(decodeResult.formatted.description).toBe('Airline Defined');
   expect(decodeResult.message.text).toBe(text);
-  expect(decodeResult.raw.day_of_month).toBe('22');
+  expect(decodeResult.raw.day).toBe('22');
   expect(decodeResult.raw.position.latitude).toBe(40.64333333333333);
   expect(decodeResult.raw.position.longitude).toBe(-74.46333333333334);
   expect(decodeResult.raw.altitude).toBe(2925);
@@ -155,7 +155,7 @@ test('decodes Label 83 variant 3 (C-band)', () => {
   expect(decodeResult.formatted.description).toBe('Airline Defined');
   expect(decodeResult.message.text).toBe(text);
   expect(decodeResult.raw.flight_number).toBe('XA1');
-  expect(decodeResult.raw.day_of_month).toBe('11');
+  expect(decodeResult.raw.day).toBe('11');
   expect(decodeResult.raw.position.latitude).toBe(5.943333333333333);
   expect(decodeResult.raw.position.longitude).toBe(116.05);
   expect(decodeResult.raw.altitude).toBe(0);

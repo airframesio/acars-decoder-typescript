@@ -22,7 +22,7 @@ test('decodes Label 4N variant 1', () => {
   expect(decodeResult.decoder.name).toBe('label-4n');
   expect(decodeResult.formatted.description).toBe('Airline Defined');
   expect(decodeResult.message.text).toBe(text);
-  expect(decodeResult.raw.day_of_month).toBe('22');
+  expect(decodeResult.raw.day).toBe('22');
   expect(decodeResult.remaining.text).toBe('02 0013  0072');
   expect(decodeResult.formatted.items.length).toBe(4);
   expect(decodeResult.formatted.items[0].code).toBe('ORG');
