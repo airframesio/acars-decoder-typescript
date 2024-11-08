@@ -112,7 +112,7 @@ export class Label_5Z_Slash extends DecoderPlugin {
         ResultFormatter.time_of_day(decodeResult, DateTimeUtils.convertHHMMSSToTod(airports[4]));
 
         const estimates = data[3].split(' ');
-        ResultFormatter.eta(decodeResult, DateTimeUtils.convertHHMMSSToTod(estimates[1]+'00'));
+        ResultFormatter.eta(decodeResult, DateTimeUtils.convertHHMMSSToTod(estimates[1]));
         ResultFormatter.unknown(decodeResult, estimates[2]);
       } else {
         if (options.debug) {

@@ -26,10 +26,13 @@ export class DateTimeUtils {
 
   /**
    * 
-   * @param time HHMMSS
+   * @param time HHMMSS or HHMM
    * @returns seconds since midnight
    */
   public static convertHHMMSSToTod(time: string): number {
+    if(time.length === 4) { // add seconds if not present
+      time += '00';
+    }
     const h = Number(time.substring(0, 2));
     const m = Number(time.substring(2, 4));
     const s = Number(time.substring(4, 6));

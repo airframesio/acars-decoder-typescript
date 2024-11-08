@@ -42,16 +42,16 @@ export class Label_10_Slash extends DecoderPlugin { // eslint-disable-line camel
     ResultFormatter.heading(decodeResult, Number(parts[5]));
     ResultFormatter.altitude(decodeResult, 100*Number(parts[6]));
     ResultFormatter.arrivalAirport(decodeResult, parts[7]);
-    ResultFormatter.eta(decodeResult, DateTimeUtils.convertHHMMSSToTod(parts[8]+'00'));
+    ResultFormatter.eta(decodeResult, DateTimeUtils.convertHHMMSSToTod(parts[8]));
     const waypoints: Waypoint[] = [{
       name: parts[11],
     },{
       name: parts[12],
-      time: DateTimeUtils.convertHHMMSSToTod(parts[13]+'00'),
+      time: DateTimeUtils.convertHHMMSSToTod(parts[13]),
       timeFormat: 'tod',
     },{
       name: parts[14],
-      time: DateTimeUtils.convertHHMMSSToTod(parts[15]+'00'),
+      time: DateTimeUtils.convertHHMMSSToTod(parts[15]),
       timeFormat: 'tod',
     },];
     ResultFormatter.route(decodeResult, { waypoints: waypoints });
