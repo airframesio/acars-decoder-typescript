@@ -29,7 +29,7 @@ export class Label_4N extends DecoderPlugin {
     const fields = text.split(",");
     if (text.length === 51) {
         // variant 1
-        decodeResult.raw.day_of_month = text.substring(0, 2);
+        decodeResult.raw.day = text.substring(0, 2);
         ResultFormatter.departureAirport(decodeResult, text.substring(8, 11));
         ResultFormatter.arrivalAirport(decodeResult, text.substring(13, 16));
         ResultFormatter.position(decodeResult, CoordinateUtils.decodeStringCoordinatesDecimalMinutes(text.substring(30, 45).replace(/^(.)0/, "$1")));

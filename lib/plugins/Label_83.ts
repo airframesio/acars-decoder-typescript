@@ -31,7 +31,7 @@ export class Label_83 extends DecoderPlugin {
         // variant 2
         const fields = text.split(/\s+/);
         if (fields[2].length > 5) {
-            decodeResult.raw.day_of_month = fields[2].substring(5);
+            decodeResult.raw.day = fields[2].substring(5);
         }
         ResultFormatter.unknown(decodeResult, fields[2].substring(0, 4));
         const subfields = fields[3].split("/");
@@ -41,7 +41,7 @@ export class Label_83 extends DecoderPlugin {
         ResultFormatter.eta(decodeResult, DateTimeUtils.convertHHMMSSToTod(fields[6] + "00"));
     } else if (text.substring(0, 5) === "001PR") {
         // variant 3
-        decodeResult.raw.day_of_month = text.substring(5, 7);
+        decodeResult.raw.day = text.substring(5, 7);
         const position = CoordinateUtils.decodeStringCoordinatesDecimalMinutes(text.substring(13, 28).replace(/\./g, ""))
         if (position) {
             ResultFormatter.position(decodeResult, position);
@@ -54,7 +54,7 @@ export class Label_83 extends DecoderPlugin {
             // variant 1
             ResultFormatter.departureAirport(decodeResult, fields[0]);
             ResultFormatter.arrivalAirport(decodeResult, fields[1]);
-            decodeResult.raw.day_of_month = fields[2].substring(0,2);
+            decodeResult.raw.day = fields[2].substring(0,2);
             decodeResult.raw.time = fields[2].substring(2);
             ResultFormatter.position(decodeResult,
                 {

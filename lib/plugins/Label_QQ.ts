@@ -23,7 +23,7 @@ export class Label_QQ extends DecoderPlugin {
     ResultFormatter.arrivalAirport(decodeResult, message.text.substring(4, 8));
 
     if (message.text.substring(12, 19) === "\r\n001FE") {
-        decodeResult.raw.day_of_month = message.text.substring(19, 21);
+        decodeResult.raw.day = message.text.substring(19, 21);
         ResultFormatter.off(decodeResult, DateTimeUtils.convertHHMMSSToTod(message.text.substring(21, 27)));
         let latdir = message.text.substring(27, 28);
         let latdeg = Number(message.text.substring(28, 30));

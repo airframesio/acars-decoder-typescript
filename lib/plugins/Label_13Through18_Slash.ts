@@ -41,7 +41,7 @@ export class Label_13Through18_Slash extends DecoderPlugin { // eslint-disable-l
     const data = parts[2].split(' ');
     ResultFormatter.departureAirport(decodeResult, data[1]);
     ResultFormatter.arrivalAirport(decodeResult, data[2]);
-    decodeResult.raw.day_of_month = Number(data[3]);
+    decodeResult.raw.day = Number(data[3]);
     const time = DateTimeUtils.convertHHMMSSToTod(data[4])
     if (labelNumber === 13) {
       ResultFormatter.out(decodeResult, time);

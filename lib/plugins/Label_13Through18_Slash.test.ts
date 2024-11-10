@@ -28,7 +28,7 @@ describe('Label_13Through18_Slash', () => {
       expect(decodeResult.decoded).toBe(true);
 
       expect(decodeResult.decoder.decodeLevel).toBe('full');
-      expect(decodeResult.raw.day_of_month).toBe(12);
+      expect(decodeResult.raw.day).toBe(12);
       expect(decodeResult.formatted.description).toBe('Out of Gate Report');
       expect(decodeResult.formatted.items.length).toBe(3);
       expect(decodeResult.formatted.items[0].label).toBe('Origin');
@@ -46,7 +46,7 @@ describe('Label_13Through18_Slash', () => {
 
       expect(decodeResult.decoded).toBe(true);
       expect(decodeResult.decoder.decodeLevel).toBe('full');
-      expect(decodeResult.raw.day_of_month).toBe(12);
+      expect(decodeResult.raw.day).toBe(12);
       expect(decodeResult.formatted.description).toBe('Out of Gate Report');
       expect(decodeResult.formatted.items.length).toBe(4);
       expect(decodeResult.formatted.items[0].label).toBe('Origin');
@@ -67,7 +67,7 @@ describe('Label_13Through18_Slash', () => {
 
       expect(decodeResult.decoded).toBe(true);
       expect(decodeResult.decoder.decodeLevel).toBe('full');
-      expect(decodeResult.raw.day_of_month).toBe(8);
+      expect(decodeResult.raw.day).toBe(8);
       expect(decodeResult.formatted.description).toBe('Takeoff Report');
       expect(decodeResult.formatted.items.length).toBe(3);
       expect(decodeResult.formatted.items[0].label).toBe('Origin');
@@ -85,7 +85,7 @@ describe('Label_13Through18_Slash', () => {
 
       expect(decodeResult.decoded).toBe(true);
       expect(decodeResult.decoder.decodeLevel).toBe('full');
-      expect(decodeResult.raw.day_of_month).toBe(9);
+      expect(decodeResult.raw.day).toBe(9);
       expect(decodeResult.formatted.items.length).toBe(4);
       expect(decodeResult.formatted.items[0].label).toBe('Origin');
       expect(decodeResult.formatted.items[0].value).toBe('KIAD');
@@ -105,7 +105,7 @@ describe('Label_13Through18_Slash', () => {
 
       expect(decodeResult.decoded).toBe(true);
       expect(decodeResult.decoder.decodeLevel).toBe('partial');
-      expect(decodeResult.raw.day_of_month).toBe(9);
+      expect(decodeResult.raw.day).toBe(9);
       expect(decodeResult.formatted.items.length).toBe(4);
       expect(decodeResult.formatted.items[0].label).toBe('Origin');
       expect(decodeResult.formatted.items[0].value).toBe('KIAD');
@@ -131,7 +131,7 @@ describe('Label_13Through18_Slash', () => {
 
       expect(decodeResult.decoded).toBe(true);
       expect(decodeResult.decoder.decodeLevel).toBe('partial');
-      expect(decodeResult.raw.day_of_month).toBe(10);
+      expect(decodeResult.raw.day).toBe(10);
       expect(decodeResult.formatted.items.length).toBe(4);
       expect(decodeResult.formatted.items[0].label).toBe('Origin');
       expect(decodeResult.formatted.items[0].value).toBe('KIAD');
@@ -154,7 +154,7 @@ describe('Label_13Through18_Slash', () => {
       expect(decodeResult.decoded).toBe(true);
 
       expect(decodeResult.decoder.decodeLevel).toBe('full');
-      expect(decodeResult.raw.day_of_month).toBe(12);
+      expect(decodeResult.raw.day).toBe(12);
       expect(decodeResult.formatted.description).toBe('On Ground Report');
       expect(decodeResult.formatted.items.length).toBe(3);
       expect(decodeResult.formatted.items[0].label).toBe('Origin');
@@ -172,7 +172,7 @@ describe('Label_13Through18_Slash', () => {
 
       expect(decodeResult.decoded).toBe(true);
       expect(decodeResult.decoder.decodeLevel).toBe('full');
-      expect(decodeResult.raw.day_of_month).toBe(12);
+      expect(decodeResult.raw.day).toBe(12);
       expect(decodeResult.formatted.description).toBe('On Ground Report');
       expect(decodeResult.formatted.items.length).toBe(4);
       expect(decodeResult.formatted.items[0].label).toBe('Origin');
@@ -197,7 +197,7 @@ describe('Label_13Through18_Slash', () => {
 
       expect(decodeResult.decoded).toBe(true);
       expect(decodeResult.decoder.decodeLevel).toBe('partial');
-      expect(decodeResult.raw.day_of_month).toBe(12);
+      expect(decodeResult.raw.day).toBe(12);
       expect(decodeResult.formatted.description).toBe('In Gate Report');
       expect(decodeResult.formatted.items.length).toBe(4);
       expect(decodeResult.formatted.items[0].label).toBe('Origin');
@@ -224,7 +224,7 @@ describe('Label_13Through18_Slash', () => {
       expect(decodeResult.decoded).toBe(true);
 
       expect(decodeResult.decoder.decodeLevel).toBe('partial');
-      expect(decodeResult.raw.day_of_month).toBe(12);
+      expect(decodeResult.raw.day).toBe(12);
       expect(decodeResult.formatted.description).toBe('Post Report');
       expect(decodeResult.formatted.items.length).toBe(2);
       expect(decodeResult.formatted.items[0].label).toBe('Origin');
@@ -244,7 +244,7 @@ describe('Label_13Through18_Slash', () => {
 
       expect(decodeResult.decoded).toBe(true);
       expect(decodeResult.decoder.decodeLevel).toBe('partial');
-      expect(decodeResult.raw.day_of_month).toBe(12);
+      expect(decodeResult.raw.day).toBe(12);
       expect(decodeResult.formatted.description).toBe('Post Report');
       expect(decodeResult.formatted.items.length).toBe(3);
       expect(decodeResult.formatted.items[0].label).toBe('Origin');
@@ -269,7 +269,7 @@ describe('Label_13Through18_Slash', () => {
 
       expect(decodeResult.decoded).toBe(true);
       expect(decodeResult.decoder.decodeLevel).toBe('partial');
-      expect(decodeResult.raw.day_of_month).toBe(12);
+      expect(decodeResult.raw.day).toBe(12);
       expect(decodeResult.formatted.description).toBe('Post Times Report');
       expect(decodeResult.formatted.items.length).toBe(3);
       expect(decodeResult.formatted.items[0].label).toBe('Origin');
@@ -288,7 +288,7 @@ describe('Label_13Through18_Slash', () => {
 
       expect(decodeResult.decoded).toBe(true);
       expect(decodeResult.decoder.decodeLevel).toBe('partial');
-      expect(decodeResult.raw.day_of_month).toBe(12);
+      expect(decodeResult.raw.day).toBe(12);
       expect(decodeResult.formatted.description).toBe('Post Times Report');
       expect(decodeResult.formatted.items.length).toBe(2);
       expect(decodeResult.formatted.items[0].label).toBe('Origin');
