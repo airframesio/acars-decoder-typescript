@@ -324,16 +324,6 @@ export class ResultFormatter {
         });
     }
 
-    static month(decodeResult: DecodeResult, month: number) {
-        decodeResult.raw.month = month;
-        decodeResult.formatted.items.push({
-            type: 'month',
-            code: 'MSG_MON',
-            label: 'Month of Year',
-            value: `${month}`,
-        });
-    }
-
     static day(decodeResult: DecodeResult, day: number) {
         decodeResult.raw.day = day;
         decodeResult.formatted.items.push({
