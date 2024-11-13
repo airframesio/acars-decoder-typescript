@@ -80,14 +80,14 @@ export class Label_5Z_Slash extends DecoderPlugin {
         //info[0] is blank
         ResultFormatter.departureAirport(decodeResult, info[1]);
         ResultFormatter.arrivalAirport(decodeResult, info[2]);
-        decodeResult.raw.day_of_month = Number(info[3]);
+        decodeResult.raw.day = Number(info[3]);
         ResultFormatter.time_of_day(decodeResult, DateTimeUtils.convertHHMMSSToTod(info[4]));
         ResultFormatter.arrivalRunway(decodeResult, info[5].slice(1));
         ResultFormatter.unknownArr(decodeResult, data.slice(3), '/');
       } else if (type === 'B3') {
         ResultFormatter.departureAirport(decodeResult, header[1].substring(0, 3), 'IATA');
         ResultFormatter.arrivalAirport(decodeResult, header[1].substring(3), 'IATA');
-        decodeResult.raw.day_of_month = Number(header[2]);
+        decodeResult.raw.day = Number(header[2]);
         ResultFormatter.arrivalRunway(decodeResult, header[3].slice(1));
         if (header.length > 4) {
           ResultFormatter.unknownArr(decodeResult, header.slice(4), '/');
@@ -97,7 +97,7 @@ export class Label_5Z_Slash extends DecoderPlugin {
         //info[0] is blank
         ResultFormatter.departureAirport(decodeResult, info[1]);
         ResultFormatter.arrivalAirport(decodeResult, info[2]);
-        decodeResult.raw.day_of_month = Number(info[3]);
+        decodeResult.raw.day = Number(info[3]);
         ResultFormatter.time_of_day(decodeResult, DateTimeUtils.convertHHMMSSToTod(info[4]));
         ResultFormatter.unknownArr(decodeResult, info.slice(5), ' ');
       } else if (type === 'C3') {
@@ -108,11 +108,11 @@ export class Label_5Z_Slash extends DecoderPlugin {
         // aiports[0] is blank
         ResultFormatter.departureAirport(decodeResult, airports[1]);
         ResultFormatter.arrivalAirport(decodeResult, airports[2]);
-        decodeResult.raw.day_of_month = Number(airports[3]);
+        decodeResult.raw.day = Number(airports[3]);
         ResultFormatter.time_of_day(decodeResult, DateTimeUtils.convertHHMMSSToTod(airports[4]));
 
         const estimates = data[3].split(' ');
-        ResultFormatter.eta(decodeResult, DateTimeUtils.convertHHMMSSToTod(estimates[1]+'00'));
+        ResultFormatter.eta(decodeResult, DateTimeUtils.convertHHMMSSToTod(estimates[1]));
         ResultFormatter.unknown(decodeResult, estimates[2]);
       } else {
         if (options.debug) {

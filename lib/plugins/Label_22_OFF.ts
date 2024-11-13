@@ -33,7 +33,7 @@ export class Label_22_OFF extends DecoderPlugin {
       ResultFormatter.flightNumber(decodeResult, fields[0]);
       ResultFormatter.departureDay(decodeResult, Number(fields[1].substring(0, 2))); // departure day
       ResultFormatter.arrivalDay(decodeResult, Number(fields[1].substring(2,4))); // arrival day
-      ResultFormatter.time_of_day(decodeResult, DateTimeUtils.convertHHMMSSToTod(fields[1].substring(4, 8) + '00')); //HHMM
+      ResultFormatter.time_of_day(decodeResult, DateTimeUtils.convertHHMMSSToTod(fields[1].substring(4, 8)));
       ResultFormatter.departureAirport(decodeResult, fields[1].substring(8, 12));
       ResultFormatter.arrivalAirport(decodeResult, fields[1].substring(12, 16));
       ResultFormatter.off(decodeResult, DateTimeUtils.convertHHMMSSToTod(fields[1].substring(16,22)));
@@ -52,7 +52,7 @@ export class Label_22_OFF extends DecoderPlugin {
 
       ResultFormatter.departureAirport(decodeResult, fields[0]);
       ResultFormatter.arrivalAirport(decodeResult, fields[1]);
-      ResultFormatter.off(decodeResult, DateTimeUtils.convertHHMMSSToTod(fields[2] + '00'));
+      ResultFormatter.off(decodeResult, DateTimeUtils.convertHHMMSSToTod(fields[2]));
       ResultFormatter.unknown(decodeResult, fields[3]);
 
       decodeResult.decoded = true;
@@ -72,12 +72,12 @@ export class Label_22_OFF extends DecoderPlugin {
         ResultFormatter.position(decodeResult, position);
       }
       ResultFormatter.day(decodeResult, Number(fields[1].substring(14, 16)));
-      ResultFormatter.time_of_day(decodeResult, DateTimeUtils.convertHHMMSSToTod(fields[1].substring(16, 20) + '00'));
+      ResultFormatter.time_of_day(decodeResult, DateTimeUtils.convertHHMMSSToTod(fields[1].substring(16, 20) ));
       ResultFormatter.departureAirport(decodeResult, fields[1].substring(20, 24));
       ResultFormatter.arrivalAirport(decodeResult, fields[1].substring(24, 28));
-      ResultFormatter.off(decodeResult, DateTimeUtils.convertHHMMSSToTod(fields[1].substring(28, 32) + '00'));
+      ResultFormatter.off(decodeResult, DateTimeUtils.convertHHMMSSToTod(fields[1].substring(28, 32)));
       ResultFormatter.unknown(decodeResult, fields[1].substring(32, 36));
-      ResultFormatter.eta(decodeResult, DateTimeUtils.convertHHMMSSToTod(fields[1].substring(36,40) + '00'));
+      ResultFormatter.eta(decodeResult, DateTimeUtils.convertHHMMSSToTod(fields[1].substring(36,40)));
       decodeResult.decoded = true;
       decodeResult.decoder.decodeLevel = 'partial';
 

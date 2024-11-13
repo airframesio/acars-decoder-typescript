@@ -55,11 +55,11 @@ export class H1Helper {
                 ResultFormatter.freetext(decodeResult, fields[i].substring(2));
             }  else if (fields[i].startsWith('ET')) {
                 if(fields[i].length === 7) { // 1 digit day
-                //ResultFormatter.dayOfMonth(decodeResult, Number(fields[i].substring(1, 3)));
-                ResultFormatter.eta(decodeResult, DateTimeUtils.convertHHMMSSToTod(fields[i].substring(3)+'00'));
+                ResultFormatter.day(decodeResult, Number(fields[i].substring(2, 3)));
+                ResultFormatter.eta(decodeResult, DateTimeUtils.convertHHMMSSToTod(fields[i].substring(3)));
                 } else if(fields[i].length === 8) { // 2 digit day
-                //ResultFormatter.dayOfMonth(decodeResult, Number(fields[i].substring(2, 4)));
-                ResultFormatter.eta(decodeResult, DateTimeUtils.convertHHMMSSToTod(fields[i].substring(4)+'00'));
+                ResultFormatter.day(decodeResult, Number(fields[i].substring(2, 4)));
+                ResultFormatter.eta(decodeResult, DateTimeUtils.convertHHMMSSToTod(fields[i].substring(4)));
                 } else {
                     ResultFormatter.unknown(decodeResult, fields[i], '/');
                 }

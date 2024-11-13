@@ -65,7 +65,7 @@ export class Label_1L_Slash extends DecoderPlugin { // eslint-disable-line camel
     }
     const eta = data.get('ETA');
     if (eta) {
-      ResultFormatter.eta(decodeResult, DateTimeUtils.convertHHMMSSToTod(eta + '00'));
+      ResultFormatter.eta(decodeResult, DateTimeUtils.convertHHMMSSToTod(eta));
       data.delete('ETA');
     }
 

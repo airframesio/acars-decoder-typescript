@@ -29,7 +29,7 @@ export class Label_8E extends DecoderPlugin {
         console.log(results.groups);
       }
 
-      ResultFormatter.eta(decodeResult, DateTimeUtils.convertHHMMSSToTod(results.groups.arrival_eta + '00'));
+      ResultFormatter.eta(decodeResult, DateTimeUtils.convertHHMMSSToTod(results.groups.arrival_eta));
       ResultFormatter.arrivalAirport(decodeResult, results.groups.arrival_icao);
     }
 

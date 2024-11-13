@@ -11,7 +11,7 @@ import { Route } from "../types/route";
  */
 export class ResultFormatter {
 
-    static route(decodeResult: DecodeResult, route: Route ) {
+    static route(decodeResult: DecodeResult, route: Route) {
         decodeResult.raw.route = route;
         decodeResult.formatted.items.push({
             type: 'aircraft_route',
@@ -61,7 +61,7 @@ export class ResultFormatter {
     }
 
     static position(decodeResult: DecodeResult, value: { latitude: number, longitude: number } | undefined) {
-        if(!value || isNaN(value.latitude) || isNaN(value.longitude)) {
+        if (!value || isNaN(value.latitude) || isNaN(value.longitude)) {
             return;
         }
         decodeResult.raw.position = value;
@@ -335,7 +335,7 @@ export class ResultFormatter {
     }
 
     static day(decodeResult: DecodeResult, day: number) {
-        decodeResult.raw.day_of_month = day;
+        decodeResult.raw.day = day;
         decodeResult.formatted.items.push({
             type: 'day_of_month',
             code: 'MSG_DAY',
@@ -344,8 +344,18 @@ export class ResultFormatter {
         });
     }
 
+    static month(decodeResult: DecodeResult, month: number) {
+        decodeResult.raw.month = month;
+        decodeResult.formatted.items.push({
+            type: 'month_of_year',
+            code: 'MSG_MON',
+            label: 'Month of Year',
+            value: `${month}`,
+        });
+    }
+
     static departureDay(decodeResult: DecodeResult, day: number) {
-        decodeResult.raw.departure_day_of_month = day;
+        decodeResult.raw.departure_day = day;
         decodeResult.formatted.items.push({
             type: 'day_of_month',
             code: 'DEP_DAY',
@@ -355,7 +365,7 @@ export class ResultFormatter {
     }
 
     static arrivalDay(decodeResult: DecodeResult, day: number) {
-        decodeResult.raw.arrival_day_of_month = day;
+        decodeResult.raw.arrival_day = day;
         decodeResult.formatted.items.push({
             type: 'day_of_month',
             code: 'ARR_DAY',

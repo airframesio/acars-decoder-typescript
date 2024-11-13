@@ -29,7 +29,7 @@ export class Label_30_Slash_EA extends DecoderPlugin {
       }
     }
 
-    ResultFormatter.eta(decodeResult, DateTimeUtils.convertHHMMSSToTod(results[0].substr(2, 4)+'00'));
+    ResultFormatter.eta(decodeResult, DateTimeUtils.convertHHMMSSToTod(results[0].substr(2, 4)));
 
     if (results[1].substring(0,2) === "DS") {
       ResultFormatter.arrivalAirport(decodeResult, results[1].substring(2, 6));
