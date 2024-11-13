@@ -31,8 +31,8 @@ export class Label_H1_StarPOS extends DecoderPlugin {
       return decodeResult;
     }
 
-    decodeResult.raw.month = Number(msg.substring(4, 6));
-    decodeResult.raw.day_of_month = Number(msg.substring(6, 8));
+    ResultFormatter.month(decodeResult, Number(msg.substring(4, 6)));
+    ResultFormatter.day(decodeResult, Number(msg.substring(6, 8)));
     ResultFormatter.time_of_day(decodeResult, DateTimeUtils.convertHHMMSSToTod(msg.substring(8, 12)));
     ResultFormatter.position(decodeResult, { // Deg Min, no sec
       latitude: CoordinateUtils.getDirection(msg.substring(12,13)) * (Number(msg.substring(13, 15)) + Number(msg.substring(15, 17))/60), 
