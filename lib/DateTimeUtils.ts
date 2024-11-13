@@ -30,7 +30,7 @@ export class DateTimeUtils {
    * @returns seconds since midnight
    */
   public static convertHHMMSSToTod(time: string): number {
-    if(time.length === 4) { // add seconds if not present
+    if(time.length === 4) {
       time += '00';
     }
     const h = Number(time.substring(0, 2));
