@@ -29,7 +29,7 @@ export class Label_15 extends DecoderPlugin {
         if (alt != '---') {
           ResultFormatter.altitude(decodeResult, 100 * Number(alt));
         }
-        ResultFormatter.temperature(decodeResult, between.substring(22).replace(" ", "0"));
+        ResultFormatter.temperature(decodeResult, between.substring(22).replaceAll(" ", "0"));
       } else { // long variant
         ResultFormatter.unknown(decodeResult, between.substring(13));
       }

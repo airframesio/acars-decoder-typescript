@@ -20,19 +20,19 @@ describe('Label_15', () => {
     });
 
     test('decodes short variant missing ???', () => {
-        const text = '(2N39413W 73354--- 66349-43(Z'
+        const text = '(2N38448W 77216--- 28 20  7(Z'
         const decodeResult = plugin.decode({ text: text });
         
         expect(decodeResult.decoded).toBe(true);
         expect(decodeResult.decoder.decodeLevel).toBe('partial');
         expect(decodeResult.formatted.items.length).toBe(3);
         expect(decodeResult.formatted.items[0].label).toBe('Aircraft Position');
-        expect(decodeResult.formatted.items[0].value).toBe('39.688 N, 73.590 W');
+        expect(decodeResult.formatted.items[0].value).toBe('38.747 N, 77.360 W');
         expect(decodeResult.formatted.items[1].label).toBe('Altitude');
-        expect(decodeResult.formatted.items[1].value).toBe('34900 feet');
+        expect(decodeResult.formatted.items[1].value).toBe('2000 feet');
         expect(decodeResult.formatted.items[2].label).toBe('Outside Air Temperature (C)');
-        expect(decodeResult.formatted.items[2].value).toBe('-43 degrees');
-        expect(decodeResult.remaining.text).toBe('--- 66');
+        expect(decodeResult.formatted.items[2].value).toBe('7 degrees');
+        expect(decodeResult.remaining.text).toBe('--- 28');
     });
 
     test('decodes short variant all fields', () => {
