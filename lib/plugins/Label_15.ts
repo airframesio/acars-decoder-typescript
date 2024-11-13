@@ -1,3 +1,4 @@
+import { DateTimeUtils } from '../DateTimeUtils';
 import { DecoderPlugin } from '../DecoderPlugin';
 import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
 import { CoordinateUtils } from '../utils/coordinate_utils';
@@ -30,8 +31,19 @@ export class Label_15 extends DecoderPlugin {
           ResultFormatter.altitude(decodeResult, 100 * Number(alt));
         }
         ResultFormatter.temperature(decodeResult, between.substring(22).replaceAll(" ", "0"));
-      } else { // long variant
-        ResultFormatter.unknown(decodeResult, between.substring(13));
+      } else if(between.substring(13,16) === 'OFF') { // off variant
+        const ddmmyy = between.substring(16, 22);
+        const hhmm = between.substring(22, 26);
+        if(ddmmyy != '------') {
+          const mmddyy = ddmmyy.substring(2, 4) + ddmmyy.substring(0, 2) + ddmmyy.substring(4);
+          console.log(`Decoder: mmddyy: ${mmddyy}, hhmm: ${hhmm}`);
+          ResultFormatter.off(decodeResult, DateTimeUtils.convertDateTimeToEpoch(hhmm+'00', mmddyy), 'epoch');
+        } else {
+          ResultFormatter.off(decodeResult, DateTimeUtils.convertHHMMSSToTod(hhmm), 'tod');
+        }
+        ResultFormatter.unknown(decodeResult, between.substring(26));
+      } else {
+        ResultFormatter.unknown(decodeResult, between.substring(26));
       }
     } else {
       if (options.debug) {

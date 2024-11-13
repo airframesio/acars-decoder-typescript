@@ -284,14 +284,24 @@ export class ResultFormatter {
         });
     }
 
-    static off(decodeResult: DecodeResult, time: number) {
-        decodeResult.raw.off_time = time;
-        decodeResult.formatted.items.push({
-            type: 'time_of_day',
-            code: 'OFF',
-            label: 'Takeoff Time',
-            value: DateTimeUtils.timestampToString(time, 'tod'),
-        });
+    static off(decodeResult: DecodeResult, time: number, type: 'tod' | 'epoch' = 'tod') {
+        if (type === 'tod') {
+            decodeResult.raw.off_time = time;
+            decodeResult.formatted.items.push({
+                type: 'time_of_day',
+                code: 'OFF',
+                label: 'Takeoff Time',
+                value: DateTimeUtils.timestampToString(time, 'tod'),
+            });
+        } else {
+            decodeResult.raw.off_date = time;
+            decodeResult.formatted.items.push({
+                type: 'epoch',
+                code: 'OFF',
+                label: 'Takeoff Time',
+                value: DateTimeUtils.timestampToString(time, 'epoch'),
+            });
+        }
     }
 
     static on(decodeResult: DecodeResult, time: number) {

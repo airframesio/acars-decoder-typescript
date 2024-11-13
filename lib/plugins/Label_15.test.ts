@@ -19,7 +19,7 @@ describe('Label_15', () => {
         });
     });
 
-    test('decodes short variant missing ???', () => {
+    test('decodes short variant missing unkown', () => {
         const text = '(2N38448W 77216--- 28 20  7(Z'
         const decodeResult = plugin.decode({ text: text });
         
@@ -65,16 +65,48 @@ describe('Label_15', () => {
         expect(decodeResult.remaining.text).toBe('--- 42');
     });
     
-    test('decodes long variant', () => {
+    test('decodes off variant no unkown', () => {
         const text = '(2N39018W 77284OFF11112418101313--------(Z'
         const decodeResult = plugin.decode({ text: text });
         
         expect(decodeResult.decoded).toBe(true);
         expect(decodeResult.decoder.decodeLevel).toBe('partial');
-        expect(decodeResult.formatted.items.length).toBe(1);
+        expect(decodeResult.formatted.items.length).toBe(2);
         expect(decodeResult.formatted.items[0].label).toBe('Aircraft Position');
         expect(decodeResult.formatted.items[0].value).toBe('39.030 N, 77.473 W');
-        expect(decodeResult.remaining.text).toBe('OFF11112418101313--------');
+        expect(decodeResult.formatted.items[1].label).toBe('Takeoff Time');
+        expect(decodeResult.formatted.items[1].value).toBe('2024-11-11T18:10:00Z');
+        expect(decodeResult.remaining.text).toBe('1313--------');
+    });
+    
+    test('decodes off variant no date and unknown', () => {
+        // https://app.airframes.io/messages/3593342701
+        const text = '(2N42589W 83520OFF------13280606--------(Z'
+        const decodeResult = plugin.decode({ text: text });
+        
+        expect(decodeResult.decoded).toBe(true);
+        expect(decodeResult.decoder.decodeLevel).toBe('partial');
+        expect(decodeResult.formatted.items.length).toBe(2);
+        expect(decodeResult.formatted.items[0].label).toBe('Aircraft Position');
+        expect(decodeResult.formatted.items[0].value).toBe('42.982 N, 83.867 W');
+        expect(decodeResult.formatted.items[1].label).toBe('Takeoff Time');
+        expect(decodeResult.formatted.items[1].value).toBe('13:28:00');
+        expect(decodeResult.remaining.text).toBe('0606--------');
+    });
+
+    test('decodes off variant all fields', () => {
+        // https://app.airframes.io/messages/3603048708
+        const text = '(2N39042W 77308OFF1311240327B1818 015(Z'
+        const decodeResult = plugin.decode({ text: text });
+        
+        expect(decodeResult.decoded).toBe(true);
+        expect(decodeResult.decoder.decodeLevel).toBe('partial');
+        expect(decodeResult.formatted.items.length).toBe(2);
+        expect(decodeResult.formatted.items[0].label).toBe('Aircraft Position');
+        expect(decodeResult.formatted.items[0].value).toBe('39.070 N, 77.513 W');
+        expect(decodeResult.formatted.items[1].label).toBe('Takeoff Time');
+        expect(decodeResult.formatted.items[1].value).toBe('2024-11-13T03:27:00Z');
+        expect(decodeResult.remaining.text).toBe('B1818 015');
     });
 
     test('does not decode Label 15 <invalid>', () => {
