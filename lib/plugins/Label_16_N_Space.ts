@@ -9,7 +9,7 @@ export class Label_16_N_Space extends DecoderPlugin {
   qualifiers() { // eslint-disable-line class-methods-use-this
     return {
       labels: ["16"],
-      preambles: ['N '],
+      preambles: ['N ', 'S '],
     };
   }
 
