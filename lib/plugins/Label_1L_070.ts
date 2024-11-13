@@ -44,8 +44,8 @@ export class Label_1L_070 extends DecoderPlugin { // eslint-disable-line camelca
 
     ResultFormatter.departureAirport(decodeResult, parts[0]);
     ResultFormatter.arrivalAirport(decodeResult, parts[1]);
-    ResultFormatter.time_of_day(decodeResult, DateTimeUtils.convertHHMMSSToTod(parts[2] + '00'));
-    ResultFormatter.eta(decodeResult, DateTimeUtils.convertHHMMSSToTod(parts[3] + '00'));
+    ResultFormatter.time_of_day(decodeResult, DateTimeUtils.convertHHMMSSToTod(parts[2]));
+    ResultFormatter.eta(decodeResult, DateTimeUtils.convertHHMMSSToTod(parts[3]));
     ResultFormatter.position(decodeResult, {
       latitude: CoordinateUtils.getDirection(parts[4][0]) * Number(parts[4].substring(1)),
       longitude: CoordinateUtils.getDirection(parts[5][0]) * Number(parts[5].substring(1)),

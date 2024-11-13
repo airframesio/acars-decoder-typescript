@@ -11,7 +11,7 @@ import { Route } from "../types/route";
  */
 export class ResultFormatter {
 
-    static route(decodeResult: DecodeResult, route: Route ) {
+    static route(decodeResult: DecodeResult, route: Route) {
         decodeResult.raw.route = route;
         decodeResult.formatted.items.push({
             type: 'aircraft_route',
@@ -61,7 +61,7 @@ export class ResultFormatter {
     }
 
     static position(decodeResult: DecodeResult, value: { latitude: number, longitude: number } | undefined) {
-        if(!value || isNaN(value.latitude) || isNaN(value.longitude)) {
+        if (!value || isNaN(value.latitude) || isNaN(value.longitude)) {
             return;
         }
         decodeResult.raw.position = value;
@@ -331,6 +331,16 @@ export class ResultFormatter {
             code: 'MSG_DAY',
             label: 'Day of Month',
             value: `${day}`,
+        });
+    }
+
+    static month(decodeResult: DecodeResult, month: number) {
+        decodeResult.raw.month = month;
+        decodeResult.formatted.items.push({
+            type: 'month_of_year',
+            code: 'MSG_MON',
+            label: 'Month of Year',
+            value: `${month}`,
         });
     }
 

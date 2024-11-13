@@ -35,7 +35,7 @@ export class Label_24_Slash extends DecoderPlugin {
         longitude: (lon[0] === 'E' ? 1 : -1) * Number(lon.substring(1)),
       };
       ResultFormatter.position(decodeResult, position);
-      ResultFormatter.eta(decodeResult, DateTimeUtils.convertHHMMSSToTod(fields[8]+'00'));
+      ResultFormatter.eta(decodeResult, DateTimeUtils.convertHHMMSSToTod(fields[8]));
       ResultFormatter.unknown(decodeResult, fields[7]);
 
       decodeResult.decoded = true;
