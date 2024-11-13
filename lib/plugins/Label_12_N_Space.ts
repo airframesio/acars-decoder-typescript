@@ -9,7 +9,7 @@ export class Label_12_N_Space extends DecoderPlugin {
   qualifiers() { // eslint-disable-line class-methods-use-this
     return {
       labels: ["12"],
-      preambles: ['N '],
+      preambles: ['N ', 'S '],
     };
   }
 

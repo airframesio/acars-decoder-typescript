@@ -18,7 +18,7 @@ describe('Label H1 *POS', () => {
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.message.text).toBe(text);
-    expect(decodeResult.raw.day_of_month).toBe(30);
+    expect(decodeResult.raw.day).toBe(30);
     expect(decodeResult.raw.month).toBe(10);
     expect(decodeResult.raw.time_of_day).toBe(35400);
     expect(decodeResult.raw.position.latitude).toBe(39.900000);

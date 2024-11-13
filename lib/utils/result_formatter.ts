@@ -325,7 +325,7 @@ export class ResultFormatter {
     }
 
     static day(decodeResult: DecodeResult, day: number) {
-        decodeResult.raw.day_of_month = day;
+        decodeResult.raw.day = day;
         decodeResult.formatted.items.push({
             type: 'day_of_month',
             code: 'MSG_DAY',
@@ -335,7 +335,7 @@ export class ResultFormatter {
     }
 
     static departureDay(decodeResult: DecodeResult, day: number) {
-        decodeResult.raw.departure_day_of_month = day;
+        decodeResult.raw.departure_day = day;
         decodeResult.formatted.items.push({
             type: 'day_of_month',
             code: 'DEP_DAY',
@@ -345,7 +345,7 @@ export class ResultFormatter {
     }
 
     static arrivalDay(decodeResult: DecodeResult, day: number) {
-        decodeResult.raw.arrival_day_of_month = day;
+        decodeResult.raw.arrival_day = day;
         decodeResult.formatted.items.push({
             type: 'day_of_month',
             code: 'ARR_DAY',

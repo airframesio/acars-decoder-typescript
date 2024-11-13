@@ -5,7 +5,7 @@ import { ResultFormatter } from '../utils/result_formatter';
 
 // General Aviation Position Report
 export class Label_15 extends DecoderPlugin {
-  name = 'label-5z';
+  name = 'label-15';
 
   qualifiers() { // eslint-disable-line class-methods-use-this
     return {
@@ -14,17 +14,33 @@ export class Label_15 extends DecoderPlugin {
     };
   }
 
-  decode(message: Message, options: Options = {}) : DecodeResult {
+  decode(message: Message, options: Options = {}): DecodeResult {
     const decodeResult = this.defaultResult();
     decodeResult.decoder.name = this.name;
     decodeResult.formatted.description = 'Position Report';
+    decodeResult.message = message;
 
-    const twoZeeRegex = /^\(2(?<between>.+)\(Z$/;
-    const results = message.text.match(twoZeeRegex);
-    if (results?.groups) {
-      // Style: (2N38111W 82211266 76400-64(Z
-      // console.log(`Label 15 Position Report: between = ${results.groups.between}`);
-      ResultFormatter.position(decodeResult, CoordinateUtils.decodeStringCoordinates(results.groups.between.substr(0,13)));
+    if (message.text.startsWith('(2') && message.text.endsWith('(Z')) {
+      const between = message.text.substring(2, message.text.length - 2);
+      ResultFormatter.position(decodeResult, CoordinateUtils.decodeStringCoordinatesDecimalMinutes(between.substring(0, 13)));
+      if (between.length === 25) { // short variant
+        ResultFormatter.unknown(decodeResult, between.substring(13, 19));
+        const alt = between.substring(19, 22);
+        if (alt != '---') {
+          ResultFormatter.altitude(decodeResult, 100 * Number(alt));
+        }
+        ResultFormatter.temperature(decodeResult, between.substring(22).replace(" ", "0"));
+      } else { // long variant
+        ResultFormatter.unknown(decodeResult, between.substring(13));
+      }
+    } else {
+      if (options.debug) {
+        console.log(`Decoder: Unknown 15 message: ${message.text}`);
+      }
+      ResultFormatter.unknown(decodeResult, message.text);
+      decodeResult.decoded = false;
+      decodeResult.decoder.decodeLevel = 'none';
+      return decodeResult;
     }
 
     decodeResult.decoded = true;
