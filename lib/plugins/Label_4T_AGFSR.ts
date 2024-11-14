@@ -42,7 +42,6 @@ export class Label_4T_AGFSR extends DecoderPlugin {
     ResultFormatter.unknown(decodeResult, data[5], '/');
     const lat = data[6].substring(0,7);
     const lon = data[6].substring(7,15);
-    console.log(lat);
     ResultFormatter.position(decodeResult, {
       latitude: CoordinateUtils.getDirection(lat[6]) * Number(lat.substring(0,2)) + Number(lat.substring(2,6))/60,
       longitude: CoordinateUtils.getDirection(lon[7]) * Number(lon.substring(0,3)) + Number(lon.substring(3, 7))/60

@@ -27,7 +27,6 @@ describe('Label 4T ', () => {
     // https://www.flightaware.com/live/flight/ACA620/history/20241108/0245Z/CYYZ/CYHZ
     // https://globe.airplanes.live/?icao=c05bd2
     const text = 'AGFSR AC0620/07/08/YYZYHZ/0340Z/453/4435.1N07143.4W/350/ /0063/0035/ /281065/----/ /512/0240/0253/----/----';
-                  //    fl num/dd/ad/srcdst/HHMM /???/ position      /alt/p/????/????/t/??????/????/?/???/????/????/****/****
 
     const decodeResult = plugin.decode({ text: text });
 
@@ -59,7 +58,6 @@ describe('Label 4T ', () => {
     // https://www.flightaware.com/live/flight/CFNOH/history/20241108/0335Z/CYUL/SBGR
     // https://globe.airplanes.live/?icao=c023c8
     const text = 'AGFSR AC0096/07/08/YULGRU/0354Z/833/4417.8N07232.6W/254/CLIMB /0565/0033/-33/275049/0289/144/453/0319/0339/****/****';
-                  //    fl num/dd/ad/srcdst/HHMM /???/ position      /alt/phase /????/????/oat/??????/????/???/???/????/????/****/****
     const decodeResult = plugin.decode({ text: text });
 
     expect(decodeResult.decoded).toBe(true);
