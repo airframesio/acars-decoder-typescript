@@ -1,7 +1,7 @@
 import { MessageDecoder } from '../MessageDecoder';
 import { Label_4T_AGFSR } from './Label_4T_AGFSR';
 
-describe('Label 4T ', () => {
+describe('Label 4T ETA', () => {
 
   let plugin: Label_4T_AGFSR;
 
