@@ -12,7 +12,12 @@ export class H1Helper {
         const data = message.slice(0, message.length - 4);
 
         const fields = data.split('/');
-        parseMessageType(decodeResult, fields[0]);
+        const canDecode = parseMessageType(decodeResult, fields[0]);
+        if (!canDecode) {
+            decodeResult.decoded = false;
+            decodeResult.decoder.decodeLevel = 'none';
+            return;
+        }
 
         for (let i = 1; i < fields.length; ++i) {
             if (fields[i].startsWith('FN')) {
@@ -22,17 +27,9 @@ export class H1Helper {
             } else if (fields[i].startsWith('DC')) {
                 processDC(decodeResult, fields[i].substring(2).split(',')); // Strip off 'DC'
             } else if (fields[i].startsWith('TS')) {
-                const ts = fields[i].substring(2).split(','); // Strip off PS
-                let time = DateTimeUtils.convertDateTimeToEpoch(ts[0], ts[1]);
-
-                if (Number.isNaN(time)) {  // convert DDMMYY to MMDDYY - TODO figure out a better way to determine
-                    const date = ts[1].substring(2, 4) + ts[1].substring(0, 2) + ts[1].substring(4, 6);
-                    time = DateTimeUtils.convertDateTimeToEpoch(ts[0], date);
-                }
-                decodeResult.raw.message_date = ts[1];
-                decodeResult.raw.message_timestamp = time;
+                H1Helper.processTS(decodeResult, fields[i].substring(2).split(',')); // Strip off PS
             } else if (fields[i].startsWith('PS')) {
-                const pos = processPS(decodeResult, fields[i].substring(2).split(',')); // Strip off PS
+                H1Helper.processPS(decodeResult, fields[i].substring(2).split(',')); // Strip off PS
             } else if (fields[i].startsWith('DT')) {
                 const data = fields[i].substring(2).split(','); // Strip off DT
                 processDT(decodeResult, data);
@@ -53,13 +50,13 @@ export class H1Helper {
                 processTimeOfDeparture(decodeResult, fields[i].substring(2).split(',')); // Strip off TD
             } else if (fields[i].startsWith('FX')) {
                 ResultFormatter.freetext(decodeResult, fields[i].substring(2));
-            }  else if (fields[i].startsWith('ET')) {
-                if(fields[i].length === 7) { // 1 digit day
-                ResultFormatter.day(decodeResult, Number(fields[i].substring(2, 3)));
-                ResultFormatter.eta(decodeResult, DateTimeUtils.convertHHMMSSToTod(fields[i].substring(3)));
-                } else if(fields[i].length === 8) { // 2 digit day
-                ResultFormatter.day(decodeResult, Number(fields[i].substring(2, 4)));
-                ResultFormatter.eta(decodeResult, DateTimeUtils.convertHHMMSSToTod(fields[i].substring(4)));
+            } else if (fields[i].startsWith('ET')) {
+                if (fields[i].length === 7) { // 1 digit day
+                    ResultFormatter.day(decodeResult, Number(fields[i].substring(2, 3)));
+                    ResultFormatter.eta(decodeResult, DateTimeUtils.convertHHMMSSToTod(fields[i].substring(3)));
+                } else if (fields[i].length === 8) { // 2 digit day
+                    ResultFormatter.day(decodeResult, Number(fields[i].substring(2, 4)));
+                    ResultFormatter.eta(decodeResult, DateTimeUtils.convertHHMMSSToTod(fields[i].substring(4)));
                 } else {
                     ResultFormatter.unknown(decodeResult, fields[i], '/');
                 }
@@ -71,6 +68,60 @@ export class H1Helper {
             ResultFormatter.checksum(decodeResult, checksum);
         }
         return true;
+    }
+
+    public static processPS(decodeResult: DecodeResult, data: string[]) {
+        const position = CoordinateUtils.decodeStringCoordinatesDecimalMinutes(data[0]);
+        if (position) {
+            decodeResult.raw.position = position
+            decodeResult.formatted.items.push({
+                type: 'aircraft_position',
+                code: 'POS',
+                label: 'Aircraft Position',
+                value: CoordinateUtils.coordinateString(position),
+            });
+        }
+        if (data.length === 9) { // variant 7
+            processRoute(decodeResult, data[3], data[1], data[5], data[4], undefined);
+            ResultFormatter.altitude(decodeResult, Number(data[2]) * 100);
+            ResultFormatter.temperature(decodeResult, data[6]);
+            ResultFormatter.unknown(decodeResult, data[7]);
+            ResultFormatter.unknown(decodeResult, data[8]);
+        }
+        if (data.length === 14) { // variant 2
+            ResultFormatter.altitude(decodeResult, Number(data[3]) * 100);
+            processRoute(decodeResult, data[1], data[2], data[4], data[5], data[6]);
+            ResultFormatter.temperature(decodeResult, data[7]);
+            ResultFormatter.unknownArr(decodeResult, data.slice(8));
+        }
+    }
+
+    public static processPosition(decodeResult: DecodeResult, data: string[]) {
+        const position = CoordinateUtils.decodeStringCoordinatesDecimalMinutes(data[0]);
+        if (position) {
+            ResultFormatter.position(decodeResult, position);
+        }
+        if (data.length >= 10) { // variant 1, short
+            ResultFormatter.altitude(decodeResult, Number(data[3]) * 100);
+            processRoute(decodeResult, data[1], data[2], data[4], data[5], data[6]);
+            ResultFormatter.temperature(decodeResult, data[7]);
+            ResultFormatter.unknown(decodeResult, data[8]);
+            ResultFormatter.unknown(decodeResult, data[9]);
+        }
+        if (data.length >= 14) { // variant 2,long
+            ResultFormatter.unknownArr(decodeResult, data.slice(10));
+        }
+    }
+
+    public static processTS(decodeResult: DecodeResult, data: string[]) {
+        let time = DateTimeUtils.convertDateTimeToEpoch(data[0], data[1]);
+
+        if (Number.isNaN(time)) {  // convert DDMMYY to MMDDYY - TODO figure out a better way to determine
+            const date = data[1].substring(2, 4) + data[1].substring(0, 2) + data[1].substring(4, 6);
+            time = DateTimeUtils.convertDateTimeToEpoch(data[0], date);
+        }
+        decodeResult.raw.message_date = data[1];
+        decodeResult.raw.message_timestamp = time;
     }
 }
 
@@ -153,12 +204,12 @@ function processLR(decodeResult: DecodeResult, data: string[]) {
 };
 
 
-function parseMessageType(decodeResult: DecodeResult, messageType: string) {
+function parseMessageType(decodeResult: DecodeResult, messageType: string): boolean {
     const parts = messageType.split('#');
     if (parts.length == 1) {
         const type = parts[0].substring(0, 3);
         if (type === 'POS' && parts[0].length !== 3) {
-            processPosition(decodeResult, parts[0].substring(3).split(','));
+            H1Helper.processPosition(decodeResult, parts[0].substring(3).split(','));
         }
         return processMessageType(decodeResult, type);
     } else if (parts.length == 2) {
@@ -170,16 +221,17 @@ function parseMessageType(decodeResult: DecodeResult, messageType: string) {
         // TODO - see if there's a better way to determine the type
         const type = parts[1].length == 5 ? parts[1].substring(2, 5) : parts[1].substring(3, 6);
         if (parts[1].substring(3, 6) === 'POS' && parts[1].length > 6) {
-            processPosition(decodeResult, parts[1].substring(6).split(','));
+            H1Helper.processPosition(decodeResult, parts[1].substring(6).split(','));
         }
-        processMessageType(decodeResult, type);
+        return processMessageType(decodeResult, type);
     }
     else {
         ResultFormatter.unknown(decodeResult, messageType);
+        return false;
     }
 }
 
-function processMessageType(decodeResult: DecodeResult, type: string) {
+function processMessageType(decodeResult: DecodeResult, type: string): boolean {
     if (type === 'FPN') {
         decodeResult.formatted.description = 'Flight Plan';
     } else if (type === 'FTX') {
@@ -192,7 +244,9 @@ function processMessageType(decodeResult: DecodeResult, type: string) {
         decodeResult.formatted.description = 'Progress Report';
     } else {
         decodeResult.formatted.description = 'Unknown H1 Message';
+        return false;
     }
+    return true;
 }
 
 function processDC(decodeResult: DecodeResult, data: string[]) {
@@ -208,62 +262,6 @@ function processDC(decodeResult: DecodeResult, data: string[]) {
         decodeResult.raw.message_timestamp = time;
     }
 }
-
-function processPS(decodeResult: DecodeResult, data: string[]) {
-    const position = CoordinateUtils.decodeStringCoordinatesDecimalMinutes(data[0]);
-    if (position) {
-        decodeResult.raw.position = position
-        decodeResult.formatted.items.push({
-            type: 'aircraft_position',
-            code: 'POS',
-            label: 'Aircraft Position',
-            value: CoordinateUtils.coordinateString(position),
-        });
-    }
-    if (data.length === 9) { // variant 7
-        processRoute(decodeResult, data[3], data[1], data[5], data[4], undefined);
-        ResultFormatter.altitude(decodeResult, Number(data[2]) * 100);
-        ResultFormatter.temperature(decodeResult, data[6]);
-        ResultFormatter.unknown(decodeResult, data[7]);
-        ResultFormatter.unknown(decodeResult, data[8]);
-    }
-    if (data.length === 14) { // variant 2
-        ResultFormatter.altitude(decodeResult, Number(data[3]) * 100);
-        processRoute(decodeResult, data[4], data[2], data[6], data[5], undefined);
-        ResultFormatter.temperature(decodeResult, data[7]);
-        ResultFormatter.groundspeed(decodeResult, Number(data[10]));
-        ResultFormatter.unknown(decodeResult, data[1]);
-        ResultFormatter.unknown(decodeResult, data[8]);
-        ResultFormatter.unknown(decodeResult, data[9]);
-        ResultFormatter.unknown(decodeResult, data.slice(11).join(','));
-    }
-}
-function processPosition(decodeResult: DecodeResult, data: string[]) {
-    const position = CoordinateUtils.decodeStringCoordinatesDecimalMinutes(data[0]);
-    if (position) {
-        decodeResult.raw.position = position
-        decodeResult.formatted.items.push({
-            type: 'aircraft_position',
-            code: 'POS',
-            label: 'Aircraft Position',
-            value: CoordinateUtils.coordinateString(position),
-        });
-    }
-    if (data.length >= 10) { // variant 1, short
-        ResultFormatter.altitude(decodeResult, Number(data[3]) * 100);
-        processRoute(decodeResult, data[1], data[2], data[4], data[5], data[6]);
-        ResultFormatter.temperature(decodeResult, data[7]);
-        ResultFormatter.unknown(decodeResult, data[8]);
-        ResultFormatter.unknown(decodeResult, data[9]);
-    }
-    if (data.length >= 14) { // variant 2,long
-        ResultFormatter.groundspeed(decodeResult, Number(data[10]));
-        ResultFormatter.unknown(decodeResult, data[11]);
-        ResultFormatter.unknown(decodeResult, data[12]);
-        ResultFormatter.unknown(decodeResult, data[13]);
-    }
-}
-
 
 function processRoute(decodeResult: DecodeResult, last: string, time: string, next: string, eta: string, then?: string, date?: string) {
     const lastTime = date ? DateTimeUtils.convertDateTimeToEpoch(time, date) : DateTimeUtils.convertHHMMSSToTod(time);
