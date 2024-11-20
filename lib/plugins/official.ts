@@ -3,6 +3,7 @@ export * from './Label_10_LDR';
 export * from './Label_10_POS';
 export * from './Label_10_Slash';
 export * from './Label_12_N_Space';
+export * from './Label_12_POS';
 export * from './Label_13Through18_Slash';
 export * from './Label_15';
 export * from './Label_15_FST';
