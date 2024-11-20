@@ -16,6 +16,6 @@ jobs:
           scope: '@airframes'
       - run: yarn install --immutable
       - run: yarn build
-      - run: yarn publish
+      - run: yarn npm publish
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          YARN_NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
