@@ -19,6 +19,7 @@ export class MessageDecoder {
     this.registerPlugin(new Plugins.Label_10_POS(this));
     this.registerPlugin(new Plugins.Label_10_Slash(this));
     this.registerPlugin(new Plugins.Label_12_N_Space(this));
+    this.registerPlugin(new Plugins.Label_12_POS(this));
     this.registerPlugin(new Plugins.Label_13Through18_Slash(this));
     this.registerPlugin(new Plugins.Label_15(this));
     this.registerPlugin(new Plugins.Label_15_FST(this));
@@ -46,11 +47,13 @@ export class MessageDecoder {
     this.registerPlugin(new Plugins.Label_4J_POS(this));
     this.registerPlugin(new Plugins.Label_4N(this));
     this.registerPlugin(new Plugins.Label_4T_AGFSR(this));
+    this.registerPlugin(new Plugins.Label_4T_ETA(this));
     this.registerPlugin(new Plugins.Label_B6_Forwardslash(this));
     this.registerPlugin(new Plugins.Label_H1_FLR(this));
     this.registerPlugin(new Plugins.Label_H1_OHMA(this));
     this.registerPlugin(new Plugins.Label_H1_WRN(this));
     this.registerPlugin(new Plugins.Label_H1(this));
+    this.registerPlugin(new Plugins.Label_H1_Slash(this));
     this.registerPlugin(new Plugins.Label_H1_StarPOS(this));
     this.registerPlugin(new Plugins.Label_HX(this));
     this.registerPlugin(new Plugins.Label_58(this));
