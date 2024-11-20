@@ -36,7 +36,6 @@ export class Label_15 extends DecoderPlugin {
         const hhmm = between.substring(22, 26);
         if(ddmmyy != '------') {
           const mmddyy = ddmmyy.substring(2, 4) + ddmmyy.substring(0, 2) + ddmmyy.substring(4);
-          console.log(`Decoder: mmddyy: ${mmddyy}, hhmm: ${hhmm}`);
           ResultFormatter.off(decodeResult, DateTimeUtils.convertDateTimeToEpoch(hhmm+'00', mmddyy), 'epoch');
         } else {
           ResultFormatter.off(decodeResult, DateTimeUtils.convertHHMMSSToTod(hhmm), 'tod');

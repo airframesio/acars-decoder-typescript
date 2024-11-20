@@ -38,7 +38,6 @@ export class Label_1L_Slash extends DecoderPlugin { // eslint-disable-line camel
       const part = parts[i].split(' ');
       data.set(part[0], part.slice(1).join(' '));
     }
-    console.log(data);
 
     const position = {
       latitude: Number(data.get('LAT')),
