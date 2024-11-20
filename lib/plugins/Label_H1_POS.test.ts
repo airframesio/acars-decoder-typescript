@@ -56,9 +56,8 @@ describe('Label_H1 POS', () => {
     expect(decodeResult.raw.position.latitude).toBe(45.348333333333336);
     expect(decodeResult.raw.position.longitude).toBe(-122.91666666666667);
     expect(decodeResult.raw.altitude).toBe(13400);
-    expect(decodeResult.raw.groundspeed).toBe(366);
     expect(decodeResult.raw.outside_air_temperature).toBe(-6);
-    expect(decodeResult.formatted.items.length).toBe(6);
+    expect(decodeResult.formatted.items.length).toBe(5);
     expect(decodeResult.formatted.items[0].type).toBe('aircraft_position');
     expect(decodeResult.formatted.items[0].code).toBe('POS');
     expect(decodeResult.formatted.items[0].label).toBe('Aircraft Position');
@@ -75,12 +74,8 @@ describe('Label_H1 POS', () => {
     expect(decodeResult.formatted.items[3].code).toBe('OATEMP');
     expect(decodeResult.formatted.items[3].label).toBe('Outside Air Temperature (C)');
     expect(decodeResult.formatted.items[3].value).toBe('-6 degrees');
-    expect(decodeResult.formatted.items[4].type).toBe('aircraft_groundspeed');
-    expect(decodeResult.formatted.items[4].code).toBe('GSPD');
-    expect(decodeResult.formatted.items[4].label).toBe('Aircraft Groundspeed');
-    expect(decodeResult.formatted.items[4].value).toBe('366 knots');
-    expect(decodeResult.formatted.items[5].label).toBe('Message Checksum');
-    expect(decodeResult.formatted.items[5].value).toBe('0x0a5b');
+    expect(decodeResult.formatted.items[4].label).toBe('Message Checksum');
+    expect(decodeResult.formatted.items[4].value).toBe('0x0a5b');
   });
 
   test('variant 3', () => {
@@ -428,31 +423,65 @@ describe('Label_H1 POS', () => {
     expect(decodeResult.remaining.text).toBe('290016,191/PR1496,150,370,191,,55,10,248028,M47,30,P19,P0/FHCIV,105208,273K,3226,175,M41,252027,450,N,221,62.MEDIL,105411,267K,3439,172,M44,250028,459,N,203,15.PITHI,105533,259K,3584,170,M47,249028,456,N,203,10.LESDO,105859,252K,3700,167,M47,248028,456,N,203,25.KOVIN,110153,252K,3700,164,M47,248028,456,N,203,21.DUCRA,110705,252K,3700,160,M47,248028,456,N,213,37.RESMI,111101,251K,3700,156,M47,248028,455,N,213,28.DEKOD,111325,251K,3700,154,M47,248028,455,N,192,17.DISAK,111438,251K,3700,153,M47,248028,454,N,172,9.DIRMO,112306,251K,3700,145,M47,248028,454,N,178,63.ETAMO,112514,250K,3700,143,M47,248028,453,N,158,16.ADEKA,113339,250K,3700,136,M47,248028,454,N,147,64.MOKDI,114139,251K,3700,129,M47,248028,454,N,181,59.MEN,114429,251K,3700,127,M47,248028,454,N,181,21.BADAM,114843,251K,3700,123,M47,248028,454,N,179,31.KANIG,120154,250K,3700,111,M47,248028,453,N,185,97.KENAS,121800,250K,3700,98,M47,248028,453,N,177,119.POS,122257,250K,3018,96,M45,248023,395,N,182,34.LEIB,124503,150K,2,89,P15,000000,161,N,231,103,LEIB,,89,124503,73');
   });
 
-  test('/.POS variant 2', () => {
-
+  test('does not decode /.POS', () => {
     // https://app.airframes.io/messages/2500488708
     const text = '/.POS/TS100316,210324/PSS35333W058220,,100316,250,S37131W059150,101916,S39387W060377,M23,27282,241,780,MANUAL,0,813E711';
     const decodeResult = plugin.decode({ text: text });
 
+    expect(decodeResult.decoded).toBe(false);
+    expect(decodeResult.decoder.decodeLevel).toBe('none');
+    expect(decodeResult.formatted.description).toBe('Unknown H1 Message');
+  });
+
+  test('decodes duplicate data', () => {
+    const text = 'POSN39220W078258,MRB18,044034,340,EYT19,044427,COL20,M49,27369,436,813/PSN39220W078258,MRB18,044034,340,EYT19,044427,COL20,M49,27369,436,813,ECON CRZ,0,25140035'
+    const decodeResult = plugin.decode({ text: text });
+
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
-    expect(decodeResult.formatted.description).toBe('Unknown H1 Message');
-    expect(decodeResult.raw.message_timestamp).toBe(1711015396);
-    expect(decodeResult.formatted.items.length).toBe(6);
+    expect(decodeResult.formatted.description).toBe('Position Report');
+
+    expect(decodeResult.formatted.items.length).toBe(9);
+    expect(decodeResult.formatted.items[0].type).toBe('aircraft_position');
+    expect(decodeResult.formatted.items[0].code).toBe('POS');
     expect(decodeResult.formatted.items[0].label).toBe('Aircraft Position');
-    expect(decodeResult.formatted.items[0].value).toBe('35.555 S, 58.367 W');
+    expect(decodeResult.formatted.items[0].value).toBe('39.367 N, 78.430 W');
+    expect(decodeResult.formatted.items[1].type).toBe('altitude');
+    expect(decodeResult.formatted.items[1].code).toBe('ALT');
     expect(decodeResult.formatted.items[1].label).toBe('Altitude');
-    expect(decodeResult.formatted.items[1].value).toBe('25000 feet');
+    expect(decodeResult.formatted.items[1].value).toBe('34000 feet');
+    expect(decodeResult.formatted.items[2].type).toBe('aircraft_route');
+    expect(decodeResult.formatted.items[2].code).toBe('ROUTE');
     expect(decodeResult.formatted.items[2].label).toBe('Aircraft Route');
-    expect(decodeResult.formatted.items[2].value).toBe('(37.218 S, 59.250 W)@10:03:16 > (39.645 S, 60.628 W)@10:19:16 > ?');
+    expect(decodeResult.formatted.items[2].value).toBe('MRB18@04:40:34 > EYT19@04:44:27 > COL20');
+    expect(decodeResult.formatted.items[3].type).toBe('outside_air_temperature');
+    expect(decodeResult.formatted.items[3].code).toBe('OATEMP');
     expect(decodeResult.formatted.items[3].label).toBe('Outside Air Temperature (C)');
-    expect(decodeResult.formatted.items[3].value).toBe('-23 degrees');
-    expect(decodeResult.formatted.items[4].label).toBe('Aircraft Groundspeed');
-    expect(decodeResult.formatted.items[4].value).toBe('780 knots');
-    expect(decodeResult.formatted.items[5].label).toBe('Message Checksum');
-    expect(decodeResult.formatted.items[5].value).toBe('0xe711');
-    expect(decodeResult.remaining.text).toBe('.POS,,27282,241,MANUAL,0,813');
+    expect(decodeResult.formatted.items[3].value).toBe('-49 degrees');
+    // YAY DUPLICATES!
+    expect(decodeResult.formatted.items[4].type).toBe('aircraft_position');
+    expect(decodeResult.formatted.items[4].code).toBe('POS');
+    expect(decodeResult.formatted.items[4].label).toBe('Aircraft Position');
+    expect(decodeResult.formatted.items[4].value).toBe('39.367 N, 78.430 W');
+    expect(decodeResult.formatted.items[5].type).toBe('altitude');
+    expect(decodeResult.formatted.items[5].code).toBe('ALT');
+    expect(decodeResult.formatted.items[5].label).toBe('Altitude');
+    expect(decodeResult.formatted.items[5].value).toBe('34000 feet');
+    expect(decodeResult.formatted.items[6].type).toBe('aircraft_route');
+    expect(decodeResult.formatted.items[6].code).toBe('ROUTE');
+    expect(decodeResult.formatted.items[6].label).toBe('Aircraft Route');
+    expect(decodeResult.formatted.items[6].value).toBe('MRB18@04:40:34 > EYT19@04:44:27 > COL20');
+    expect(decodeResult.formatted.items[7].type).toBe('outside_air_temperature');
+    expect(decodeResult.formatted.items[7].code).toBe('OATEMP');
+    expect(decodeResult.formatted.items[7].label).toBe('Outside Air Temperature (C)');
+    expect(decodeResult.formatted.items[7].value).toBe('-49 degrees');
+    // And then the end
+    expect(decodeResult.formatted.items[8].label).toBe('Message Checksum');
+    expect(decodeResult.formatted.items[8].value).toBe('0x0035');
+    expect(decodeResult.remaining.text).toBe('27369,436,27369,436,813,ECON CRZ,0,2514');
+
   });
+
 
   test('decodes Label H1 Preamble #M1BPOS <invalid>', () => {
 
