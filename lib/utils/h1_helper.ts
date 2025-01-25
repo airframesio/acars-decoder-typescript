@@ -20,7 +20,6 @@ export class H1Helper {
         }
 
         for (let i = 1; i < fields.length; ++i) {
-            console.log('Processing: ' + fields[i]);
             if (fields[i].startsWith('FN')) {
                 decodeResult.raw.flight_number = fields[i].substring(2); // Strip off 'FN'
             } else if (fields[i].startsWith('SN')) {
@@ -208,7 +207,6 @@ function processLR(decodeResult: DecodeResult, data: string[]) {
 
 
 function parseMessageType(decodeResult: DecodeResult, messageType: string): boolean {
-    console.log('Processing: ' + messageType);
     const parts = messageType.split('#');
     if (parts.length == 1) {
         const type = parts[0].substring(0, 3);
