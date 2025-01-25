@@ -31,8 +31,8 @@ test('decodes Label 44 Preamble POS02 variant 1', () => {
   expect(decodeResult.raw.altitude).toBe(31900);
   expect(decodeResult.raw.departure_icao).toBe('KJFK');
   expect(decodeResult.raw.arrival_icao).toBe('KUZA');
-  expect(decodeResult.raw.current_time).toBe(1727318700000);
-  expect(decodeResult.raw.eta_time).toBe(1727321220000);
+  expect(decodeResult.raw.current_time).toBe(1758854700000);
+  expect(decodeResult.raw.eta_time).toBe(1758857220000);
   expect(decodeResult.raw.fuel_in_tons).toBe(4.6);
   expect(decodeResult.formatted.items.length).toBe(4);
   expect(decodeResult.formatted.items[0].type).toBe('aircraft_position');
