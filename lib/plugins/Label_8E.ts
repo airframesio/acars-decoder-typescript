@@ -1,6 +1,7 @@
 import { DateTimeUtils } from '../DateTimeUtils';
 import { DecoderPlugin } from '../DecoderPlugin';
 import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
+import { ResultFormatter } from '../utils/result_formatter';
 
 // ETA
 export class Label_8E extends DecoderPlugin {
@@ -22,28 +23,14 @@ export class Label_8E extends DecoderPlugin {
     // Match: arrival_icao,arrival_eta
     const regex = /^(?<arrival_icao>\w{4}),(?<arrival_eta>\d{4})$/;
     const results = message.text.match(regex);
-    if (results) {
+    if (results?.groups) {
       if (options.debug) {
         console.log(`Label 8E ETA: groups`);
         console.log(results.groups);
       }
 
-      decodeResult.formatted.items.push({
-        type: 'eta',
-        code: 'ETA',
-        label: 'Estimated Time of Arrival',
-        value: DateTimeUtils.UTCToString(results.groups.arrival_eta),
-      });
-
-
-      decodeResult.raw.arrival_icao = results.groups.arrival_icao;
-      decodeResult.formatted.items.push({
-        type: 'destination',
-        code: 'DST',
-        label: 'Destination',
-        value: decodeResult.raw.arrival_icao,
-      });
-
+      ResultFormatter.eta(decodeResult, DateTimeUtils.convertHHMMSSToTod(results.groups.arrival_eta));
+      ResultFormatter.arrivalAirport(decodeResult, results.groups.arrival_icao);
     }
 
     decodeResult.decoded = true;

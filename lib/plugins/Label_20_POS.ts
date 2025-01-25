@@ -1,6 +1,7 @@
 import { DecoderPlugin } from '../DecoderPlugin';
 import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
 import { CoordinateUtils } from '../utils/coordinate_utils';
+import { ResultFormatter } from '../utils/result_formatter';
 
 // Position Report
 export class Label_20_POS extends DecoderPlugin {
@@ -13,7 +14,7 @@ export class Label_20_POS extends DecoderPlugin {
     };
   }
 
-  decode(message: Message, options: Options = {}) : DecodeResult {
+  decode(message: Message, options: Options = {}): DecodeResult {
     const decodeResult = this.defaultResult();
     decodeResult.decoder.name = this.name;
     decodeResult.formatted.description = 'Position Report';
@@ -22,49 +23,36 @@ export class Label_20_POS extends DecoderPlugin {
     decodeResult.raw.preamble = message.text.substring(0, 3);
 
     const content = message.text.substring(3);
-    console.log('Content: ' + content);
-
     const fields = content.split(',');
-    console.log('Field Count: ' + fields.length);
 
     if (fields.length == 11) {
       // N38160W077075,,211733,360,OTT,212041,,N42,19689,40,544
-      console.log(`DEBUG: ${this.name}: Variation 1 detected`);
-
+      if (options.debug) {
+        console.log(`DEBUG: ${this.name}: Variation 1 detected`);
+      }
       // Field 1: Coordinates
       const rawCoords = fields[0];
-      decodeResult.raw.position = CoordinateUtils.decodeStringCoordinates(rawCoords);
-      if(decodeResult.raw.position) {
-        decodeResult.formatted.items.push({
-          type: 'position',
-          code: 'POS',
-          label: 'Position',
-          value: CoordinateUtils.coordinateString(decodeResult.raw.position),
-        });
-      }
+      ResultFormatter.position(decodeResult, CoordinateUtils.decodeStringCoordinates(rawCoords));
 
       decodeResult.decoded = true;
       decodeResult.decoder.decodeLevel = 'full';
     } else if (fields.length == 5) {
       // N38160W077075,,211733,360,OTT
-      console.log(`DEBUG: ${this.name}: Variation 2 detected`);
-
+      if (options.debug) {
+        console.log(`DEBUG: ${this.name}: Variation 2 detected`);
+      }
       // Field 1: Coordinates
-      const rawCoords = fields[0];
-      decodeResult.raw.position = CoordinateUtils.decodeStringCoordinates(rawCoords);
-      if(decodeResult.raw.position) {
-        decodeResult.formatted.items.push({
-          type: 'position',
-          code: 'POS',
-          label: 'Position',
-          value: CoordinateUtils.coordinateString(decodeResult.raw.position),
-        });
+      const position = CoordinateUtils.decodeStringCoordinates(fields[0]);
+      if (position) {
+        ResultFormatter.position(decodeResult, position);
       }
       decodeResult.decoded = true;
       decodeResult.decoder.decodeLevel = 'full';
     } else {
       // Unknown!
-      console.log(`DEBUG: ${this.name}: Unknown variation. Field count: ${fields.length}, content: ${content}`);
+      if (options.debug) {
+        console.log(`DEBUG: ${this.name}: Unknown variation. Field count: ${fields.length}, content: ${content}`);
+      }
       decodeResult.decoded = false;
       decodeResult.decoder.decodeLevel = 'none';
     }

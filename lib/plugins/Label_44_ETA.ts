@@ -1,6 +1,8 @@
+import { DateTimeUtils } from '../DateTimeUtils';
 import { DecoderPlugin } from '../DecoderPlugin';
 import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
 import { CoordinateUtils } from '../utils/coordinate_utils';
+import { ResultFormatter } from '../utils/result_formatter';
 
 // In Air Report
 export class Label_44_ETA extends DecoderPlugin {
@@ -13,61 +15,45 @@ export class Label_44_ETA extends DecoderPlugin {
     };
   }
 
-  decode(message: Message, options: Options = {}) : DecodeResult {
+  decode(message: Message, options: Options = {}): DecodeResult {
     const decodeResult = this.defaultResult();
     decodeResult.decoder.name = this.name;
     decodeResult.formatted.description = 'ETA Report';
     decodeResult.message = message;
 
-    // Style: IN02,N38338W121179,KMHR,KPDX,0806,2355,005.1
-    // Match: IN02,coords,departure_icao,arrival_icao,current_date,current_time,fuel_in_tons
-    const regex = /^.*,(?<unsplit_coords>.*),(?<departure_icao>.*),(?<arrival_icao>.*),(?<current_date>.*),(?<current_time>.*),(?<fuel_in_tons>.*)$/;
-    const results = message.text.match(regex);
-    if (results) {
+    const data = message.text.split(',');
+    if (data.length >= 9) {
       if (options.debug) {
         console.log(`Label 44 ETA Report: groups`);
-        console.log(results.groups);
+        console.log(data);
       }
 
-      decodeResult.raw.position = CoordinateUtils.decodeStringCoordinates(results.groups.unsplit_coords);
+      ResultFormatter.position(decodeResult, CoordinateUtils.decodeStringCoordinatesDecimalMinutes(data[1]));
+      ResultFormatter.altitude(decodeResult, 100 * Number(data[2]));
+      ResultFormatter.departureAirport(decodeResult, data[3]);
+      ResultFormatter.arrivalAirport(decodeResult, data[4]);
 
-      decodeResult.raw.departure_icao = results.groups.departure_icao;
-      decodeResult.raw.arrival_icao = results.groups.arrival_icao;
-      decodeResult.raw.current_time = Date.parse(
-        new Date().getFullYear() + "-" +
-        results.groups.current_date.substr(0, 2) + "-" +
-        results.groups.current_date.substr(2, 2) + "T" +
-        results.groups.current_time.substr(0, 2) + ":" +
-        results.groups.current_time.substr(2, 2) + ":00Z"
-      );
-
-      if (results.groups.fuel_in_tons != '***' && results.groups.fuel_in_tons != '****') {
-        decodeResult.raw.fuel_in_tons = Number(results.groups.fuel_in_tons);
+      ResultFormatter.month(decodeResult, Number(data[5].substring(0, 2)));
+      ResultFormatter.day(decodeResult, Number(data[5].substring(2, 4)));
+      ResultFormatter.time_of_day(decodeResult, DateTimeUtils.convertHHMMSSToTod(data[6]));
+      ResultFormatter.eta(decodeResult, DateTimeUtils.convertHHMMSSToTod(data[7]));
+      const fuel = Number(data[8]);
+      if (!isNaN(fuel)) {
+        ResultFormatter.remainingFuel(decodeResult, Number(fuel));
       }
 
-      if(decodeResult.raw.position) {
-        decodeResult.formatted.items.push({
-          type: 'position',
-          code: 'POS' ,
-          label: 'Position',
-          value: CoordinateUtils.coordinateString(decodeResult.raw.position),
-        });
+      if (data.length > 9) {
+        ResultFormatter.unknownArr(decodeResult, data.slice(9));
       }
 
-      decodeResult.formatted.items.push({
-        type: 'origin',
-        code: 'ORG',
-        label: 'Origin',
-        value: decodeResult.raw.departure_icao,
-      });
-
-      decodeResult.formatted.items.push({
-        type: 'destination',
-        code: 'DST',
-        label: 'Destination',
-        value: decodeResult.raw.arrival_icao,
-      });
-
+    } else {
+      if (options.debug) {
+        console.log(`Decoder: Unknown 44 message: ${message.text}`);
+      }
+      ResultFormatter.unknown(decodeResult, message.text);
+      decodeResult.decoded = false;
+      decodeResult.decoder.decodeLevel = 'none';
+      return decodeResult;
     }
 
     decodeResult.decoded = true;

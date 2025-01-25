@@ -1,6 +1,7 @@
 import { DecoderPlugin } from '../DecoderPlugin';
 import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
 import { CoordinateUtils } from '../utils/coordinate_utils';
+import { ResultFormatter } from '../utils/result_formatter';
 
 // General Aviation Position Report
 export class Label_44_POS extends DecoderPlugin {
@@ -23,16 +24,14 @@ export class Label_44_POS extends DecoderPlugin {
     // Match: POS02,coords,flight_level_or_ground,departure_icao,arrival_icao,current_date,current_time,eta_time,unknown
     const regex = /^.*,(?<unsplit_coords>.*),(?<flight_level_or_ground>.*),(?<departure_icao>.*),(?<arrival_icao>.*),(?<current_date>.*),(?<current_time>.*),(?<eta_time>.*),(?<fuel_in_tons>.*)$/;
     const results = message.text.match(regex);
-    if (results) {
+    if (results?.groups) {
       if (options.debug) {
         console.log(`Label 44 Position Report: groups`);
         console.log(results.groups);
       }
 
-      decodeResult.raw.position = CoordinateUtils.decodeStringCoordinatesDecimalMinutes(results.groups.unsplit_coords);
-      decodeResult.raw.flight_level = results.groups.flight_level_or_ground == 'GRD' || results.groups.flight_level_or_ground == '***' ? '0' : Number(results.groups.flight_level_or_ground);
-      decodeResult.raw.departure_icao = results.groups.departure_icao;
-      decodeResult.raw.arrival_icao = results.groups.arrival_icao;
+      ResultFormatter.position(decodeResult, CoordinateUtils.decodeStringCoordinatesDecimalMinutes(results.groups.unsplit_coords));
+      const flight_level = results.groups.flight_level_or_ground == 'GRD' || results.groups.flight_level_or_ground == '***' ? 0 : Number(results.groups.flight_level_or_ground);
       decodeResult.raw.current_time = Date.parse(
         new Date().getFullYear() + "-" +
         results.groups.current_date.substr(0, 2) + "-" +
@@ -52,36 +51,9 @@ export class Label_44_POS extends DecoderPlugin {
         decodeResult.raw.fuel_in_tons = Number(results.groups.fuel_in_tons);
       }
 
-      if(decodeResult.raw.position) {
-        decodeResult.formatted.items.push({
-          type: 'aircraft_position',
-          code: 'POS' ,
-          label: 'Aircraft Position',
-          value: CoordinateUtils.coordinateString(decodeResult.raw.position),
-        });
-      }
-
-      decodeResult.formatted.items.push({
-        type: 'origin',
-        code: 'ORG',
-        label: 'Origin',
-        value: decodeResult.raw.departure_icao,
-      });
-
-      decodeResult.formatted.items.push({
-        type: 'destination',
-        code: 'DST',
-        label: 'Destination',
-        value: decodeResult.raw.arrival_icao,
-      });
-
-      decodeResult.formatted.items.push({
-        type: 'flight_level',
-        code: 'FL',
-        label: 'Flight Level',
-        value: decodeResult.raw.flight_level,
-      });
-
+      ResultFormatter.departureAirport(decodeResult, results.groups.departure_icao);
+      ResultFormatter.arrivalAirport(decodeResult, results.groups.arrival_icao);
+      ResultFormatter.altitude(decodeResult, flight_level * 100);
     }
 
     decodeResult.decoded = true;

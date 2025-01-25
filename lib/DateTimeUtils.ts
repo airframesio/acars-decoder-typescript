@@ -26,14 +26,17 @@ export class DateTimeUtils {
 
   /**
    * 
-   * @param time HHMMSS
+   * @param time HHMMSS or HHMM
    * @returns seconds since midnight
    */
-  public static convertHHMMSSToTod(time: string): number{
-    const h = Number(time.substring(0,2));
-    const m = Number(time.substring(2,4));
-    const s = Number(time.substring(4,6));
-    const tod = (h*3600 )+ (m*60) + s;
+  public static convertHHMMSSToTod(time: string): number {
+    if(time.length === 4) {
+      time += '00';
+    }
+    const h = Number(time.substring(0, 2));
+    const m = Number(time.substring(2, 4));
+    const s = Number(time.substring(4, 6));
+    const tod = (h * 3600) + (m * 60) + s;
     return tod;
   }
 
@@ -43,15 +46,30 @@ export class DateTimeUtils {
    * @param date MMDDYY or MMDDYYYY
    * @returns seconds since epoch
    */
-  public static convertDateTimeToEpoch(time: string, date: string):number {
+  public static convertDateTimeToEpoch(time: string, date: string): number {
     //YYYY-MM-DDTHH:mm:ss.sssZ
     if (date.length === 6) {
-      date = date.substring(0,4) + `20${date.substring(4,6)}`;
+      date = date.substring(0, 4) + `20${date.substring(4, 6)}`;
     }
-    const timestamp = `${date.substring(4,8)}-${date.substring(0,2)}-${date.substring(2,4)}T${time.substring(0,2)}:${time.substring(2,4)}:${time.substring(4,6)}.000Z`
+    const timestamp = `${date.substring(4, 8)}-${date.substring(0, 2)}-${date.substring(2, 4)}T${time.substring(0, 2)}:${time.substring(2, 4)}:${time.substring(4, 6)}.000Z`
     const millis = Date.parse(timestamp);
     return millis / 1000;
   }
-}
 
-export default {};
+  /**
+   * Converts a timestamp to a string
+   * 
+   * ISO-8601 format for 'epoch'
+   * HH:MM:SS for 'tod'
+   * @param time 
+   * @param format 
+   * @returns 
+   */
+  public static timestampToString(time: number, format: 'tod' | 'epoch'): string {
+    const date = new Date(time * 1000); if (format == 'tod') {
+      return date.toISOString().slice(11, 19);
+    }
+    //strip off millis
+    return date.toISOString().slice(0, -5) + "Z";
+  }
+}

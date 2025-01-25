@@ -21,8 +21,7 @@ test('decodes Label H1 Preamble WRN FUEL', () => {
   // https://app.airframes.io/messages/2435520576
   const text = 'WRN/WN24030400580028000006FUEL L TK PUMP 1 2 LO PR ';
   const decodeResult = decoderPlugin.decode({ text: text });
-  console.log(JSON.stringify(decodeResult, null, 2));
-
+  
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
   expect(decodeResult.decoder.name).toBe('label-h1-wrn');
@@ -44,8 +43,7 @@ test('decodes Label H1 Preamble WRN NAV', () => {
   // https://app.airframes.io/messages/2435409810
   const text = 'WRN/PNRC12860AA07/WN24030316250034000006NAV ADS-B RPTG 1 FAULT ';
   const decodeResult = decoderPlugin.decode({ text: text });
-  console.log(JSON.stringify(decodeResult, null, 2));
-
+  
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
   expect(decodeResult.decoder.name).toBe('label-h1-wrn');
@@ -57,7 +55,7 @@ test('decodes Label H1 Preamble WRN NAV', () => {
   expect(decodeResult.formatted.items[0].code).toBe('WRN');
   expect(decodeResult.formatted.items[0].label).toBe('Warning Message');
   expect(decodeResult.formatted.items[0].value).toBe('NAV ADS-B RPTG 1 FAULT ');
-  expect(decodeResult.remaining.text).toBe('/PNRC12860AA0734000006');
+  expect(decodeResult.remaining.text).toBe('PNRC12860AA07/34000006');
 });
 
 test('decodes Label H1 Preamble WRN F/CTL', () => {
@@ -67,8 +65,7 @@ test('decodes Label H1 Preamble WRN F/CTL', () => {
   // https://app.airframes.io/messages/2435339713
   const text = 'WRN/PNRC12860AA07/WN24030322050027000002F/CTL ELAC 1 FAULT ';
   const decodeResult = decoderPlugin.decode({ text: text });
-  console.log(JSON.stringify(decodeResult, null, 2));
-
+  
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
   expect(decodeResult.decoder.name).toBe('label-h1-wrn');
@@ -80,7 +77,7 @@ test('decodes Label H1 Preamble WRN F/CTL', () => {
   expect(decodeResult.formatted.items[0].code).toBe('WRN');
   expect(decodeResult.formatted.items[0].label).toBe('Warning Message');
   expect(decodeResult.formatted.items[0].value).toBe('F/CTL ELAC 1 FAULT ');
-  expect(decodeResult.remaining.text).toBe('/PNRC12860AA0727000002');
+  expect(decodeResult.remaining.text).toBe('PNRC12860AA07/27000002');
 });
 
 test('decodes Label H1 Preamble WRN ENG', () => {
@@ -90,8 +87,7 @@ test('decodes Label H1 Preamble WRN ENG', () => {
   // https://app.airframes.io/messages/2434945276
   const text = 'WRN/PNRC12860AA07/WN24030316580030210006ENG 1 A.ICE ';
   const decodeResult = decoderPlugin.decode({ text: text });
-  console.log(JSON.stringify(decodeResult, null, 2));
-
+  
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
   expect(decodeResult.decoder.name).toBe('label-h1-wrn');
@@ -103,7 +99,7 @@ test('decodes Label H1 Preamble WRN ENG', () => {
   expect(decodeResult.formatted.items[0].code).toBe('WRN');
   expect(decodeResult.formatted.items[0].label).toBe('Warning Message');
   expect(decodeResult.formatted.items[0].value).toBe('ENG 1 A.ICE ');
-  expect(decodeResult.remaining.text).toBe('/PNRC12860AA0730210006');
+  expect(decodeResult.remaining.text).toBe('PNRC12860AA07/30210006');
 });
 
 test('decodes Label H1 Preamble #CFBWRN', () => {
@@ -113,8 +109,7 @@ test('decodes Label H1 Preamble #CFBWRN', () => {
   // https://app.airframes.io/messages/2434735527
   const text = '#CFBWRN/WN24030312040034580006NAV GPS1 FAULT ';
   const decodeResult = decoderPlugin.decode({ text: text });
-  console.log(JSON.stringify(decodeResult, null, 2));
-
+  
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
   expect(decodeResult.decoder.name).toBe('label-h1-wrn');
@@ -135,8 +130,7 @@ test('decodes Label H1 Preamble WRN invalid', () => {
 
   const text = 'WRN <Invalid text>';
   const decodeResult = decoderPlugin.decode({ text: text });
-  console.log(JSON.stringify(decodeResult, null, 2));
-
+  
   expect(decodeResult.decoded).toBe(false);
   expect(decodeResult.decoder.decodeLevel).toBe('none');
   expect(decodeResult.decoder.name).toBe('label-h1-wrn');

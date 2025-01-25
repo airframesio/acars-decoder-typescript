@@ -1,6 +1,7 @@
 import { DecoderPlugin } from '../DecoderPlugin';
 import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
 import { CoordinateUtils } from '../utils/coordinate_utils';
+import { ResultFormatter } from '../utils/result_formatter';
 
 // In Air Report
 export class Label_20_CFB01 extends DecoderPlugin {
@@ -13,7 +14,7 @@ export class Label_20_CFB01 extends DecoderPlugin {
     };
   }
 
-  decode(message: Message, options: Options = {}) : DecodeResult {
+  decode(message: Message, options: Options = {}): DecodeResult {
     const decodeResult = this.defaultResult();
     decodeResult.decoder.name = this.name;
     decodeResult.formatted.description = 'Crew Flight Bag Message';
@@ -23,16 +24,16 @@ export class Label_20_CFB01 extends DecoderPlugin {
     // Match: IN02,coords,departure_icao,arrival_icao,current_date,current_time,fuel_in_tons
     const regex = /^IN02,(?<unsplit_coords>.*),(?<departure_icao>.*),(?<arrival_icao>.*),(?<current_date>.*),(?<current_time>.*),(?<fuel_in_tons>.*)$/;
     const results = message.text.match(regex);
-    if (results) {
+    if (results?.groups) {
       if (options.debug) {
         console.log(`Label 44 ETA Report: groups`);
         console.log(results.groups);
       }
 
-      decodeResult.raw.position = CoordinateUtils.decodeStringCoordinates(results.groups.unsplit_coords);
+      ResultFormatter.position(decodeResult, CoordinateUtils.decodeStringCoordinates(results.groups.unsplit_coords));
+      ResultFormatter.departureAirport(decodeResult, results.groups.departure_icao);
+      ResultFormatter.arrivalAirport(decodeResult, results.groups.arrival_icao);
 
-      decodeResult.raw.departure_icao = results.groups.departure_icao;
-      decodeResult.raw.arrival_icao = results.groups.arrival_icao;
       decodeResult.raw.current_time = Date.parse(
         new Date().getFullYear() + "-" +
         results.groups.current_date.substr(0, 2) + "-" +
@@ -44,29 +45,6 @@ export class Label_20_CFB01 extends DecoderPlugin {
       if (results.groups.fuel_in_tons != '***' && results.groups.fuel_in_tons != '****') {
         decodeResult.raw.fuel_in_tons = Number(results.groups.fuel_in_tons);
       }
-
-      if(decodeResult.raw.position) {
-        decodeResult.formatted.items.push({
-          type: 'position',
-          code: 'POS' ,
-          label: 'Position',
-          value: CoordinateUtils.coordinateString(decodeResult.raw.position),
-        });
-      }
-
-      decodeResult.formatted.items.push({
-        type: 'origin',
-        code: 'ORG',
-        label: 'Origin',
-        value: decodeResult.raw.departure_icao,
-      });
-
-      decodeResult.formatted.items.push({
-        type: 'destination',
-        code: 'DST',
-        label: 'Destination',
-        value: decodeResult.raw.arrival_icao,
-      });
 
     }
 
