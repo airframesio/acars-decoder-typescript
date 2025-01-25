@@ -25,7 +25,7 @@ describe('Label_H1_PWI', () => {
         const decodeResult = plugin.decode({ text: text });
 
         expect(decodeResult.decoded).toBe(true);
-        expect(decodeResult.decoder.decodeLevel).toBe('partial');
+        expect(decodeResult.decoder.decodeLevel).toBe('full');
         expect(decodeResult.formatted.items.length).toBe(25);
         expect(decodeResult.formatted.items[0].type).toBe('wind_data');
         expect(decodeResult.formatted.items[0].code).toBe('WIND');

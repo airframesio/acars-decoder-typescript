@@ -20,6 +20,7 @@ export class H1Helper {
         }
 
         for (let i = 1; i < fields.length; ++i) {
+            console.log('Processing: ' + fields[i]);
             if (fields[i].startsWith('FN')) {
                 decodeResult.raw.flight_number = fields[i].substring(2); // Strip off 'FN'
             } else if (fields[i].startsWith('SN')) {
@@ -60,6 +61,8 @@ export class H1Helper {
                 } else {
                     ResultFormatter.unknown(decodeResult, fields[i], '/');
                 }
+            } else if (fields[i].startsWith('WD')) {
+                processWindData(decodeResult, fields[i].substring(2)); // Strip off WD
             } else {
                 ResultFormatter.unknown(decodeResult, fields[i], '/');
             }
@@ -205,6 +208,7 @@ function processLR(decodeResult: DecodeResult, data: string[]) {
 
 
 function parseMessageType(decodeResult: DecodeResult, messageType: string): boolean {
+    console.log('Processing: ' + messageType);
     const parts = messageType.split('#');
     if (parts.length == 1) {
         const type = parts[0].substring(0, 3);
@@ -242,6 +246,8 @@ function processMessageType(decodeResult: DecodeResult, type: string): boolean {
         decodeResult.formatted.description = 'Position Report';
     } else if (type === 'PRG') {
         decodeResult.formatted.description = 'Progress Report';
+    } else if (type === 'PWI') {
+        decodeResult.formatted.description = 'Weather Report';
     } else {
         decodeResult.formatted.description = 'Unknown H1 Message';
         return false;
@@ -285,5 +291,57 @@ function processRoute(decodeResult: DecodeResult, last: string, time: string, ne
         code: 'ROUTE',
         label: 'Aircraft Route',
         value: RouteUtils.routeToString(decodeResult.raw.route),
+    });
+}
+
+
+function processWindData(decodeResult: DecodeResult, message: string) {
+    if (decodeResult.raw.wind_data === undefined) {
+        decodeResult.raw.wind_data = [];
+    }
+    const flightLevel = Number(message.slice(0, 3));
+    const fields = message.slice(4).split('.'); // strip off altitude and comma
+    fields.forEach((field) => {
+        const data = field.split(',');
+        const waypoint = data[0];
+        const windData = data[1];
+        const windDirection = Number(windData.slice(0, 3));
+        const windSpeed = Number(windData.slice(3));
+
+        if (data.length === 3) {
+            const tempData = data[2];
+            const tempFlightLevel = Number(tempData.slice(0, 3));
+            const tempString = tempData.slice(3);
+            const tempDegrees = Number(tempString.substring(1)) * (tempString.charAt(0) === 'M' ? -1 : 1);
+            decodeResult.raw.wind_data.push({
+                waypoint: waypoint,
+                flightLevel: flightLevel,
+                windDirection: windDirection,
+                windSpeed: windSpeed,
+                temperature: {
+                    flightLevel: tempFlightLevel,
+                    degreesC: tempDegrees
+                },
+            });
+            decodeResult.formatted.items.push({
+                type: 'wind_data',
+                code: 'WIND',
+                label: 'Wind Data',
+                value: `${waypoint} at FL${flightLevel}: ${windDirection}° at ${windSpeed}kt, ${tempDegrees}°C at FL${tempFlightLevel}`,
+            });
+        } else {
+            decodeResult.raw.wind_data.push({
+                waypoint: waypoint,
+                flightLevel: flightLevel,
+                windDirection: windDirection,
+                windSpeed: windSpeed,
+            });
+            decodeResult.formatted.items.push({
+                type: 'wind_data',
+                code: 'WIND',
+                label: 'Wind Data',
+                value: `${waypoint} at FL${flightLevel}: ${windDirection}° at ${windSpeed}kt`,
+            });
+        }
     });
 }
