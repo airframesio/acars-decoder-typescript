@@ -39,7 +39,7 @@ export class Label_44_POS extends DecoderPlugin {
       ResultFormatter.day(decodeResult, Number(results.groups.current_date.substring(2, 4)));
       ResultFormatter.time_of_day(decodeResult, DateTimeUtils.convertHHMMSSToTod(results.groups.current_time + '00'));
 
-      // TODO: ETA month and DayFR
+      // TODO: ETA month and Day
       ResultFormatter.eta(decodeResult, DateTimeUtils.convertHHMMSSToTod(results.groups.eta_time + '00'));
 
       if (results.groups.fuel_in_tons != '***' && results.groups.fuel_in_tons != '****') {
