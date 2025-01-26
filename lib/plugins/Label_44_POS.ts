@@ -1,3 +1,4 @@
+import { DateTimeUtils } from '../DateTimeUtils';
 import { DecoderPlugin } from '../DecoderPlugin';
 import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
 import { CoordinateUtils } from '../utils/coordinate_utils';
@@ -32,20 +33,14 @@ export class Label_44_POS extends DecoderPlugin {
 
       ResultFormatter.position(decodeResult, CoordinateUtils.decodeStringCoordinatesDecimalMinutes(results.groups.unsplit_coords));
       const flight_level = results.groups.flight_level_or_ground == 'GRD' || results.groups.flight_level_or_ground == '***' ? 0 : Number(results.groups.flight_level_or_ground);
-      decodeResult.raw.current_time = Date.parse(
-        new Date().getFullYear() + "-" +
-        results.groups.current_date.substr(0, 2) + "-" +
-        results.groups.current_date.substr(2, 2) + "T" +
-        results.groups.current_time.substr(0, 2) + ":" +
-        results.groups.current_time.substr(2, 2) + ":00Z"
-      );
-      decodeResult.raw.eta_time = Date.parse(
-        new Date().getFullYear() + "-" +
-        results.groups.current_date.substr(0, 2) + "-" +
-        results.groups.current_date.substr(2, 2) + "T" +
-        results.groups.eta_time.substr(0, 2) + ":" +
-        results.groups.eta_time.substr(2, 2) + ":00Z"
-      );
+
+
+      ResultFormatter.month(decodeResult, Number(results.groups.current_date.substring(0, 2)));
+      ResultFormatter.day(decodeResult, Number(results.groups.current_date.substring(2, 4)));
+      ResultFormatter.time_of_day(decodeResult, DateTimeUtils.convertHHMMSSToTod(results.groups.current_time + '00'));
+
+      // TODO: ETA month and DayFR
+      ResultFormatter.eta(decodeResult, DateTimeUtils.convertHHMMSSToTod(results.groups.eta_time + '00'));
 
       if (results.groups.fuel_in_tons != '***' && results.groups.fuel_in_tons != '****') {
         decodeResult.raw.fuel_in_tons = Number(results.groups.fuel_in_tons);
