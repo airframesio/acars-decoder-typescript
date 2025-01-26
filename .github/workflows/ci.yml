@@ -2,6 +2,14 @@ name: Grype CI
 on:
   workflow_dispatch:
   push:
+
+permissions:
+  # required for all workflows
+  security-events: write
+  # only required for workflows in private repositories
+  actions: read
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
