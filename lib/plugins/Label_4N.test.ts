@@ -11,11 +11,10 @@ test('matches Label 4N qualifiers', () => {
 
 test('decodes Label 4N variant 1', () => {
   const decoder = new MessageDecoder();
-  const decoderPlugin = new Label_4N(decoder);
 
   // https://globe.adsbexchange.com/?icao=A15027&showTrace=2024-09-23&timestamp=1727057017
   const text = '22024N  MCI  JFK1\r\n0013  0072 N040586 W074421   230';
-  const decodeResult = decoderPlugin.decode({ text: text });
+  const decodeResult = decoder.decode({ label: "4N", text: text });
 
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
@@ -37,11 +36,10 @@ test('decodes Label 4N variant 1', () => {
 
 test('decodes Label 4N variant 2B', () => {
   const decoder = new MessageDecoder();
-  const decoderPlugin = new Label_4N(decoder);
 
   // https://app.airframes.io/messages/3421601874
   const text = '285,B,69005074-507,10/12,+36.081,-094.810,35014,002.3,ELP,SDF,SDF,17R/,17L/,0,0,,,,,,0,0,0,0,1,,,,,247.0,014.2,261.2,421A';
-  const decodeResult = decoderPlugin.decode({ text: text });
+  const decodeResult = decoder.decode({ label: "4N", text: text });
 
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
@@ -71,11 +69,10 @@ test('decodes Label 4N variant 2B', () => {
 
 test('decodes Label 4N variant 2C', () => {
   const decoder = new MessageDecoder();
-  const decoderPlugin = new Label_4N(decoder);
 
   // https://globe.adsbexchange.com/?icao=A3E08D&showTrace=2024-09-24&timestamp=1727181643
   const text = '285,C,,09/24,,,,,EWR,PHL,PHL,09R/,/,0,0,,,,,,1,0,0,0,1,0,,0,0,198.5,014.5,213.0,9BCD';
-  const decodeResult = decoderPlugin.decode({ text: text });
+  const decodeResult = decoder.decode({ label: "4N", text: text });
 
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
@@ -99,11 +96,10 @@ test('decodes Label 4N variant 2C', () => {
 
 test('decodes Label 4N variant 2C (C-band)', () => {
   const decoder = new MessageDecoder();
-  const decoderPlugin = new Label_4N(decoder);
 
   // https://app.airframes.io/messages/3422221702
   const text = 'M85AUP0109285,C,,10/12,,,,,NRT,ANC,ANC,07R/,33/,0,0,,,,,,0,0,0,0,1,0,,0,0,709.8,048.7,758.5,75F3';
-  const decodeResult = decoderPlugin.decode({ text: text });
+  const decodeResult = decoder.decode({ label: "4N", text: text });
 
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
@@ -114,28 +110,27 @@ test('decodes Label 4N variant 2C (C-band)', () => {
   expect(decodeResult.raw.date).toBe('10/12');
   expect(decodeResult.remaining.text).toBe('C,0,0,0,0,0,0,1,0,0,0,709.8,048.7,758.5');
   expect(decodeResult.formatted.items.length).toBe(7);
-  expect(decodeResult.formatted.items[0].code).toBe('FLIGHT');
-  expect(decodeResult.formatted.items[0].value).toBe('UP109');
-  expect(decodeResult.formatted.items[1].code).toBe('ORG');
-  expect(decodeResult.formatted.items[1].value).toBe('NRT');
-  expect(decodeResult.formatted.items[2].code).toBe('DST');
+  expect(decodeResult.formatted.items[0].code).toBe('ORG');
+  expect(decodeResult.formatted.items[0].value).toBe('NRT');
+  expect(decodeResult.formatted.items[1].code).toBe('DST');
+  expect(decodeResult.formatted.items[1].value).toBe('ANC');
+  expect(decodeResult.formatted.items[2].code).toBe('ALT_DST');
   expect(decodeResult.formatted.items[2].value).toBe('ANC');
-  expect(decodeResult.formatted.items[3].code).toBe('ALT_DST');
-  expect(decodeResult.formatted.items[3].value).toBe('ANC');
-  expect(decodeResult.formatted.items[4].code).toBe('ARWY');
-  expect(decodeResult.formatted.items[4].value).toBe('07R');
-  expect(decodeResult.formatted.items[5].code).toBe('ALT_ARWY');
-  expect(decodeResult.formatted.items[5].value).toBe('33');
-  expect(decodeResult.formatted.items[6].code).toBe('CHECKSUM');
-  expect(decodeResult.formatted.items[6].value).toBe('0x75f3');
+  expect(decodeResult.formatted.items[3].code).toBe('ARWY');
+  expect(decodeResult.formatted.items[3].value).toBe('07R');
+  expect(decodeResult.formatted.items[4].code).toBe('ALT_ARWY');
+  expect(decodeResult.formatted.items[4].value).toBe('33');
+  expect(decodeResult.formatted.items[5].code).toBe('CHECKSUM');
+  expect(decodeResult.formatted.items[5].value).toBe('0x75f3');
+  expect(decodeResult.formatted.items[6].code).toBe('FLIGHT');
+  expect(decodeResult.formatted.items[6].value).toBe('UP109');
 });
 
 test('decodes Label 4N <invalid>', () => {
   const decoder = new MessageDecoder();
-  const decoderPlugin = new Label_4N(decoder);
 
   const text = '4N Bogus message';
-  const decodeResult = decoderPlugin.decode({ text: text });
+  const decodeResult = decoder.decode({ label: "4N", text: text });
 
   expect(decodeResult.decoded).toBe(false);
   expect(decodeResult.decoder.decodeLevel).toBe('none');
