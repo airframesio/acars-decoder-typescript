@@ -16,7 +16,7 @@ export class H1Helper {
         if (!canDecode) {
             decodeResult.decoded = false;
             decodeResult.decoder.decodeLevel = 'none';
-            return;
+            return false;
         }
 
         for (let i = 1; i < fields.length; ++i) {
@@ -160,7 +160,7 @@ function processTimeOfDeparture(decodeResult: DecodeResult, data: string[]) {
 function processIdentification(decodeResult: DecodeResult, data: string[]) {
     ResultFormatter.tail(decodeResult, data[0])
     if (data.length > 1) {
-        decodeResult.raw.flight_number = data[1];
+        ResultFormatter.flightNumber(decodeResult, data[1]);
     }
     if (data.length > 2) { //TODO: figure out what this is
         decodeResult.raw.mission_number = data[2];
@@ -216,8 +216,8 @@ function parseMessageType(decodeResult: DecodeResult, messageType: string): bool
         return processMessageType(decodeResult, type);
     } else if (parts.length == 2) {
         if (parts[0].length > 0) {
-            ResultFormatter.unknown(decodeResult, parts[0].substring(0, 3));
-            decodeResult.raw.flight_number = parts[0].substring(3);
+            ResultFormatter.unknown(decodeResult, parts[0].substring(0, 4));
+            ResultFormatter.flightNumber(decodeResult, parts[0].substring(4));
             ResultFormatter.unknown(decodeResult, parts[1].length == 5 ? parts[1].substring(0, 2) : parts[1].substring(0, 3), '#');
         }
         // TODO - see if there's a better way to determine the type
