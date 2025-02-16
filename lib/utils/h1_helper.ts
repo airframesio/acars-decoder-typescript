@@ -212,6 +212,10 @@ function parseMessageType(decodeResult: DecodeResult, messageType: string): bool
         const type = parts[0].substring(0, 3);
         if (type === 'POS' && parts[0].length !== 3) {
             H1Helper.processPosition(decodeResult, parts[0].substring(3).split(','));
+        } else if(parts[0].length > 3 && parts[0].slice(-3) === 'POS') {
+            ResultFormatter.unknown(decodeResult, parts[0].substring(0, 4));
+            ResultFormatter.flightNumber(decodeResult, parts[0].slice(4, -3));
+            return processMessageType(decodeResult, 'POS');
         }
         return processMessageType(decodeResult, type);
     } else if (parts.length == 2) {
