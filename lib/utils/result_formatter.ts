@@ -84,6 +84,9 @@ export class ResultFormatter {
     }
 
     static flightNumber(decodeResult: DecodeResult, value: string) {
+        if(value.length === 0 ) {
+            return;
+        }
         decodeResult.raw.flight_number = value;
         decodeResult.formatted.items.push({
             type: 'flight_number',
@@ -245,6 +248,9 @@ export class ResultFormatter {
     }
 
     static temperature(decodeResult: DecodeResult, value: string) {
+        if(value.length === 0 ) {
+            return;
+        }
         decodeResult.raw.outside_air_temperature = Number(value.replace("M", "-").replace("P", "+"));
         decodeResult.formatted.items.push({
             type: 'outside_air_temperature',
