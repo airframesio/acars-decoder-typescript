@@ -1,6 +1,6 @@
 {
   "name": "@airframes/acars-decoder",
-  "version": "1.6.17",
+  "version": "1.6.18",
   "description": "ACARS Message Decoder for TypeScript/JavaScript",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
