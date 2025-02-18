@@ -34,12 +34,8 @@ export class Label_2P_FM5 extends DecoderPlugin {
 
       ResultFormatter.departureAirport(decodeResult, header[1]);
       ResultFormatter.arrivalAirport(decodeResult, parts[1]);
-      let time = parts[2];
-      if(time.length === 4) {
-        time += '00';
-      }
-      ResultFormatter.time_of_day(decodeResult, DateTimeUtils.convertHHMMSSToTod(time));
-      ResultFormatter.eta(decodeResult, DateTimeUtils.convertHHMMSSToTod(parts[3]+'00'));
+      ResultFormatter.time_of_day(decodeResult, DateTimeUtils.convertHHMMSSToTod(parts[2]));
+      ResultFormatter.eta(decodeResult, DateTimeUtils.convertHHMMSSToTod(parts[3]));
       ResultFormatter.position(decodeResult, {latitude: Number(parts[4].replaceAll(' ','')), longitude: Number(parts[5].replaceAll(' ',''))});
       ResultFormatter.altitude(decodeResult, Number(parts[6]));
       // TODO: decode further
