@@ -39,11 +39,11 @@ export class Label_2P_FM3 extends DecoderPlugin {
       }
       console.log(header[1]);
       if(header[1].length === 4) {
-        ResultFormatter.time_of_day(decodeResult, DateTimeUtils.convertHHMMSSToTod(header[1]+'00'));
+        ResultFormatter.time_of_day(decodeResult, DateTimeUtils.convertHHMMSSToTod(header[1]));
       } else {
         ResultFormatter.time_of_day(decodeResult, DateTimeUtils.convertHHMMSSToTod(header[1]));
       }
-      ResultFormatter.eta(decodeResult, DateTimeUtils.convertHHMMSSToTod(parts[1]+'00'));
+      ResultFormatter.eta(decodeResult, DateTimeUtils.convertHHMMSSToTod(parts[1]));
       const lat = parts[2].replaceAll(' ','');
       const lon = parts[3].replaceAll(' ','');
       if(lat[0] === 'N' || lat[0] === 'S') {
