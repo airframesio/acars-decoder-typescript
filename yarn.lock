@@ -14,15 +14,15 @@ __metadata:
     "@babel/preset-typescript": "npm:^7.26.0"
     "@types/jest": "npm:^29.5.14"
     "@types/minizlib": "npm:^2.1.7"
-    "@types/node": "npm:^22.0.0"
+    "@types/node": "npm:^22.13.4"
     babel-jest: "npm:^29.7.0"
     base85: "npm:^3.1.0"
     jest: "npm:^29.7.0"
     minizlib: "npm:^2.1.2"
     ts-jest: "npm:^29.2.5"
-    ts-node: "npm:^10.9.1"
-    tsup: "npm:^8.0.2"
-    typescript: "npm:^5.3.3"
+    ts-node: "npm:^10.9.2"
+    tsup: "npm:^8.3.6"
+    typescript: "npm:^5.7.3"
   bin:
     acars-decoder: ./dist/bin/acars-decoder.js
     acars-decoder-test: ./dist/bin/acars-decoder-test.js
@@ -2423,12 +2423,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:*, @types/node@npm:^22.0.0":
+"@types/node@npm:*":
   version: 22.13.1
   resolution: "@types/node@npm:22.13.1"
   dependencies:
     undici-types: "npm:~6.20.0"
   checksum: 10c0/d4e56d41d8bd53de93da2651c0a0234e330bd7b1b6d071b1a94bd3b5ee2d9f387519e739c52a15c1faa4fb9d97e825b848421af4b2e50e6518011e7adb4a34b7
+  languageName: node
+  linkType: hard
+
+"@types/node@npm:^22.13.4":
+  version: 22.13.4
+  resolution: "@types/node@npm:22.13.4"
+  dependencies:
+    undici-types: "npm:~6.20.0"
+  checksum: 10c0/3a234fa7766a3efc382cf81f66f474c26cdab2f54f43f757634c81c0444eb2160c2dabbde9741e4983078a318a88515b65416b5f1ab5478548579d7b3ead1d95
   languageName: node
   linkType: hard
 
@@ -5616,7 +5625,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ts-node@npm:^10.9.1":
+"ts-node@npm:^10.9.2":
   version: 10.9.2
   resolution: "ts-node@npm:10.9.2"
   dependencies:
@@ -5654,7 +5663,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tsup@npm:^8.0.2":
+"tsup@npm:^8.3.6":
   version: 8.3.6
   resolution: "tsup@npm:8.3.6"
   dependencies:
@@ -5709,7 +5718,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:^5.3.3":
+"typescript@npm:^5.7.3":
   version: 5.7.3
   resolution: "typescript@npm:5.7.3"
   bin:
@@ -5719,7 +5728,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@npm%3A^5.3.3#optional!builtin<compat/typescript>":
+"typescript@patch:typescript@npm%3A^5.7.3#optional!builtin<compat/typescript>":
   version: 5.7.3
   resolution: "typescript@patch:typescript@npm%3A5.7.3#optional!builtin<compat/typescript>::version=5.7.3&hash=cef18b"
   bin:
