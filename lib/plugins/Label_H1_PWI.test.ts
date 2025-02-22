@@ -24,7 +24,7 @@ describe('Label_H1 PWI', () => {
         const decodeResult = plugin.decode({ text: text });
 
         expect(decodeResult.decoded).toBe(true);
-        expect(decodeResult.decoder.decodeLevel).toBe('full');
+        expect(decodeResult.decoder.decodeLevel).toBe('partial');
         expect(decodeResult.formatted.items.length).toBe(25);
         expect(decodeResult.formatted.items[0].type).toBe('wind_data');
         expect(decodeResult.formatted.items[0].code).toBe('WIND');
@@ -36,6 +36,7 @@ describe('Label_H1 PWI', () => {
         expect(decodeResult.formatted.items[1].value).toBe('AWYAT at FL390: 252° at 71kt');
         expect(decodeResult.formatted.items[24].label).toBe('Message Checksum');
         expect(decodeResult.formatted.items[24].value).toBe('0x0338');
+        expect(decodeResult.remaining.text).toBe('DD300214059.240214040.180236024.100250018:,,,,/CB300246040.240246017.180226015.100210008');
     });
 
     test('decodes Label H1 Preamble POS <invalid>', () => {
