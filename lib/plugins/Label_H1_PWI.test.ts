@@ -1,21 +1,20 @@
 import { MessageDecoder } from '../MessageDecoder';
-import { Label_H1_PWI } from './Label_H1_PWI';
+import { Label_H1 } from './Label_H1';
 
-describe('Label_H1_PWI', () => {
-    let plugin: Label_H1_PWI;
+describe('Label_H1 PWI', () => {
+    let plugin: Label_H1;
 
     beforeEach(() => {
         const decoder = new MessageDecoder();
-        plugin = new Label_H1_PWI(decoder);
+        plugin = new Label_H1(decoder);
     });
 
     test('matches Label H1 Preamble PWI qualifiers', () => {
         expect(plugin.decode).toBeDefined();
-        expect(plugin.name).toBe('label-h1-pwi');
+        expect(plugin.name).toBe('label-h1');
         expect(plugin.qualifiers).toBeDefined();
         expect(plugin.qualifiers()).toEqual({
           labels: ['H1'],
-          preambles: ['PWI'],
         });
       });
     
@@ -46,7 +45,7 @@ describe('Label_H1_PWI', () => {
       
         expect(decodeResult.decoded).toBe(false);
         expect(decodeResult.decoder.decodeLevel).toBe('none');
-        expect(decodeResult.decoder.name).toBe('label-h1-pwi');
+        expect(decodeResult.decoder.name).toBe('label-h1');
         expect(decodeResult.formatted.description).toBe('Weather Report');
         expect(decodeResult.message.text).toBe(text);
       });
