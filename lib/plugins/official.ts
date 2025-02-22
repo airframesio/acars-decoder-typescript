@@ -8,6 +8,7 @@ export * from './Label_13Through18_Slash';
 export * from './Label_15';
 export * from './Label_15_FST';
 export * from './Label_16_N_Space';
+export * from './Label_1J_2J_FTX';
 export * from './Label_1M_Slash';
 export * from './Label_1L_3-line';
 export * from './Label_1L_070';

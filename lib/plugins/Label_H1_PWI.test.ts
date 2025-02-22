@@ -1,21 +1,20 @@
 import { MessageDecoder } from '../MessageDecoder';
-import { Label_H1_PWI } from './Label_H1_PWI';
+import { Label_H1 } from './Label_H1';
 
-describe('Label_H1_PWI', () => {
-    let plugin: Label_H1_PWI;
+describe('Label_H1 PWI', () => {
+    let plugin: Label_H1;
 
     beforeEach(() => {
         const decoder = new MessageDecoder();
-        plugin = new Label_H1_PWI(decoder);
+        plugin = new Label_H1(decoder);
     });
 
     test('matches Label H1 Preamble PWI qualifiers', () => {
         expect(plugin.decode).toBeDefined();
-        expect(plugin.name).toBe('label-h1-pwi');
+        expect(plugin.name).toBe('label-h1');
         expect(plugin.qualifiers).toBeDefined();
         expect(plugin.qualifiers()).toEqual({
           labels: ['H1'],
-          preambles: ['PWI'],
         });
       });
     
@@ -25,7 +24,7 @@ describe('Label_H1_PWI', () => {
         const decodeResult = plugin.decode({ text: text });
 
         expect(decodeResult.decoded).toBe(true);
-        expect(decodeResult.decoder.decodeLevel).toBe('full');
+        expect(decodeResult.decoder.decodeLevel).toBe('partial');
         expect(decodeResult.formatted.items.length).toBe(25);
         expect(decodeResult.formatted.items[0].type).toBe('wind_data');
         expect(decodeResult.formatted.items[0].code).toBe('WIND');
@@ -37,6 +36,7 @@ describe('Label_H1_PWI', () => {
         expect(decodeResult.formatted.items[1].value).toBe('AWYAT at FL390: 252° at 71kt');
         expect(decodeResult.formatted.items[24].label).toBe('Message Checksum');
         expect(decodeResult.formatted.items[24].value).toBe('0x0338');
+        expect(decodeResult.remaining.text).toBe('DD300214059.240214040.180236024.100250018:,,,,/CB300246040.240246017.180226015.100210008');
     });
 
     test('decodes Label H1 Preamble POS <invalid>', () => {
@@ -46,7 +46,7 @@ describe('Label_H1_PWI', () => {
       
         expect(decodeResult.decoded).toBe(false);
         expect(decodeResult.decoder.decodeLevel).toBe('none');
-        expect(decodeResult.decoder.name).toBe('label-h1-pwi');
+        expect(decodeResult.decoder.name).toBe('label-h1');
         expect(decodeResult.formatted.description).toBe('Weather Report');
         expect(decodeResult.message.text).toBe(text);
       });
