@@ -23,8 +23,6 @@ describe('Label 16 Time of Day', () => {
     const text = '005236,36787,0135,  97,N 38.364 W 75.226';
     const decodeResult = plugin.decode({ text: text });
 
-    console.log(decodeResult.formatted.items);
-
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.decoder.name).toBe('label-16-tod');

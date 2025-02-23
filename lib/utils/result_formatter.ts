@@ -74,6 +74,9 @@ export class ResultFormatter {
     }
 
     static altitude(decodeResult: DecodeResult, value: number) {
+        if(isNaN(value)) {
+            return;
+        }
         decodeResult.raw.altitude = value;
         decodeResult.formatted.items.push({
             type: 'altitude',
