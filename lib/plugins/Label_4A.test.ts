@@ -27,7 +27,7 @@ test('decodes Label 4A, variant 1', () => {
   expect(decodeResult.formatted.description).toBe('Latest New Format');
   expect(decodeResult.message.text).toBe(text);
   expect(decodeResult.remaining.text).toBe('RT0,LT0,');
-  expect(decodeResult.formatted.items.length).toBe(6);
+  expect(decodeResult.formatted.items.length).toBe(5);
   expect(decodeResult.formatted.items[0].code).toBe('MSG_TOD');
   expect(decodeResult.formatted.items[0].value).toBe('06:32:00');
   expect(decodeResult.formatted.items[1].code).toBe('TAIL');
@@ -54,7 +54,7 @@ test('decodes Label 4A, variant 1, no callsign', () => {
   expect(decodeResult.formatted.description).toBe('Latest New Format');
   expect(decodeResult.message.text).toBe(text);
   expect(decodeResult.remaining.text).toBe('RT0,LT1,');
-  expect(decodeResult.formatted.items.length).toBe(5);
+  expect(decodeResult.formatted.items.length).toBe(4);
   expect(decodeResult.formatted.items[0].code).toBe('MSG_TOD');
   expect(decodeResult.formatted.items[0].value).toBe('10:16:06');
   expect(decodeResult.formatted.items[1].code).toBe('TAIL');
