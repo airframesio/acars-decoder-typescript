@@ -14,7 +14,7 @@ test('decodes Label 30 sample 1', () => {
   });
 
   const text = '/EA1719/DSKSFO/SK23';
-  const decodeResult = decoderPlugin.decode({ text: text });
+  const decodeResult = decoder.decode({ label: "30", text: text });
   
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
