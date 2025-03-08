@@ -26,6 +26,7 @@ export class MessageDecoder {
     this.registerPlugin(new Plugins.Label_16_N_Space(this));
     this.registerPlugin(new Plugins.Label_16_POSA1(this));
     this.registerPlugin(new Plugins.Label_16_TOD(this));
+    this.registerPlugin(new Plugins.Label_1J_2J_FTX(this));
     this.registerPlugin(new Plugins.Label_1L_3Line(this));
     this.registerPlugin(new Plugins.Label_1L_070(this));
     this.registerPlugin(new Plugins.Label_1L_660(this));

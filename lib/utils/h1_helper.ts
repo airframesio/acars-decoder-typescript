@@ -209,15 +209,17 @@ function processLR(decodeResult: DecodeResult, data: string[]) {
 function parseMessageType(decodeResult: DecodeResult, messageType: string): boolean {
     const parts = messageType.split('#');
     if (parts.length == 1) {
-        const type = parts[0].substring(0, 3);
-        if (type === 'POS' && parts[0].length !== 3) {
+        if (parts[0].startsWith('POS')) {
             H1Helper.processPosition(decodeResult, parts[0].substring(3).split(','));
-        } else if(parts[0].length > 3 && parts[0].slice(-3) === 'POS') {
-            ResultFormatter.unknown(decodeResult, parts[0].substring(0, 4));
-            ResultFormatter.flightNumber(decodeResult, parts[0].slice(4, -3));
             return processMessageType(decodeResult, 'POS');
+        } else if(parts[0].length === 13) {
+            if(processMessageType(decodeResult, parts[0].substring(10))) {
+                ResultFormatter.unknown(decodeResult, parts[0].substring(0, 4));
+                ResultFormatter.flightNumber(decodeResult, parts[0].slice(4, 10));
+                return true;
+            }
         }
-        return processMessageType(decodeResult, type);
+        return processMessageType(decodeResult, parts[0].substring(0,3));
     } else if (parts.length == 2) {
         if (parts[0].length > 0) {
             ResultFormatter.unknown(decodeResult, parts[0].substring(0, 4));
