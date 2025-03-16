@@ -6,7 +6,7 @@
 ![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/airframesio/acars-decoder-typescript?utm_source=oss&utm_medium=github&utm_campaign=airframesio%2Facars-decoder-typescript&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
 [![Contributors](https://img.shields.io/github/contributors/airframesio/acars-decoder-typescript)](https://github.com/airframesio/acars-decoder-typescript/graphs/contributors)
 [![Activity](https://img.shields.io/github/commit-activity/m/airframesio/acars-decoder-typescript)](https://github.com/airframesio/acars-decoder-typescript/pulse)
-[![Discord](https://img.shields.io/discord/1067697487927853077?logo=discord)](https://discord.gg/8Ksch7zE)
+[![Discord](https://img.shields.io/discord/1067697487927853077?logo=discord)](https://discord.gg/airframes)
 
 ACARS is an aircraft communications messaging protocol that has been in use worldwide for a few decades. This library exists to specifically decode the text portion of the ACARS message payload.
 
