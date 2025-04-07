@@ -2735,13 +2735,12 @@ __metadata:
   linkType: hard
 
 "base85@npm:^3.1.0":
-  version: 3.1.0
-  resolution: "base85@npm:3.1.0"
+  version: 3.2.0
+  resolution: "base85@npm:3.2.0"
   dependencies:
     buffer: "npm:^6.0.3"
     ip-address: "npm:^5.8.9"
-    underscore: "npm:^1.9.1"
-  checksum: 10c0/50a821e097c200173097dfd8bab5f0ff5e12379c13ce040d41781938061c728b7c1b569f2c5801701bf042762d19457f0feda3a40805ad72dc6cd4711c8093f3
+  checksum: 10c0/4a6a601df913bfa34056a6e512174f2c90dd410c99483fad9b7b9e9af3e565f917b9dab314d228018c8722951f832d28abd9156113b13ae14b91a258392bff8b
   languageName: node
   linkType: hard
 
@@ -5797,13 +5796,6 @@ __metadata:
     tsc: bin/tsc
     tsserver: bin/tsserver
   checksum: 10c0/8a6cd29dfb59bd5a978407b93ae0edb530ee9376a5b95a42ad057a6f80ffb0c410489ccd6fe48d1d0dfad6e8adf5d62d3874bbd251f488ae30e11a1ce6dabd28
-  languageName: node
-  linkType: hard
-
-"underscore@npm:^1.9.1":
-  version: 1.13.7
-  resolution: "underscore@npm:1.13.7"
-  checksum: 10c0/fad2b4aac48847674aaf3c30558f383399d4fdafad6dd02dd60e4e1b8103b52c5a9e5937e0cc05dacfd26d6a0132ed0410ab4258241240757e4a4424507471cd
   languageName: node
   linkType: hard
 
