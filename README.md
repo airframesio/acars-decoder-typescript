@@ -1,3 +1,6 @@
+# @airframes/acars-decoder
+
+This is a no-op documentation tweak to verify repository access, build/lint, tests, and PR workflow. No functional code changes are included.
 # acars-decoder-typescript
 
 [![NPM Version](https://badge.fury.io/js/@airframes%2Facars-decoder.svg)](https://badge.fury.io/js/@airframes%2Facars-decoder)
