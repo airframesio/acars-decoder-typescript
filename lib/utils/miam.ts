@@ -1,5 +1,7 @@
 import * as Base85 from 'base85';
 import * as zlib  from "minizlib";
+import { Buffer } from 'node:buffer';
+
 
 enum MIAMFid {
   SingleTransfer = 'T',

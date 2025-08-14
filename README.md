@@ -1,3 +1,11 @@
+# Node.js Support Policy
+
+- Runtime support: Node.js >= 18
+- Development and CI: validated on Node 18.x, 20.x, 22.x, and 24.x
+- TypeScript development uses the latest stable Node types (currently v24) without forcing consumers to use a specific Node types version, since `@types/node` is a devDependency.
+- The published builds are compiled targeting Node 18 runtime via `tsup` so they remain compatible across supported Node versions.
+
+
 # @airframes/acars-decoder
 
 This is a no-op documentation tweak to verify repository access, build/lint, tests, and PR workflow. No functional code changes are included.

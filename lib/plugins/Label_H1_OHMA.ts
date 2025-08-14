@@ -3,6 +3,8 @@ import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
 import { ResultFormatter } from '../utils/result_formatter';
 
 import * as zlib  from "minizlib";
+import { Buffer } from 'node:buffer';
+
 
 export class Label_H1_OHMA extends DecoderPlugin {
   name = 'label-h1-ohma';
