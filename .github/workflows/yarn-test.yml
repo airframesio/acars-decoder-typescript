@@ -13,11 +13,16 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    continue-on-error: ${{ matrix.allow-failure }}
 
     strategy:
       matrix:
         # build against all active LTS and current stable node; include "latest" as an extra, non-required signal
         node-version: [18.x, 20.x, 22.x, 24.x, latest]
+        allow-failure: [false]
+        include:
+          - node-version: latest
+            allow-failure: true
 
     steps:
       - uses: actions/checkout@v4
