@@ -16,6 +16,9 @@
     "build": "tsup",
     "test": "jest"
   },
+  "engines": {
+    "node": ">=18"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/airframesio/acars-decoder-typescript.git"
@@ -27,7 +30,6 @@
   "author": "Kevin Elliott <kevin@welikeinc.com>",
   "license": "UNLICENSED",
   "dependencies": {
-    "@types/node": "^22.13.10",
     "base85": "^3.1.0",
     "minizlib": "^3.0.1"
   },
@@ -37,6 +39,7 @@
     "@babel/preset-typescript": "^7.26.0",
     "@types/jest": "^29.5.14",
     "@types/minizlib": "^2.1.7",
+    "@types/node": "^24.2.1",
     "babel-jest": "^29.7.0",
     "jest": "^29.7.0",
     "ts-jest": "^29.2.6",

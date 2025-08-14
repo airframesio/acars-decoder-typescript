@@ -16,8 +16,8 @@ jobs:
 
     strategy:
       matrix:
-        # build against all active LTS and latest node
-        node-version: [18.x, 20.x, latest]
+        # build against all active LTS and current stable node
+        node-version: [18.x, 20.x, 22.x, 24.x]
 
     steps:
       - uses: actions/checkout@v4
