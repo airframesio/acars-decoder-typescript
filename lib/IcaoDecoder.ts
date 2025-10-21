@@ -2,13 +2,112 @@ export class IcaoDecoder {
   name : string;
   icao : string;
 
+  // Pre-compiled regex patterns for military ICAO address detection (performance optimization)
+  private static readonly MILITARY_PATTERNS = {
+    // US military
+    US_MIL_1: /^adf[7-9]/,
+    US_MIL_2: /^adf[a-f]/,
+    US_MIL_3: /^a[ef]/,
+
+    // Egypt military
+    EGYPT_MIL: /^0100[78]/,
+
+    // Algeria military
+    ALGERIA_MIL: /^0a4/,
+
+    // Italy military
+    ITALY_MIL: /^33ff/,
+
+    // France military
+    FRANCE_MIL_1: /^3a[89a-f]/,
+    FRANCE_MIL_2: /^3b/,
+
+    // Germany military
+    GERMANY_MIL_1: /^3e[ab]/,
+    GERMANY_MIL_2: /^3f[4-9ab]/,
+
+    // UK military
+    UK_MIL_1: /^4000[0-3]/,
+    UK_MIL_2: /^43c/,
+
+    // Austria military
+    AUSTRIA_MIL: /^44[4-7]/,
+
+    // Belgium military
+    BELGIUM_MIL: /^44f/,
+
+    // Bulgaria military
+    BULGARIA_MIL: /^457/,
+
+    // Denmark military
+    DENMARK_MIL: /^45f4/,
+
+    // Greece military
+    GREECE_MIL: /^468[0-3]/,
+
+    // Hungary military
+    HUNGARY_MIL: /^473c0/,
+
+    // Norway military
+    NORWAY_MIL: /^4781/,
+
+    // Netherlands military
+    NETHERLANDS_MIL: /^480/,
+
+    // Poland military
+    POLAND_MIL: /^48d8[0-7]/,
+
+    // Portugal military
+    PORTUGAL_MIL: /^497c/,
+
+    // Czech Republic military
+    CZECH_MIL: /^49842/,
+
+    // Switzerland military
+    SWITZERLAND_MIL: /^4b7/,
+
+    // Turkey military
+    TURKEY_MIL: /^4b82/,
+
+    // Slovenia military
+    SLOVENIA_MIL: /^506f/,
+
+    // Oman military
+    OMAN_MIL: /^70c07/,
+
+    // Saudi Arabia military
+    SAUDI_MIL_1: /^7102[5-8]/,
+    SAUDI_MIL_2: /^7103[89]/,
+
+    // Israel military
+    ISRAEL_MIL: /^738a/,
+
+    // Australia military
+    AUSTRALIA_MIL_1: /^7c8[2-48]/,
+    AUSTRALIA_MIL_2: /^7[def]/,
+
+    // India military
+    INDIA_MIL: /^8002/,
+
+    // Canada military
+    CANADA_MIL: /^c[23]/,
+
+    // Brazil military
+    BRAZIL_MIL: /^e4[01]/,
+
+    // Chile military
+    CHILE_MIL: /^e806/,
+  };
+
   constructor(icao: string) {
     this.name = 'icao-decoder-typescript';
     this.icao = icao;
   }
 
   isMilitary() {
-    let i = this.icao;
+    const i = this.icao;
+    const p = IcaoDecoder.MILITARY_PATTERNS;
+
     return (
       false
       // us military
@@ -16,89 +115,89 @@ export class IcaoDecoder {
       //adf7d0-adf7df = united states mil_4(uf)
       //adf7e0-adf7ff = united states mil_3(uf)
       //adf800-adffff = united states mil_2(uf)
-      || i.match(/^adf[7-9]/)
-      || i.match(/^adf[a-f]/)
+      || p.US_MIL_1.test(i)
+      || p.US_MIL_2.test(i)
       //ae0000-afffff = united states mil_1(uf)
-      || i.match(/^a(e|f)/)
+      || p.US_MIL_3.test(i)
 
       //010070-01008f = egypt_mil
-      || i.match(/^0100(7|8)/)
+      || p.EGYPT_MIL.test(i)
 
       //0a4000-0a4fff = algeria mil(ap)
-      || i.match(/^0a4/)
+      || p.ALGERIA_MIL.test(i)
 
       //33ff00-33ffff = italy mil(iy)
-      || i.match(/^33ff/)
+      || p.ITALY_MIL.test(i)
 
       //350000-37ffff = spain mil(sp)
       || (i >= '350000' && i <= '37ffff')
 
       //3a8000-3affff = france mil_1(fs)
-      || i.match(/^3a(8|9|[a-f])/)
+      || p.FRANCE_MIL_1.test(i)
       //3b0000-3bffff = france mil_2(fs)
-      || i.match(/^3b/)
+      || p.FRANCE_MIL_2.test(i)
 
       //3e8000-3ebfff = germany mil_1(df)
       // remove 8 and 9 from mil arnge
-      || i.match(/^3e(a|b)/)
+      || p.GERMANY_MIL_1.test(i)
       //3f4000-3f7fff = germany mil_2(df)
       //3f8000-3fbfff = germany mil_3(df)
-      || i.match(/^3f([4-9]|[a-b])/)
+      || p.GERMANY_MIL_2.test(i)
 
       //400000-40003f = united kingdom mil_1(ra)
-      || i.match(/^4000[0-3]/)
+      || p.UK_MIL_1.test(i)
       //43c000-43cfff = united kingdom mil(ra)
-      || i.match(/^43c/)
+      || p.UK_MIL_2.test(i)
 
       //444000-447fff = austria mil(aq)
-      || (i.match(/^44[4-7]/) && i != '447ac7')
+      || (p.AUSTRIA_MIL.test(i) && i != '447ac7')
 
       //44f000-44ffff = belgium mil(bc)
-      || i.match(/^44f/)
+      || p.BELGIUM_MIL.test(i)
 
       //457000-457fff = bulgaria mil(bu)
-      || i.match(/^457/)
+      || p.BULGARIA_MIL.test(i)
 
       //45f400-45f4ff = denmark mil(dg)
-      || i.match(/^45f4/)
+      || p.DENMARK_MIL.test(i)
 
       //468000-4683ff = greece mil(gc)
-      || i.match(/^468[0-3]/)
+      || p.GREECE_MIL.test(i)
 
       //473c00-473c0f = hungary mil(hm)
-      || i.match(/^473c0/)
+      || p.HUNGARY_MIL.test(i)
 
       //478100-4781ff = norway mil(nn)
-      || i.match(/^4781/)
+      || p.NORWAY_MIL.test(i)
       //480000-480fff = netherlands mil(nm)
-      || i.match(/^480/)
+      || p.NETHERLANDS_MIL.test(i)
       //48d800-48d87f = poland mil(po)
-      || i.match(/^48d8[0-7]/)
+      || p.POLAND_MIL.test(i)
       //497c00-497cff = portugal mil(pu)
-      || i.match(/^497c/)
+      || p.PORTUGAL_MIL.test(i)
       //498420-49842f = czech republic mil(ct)
-      || i.match(/^49842/)
+      || p.CZECH_MIL.test(i)
 
       //4b7000-4b7fff = switzerland mil(su)
-      || i.match(/^4b7/)
+      || p.SWITZERLAND_MIL.test(i)
       //4b8200-4b82ff = turkey mil(tq)
-      || i.match(/^4b82/)
+      || p.TURKEY_MIL.test(i)
 
       //506f00-506fff = slovenia mil(sj)
-      || i.match(/^506f/)
+      || p.SLOVENIA_MIL.test(i)
 
       //70c070-70c07f = oman mil(on)
-      || i.match(/^70c07/)
+      || p.OMAN_MIL.test(i)
 
       //710258-71025f = saudi arabia mil_1(sx)
       //710260-71027f = saudi arabia mil_2(sx)
       //710280-71028f = saudi arabia mil_3(sx)
       //710380-71039f = saudi arabia mil_4(sx)
-      || i.match(/^7102[5-8]/)
-      || i.match(/^7103[8-9]/)
+      || p.SAUDI_MIL_1.test(i)
+      || p.SAUDI_MIL_2.test(i)
 
       //738a00-738aff = israel mil(iz)
-      || i.match(/^738a/)
+      || p.ISRAEL_MIL.test(i)
 
       //7c822e-7c822f = australia mil_1(av)
       //7c8230-7c823f = australia mil_2(av)
@@ -107,26 +206,26 @@ export class IcaoDecoder {
       //7c8300-7c83ff = australia mil_5(av)
       //7c8400-7c87ff = australia mil_6(av)
       //7c8800-7c8fff = australia mil_7(av)
-      || i.match(/^7c8([2-4]|8)/)
+      || p.AUSTRALIA_MIL_1.test(i)
       //7c9000-7c9fff = australia mil_8(av)
       //7ca000-7cbfff = australia mil_9(av)
       || (i >= '7c9000' && i <= '7cbfff')
       //7cc000-7cffff = australia mil_10(av) 7cc409 not mil, remove this range
       //7d0000-7dffff = australia mil_11(av)
       //7e0000-7fffff = australia mil_12(av)
-      || i.match(/^7[d-f]/)
+      || p.AUSTRALIA_MIL_2.test(i)
 
       //800200-8002ff = india mil(im)
-      || i.match(/^8002/)
+      || p.INDIA_MIL.test(i)
 
       //c20000-c3ffff = canada mil(cb)
-      || i.match(/^c[2-3]/)
+      || p.CANADA_MIL.test(i)
 
       //e40000-e41fff = brazil mil(bq)
-      || i.match(/^e4[0-1]/)
+      || p.BRAZIL_MIL.test(i)
 
       //e80600-e806ff = chile mil(cq)
-      || i.match(/^e806/)
+      || p.CHILE_MIL.test(i)
     );
   }
 
