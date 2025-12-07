@@ -2,44 +2,60 @@ export class IcaoDecoder {
   name : string;
   icao : string;
 
-  // Pre-compiled regex patterns for military ICAO address detection (performance optimization)
-  private static readonly MILITARY_PATTERNS: RegExp[] = [
-    /^adf[7-9]/,    // adf7c8-adf7cf = united states mil_5(uf)
-    /^adf[a-f]/,    // adf7d0-adf7df = united states mil_4(uf)
-    /^a[ef]/,       // adf7e0-adf7ff = united states mil_3(uf), adf800-adffff = united states mil_2(uf), ae0000-afffff = united states mil_1(uf)
-    /^0100[78]/,    // 010070-01008f = egypt_mil
-    /^0a4/,         // 0a4000-0a4fff = algeria mil(ap)
-    /^33ff/,        // 33ff00-33ffff = italy mil(iy)
-    /^3a[89a-f]/,   // 3a8000-3affff = france mil_1(fs)
-    /^3b/,          // 3b0000-3bffff = france mil_2(fs)
-    /^3e[ab]/,      // 3e8000-3ebfff = germany mil_1(df)
-    /^3f[4-9ab]/,   // 3f4000-3f7fff = germany mil_2(df), 3f8000-3fbfff = germany mil_3(df)
-    /^4000[0-3]/,   // 400000-40003f = united kingdom mil_1(ra)
-    /^43c/,         // 43c000-43cfff = united kingdom mil(ra)
-    /^44[4-7]/,     // 444000-447fff = austria mil(aq)
-    /^44f/,         // 44f000-44ffff = belgium mil(bc)
-    /^457/,         // 457000-457fff = bulgaria mil(bu)
-    /^45f4/,        // 45f400-45f4ff = denmark mil(dg)
-    /^468[0-3]/,    // 468000-4683ff = greece mil(gc)
-    /^473c0/,       // 473c00-473c0f = hungary mil(hm)
-    /^4781/,        // 478100-4781ff = norway mil(nn)
-    /^480/,         // 480000-480fff = netherlands mil(nm)
-    /^48d8[0-7]/,   // 48d800-48d87f = poland mil(po)
-    /^497c/,        // 497c00-497cff = portugal mil(pu)
-    /^49842/,       // 498420-49842f = czech republic mil(ct)
-    /^4b7/,         // 4b7000-4b7fff = switzerland mil(su)
-    /^4b82/,        // 4b8200-4b82ff = turkey mil(tq)
-    /^506f/,        // 506f00-506fff = slovenia mil(sj)
-    /^70c07/,       // 70c070-70c07f = oman mil(on)
-    /^7102[5-8]/,   // 710258-71025f = saudi arabia mil_1(sx), 710260-71027f = saudi arabia mil_2(sx), 710280-71028f = saudi arabia mil_3(sx)
-    /^7103[89]/,    // 710380-71039f = saudi arabia mil_4(sx)
-    /^738a/,        // 738a00-738aff = israel mil(iz)
-    /^7c8[2-48]/,   // 7c822e-7c822f = australia mil_1(av), 7c8230-7c823f = australia mil_2(av), 7c8240-7c827f = australia mil_3(av), 7c8280-7c82ff = australia mil_4(av), 7c8300-7c83ff = australia mil_5(av), 7c8400-7c87ff = australia mil_6(av), 7c8800-7c8fff = australia mil_7(av)
-    /^7[def]/,      // 7d0000-7dffff = australia mil_11(av), 7e0000-7fffff = australia mil_12(av)
-    /^8002/,        // 800200-8002ff = india mil(im)
-    /^c[23]/,       // c20000-c3ffff = canada mil(cb)
-    /^e4[01]/,      // e40000-e41fff = brazil mil(bq)
-    /^e806/         // e80600-e806ff = chile mil(cq)
+  // Military ICAO address ranges (as [start, end] tuples, inclusive)
+  private static readonly MILITARY_RANGES: Array<[number, number]> = [
+    [0x010070, 0x01008f], // Egypt
+    [0x0a4000, 0x0a4fff], // Algeria
+    [0x33ff00, 0x33ffff], // Italy
+    [0x350000, 0x37ffff], // Spain
+    [0x3a8000, 0x3affff], // France 1
+    [0x3b0000, 0x3bffff], // France 2
+    [0x3ea000, 0x3ebfff], // Germany 4
+    [0x3f4000, 0x3f7fff], // Germany 2
+    [0x3f8000, 0x3fbfff], // Germany 3
+    [0x400000, 0x40003f], // UK 1
+    [0x43c000, 0x43cfff], // UK 2
+    [0x444000, 0x447ac6], // Austria (before exception)
+    [0x447ac8, 0x447fff], // Austria (after exception)
+    [0x44f000, 0x44ffff], // Belgium
+    [0x457000, 0x457fff], // Bulgaria
+    [0x45f400, 0x45f4ff], // Denmark
+    [0x468000, 0x4683ff], // Greece
+    [0x473c00, 0x473c0f], // Hungary
+    [0x478100, 0x4781ff], // Norway
+    [0x480000, 0x480fff], // Netherlands
+    [0x48d800, 0x48d87f], // Poland
+    [0x497c00, 0x497cff], // Portugal
+    [0x498420, 0x49842f], // Czech
+    [0x4b7000, 0x4b7fff], // Switzerland
+    [0x4b8200, 0x4b82ff], // Turkey
+    [0x506f00, 0x506fff], // Slovenia
+    [0x70c070, 0x70c07f], // Oman
+    [0x710258, 0x71025f], // Saudi 1
+    [0x710260, 0x71027f], // Saudi 2
+    [0x710280, 0x71028f], // Saudi 3
+    [0x710380, 0x71039f], // Saudi 4
+    [0x738a00, 0x738aff], // Israel
+    [0x7c822e, 0x7c822f], // Australia 1
+    [0x7c8230, 0x7c823f], // Australia 2
+    [0x7c8240, 0x7c827f], // Australia 3
+    [0x7c8280, 0x7c82ff], // Australia 4
+    [0x7c8300, 0x7c83ff], // Australia 5
+    [0x7c8400, 0x7c87fe], // Australia 6 (before exception)
+    [0x7c8800, 0x7c8ffe], // Australia 7 (before exception)
+    [0x7c9000, 0x7c9fff], // Australia 8
+    [0x7ca000, 0x7cbfff], // Australia 9
+    [0x7d0000, 0x7dffff], // Australia 11
+    [0x7e0000, 0x7fffff], // Australia 12
+    [0x800200, 0x8002ff], // India
+    [0xadf7c8, 0xadf7cf], // US mil_5
+    [0xadf7d0, 0xadf7df], // US mil_4
+    [0xadf7e0, 0xadf7ff], // US mil_3
+    [0xadf800, 0xadffff], // US mil_2
+    [0xae0000, 0xafffff], // US mil_1
+    [0xc20000, 0xc3ffff], // Canada
+    [0xe40000, 0xe41fff], // Brazil
+    [0xe80600, 0xe806ff], // Chile
   ];
 
   constructor(icao: string) {
@@ -47,22 +63,16 @@ export class IcaoDecoder {
     this.icao = icao;
   }
 
-  isMilitary() {
+  isMilitary() : boolean{
     const i = this.icao;
-    // Range checks that cannot be expressed as regex
-    if ((i >= '350000' && i <= '37ffff') ||
-        (i >= '7c9000' && i <= '7cbfff')) {
-      return true;
+    const n = parseInt(i, 16);
+    // Range checks only
+    for (const [start, end] of IcaoDecoder.MILITARY_RANGES) {
+      if (n >= start && n <= end) {
+        return true;
+      }
     }
-    // Austria exception
-    if (/^44[4-7]/.test(i) && i === '447ac7') {
-      return false;
-    }
-    // Australia exception
-    if (i === '7cc409') {
-      return false;
-    }
-    return IcaoDecoder.MILITARY_PATTERNS.some((p) => p.test(i));
+    return false;
   }
 }
 
