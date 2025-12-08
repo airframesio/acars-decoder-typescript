@@ -66,9 +66,8 @@ export class IcaoDecoder {
   isMilitary(): boolean {
     const i = this.icao;
     const n = parseInt(i, 16);
-    // Range checks only
     for (const [start, end] of IcaoDecoder.MILITARY_RANGES) {
-      if (n >= start && n <= end) {
+      if (start <= n && n <= end) {
         return true;
       }
     }
