@@ -48,11 +48,7 @@ export class IcaoDecoder {
     [0x7d0000, 0x7dffff], // Australia 11
     [0x7e0000, 0x7fffff], // Australia 12
     [0x800200, 0x8002ff], // India
-    [0xadf7c8, 0xadf7cf], // US mil_5
-    [0xadf7d0, 0xadf7df], // US mil_4
-    [0xadf7e0, 0xadf7ff], // US mil_3
-    [0xadf800, 0xadffff], // US mil_2
-    [0xae0000, 0xafffff], // US mil_1
+    [0xadf7c8, 0xafffff], // US military (merged)
     [0xc20000, 0xc3ffff], // Canada
     [0xe40000, 0xe41fff], // Brazil
     [0xe80600, 0xe806ff], // Chile
