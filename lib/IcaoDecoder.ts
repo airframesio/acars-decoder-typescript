@@ -41,8 +41,8 @@ export class IcaoDecoder {
     [0x7c8240, 0x7c827f], // Australia 3
     [0x7c8280, 0x7c82ff], // Australia 4
     [0x7c8300, 0x7c83ff], // Australia 5
-    [0x7c8400, 0x7c87fe], // Australia 6 (before exception)
-    [0x7c8800, 0x7c8ffe], // Australia 7 (before exception)
+    [0x7c8400, 0x7c87ff], // Australia 6 (before exception)
+    [0x7c8800, 0x7c8fff], // Australia 7 (before exception)
     [0x7c9000, 0x7c9fff], // Australia 8
     [0x7ca000, 0x7cbfff], // Australia 9
     [0x7d0000, 0x7dffff], // Australia 11

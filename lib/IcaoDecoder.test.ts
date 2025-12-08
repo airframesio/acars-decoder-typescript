@@ -81,7 +81,7 @@ describe('IcaoDecoder', () => {
     });
 
     // Germany
-    it('should match 3e8000-3ebfff', () => {
+    it('should match 3ea000-3ebfff', () => {
       expect(new IcaoDecoder('3ea000').isMilitary()).toBe(true);
       expect(new IcaoDecoder('3ebfff').isMilitary()).toBe(true);
     });
@@ -240,12 +240,14 @@ describe('IcaoDecoder', () => {
       expect(new IcaoDecoder('7c8300').isMilitary()).toBe(true);
       expect(new IcaoDecoder('7c83ff').isMilitary()).toBe(true);
     });
-    it('should match 7c8400 and not 7c87ff', () => {
+    it('should match 7c8400-7c87fe and not 7c87ff', () => {
       expect(new IcaoDecoder('7c8400').isMilitary()).toBe(true);
+      expect(new IcaoDecoder('7c87fe').isMilitary()).toBe(true);
       expect(new IcaoDecoder('7c87ff').isMilitary()).toBe(false);
     });
-    it('should match 7c8800 and not 7c8fff', () => {
+    it('should match 7c8800-7c8ffe and not 7c8fff', () => {
       expect(new IcaoDecoder('7c8800').isMilitary()).toBe(true);
+      expect(new IcaoDecoder('7c8ffe').isMilitary()).toBe(true);
       expect(new IcaoDecoder('7c8fff').isMilitary()).toBe(false);
     });
     it('should match 7c9000-7c9fff', () => {
