@@ -63,7 +63,7 @@ export class IcaoDecoder {
     this.icao = icao;
   }
 
-  isMilitary() : boolean{
+  isMilitary(): boolean {
     const i = this.icao;
     const n = parseInt(i, 16);
     // Range checks only
