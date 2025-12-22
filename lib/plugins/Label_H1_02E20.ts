@@ -49,7 +49,7 @@ export class Label_H1_02E20 extends DecoderPlugin {
       const part = parts[i];
       if(part[0] !== 'Q') {
         decodeResult.remaining.text += (decodeResult.remaining.text ? ' ' : '') + part;
-        continue
+        continue;
       }
       const wind = this.parseWeatherReport(part.substring(1));
       if(wind) {
@@ -67,7 +67,7 @@ export class Label_H1_02E20 extends DecoderPlugin {
     return decodeResult;
   }
 
- parseWeatherReport(text: string): Wind | null {
+ private parseWeatherReport(text: string): Wind | null {
 
   //N40359E02208116253601M627259020G
 
