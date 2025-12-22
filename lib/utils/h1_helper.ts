@@ -1,6 +1,7 @@
 import { DateTimeUtils } from "../DateTimeUtils";
 import { DecodeResult } from "../DecoderPluginInterface";
 import { Waypoint } from "../types/waypoint";
+import { Wind } from "../types/wind";
 import { CoordinateUtils } from "./coordinate_utils";
 import { FlightPlanUtils } from "./flight_plan_utils";
 import { ResultFormatter } from "./result_formatter";
@@ -300,14 +301,13 @@ function processRoute(decodeResult: DecodeResult, last: string, time: string, ne
 
 
 function processWindData(decodeResult: DecodeResult, message: string) {
-    if (decodeResult.raw.wind_data === undefined) {
-        decodeResult.raw.wind_data = [];
-    }
+    const wind = [] as Wind[];
+
     const flightLevel = Number(message.slice(0, 3));
     const fields = message.slice(4).split('.'); // strip off altitude and comma
     fields.forEach((field) => {
         const data = field.split(',');
-        const waypoint = data[0];
+        const waypoint = {name: data[0]};
         const windData = data[1];
         const windDirection = Number(windData.slice(0, 3));
         const windSpeed = Number(windData.slice(3));
@@ -317,7 +317,7 @@ function processWindData(decodeResult: DecodeResult, message: string) {
             const tempFlightLevel = Number(tempData.slice(0, 3));
             const tempString = tempData.slice(3);
             const tempDegrees = Number(tempString.substring(1)) * (tempString.charAt(0) === 'M' ? -1 : 1);
-            decodeResult.raw.wind_data.push({
+            wind.push({
                 waypoint: waypoint,
                 flightLevel: flightLevel,
                 windDirection: windDirection,
@@ -327,25 +327,16 @@ function processWindData(decodeResult: DecodeResult, message: string) {
                     degreesC: tempDegrees
                 },
             });
-            decodeResult.formatted.items.push({
-                type: 'wind_data',
-                code: 'WIND',
-                label: 'Wind Data',
-                value: `${waypoint} at FL${flightLevel}: ${windDirection}° at ${windSpeed}kt, ${tempDegrees}°C at FL${tempFlightLevel}`,
-            });
+
         } else {
-            decodeResult.raw.wind_data.push({
+            wind.push({
                 waypoint: waypoint,
                 flightLevel: flightLevel,
                 windDirection: windDirection,
                 windSpeed: windSpeed,
             });
-            decodeResult.formatted.items.push({
-                type: 'wind_data',
-                code: 'WIND',
-                label: 'Wind Data',
-                value: `${waypoint} at FL${flightLevel}: ${windDirection}° at ${windSpeed}kt`,
-            });
         }
     });
+
+    ResultFormatter.wind_data(decodeResult, wind);
 }
