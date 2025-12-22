@@ -68,16 +68,12 @@ export class Label_H1_02E20 extends DecoderPlugin {
   }
 
  private parseWeatherReport(text: string): Wind | null {
-
-  //N40359E02208116253601M627259020G
-
-  //40°35.9'N, 022°08.1'E    16:25    FL360    36,000 ft    -62.7°C    259°/20kts
-
-  const pos = CoordinateUtils.decodeStringCoordinatesDecimalMinutes(text.substring(0,13));
+  const posString = text.substring(0,13);
+  const pos = CoordinateUtils.decodeStringCoordinatesDecimalMinutes(posString);
   if (text.length !== 32 || !pos) {
     return null;
   }
-  const hhmm = text.substring(13,17);
+  const tod = DateTimeUtils.convertHHMMSSToTod(text.substring(13,17));
   const flightLevel = parseInt(text.substring(17,20), 10);
   // const altitude = parseInt(text.substring(17,21), 10) * 10; // use FL instead
   const tempSign = text[21] === 'M' ? -1 : 1;
@@ -91,10 +87,10 @@ export class Label_H1_02E20 extends DecoderPlugin {
   }
   return {
     waypoint: {
-      name: text.substring(0,12),
+      name: posString,
       latitude: pos.latitude,
       longitude: pos.longitude,
-      time: DateTimeUtils.convertHHMMSSToTod(hhmm),
+      time: tod,
       timeFormat: 'tod',
     },
     flightLevel: flightLevel,
