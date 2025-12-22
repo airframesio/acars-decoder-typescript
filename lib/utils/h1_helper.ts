@@ -338,5 +338,5 @@ function processWindData(decodeResult: DecodeResult, message: string) {
         }
     });
 
-    ResultFormatter.wind_data(decodeResult, wind);
+    ResultFormatter.windData(decodeResult, wind);
 }
