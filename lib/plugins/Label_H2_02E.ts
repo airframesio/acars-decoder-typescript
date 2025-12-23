@@ -36,7 +36,7 @@ export class Label_H2_02E extends DecoderPlugin {
 
     const header = parts[0];
     // header.substring(0,3) is '02E'
-    ResultFormatter.day(decodeResult, parseInt(header.substring(3,5)));
+    ResultFormatter.day(decodeResult, parseInt(header.substring(3,5),10));
     ResultFormatter.departureAirport(decodeResult, header.substring(5,9));
     ResultFormatter.arrivalAirport(decodeResult, header.substring(9,13));
     const firstWind = this.parseWeatherReport(header.substring(13));
