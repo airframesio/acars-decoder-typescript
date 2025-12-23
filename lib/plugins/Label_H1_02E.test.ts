@@ -1,7 +1,7 @@
 import { MessageDecoder } from "../MessageDecoder";
 import { Label_H1_02E } from "./Label_H1_02E";
 
-describe("Label_H1 02E20", () => {
+describe("Label_H1 02E", () => {
   let plugin: Label_H1_02E;
 
   beforeEach(() => {
