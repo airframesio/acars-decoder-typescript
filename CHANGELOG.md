@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+## 1.7.0
+
 - Node.js support and CI:
   - Declare runtime support: Node >=18 in `package.json` engines
   - Build target via tsup set to `node18` to ensure compatibility across Node 18/20/22/24
