@@ -3,8 +3,8 @@ import { DecodeResult } from "../DecoderPluginInterface";
 import { CoordinateUtils } from "./coordinate_utils";
 import { DateTimeUtils } from "../DateTimeUtils";
 import { RouteUtils } from "./route_utils";
-import { Waypoint } from "../types/waypoint";
 import { Route } from "../types/route";
+import { Wind } from "../types/wind";
 
 /**
  * Class to format the results of common fields
@@ -393,6 +393,23 @@ export class ResultFormatter {
         });
     }
 
+        static windData(decodeResult: DecodeResult, windData: Wind[]) {
+        decodeResult.raw.wind_data = windData;
+        for(const wind of windData) {
+            let text = `${RouteUtils.waypointToString(wind.waypoint)} at FL${wind.flightLevel}: ${wind.windDirection}° at ${wind.windSpeed}kt`;
+            if (wind.temperature) {
+                text += `, ${wind.temperature.degreesC}°C at FL${wind.temperature.flightLevel}`;
+
+            }
+            decodeResult.formatted.items.push({
+                type: 'wind_data',
+                code: 'WIND',
+                label: 'Wind Data',
+                value: text,
+            });
+    }
+    }
+
     static unknown(decodeResult: DecodeResult, value: string, sep: string = ',') {
         if (!decodeResult.remaining.text)
             decodeResult.remaining.text = value;
@@ -403,4 +420,5 @@ export class ResultFormatter {
     static unknownArr(decodeResult: DecodeResult, value: string[], sep: string = ',') {
         this.unknown(decodeResult, value.join(sep), sep);
     };
+
 }
