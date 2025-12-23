@@ -5,13 +5,13 @@ import { Wind } from '../types/wind';
 import { CoordinateUtils } from '../utils/coordinate_utils';
 import { ResultFormatter } from '../utils/result_formatter';
 
-export class Label_H1_02E20 extends DecoderPlugin {
-  name = 'label-h1-02e20';
+export class Label_H1_02E extends DecoderPlugin {
+  name = 'label-h1-02e';
 
   qualifiers() { // eslint-disable-line class-methods-use-this
     return {
       labels: ["H1"],
-      preambles: ['02E20'],
+      preambles: ['02E'],
     };
   }
 
@@ -35,7 +35,8 @@ export class Label_H1_02E20 extends DecoderPlugin {
     decodeResult.remaining.text = '';
 
     const header = parts[0];
-    // header.substring(0,5) is '02E20'
+    // header.substring(0,3) is '02E'
+    ResultFormatter.day(decodeResult, parseInt(header.substring(3,5)));
     ResultFormatter.departureAirport(decodeResult, header.substring(5,9));
     ResultFormatter.arrivalAirport(decodeResult, header.substring(9,13));
     const firstWind = this.parseWeatherReport(header.substring(13));

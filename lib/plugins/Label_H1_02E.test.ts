@@ -1,20 +1,20 @@
 import { MessageDecoder } from "../MessageDecoder";
-import { Label_H1_02E20 } from "./Label_H1_02E20";
+import { Label_H1_02E } from "./Label_H1_02E";
 
 describe("Label_H1 02E20", () => {
-  let plugin: Label_H1_02E20;
+  let plugin: Label_H1_02E;
 
   beforeEach(() => {
     const decoder = new MessageDecoder();
-    plugin = new Label_H1_02E20(decoder);
+    plugin = new Label_H1_02E(decoder);
   });
   test("matches qualifiers", () => {
     expect(plugin.decode).toBeDefined();
-    expect(plugin.name).toBe("label-h1-02e20");
+    expect(plugin.name).toBe("label-h1-02e");
     expect(plugin.qualifiers).toBeDefined();
     expect(plugin.qualifiers()).toEqual({
       labels: ["H1"],
-      preambles: ["02E20"],
+      preambles: ["02E"],
     });
   });
 
@@ -37,32 +37,34 @@ describe("Label_H1 02E20", () => {
     expect(decodeResult.message.text).toBe(text);
     const weather = decodeResult.raw.wind_data;
     expect(weather.length).toBe(6);
-    expect(decodeResult.formatted.items[0].label).toBe("Origin");
-    expect(decodeResult.formatted.items[0].value).toBe("HEGN");
-    expect(decodeResult.formatted.items[1].label).toBe("Destination");
-    expect(decodeResult.formatted.items[1].value).toBe("LKPR");
-    expect(decodeResult.formatted.items[2].label).toBe("Wind Data");
-    expect(decodeResult.formatted.items[2].value).toBe(
-      "N40359E022081(40.598 N, 22.135 E)@16:25:00 at FL360: 259° at 20kt, -62.7°C at FL360"
-    );
+    expect(decodeResult.formatted.items[0].label).toBe("Day of Month");
+    expect(typeof decodeResult.formatted.items[0].value).toBe("string");
+    expect(decodeResult.formatted.items[1].label).toBe("Origin");
+    expect(decodeResult.formatted.items[1].value).toBe("HEGN");
+    expect(decodeResult.formatted.items[2].label).toBe("Destination");
+    expect(decodeResult.formatted.items[2].value).toBe("LKPR");
     expect(decodeResult.formatted.items[3].label).toBe("Wind Data");
     expect(decodeResult.formatted.items[3].value).toBe(
-      "N41179E021343(41.298 N, 21.572 E)@16:32:00 at FL359: 247° at 37kt, -61.7°C at FL359"
+      "N40359E022081(40.598 N, 22.135 E)@16:25:00 at FL360: 259° at 20kt, -62.7°C at FL360"
     );
     expect(decodeResult.formatted.items[4].label).toBe("Wind Data");
     expect(decodeResult.formatted.items[4].value).toBe(
-      "N41591E021005(41.985 N, 21.008 E)@16:39:00 at FL360: 266° at 40kt, -61°C at FL360"
+      "N41179E021343(41.298 N, 21.572 E)@16:32:00 at FL359: 247° at 37kt, -61.7°C at FL359"
     );
     expect(decodeResult.formatted.items[5].label).toBe("Wind Data");
     expect(decodeResult.formatted.items[5].value).toBe(
-      "N42393E020267(42.655 N, 20.445 E)@16:46:00 at FL360: 276° at 33kt, -60°C at FL360"
+      "N41591E021005(41.985 N, 21.008 E)@16:39:00 at FL360: 266° at 40kt, -61°C at FL360"
     );
     expect(decodeResult.formatted.items[6].label).toBe("Wind Data");
     expect(decodeResult.formatted.items[6].value).toBe(
-      "N43197E019543(43.328 N, 19.905 E)@16:53:00 at FL359: 299° at 37kt, -59.2°C at FL359"
+      "N42393E020267(42.655 N, 20.445 E)@16:46:00 at FL360: 276° at 33kt, -60°C at FL360"
     );
     expect(decodeResult.formatted.items[7].label).toBe("Wind Data");
     expect(decodeResult.formatted.items[7].value).toBe(
+      "N43197E019543(43.328 N, 19.905 E)@16:53:00 at FL359: 299° at 37kt, -59.2°C at FL359"
+    );
+    expect(decodeResult.formatted.items[8].label).toBe("Wind Data");
+    expect(decodeResult.formatted.items[8].value).toBe(
       "N44023E019295(44.038 N, 19.492 E)@17:00:00 at FL359: 313° at 33kt, -58.7°C at FL359"
     );
   });
@@ -86,28 +88,30 @@ describe("Label_H1 02E20", () => {
     expect(decodeResult.message.text).toBe(text);
     const weather = decodeResult.raw.wind_data;
     expect(weather.length).toBe(5);
-    expect(decodeResult.formatted.items[0].label).toBe("Origin");
-    expect(decodeResult.formatted.items[0].value).toBe("EGKK");
-    expect(decodeResult.formatted.items[1].label).toBe("Destination");
-    expect(decodeResult.formatted.items[1].value).toBe("LBSF");
-    expect(decodeResult.formatted.items[2].label).toBe("Wind Data");
-    expect(decodeResult.formatted.items[2].value).toBe(
-      "N45081E017571(45.135 N, 17.952 E)@16:49:00 at FL350: 327° at 21kt, -57.7°C at FL350"
-    );
+    expect(decodeResult.formatted.items[0].label).toBe("Day of Month");
+    expect(typeof decodeResult.formatted.items[0].value).toBe("string");
+    expect(decodeResult.formatted.items[1].label).toBe("Origin");
+    expect(decodeResult.formatted.items[1].value).toBe("EGKK");
+    expect(decodeResult.formatted.items[2].label).toBe("Destination");
+    expect(decodeResult.formatted.items[2].value).toBe("LBSF");
     expect(decodeResult.formatted.items[3].label).toBe("Wind Data");
     expect(decodeResult.formatted.items[3].value).toBe(
-      "N44401E019030(44.668 N, 19.050 E)@16:56:00 at FL349: 352° at 28kt, -57.5°C at FL349"
+      "N45081E017571(45.135 N, 17.952 E)@16:49:00 at FL350: 327° at 21kt, -57.7°C at FL350"
     );
     expect(decodeResult.formatted.items[4].label).toBe("Wind Data");
     expect(decodeResult.formatted.items[4].value).toBe(
-      "N44115E020080(44.192 N, 20.133 E)@17:03:00 at FL346: 319° at 29kt, -55°C at FL346"
+      "N44401E019030(44.668 N, 19.050 E)@16:56:00 at FL349: 352° at 28kt, -57.5°C at FL349"
     );
     expect(decodeResult.formatted.items[5].label).toBe("Wind Data");
     expect(decodeResult.formatted.items[5].value).toBe(
-      "N43420E021123(43.700 N, 21.205 E)@17:10:00 at FL329: 299° at 36kt, -52.5°C at FL329"
+      "N44115E020080(44.192 N, 20.133 E)@17:03:00 at FL346: 319° at 29kt, -55°C at FL346"
     );
     expect(decodeResult.formatted.items[6].label).toBe("Wind Data");
     expect(decodeResult.formatted.items[6].value).toBe(
+      "N43420E021123(43.700 N, 21.205 E)@17:10:00 at FL329: 299° at 36kt, -52.5°C at FL329"
+    );
+    expect(decodeResult.formatted.items[7].label).toBe("Wind Data");
+    expect(decodeResult.formatted.items[7].value).toBe(
       "N43125E022145(43.208 N, 22.242 E)@17:17:00 at FL202: 271° at 22kt, -27.7°C at FL202"
     );
   });
@@ -124,24 +128,26 @@ describe("Label_H1 02E20", () => {
     expect(decodeResult.message.text).toBe(text);
     const weather = decodeResult.raw.wind_data;
     expect(weather.length).toBe(4);
-    expect(decodeResult.formatted.items[0].label).toBe("Origin");
-    expect(decodeResult.formatted.items[0].value).toBe("EIDW");
-    expect(decodeResult.formatted.items[1].label).toBe("Destination");
-    expect(decodeResult.formatted.items[1].value).toBe("KORD");
-    expect(decodeResult.formatted.items[2].label).toBe("Wind Data");
-    expect(decodeResult.formatted.items[2].value).toBe(
-      "N44087W085055(44.145 N, 85.092 W)@23:38:00 at FL380: 251° at 91kt, -47°C at FL380"
-    );
+    expect(decodeResult.formatted.items[0].label).toBe("Day of Month");
+    expect(typeof decodeResult.formatted.items[0].value).toBe("string");
+    expect(decodeResult.formatted.items[1].label).toBe("Origin");
+    expect(decodeResult.formatted.items[1].value).toBe("EIDW");
+    expect(decodeResult.formatted.items[2].label).toBe("Destination");
+    expect(decodeResult.formatted.items[2].value).toBe("KORD");
     expect(decodeResult.formatted.items[3].label).toBe("Wind Data");
     expect(decodeResult.formatted.items[3].value).toBe(
-      "N43210W085206(43.350 N, 85.343 W)@23:45:00 at FL281: 251° at 113kt, -44.2°C at FL281"
+      "N44087W085055(44.145 N, 85.092 W)@23:38:00 at FL380: 251° at 91kt, -47°C at FL380"
     );
     expect(decodeResult.formatted.items[4].label).toBe("Wind Data");
     expect(decodeResult.formatted.items[4].value).toBe(
-      "N42461W085395(42.768 N, 85.658 W)@23:52:00 at FL218: 256° at 121kt, -29.5°C at FL218"
+      "N43210W085206(43.350 N, 85.343 W)@23:45:00 at FL281: 251° at 113kt, -44.2°C at FL281"
     );
     expect(decodeResult.formatted.items[5].label).toBe("Wind Data");
     expect(decodeResult.formatted.items[5].value).toBe(
+      "N42461W085395(42.768 N, 85.658 W)@23:52:00 at FL218: 256° at 121kt, -29.5°C at FL218"
+    );
+    expect(decodeResult.formatted.items[6].label).toBe("Wind Data");
+    expect(decodeResult.formatted.items[6].value).toBe(
       "N42380W086237(42.633 N, 86.395 W)@23:59:00 at FL178: 266° at 100kt, -22.7°C at FL178"
     );
   });
