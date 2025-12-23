@@ -1,19 +1,19 @@
 import { MessageDecoder } from "../MessageDecoder";
-import { Label_H1_02E } from "./Label_H1_02E";
+import { Label_H2_02E } from "./Label_H2_02E";
 
-describe("Label_H1 02E", () => {
-  let plugin: Label_H1_02E;
+describe("Label_H2 02E", () => {
+  let plugin: Label_H2_02E;
 
   beforeEach(() => {
     const decoder = new MessageDecoder();
-    plugin = new Label_H1_02E(decoder);
+    plugin = new Label_H2_02E(decoder);
   });
   test("matches qualifiers", () => {
     expect(plugin.decode).toBeDefined();
-    expect(plugin.name).toBe("label-h1-02e");
+    expect(plugin.name).toBe("label-h2-02e");
     expect(plugin.qualifiers).toBeDefined();
     expect(plugin.qualifiers()).toEqual({
-      labels: ["H1"],
+      labels: ["H2"],
       preambles: ["02E"],
     });
   });

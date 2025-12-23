@@ -5,12 +5,12 @@ import { Wind } from '../types/wind';
 import { CoordinateUtils } from '../utils/coordinate_utils';
 import { ResultFormatter } from '../utils/result_formatter';
 
-export class Label_H1_02E extends DecoderPlugin {
-  name = 'label-h1-02e';
+export class Label_H2_02E extends DecoderPlugin {
+  name = 'label-h2-02e';
 
   qualifiers() { // eslint-disable-line class-methods-use-this
     return {
-      labels: ["H1"],
+      labels: ["H2"],
       preambles: ['02E'],
     };
   }
