@@ -183,7 +183,7 @@ export class Label_80 extends DecoderPlugin {
     const csvParts = text.split(',');
     const header = csvParts[0].trim().split(/\s+/);
     ResultFormatter.unknown(results,header[0], ' ');
-    ResultFormatter.unknown(results,header[1], ' ',);
+    ResultFormatter.unknown(results,header[1], ' ');
     ResultFormatter.position(results, CoordinateUtils.decodeStringCoordinates(header[2]));
     ResultFormatter.unknown(results, csvParts[1]);
     ResultFormatter.time_of_day(results, parseInt(csvParts[2], 10));
