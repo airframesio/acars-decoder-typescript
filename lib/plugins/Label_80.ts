@@ -100,8 +100,6 @@ export class Label_80 extends DecoderPlugin {
     }
     const tag = kvPair[0];
     const val = kvPair.slice(1).join(' ');
-    let wind_direction: number | undefined;
-    let wind_speed: number | undefined;
 
     switch (tag) {
       case 'POS':
@@ -168,18 +166,8 @@ export class Label_80 extends DecoderPlugin {
       default:
         ResultFormatter.unknown(results, part, '/');
     }
-    if (wind_speed !== undefined && wind_direction !== undefined) {
-      const wind : Wind = {
-        waypoint: results.raw.waypoint || { name: 'Current Position', latitude: results.raw.latitude, longitude: results.raw.longitude },
-        flightLevel: results.raw.altitude ? Math.round(results.raw.altitude / 100) : 0,
-        windDirection: wind_direction,
-        windSpeed: wind_speed
-      };
-      ResultFormatter.windData(results, [wind]);
-    }
   }
   private parseCsvFormat(text: string, results: DecodeResult) {
-    //3C01 POS N39328W077307  ,,143700,               ,      ,               ,P47,124,0069
     const csvParts = text.split(',');
     const header = csvParts[0].trim().split(/\s+/);
     ResultFormatter.unknown(results,header[0], ' ');
