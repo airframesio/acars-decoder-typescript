@@ -174,7 +174,7 @@ export class Label_80 extends DecoderPlugin {
     ResultFormatter.unknown(results,header[1], ' ');
     ResultFormatter.position(results, CoordinateUtils.decodeStringCoordinates(header[2]));
     ResultFormatter.unknown(results, csvParts[1]);
-    ResultFormatter.time_of_day(results, parseInt(csvParts[2], 10));
+    ResultFormatter.time_of_day(results, DateTimeUtils.convertHHMMSSToTod(csvParts[2]));
     ResultFormatter.unknownArr(results, csvParts.slice(4,6), ',');
     ResultFormatter.temperature(results, ((csvParts[6].charAt(0) === 'M' ? -1 : 1) * parseInt(csvParts[6].slice(1), 10)).toString());
     ResultFormatter.airspeed(results, parseInt(csvParts[7], 10));
