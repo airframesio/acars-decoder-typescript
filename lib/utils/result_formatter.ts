@@ -250,6 +250,26 @@ export class ResultFormatter {
         });
     }
 
+    static airspeed(decodeResult: DecodeResult, value: number) {
+        decodeResult.raw.airspeed = value;
+        decodeResult.formatted.items.push({
+            type: 'airspeed',
+            code: 'ASPD',
+            label: 'True Airspeed',
+            value: `${decodeResult.raw.airspeed} knots`
+        });
+    }
+
+    static mach(decodeResult: DecodeResult, value: number) {
+        decodeResult.raw.mach = value;
+        decodeResult.formatted.items.push({
+            type: 'mach',
+            code: 'MACH',
+            label: 'Mach Number',
+            value: `${decodeResult.raw.mach} mach`
+        });
+    }
+
     static temperature(decodeResult: DecodeResult, value: string) {
         if(value.length === 0 ) {
             return;
