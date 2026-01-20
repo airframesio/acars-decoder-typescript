@@ -64,7 +64,7 @@ export class Label_80 extends DecoderPlugin {
     }
     const msgInfo = fields[0].split(/\s+/);
     if(msgInfo.length === 3) {
-      ResultFormatter.unknownArr(results, msgInfo.slice(0,1), ' ');
+      ResultFormatter.unknownArr(results, msgInfo.slice(0,2), ' ');
       ResultFormatter.flightNumber(results, msgInfo[2]);
     } else {
       ResultFormatter.unknown(results, header, '/');
@@ -127,6 +127,7 @@ export class Label_80 extends DecoderPlugin {
         break;
       case 'SPD':
         ResultFormatter.groundspeed(results, parseInt(val, 10));
+        break;
       case 'TAS':
         ResultFormatter.airspeed(results, parseInt(val, 10));
         break;
@@ -154,16 +155,18 @@ export class Label_80 extends DecoderPlugin {
         results.raw.next_waypoint = val;
         break;
       case 'SWN':
-        wind_speed = parseInt(val, 10);
+        // wind speed, do nothing for
+        ResultFormatter.unknown(results, part, '/');
         break;
       case 'DWN':
-        wind_direction = parseInt(val, 10);
+        // wind direction, do nothing for now
+        ResultFormatter.unknown(results, part, '/');
         break;
       case 'AD':
         // do nothing, as it shows in the header
         break;
-        default:
-          ResultFormatter.unknown(results, part, '/');
+      default:
+        ResultFormatter.unknown(results, part, '/');
     }
     if (wind_speed !== undefined && wind_direction !== undefined) {
       const wind : Wind = {

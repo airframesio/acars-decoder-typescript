@@ -38,7 +38,7 @@ test('decodes POSRPT variant 1', () => {
   expect(decodeResult.raw.fuel_on_board).toBe(100);
   //expect(decodeResult.raw.eta_time).toBe('15000');
   expect(decodeResult.formatted.items.length).toBe(10);
-  expect(decodeResult.remaining.text).toBe('3N01/');
+  expect(decodeResult.remaining.text).toBe('3N01 POSRPT/');
 });
 test('decodes POSRPT variant 2', () => {
   // https://app.airframes.io/messages/2416917371
@@ -65,14 +65,14 @@ test('decodes POSRPT variant 2', () => {
   expect(decodeResult.raw.fuel_on_board).toBe(9414);
   expect(decodeResult.raw.eta_time).toBe(51960);
   expect(decodeResult.formatted.items.length).toBe(13);
-  expect(decodeResult.remaining.text).toBe('3N01/04H 11:02////SWND 110/DWND 306');
+  expect(decodeResult.remaining.text).toBe('3N01 POSRPT/04H 11:02////SWND 110/DWND 306');
 
 });
 
 test('decodes POSRPT variant 3', () => {
   const text = '/FB 0105/AD KCHS/N3950.1,W07548.3,3P01 POSRPT  0267/20 KBOS/KCHS .N3275J\n/UTC 143605/POS N3950.1 W07548.3/ALT 38007\n/SPD 334/FOB 0105/ETA 1622';
   const decodeResult = plugin.decode({ text: text });
-  console.log(JSON.stringify(decodeResult, null, 2));
+
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
   expect(decodeResult.raw.flight_number).toBe('0267');
@@ -86,11 +86,10 @@ test('decodes POSRPT variant 3', () => {
   expect(decodeResult.raw.position.longitude).toBe(-75.483);
   expect(decodeResult.raw.altitude).toBe(38007);
   expect(decodeResult.raw.groundspeed).toBe(334);
-  expect(decodeResult.raw.airspeed).toBe(334);
   expect(decodeResult.raw.fuel_on_board).toBe(105);
   expect(decodeResult.raw.eta_time).toBe(58920);
-  expect(decodeResult.formatted.items.length).toBe(12);
-  expect(decodeResult.remaining.text).toBe('N3950.1/W07548.3 3P01//');
+  expect(decodeResult.formatted.items.length).toBe(11);
+  expect(decodeResult.remaining.text).toBe('N3950.1/W07548.3 3P01 POSRPT//');
 });
 
 test('decodes POS variant 1', () => {
@@ -120,7 +119,7 @@ test('decodes OPNORM variant 1', () => {
   expect(decodeResult.raw.arrival_icao).toBe('MMMX');
   expect(decodeResult.raw.tail).toBe('XA-MAT');
   expect(decodeResult.formatted.items.length).toBe(5);
-  expect(decodeResult.remaining.text).toBe('3M01');
+  expect(decodeResult.remaining.text).toBe('3M01 OPNORM');
 });
 
 
@@ -137,7 +136,7 @@ test('decodes INRANG variant 1', () => {
   expect(decodeResult.raw.tail).toBe('N613AZ');
   expect(decodeResult.raw.eta_time).toBe(46440);
   expect(decodeResult.formatted.items.length).toBe(6);
-  expect(decodeResult.remaining.text).toBe('3701//ERT');
+  expect(decodeResult.remaining.text).toBe('3701 INRANG//ERT');
 });
 
 
