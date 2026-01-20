@@ -24,8 +24,19 @@ export class Label_80 extends DecoderPlugin {
     decodeResult.formatted.description = 'Airline Defined Position Report';
 
     const lines = message.text.split(/\r?\n/);
-    const header = lines[0];
-    this.parseHeader(header.trim(), decodeResult);
+    if(lines.length === 1 && lines[0].includes(',')) {
+      this.parseCsvFormat(lines[0], decodeResult);
+    } else {
+    const header = lines[0].trim();
+    const headerParts = header.split(',');
+    for(let i=0; i<headerParts.length-1; i++) {
+      const moreFields = headerParts[i].split('/');
+      for(const more of moreFields) {
+        this.parseTags(more.trim(), decodeResult);
+      }
+    }
+
+    this.parseHeader(headerParts[headerParts.length-1].trim(), decodeResult);
 
     for(let i=1; i<lines.length; i++) {
       const line = lines[i];
@@ -34,6 +45,7 @@ export class Label_80 extends DecoderPlugin {
         this.parseTags(part.trim(), decodeResult);
       }
     }
+  }
 
     if (decodeResult.formatted.items.length > 0) {
       decodeResult.decoded = true;
@@ -47,7 +59,7 @@ export class Label_80 extends DecoderPlugin {
     //3N01 POSRPT 0581/27 KIAD/MSLP .N962AV/04H 11:02
     const fields = header.split('/');
     if(fields.length < 3) {
-      ResultFormatter.unknown(results, header);
+      ResultFormatter.unknown(results, header, '/');
       return;
     }
     const msgInfo = fields[0].split(/\s+/);
@@ -55,7 +67,7 @@ export class Label_80 extends DecoderPlugin {
       ResultFormatter.unknownArr(results, msgInfo.slice(0,1), ' ');
       ResultFormatter.flightNumber(results, msgInfo[2]);
     } else {
-      ResultFormatter.unknown(results, header);
+      ResultFormatter.unknown(results, header, '/');
       return;
     }
 
@@ -82,12 +94,12 @@ export class Label_80 extends DecoderPlugin {
 
   private parseTags(part: string, results: DecodeResult) {
     const kvPair = part.split(/\s+/)
-    if(kvPair.length !== 2) {
-      ResultFormatter.unknown(results, part);
+    if(kvPair.length < 2) {
+      ResultFormatter.unknown(results, part, '/');
       return;
     }
     const tag = kvPair[0];
-    const val = kvPair[1];
+    const val = kvPair.slice(1).join(' ');
     let wind_direction: number | undefined;
     let wind_speed: number | undefined;
 
@@ -147,9 +159,11 @@ export class Label_80 extends DecoderPlugin {
       case 'DWN':
         wind_direction = parseInt(val, 10);
         break;
-
+      case 'AD':
+        // do nothing, as it shows in the header
+        break;
         default:
-          ResultFormatter.unknown(results, part);
+          ResultFormatter.unknown(results, part, '/');
     }
     if (wind_speed !== undefined && wind_direction !== undefined) {
       const wind : Wind = {
@@ -160,5 +174,19 @@ export class Label_80 extends DecoderPlugin {
       };
       ResultFormatter.windData(results, [wind]);
     }
+  }
+  private parseCsvFormat(text: string, results: DecodeResult) {
+    //3C01 POS N39328W077307  ,,143700,               ,      ,               ,P47,124,0069
+    const csvParts = text.split(',');
+    const header = csvParts[0].trim().split(/\s+/);
+    ResultFormatter.unknown(results,header[0], ' ');
+    ResultFormatter.unknown(results,header[1], ' ',);
+    ResultFormatter.position(results, CoordinateUtils.decodeStringCoordinates(header[2]));
+    ResultFormatter.unknown(results, csvParts[1]);
+    ResultFormatter.time_of_day(results, parseInt(csvParts[2], 10));
+    ResultFormatter.unknownArr(results, csvParts.slice(4,6), ',');
+    ResultFormatter.temperature(results, ((csvParts[6].charAt(0) === 'M' ? -1 : 1) * parseInt(csvParts[6].slice(1), 10)).toString());
+    ResultFormatter.airspeed(results, parseInt(csvParts[7], 10));
+    ResultFormatter.currentFuel( results, parseInt( csvParts[8], 10));
   }
 }
