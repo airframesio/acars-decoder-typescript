@@ -108,7 +108,7 @@ export class Label_80 extends DecoderPlugin {
       // don't use decodeStringCoordinates because of different position format
         const posRegex = /^(?<latd>[NS])(?<lat>.+)(?<lngd>[EW])(?<lng>.+)/;
         const posResult = val.match(posRegex);
-        const lat = Number(posResult?.groups?.lat) * (posResult?.groups?.lngd === 'S' ? -1 : 1);
+        const lat = Number(posResult?.groups?.lat) * (posResult?.groups?.latd === 'S' ? -1 : 1);
         const lon = Number(posResult?.groups?.lng) * (posResult?.groups?.lngd === 'W' ? -1 : 1);
         const position = {
           latitude: Number.isInteger(lat) ? lat / 1000 : lat / 100,
