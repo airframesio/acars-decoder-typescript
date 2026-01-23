@@ -5,7 +5,7 @@ import { CoordinateUtils } from "../utils/coordinate_utils";
 import { FlightPlanUtils } from "../utils/flight_plan_utils";
 import { ResultFormatter } from "../utils/result_formatter";
 
-// On Runway Report
+// Flight Briefing Report
 export class Label_44_Slash extends DecoderPlugin {
   name = "label-44-slash";
 
