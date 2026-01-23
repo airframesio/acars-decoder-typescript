@@ -1,7 +1,6 @@
 import { DateTimeUtils } from "../DateTimeUtils";
 import { DecoderPlugin } from "../DecoderPlugin";
 import { DecodeResult, Message, Options } from "../DecoderPluginInterface";
-import { CoordinateUtils } from "../utils/coordinate_utils";
 import { FlightPlanUtils } from "../utils/flight_plan_utils";
 import { ResultFormatter } from "../utils/result_formatter";
 
