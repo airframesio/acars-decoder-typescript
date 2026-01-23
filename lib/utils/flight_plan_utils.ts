@@ -106,7 +106,6 @@ public static addProcedure(decodeResult: DecodeResult, value: string, type: stri
   const route = { name: data[0], waypoints: waypoints };
   decodeResult.raw.procedures.push({ type: type, route: route });
   const procedureName = type.substring(0, 1).toUpperCase() + type.slice(1);
-  let procedureValue = route.name;
   decodeResult.formatted.items.push({
     type: `procedure`,
     code: 'proc',
