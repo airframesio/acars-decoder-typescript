@@ -21,7 +21,7 @@ export class Label_16_Honeywell extends DecoderPlugin {
     decodeResult.formatted.description = "Position Report";
     decodeResult.message = message;
 
-    if (message.text.startsWith("(2") && message.text.endsWith("(Z")) {
+    if (message.text.startsWith("(2") && message.text.endsWith("(Z") && message.text.length >= 29) {
       const between = message.text.substring(2, message.text.length - 2);
       ResultFormatter.unknown(decodeResult, between.substring(0, 4), ""); // Session ID
       ResultFormatter.position(
