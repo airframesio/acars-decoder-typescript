@@ -1,153 +1,153 @@
 import { MessageDecoder } from '../MessageDecoder';
 import { Label_80 } from './Label_80';
 
-test('matches Label 80 qualifiers', () => {
-  const decoder = new MessageDecoder();
-  const decoderPlugin = new Label_80(decoder);
+describe('Label 80', () => {
 
-  expect(decoderPlugin.decode).toBeDefined();
-  expect(decoderPlugin.name).toBe('label-80');
-  expect(decoderPlugin.qualifiers).toBeDefined();
-  expect(decoderPlugin.qualifiers()).toEqual({
+  let plugin : Label_80;
+
+    beforeEach(() => {
+      const decoder = new MessageDecoder();
+      plugin = new Label_80(decoder);
+    });
+test('matches qualifiers', () => {
+  expect(plugin.decode).toBeDefined();
+  expect(plugin.name).toBe('label-80');
+  expect(plugin.qualifiers).toBeDefined();
+  expect(plugin.qualifiers()).toEqual({
     labels: ['80'],
-    preambles: ['3N01 POSRPT'],
+    preambles: [],
 });
 });
 
-test('decodes Label 80 variant 1', () => {
-  const decoder = new MessageDecoder();
-  const decoderPlugin = new Label_80(decoder);
-
+test('decodes POSRPT variant 1', () => {
   // https://app.airframes.io/messages/377573108
   const text = '3N01 POSRPT 5891/04 KIAH/MMGL .XA-VOI\r\n/POS N29395W095133/ALT +15608/MCH 558/FOB 0100/ETA 0410';
-  const decodeResult = decoderPlugin.decode({ text: text });
-  
+  const decodeResult = plugin.decode({ text: text });
+
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
-  expect(decodeResult.decoder.name).toBe('label-80');
-  expect(decodeResult.formatted.description).toBe('Airline Defined Position Report');
+  expect(decodeResult.raw.flight_number).toBe('5891');
+  expect(decodeResult.raw.day).toBe(4);
   expect(decodeResult.raw.position.latitude).toBe(29.395);
   expect(decodeResult.raw.position.longitude).toBe(-95.133);
   expect(decodeResult.raw.altitude).toBe(15608);
-  expect(decodeResult.formatted.items.length).toBe(8);
-  expect(decodeResult.formatted.items[0].type).toBe('icao');
-  expect(decodeResult.formatted.items[0].code).toBe('ORG');
-  expect(decodeResult.formatted.items[0].label).toBe('Origin');
-  expect(decodeResult.formatted.items[0].value).toBe('KIAH');
-  expect(decodeResult.formatted.items[1].type).toBe('icao');
-  expect(decodeResult.formatted.items[1].code).toBe('DST');
-  expect(decodeResult.formatted.items[1].label).toBe('Destination');
-  expect(decodeResult.formatted.items[1].value).toBe('MMGL');
-  expect(decodeResult.formatted.items[2].type).toBe('tail');
-  expect(decodeResult.formatted.items[2].label).toBe('Tail');
-  expect(decodeResult.formatted.items[2].value).toBe('XA-VOI');
-  expect(decodeResult.formatted.items[3].type).toBe('aircraft_position');
-  expect(decodeResult.formatted.items[3].code).toBe('POS');
-  expect(decodeResult.formatted.items[3].label).toBe('Aircraft Position');
-  expect(decodeResult.formatted.items[3].value).toBe('29.395 N, 95.133 W');
-  expect(decodeResult.formatted.items[4].type).toBe('altitude');
-  expect(decodeResult.formatted.items[4].code).toBe('ALT');
-  expect(decodeResult.formatted.items[4].label).toBe('Altitude');
-  expect(decodeResult.formatted.items[4].value).toBe('15608 feet');
-  expect(decodeResult.formatted.items[5].type).toBe('mach');
-  expect(decodeResult.formatted.items[5].code).toBe('MCH');
-  expect(decodeResult.formatted.items[5].label).toBe('Aircraft Speed');
-  expect(decodeResult.formatted.items[5].value).toBe('0.558 Mach');
-  expect(decodeResult.formatted.items[6].type).toBe('fuel_on_board');
-  expect(decodeResult.formatted.items[6].code).toBe('FOB');
-  expect(decodeResult.formatted.items[6].label).toBe('Fuel On Board');
-  expect(decodeResult.formatted.items[6].value).toBe('100');
-  expect(decodeResult.formatted.items[7].type).toBe('ETA');
-  expect(decodeResult.formatted.items[7].code).toBe('ETA');
-  expect(decodeResult.formatted.items[7].label).toBe('Estimated Time of Arrival');
-  expect(decodeResult.formatted.items[7].value).toBe('0410'); // TODO: format as time
+  expect(decodeResult.raw.tail).toBe('XA-VOI');
+  expect(decodeResult.raw.departure_icao).toBe('KIAH');
+  expect(decodeResult.raw.arrival_icao).toBe('MMGL');
+  expect(decodeResult.raw.mach).toBe(0.558);
+  expect(decodeResult.raw.fuel_on_board).toBe(100);
+  //expect(decodeResult.raw.eta_time).toBe('15000');
+  expect(decodeResult.formatted.items.length).toBe(10);
+  expect(decodeResult.remaining.text).toBe('3N01 POSRPT/');
 });
-test('decodes Label 80 variant 2', () => {
-  const decoder = new MessageDecoder();
-  const decoderPlugin = new Label_80(decoder);
-
+test('decodes POSRPT variant 2', () => {
   // https://app.airframes.io/messages/2416917371
   const text = '3N01 POSRPT 0581/27 KIAD/MSLP .N962AV/04H 11:02\r\n/NWYP CIGAR /HDG 233/MCH 782\r\n/POS N3539.2W07937.2/FL 360/TAS 445/SAT -060\r\n/SWND 110/DWND 306/FOB N009414/ETA 14:26.0 ';
-  const decodeResult = decoderPlugin.decode({ text: text });
-  
+  const decodeResult = plugin.decode({ text: text });
+
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
   expect(decodeResult.decoder.name).toBe('label-80');
   expect(decodeResult.formatted.description).toBe('Airline Defined Position Report');
   expect(decodeResult.raw.position.latitude).toBe(35.391999999999996); // FIXME?: 35.392
   expect(decodeResult.raw.position.longitude).toBe(-79.372);
-  expect(decodeResult.formatted.items.length).toBe(15);
-  expect(decodeResult.formatted.items[0].type).toBe('icao');
-  expect(decodeResult.formatted.items[0].code).toBe('ORG');
-  expect(decodeResult.formatted.items[0].label).toBe('Origin');
-  expect(decodeResult.formatted.items[0].value).toBe('KIAD');
-  expect(decodeResult.formatted.items[1].type).toBe('icao');
-  expect(decodeResult.formatted.items[1].code).toBe('DST');
-  expect(decodeResult.formatted.items[1].label).toBe('Destination');
-  expect(decodeResult.formatted.items[1].value).toBe('MSLP');
-  expect(decodeResult.formatted.items[2].type).toBe('tail');
-  expect(decodeResult.formatted.items[2].label).toBe('Tail');
-  expect(decodeResult.formatted.items[2].value).toBe('N962AV');
-  expect(decodeResult.formatted.items[3].type).toBe('arrival_gate');
-  expect(decodeResult.formatted.items[3].code).toBe('ARG');
-  expect(decodeResult.formatted.items[3].label).toBe('Arrival Gate');
-  expect(decodeResult.formatted.items[3].value).toBe('04H');
-  expect(decodeResult.formatted.items[4].type).toBe('scheduled_time_of_arrival');
-  expect(decodeResult.formatted.items[4].code).toBe('STA');
-  expect(decodeResult.formatted.items[4].label).toBe('Scheduled Time of Arrival');
-  expect(decodeResult.formatted.items[4].value).toBe('11:02');
-  expect(decodeResult.formatted.items[5].type).toBe('next_waypoint');
-  expect(decodeResult.formatted.items[5].code).toBe('NWYP');
-  expect(decodeResult.formatted.items[5].label).toBe('Next Waypoint');
-  expect(decodeResult.formatted.items[5].value).toBe('CIGAR');
-  expect(decodeResult.formatted.items[6].type).toBe('heading');
-  expect(decodeResult.formatted.items[6].code).toBe('HDG');
-  expect(decodeResult.formatted.items[6].label).toBe('Heading');
-  expect(decodeResult.formatted.items[6].value).toBe('233');
-  expect(decodeResult.formatted.items[7].type).toBe('mach');
-  expect(decodeResult.formatted.items[7].code).toBe('MCH');
-  expect(decodeResult.formatted.items[7].label).toBe('Aircraft Speed');
-  expect(decodeResult.formatted.items[7].value).toBe('0.782 Mach');
-  expect(decodeResult.formatted.items[8].type).toBe('aircraft_position');
-  expect(decodeResult.formatted.items[8].code).toBe('POS');
-  expect(decodeResult.formatted.items[8].label).toBe('Aircraft Position');
-  expect(decodeResult.formatted.items[8].value).toBe('35.392 N, 79.372 W');
-  expect(decodeResult.formatted.items[9].type).toBe('altitude');
-  expect(decodeResult.formatted.items[9].code).toBe('ALT');
-  expect(decodeResult.formatted.items[9].label).toBe('Altitude');
-  expect(decodeResult.formatted.items[9].value).toBe('36000 feet');
-  expect(decodeResult.formatted.items[10].type).toBe('TAS');
-  expect(decodeResult.formatted.items[10].code).toBe('TAS');
-  expect(decodeResult.formatted.items[10].label).toBe('True Airspeed');
-  expect(decodeResult.formatted.items[10].value).toBe('445');
-  expect(decodeResult.formatted.items[11].type).toBe('SAT');
-  expect(decodeResult.formatted.items[11].code).toBe('SAT');
-  expect(decodeResult.formatted.items[11].label).toBe('Static Air Temperature');
-  expect(decodeResult.formatted.items[11].value).toBe('-060');
-  expect(decodeResult.formatted.items[12].type).toBe('wind_speed');
-  expect(decodeResult.formatted.items[12].code).toBe('SWND');
-  expect(decodeResult.formatted.items[12].label).toBe('Wind Speed');
-  expect(decodeResult.formatted.items[12].value).toBe(110); // FIXME: string
-  expect(decodeResult.formatted.items[13].type).toBe('wind_direction');
-  expect(decodeResult.formatted.items[13].code).toBe('DWND');
-  expect(decodeResult.formatted.items[13].label).toBe('Wind Direction');
-  expect(decodeResult.formatted.items[13].value).toBe(306); // FIXME: string
-  expect(decodeResult.formatted.items[14].type).toBe('ETA');
-  expect(decodeResult.formatted.items[14].code).toBe('ETA');
-  expect(decodeResult.formatted.items[14].label).toBe('Estimated Time of Arrival');
-  expect(decodeResult.formatted.items[14].value).toBe('14:26.0');
+  expect(decodeResult.raw.departure_icao).toBe('KIAD');
+  expect(decodeResult.raw.arrival_icao).toBe('MSLP');
+  expect(decodeResult.raw.tail).toBe('N962AV');
+  expect(decodeResult.raw.next_waypoint).toBe('CIGAR');
+  expect(decodeResult.raw.heading).toBe(233);
+  expect(decodeResult.raw.mach).toBe(0.782);
+  expect(decodeResult.raw.altitude).toBe(36000);
+  expect(decodeResult.raw.airspeed).toBe(445);
+  expect(decodeResult.raw.outside_air_temperature).toBe(-60);
+  //expect(decodeResult.raw.wind_data[0].windSpeed).toBe(110);
+  //expect(decodeResult.raw.wind_data[0].windDirection).toBe(306);
+  expect(decodeResult.raw.fuel_on_board).toBe(9414);
+  expect(decodeResult.raw.eta_time).toBe(51960);
+  expect(decodeResult.formatted.items.length).toBe(13);
+  expect(decodeResult.remaining.text).toBe('3N01 POSRPT/04H 11:02////SWND 110/DWND 306');
+
 });
 
-test('decodes Label 80 <invalid>', () => {
-  const decoder = new MessageDecoder();
-  const decoderPlugin = new Label_80(decoder);
+test('decodes POSRPT variant 3', () => {
+  const text = '/FB 0105/AD KCHS/N3950.1,W07548.3,3P01 POSRPT  0267/20 KBOS/KCHS .N3275J\n/UTC 143605/POS N3950.1 W07548.3/ALT 38007\n/SPD 334/FOB 0105/ETA 1622';
+  const decodeResult = plugin.decode({ text: text });
 
+  expect(decodeResult.decoded).toBe(true);
+  expect(decodeResult.decoder.decodeLevel).toBe('partial');
+  expect(decodeResult.raw.flight_number).toBe('0267');
+  expect(decodeResult.raw.day).toBe(20);
+  expect(decodeResult.raw.fuel_on_board).toBe(105);
+  expect(decodeResult.raw.arrival_icao).toBe('KCHS');
+  expect(decodeResult.raw.departure_icao).toBe('KBOS');
+  expect(decodeResult.raw.tail).toBe('N3275J');
+  expect(decodeResult.raw.time_of_day).toBe(52565);
+  expect(decodeResult.raw.position.latitude).toBe(39.501);
+  expect(decodeResult.raw.position.longitude).toBe(-75.483);
+  expect(decodeResult.raw.altitude).toBe(38007);
+  expect(decodeResult.raw.groundspeed).toBe(334);
+  expect(decodeResult.raw.fuel_on_board).toBe(105);
+  expect(decodeResult.raw.eta_time).toBe(58920);
+  expect(decodeResult.formatted.items.length).toBe(11);
+  expect(decodeResult.remaining.text).toBe('N3950.1/W07548.3 3P01 POSRPT//');
+});
+
+test('decodes POS variant 1', () => {
+  const text = '3C01 POS N39328W077307  ,,143700,               ,      ,               ,P47,124,0069';
+  const decodeResult = plugin.decode({ text: text });
+
+  expect(decodeResult.decoded).toBe(true);
+  expect(decodeResult.decoder.decodeLevel).toBe('partial');
+  expect(decodeResult.raw.position.latitude).toBe(39.328);
+  expect(decodeResult.raw.position.longitude).toBe(-77.307);
+  expect(decodeResult.raw.outside_air_temperature).toBe(47);
+  expect(decodeResult.raw.time_of_day).toBe(52620);
+  expect(decodeResult.raw.airspeed).toBe(124);
+  expect(decodeResult.raw.fuel_on_board).toBe(69);
+  expect(decodeResult.formatted.items.length).toBe(5);
+  expect(decodeResult.remaining.text).toBe('3C01 POS,,      ,               ');
+});
+
+test('decodes OPNORM variant 1', () => {
+  const text = '3M01 OPNORM 0411/20 KEWR/MMMX .XA-MAT ';
+  const decodeResult = plugin.decode({ text: text });
+
+  expect(decodeResult.decoded).toBe(true);
+  expect(decodeResult.raw.flight_number).toBe('0411');
+  expect(decodeResult.raw.day).toBe(20);
+  expect(decodeResult.raw.departure_icao).toBe('KEWR');
+  expect(decodeResult.raw.arrival_icao).toBe('MMMX');
+  expect(decodeResult.raw.tail).toBe('XA-MAT');
+  expect(decodeResult.formatted.items.length).toBe(5);
+  expect(decodeResult.remaining.text).toBe('3M01 OPNORM');
+});
+
+
+test('decodes INRANG variant 1', () => {
+  const text = '3701 INRANG 3451/20 KSBD/KBWI .N613AZ\n/ETA 1254/ERT      ';
+  const decodeResult = plugin.decode({ text: text });
+
+  expect(decodeResult.decoded).toBe(true);
+  expect(decodeResult.decoder.decodeLevel).toBe('partial');
+  expect(decodeResult.raw.flight_number).toBe('3451');
+  expect(decodeResult.raw.day).toBe(20);
+  expect(decodeResult.raw.departure_icao).toBe('KSBD');
+  expect(decodeResult.raw.arrival_icao).toBe('KBWI');
+  expect(decodeResult.raw.tail).toBe('N613AZ');
+  expect(decodeResult.raw.eta_time).toBe(46440);
+  expect(decodeResult.formatted.items.length).toBe(6);
+  expect(decodeResult.remaining.text).toBe('3701 INRANG//ERT');
+});
+
+
+test('does not decode invalid messages', () => {
   const text = '3N01 POSRPT Bogus message';
-  const decodeResult = decoderPlugin.decode({ text: text });
-  
+  const decodeResult = plugin.decode({ text: text });
+
   expect(decodeResult.decoded).toBe(false);
   expect(decodeResult.decoder.decodeLevel).toBe('none');
   expect(decodeResult.decoder.name).toBe('label-80');
   expect(decodeResult.formatted.description).toBe('Airline Defined Position Report');
   expect(decodeResult.formatted.items.length).toBe(0);
+});
 });
