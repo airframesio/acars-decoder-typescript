@@ -31,6 +31,7 @@ export * from './Label_44_IN';
 export * from './Label_44_OFF';
 export * from './Label_44_ON';
 export * from './Label_44_POS';
+export * from './Label_44_Slash';
 export * from './Label_4A';
 export * from './Label_4A_01';
 export * from './Label_4A_DIS';

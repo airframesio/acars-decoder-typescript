@@ -20,19 +20,19 @@ export class FlightPlanUtils {
       // TODO: discuss how store commented out bits as both raw and formatted
       switch (key) {
         case 'A': // Arrival Procedure (?)
-          addProcedure(decodeResult, value, 'arrival');
+          FlightPlanUtils.addProcedure(decodeResult, value, 'arrival');
           break;
         case 'AA':
           addArrivalAirport(decodeResult, value);
           break;
         case 'AP':
-          addProcedure(decodeResult, value, 'approach');
+          FlightPlanUtils.addProcedure(decodeResult, value, 'approach');
           break;
         case 'CR':
           addCompanyRoute(decodeResult, value);
           break;
         case 'D': // Departure Procedure
-          addProcedure(decodeResult, value, 'departure');
+          FlightPlanUtils.addProcedure(decodeResult, value, 'departure');
           break;
         case 'DA':
           addDepartureAirport(decodeResult, value);
@@ -92,6 +92,27 @@ export class FlightPlanUtils {
     }
     return allKnownFields;
   };
+
+
+public static addProcedure(decodeResult: DecodeResult, value: string, type: string) {
+  if (decodeResult.raw.procedures === undefined) {
+    decodeResult.raw.procedures = [];
+  }
+  const data = value.split('.');
+  let waypoints;
+  if (data.length > 1) {
+    waypoints = data.slice(1).map((leg) => RouteUtils.getWaypoint(leg));
+  }
+  const route = { name: data[0], waypoints: waypoints };
+  decodeResult.raw.procedures.push({ type: type, route: route });
+  const procedureName = type.substring(0, 1).toUpperCase() + type.slice(1);
+  decodeResult.formatted.items.push({
+    type: `procedure`,
+    code: 'proc',
+    label: `${procedureName} Procedure`,
+    value: RouteUtils.routeToString(route),
+  });
+};
 }
 
 function addArrivalAirport(decodeResult: DecodeResult, value: string) {
@@ -114,27 +135,6 @@ function addRunway(decodeResult: DecodeResult, value: string) {
 function addRoute(decodeResult: DecodeResult, value: string) {
   const route = value.split('.');
   ResultFormatter.route(decodeResult, { waypoints: route.map((leg) => RouteUtils.getWaypoint(leg)) });
-};
-
-function addProcedure(decodeResult: DecodeResult, value: string, type: string) {
-  if (decodeResult.raw.procedures === undefined) {
-    decodeResult.raw.procedures = [];
-  }
-  const data = value.split('.');
-  let waypoints;
-  if (data.length > 1) {
-    waypoints = data.slice(1).map((leg) => RouteUtils.getWaypoint(leg));
-  }
-  const route = { name: data[0], waypoints: waypoints };
-  decodeResult.raw.procedures.push({ type: type, route: route });
-  const procedureName = type.substring(0, 1).toUpperCase() + type.slice(1);
-  let procedureValue = route.name;
-  decodeResult.formatted.items.push({
-    type: `procedure`,
-    code: 'proc',
-    label: `${procedureName} Procedure`,
-    value: RouteUtils.routeToString(route),
-  });
 };
 
 function addCompanyRoute(decodeResult: DecodeResult, value: string) {
