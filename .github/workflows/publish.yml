@@ -21,4 +21,4 @@ jobs:
           scope: '@airframes'
       - run: npm ci
       - run: npm run build
-      - run: npm publish
+      - run: NODE_AUTH_TOKEN="" npm publish
