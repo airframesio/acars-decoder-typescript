@@ -1,4 +1,3 @@
-import { decode } from "punycode";
 import { DecodeResult } from "../DecoderPluginInterface";
 import { CoordinateUtils } from "./coordinate_utils";
 import { DateTimeUtils } from "../DateTimeUtils";

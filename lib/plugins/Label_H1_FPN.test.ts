@@ -1,5 +1,4 @@
-import { decode } from 'node:punycode';
-import { MessageDecoder } from '../MessageDecoder';
+=import { MessageDecoder } from '../MessageDecoder';
 import { Label_H1 } from './Label_H1';
 
 describe('Label_H1 FPN', () => {

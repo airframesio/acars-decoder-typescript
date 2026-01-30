@@ -1,5 +1,4 @@
-import { decode } from 'punycode';
-import { MessageDecoder } from '../MessageDecoder';
+=import { MessageDecoder } from '../MessageDecoder';
 import { Label_H1_Slash } from './Label_H1_Slash';
 
 describe('Label H1 /', () => {
