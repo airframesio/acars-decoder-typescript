@@ -1,4 +1,4 @@
-=import { MessageDecoder } from '../MessageDecoder';
+import { MessageDecoder } from '../MessageDecoder';
 import { Label_44_ON } from './Label_44_ON';
 
 describe('Label 44 ON', () => {
