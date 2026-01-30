@@ -25,11 +25,11 @@ export class Label_H1_OHMA extends DecoderPlugin {
     const data = message.text.split('OHMA')[1]; // throw out '/RTNOCR.' - even though it means something
     try {
       const compressedBuffer = Buffer.from(data, 'base64');
-      const decompress = new zlib.Inflate({windowBits: 15});
+      const decompress = new zlib.Inflate({});
       decompress.write(compressedBuffer);
       decompress.flush(zlib.constants.Z_SYNC_FLUSH);
       const result = decompress.read();
-      const jsonText = result.toString();
+      const jsonText = result?.toString() || '';
       
       let formattedMsg;
       let jsonMessage;
