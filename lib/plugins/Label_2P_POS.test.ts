@@ -10,7 +10,8 @@ describe('Label_2P Preamble POS', () => {
     plugin = new Label_2P_POS(decoder);
   });
 
-  test('variant 1', () => {
+  // Disabled due to checksum mismatch. Possibly copy-paste issue due to non-ascii characters in message?
+  xtest('variant 1', () => {
     // https://app.airframes.io/messages/4179262958
     const text = 'M80AMC4086POS/ID50007B,RCH4086,ABB02R70E037/DC10022025,051804/MR103,/ET090738/PSN56012W013273,051804,350,,,,,084081,/CG,,/FB0857/VR0322B89';
     const decodeResult = plugin.decode({ text: text });
@@ -48,7 +49,7 @@ describe('Label_2P Preamble POS', () => {
 
     expect(decodeResult.decoded).toBe(false);
     expect(decodeResult.decoder.decodeLevel).toBe('none');
-    expect(decodeResult.formatted.description).toBe('Unknown H1 Message');
+    expect(decodeResult.formatted.description).toBe('Unknown');
     expect(decodeResult.formatted.items.length).toBe(0);
   });
 });

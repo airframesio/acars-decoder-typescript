@@ -48,7 +48,6 @@ export class H1Helper {
             case 'FB':
                 ResultFormatter.burnedFuel(decodeResult, parseInt(data, 10));
                 break;
-            case 'FX':
             case 'FN':
                 decodeResult.raw.flight_number = data;
                 break;

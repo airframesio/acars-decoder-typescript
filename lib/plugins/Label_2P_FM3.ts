@@ -37,7 +37,7 @@ export class Label_2P_FM3 extends DecoderPlugin {
         ResultFormatter.unknown(decodeResult, header[0].substring(0,4));
         ResultFormatter.flightNumber(decodeResult, header[0].substring(4));
       }
-      console.log(header[1]);
+
       if(header[1].length === 4) {
         ResultFormatter.time_of_day(decodeResult, DateTimeUtils.convertHHMMSSToTod(header[1]));
       } else {
