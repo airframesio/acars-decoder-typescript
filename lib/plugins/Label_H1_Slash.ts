@@ -51,7 +51,7 @@ export class Label_H1_Slash extends DecoderPlugin {
     for(let i=2; i<fields.length; i++) {
       const field = fields[i];
       if(field.startsWith('TS')) {
-        H1Helper.processTS(decodeResult, field.substring(2,15).split(','));
+        H1Helper.processTimeStamp(decodeResult, field.substring(2,15).split(','));
       } else if(field.startsWith('PS')) {
         H1Helper.processPS(decodeResult, field.substring(2).split(','));
       } else {

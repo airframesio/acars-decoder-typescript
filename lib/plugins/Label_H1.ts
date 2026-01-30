@@ -17,7 +17,21 @@ export class Label_H1 extends DecoderPlugin {
     decodeResult.message = message;
 
     const msg = message.text.replace(/\n|\r/g, "");
-    const decoded = H1Helper.decodeH1Message(decodeResult, msg);
+    const parts = msg.split('#');
+    let decoded = false;
+    if(parts.length === 1) {
+          decoded = H1Helper.decodeH1Message(decodeResult, msg);
+    } else if (parts.length == 2) {
+      const offset = isNaN(parseInt(parts[1][1])) ? 3: 4;
+      decoded = H1Helper.decodeH1Message(decodeResult, msg.slice(parts[0].length + offset)); // skip up to # and then a little more
+      if (decoded && parts[0].length > 0) {
+          // ResultFormatter.unknown(decodeResult, parts[0].substring(0, 4));
+          ResultFormatter.flightNumber(decodeResult, parts[0].substring(4));
+          //ResultFormatter.unknown(decodeResult, parts[1].length == 5 ? parts[1].substring(0, 2) : parts[1].substring(0, 3), '#');
+          // hack of the highest degree as we've parsed the rest of the message already but we want the remaining text to be in order
+          decodeResult.remaining.text = parts[0].substring(0, 4) + '#' + parts[1].substring(0, offset -1) + '/' + decodeResult.remaining.text;
+      }
+    }
     decodeResult.decoded = decoded;
 
     decodeResult.decoder.decodeLevel = !decodeResult.remaining.text ? 'full' : 'partial';

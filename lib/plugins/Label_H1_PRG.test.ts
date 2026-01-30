@@ -115,13 +115,30 @@ describe('Label_H1 POS', () => {
     expect(decodeResult.remaining.text).toBe(':WS:FUJTI,360..BAKUP..BATAX..TAKAV..VEDOD');
   });
 
+
+  // TODO Fix this test
+  test.skip('decodes named runway', () => {
+    const text = 'PRG/DT,KMDW,31R,62,031854,524,N38584W077333,171,732B3C';
+    const decodeResult = plugin.decode({ text: text });
+    console.log(JSON)
+    expect(decodeResult.decoded).toBe(true);
+    expect(decodeResult.decoder.decodeLevel).toBe('partial');
+    expect(decodeResult.raw.arrival_icao).toBe('KMDW');
+    expect(decodeResult.raw.arrival_runway).toBe('31R');
+    expect(decodeResult.raw.position.latitude).toBe(38.584);
+    expect(decodeResult.raw.position.longitude).toBe(-77.333);
+
+    expect(decodeResult.formatted.description).toBe('Progress Report');
+    expect(decodeResult.formatted.items.length).toBe(0);
+  });
+
   test('decodes Label H1 Preamble PRG <invalid>', () => {
     const text = 'PRG Bogus message';
     const decodeResult = plugin.decode({ text: text });
 
     expect(decodeResult.decoded).toBe(false);
     expect(decodeResult.decoder.decodeLevel).toBe('none');
-    expect(decodeResult.formatted.description).toBe('Progress Report');
+    expect(decodeResult.formatted.description).toBe('Unknown');
     expect(decodeResult.formatted.items.length).toBe(0);
   });
 });

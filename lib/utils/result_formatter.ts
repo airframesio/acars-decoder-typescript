@@ -1,4 +1,3 @@
-import { decode } from "punycode";
 import { DecodeResult } from "../DecoderPluginInterface";
 import { CoordinateUtils } from "./coordinate_utils";
 import { DateTimeUtils } from "../DateTimeUtils";
@@ -219,6 +218,16 @@ export class ResultFormatter {
         });
     };
 
+    static burnedFuel(decodeResult: DecodeResult, value: number) {
+        decodeResult.raw.fuel_burned = value;
+        decodeResult.formatted.items.push({
+            type: 'fuel_burned',
+            code: 'FB',
+            label: 'Fuel Burned',
+            value: decodeResult.raw.fuel_burned.toString(),
+        });
+    };
+
     static remainingFuel(decodeResult: DecodeResult, value: number) {
         decodeResult.raw.fuel_remaining = value;
         decodeResult.formatted.items.push({
@@ -410,6 +419,26 @@ export class ResultFormatter {
             code: 'TEXT',
             label: 'Text Message',
             value: text,
+        });
+    }
+
+    static mac(decodeResult: DecodeResult, mac: number) {
+        decodeResult.raw.mac = mac;
+        decodeResult.formatted.items.push({
+            type: 'mac',
+            code: 'MAC',
+            label: 'Mean Aerodynamic Chord',
+            value: `${mac} %`,
+        });
+    }
+
+    static trim(decodeResult: DecodeResult, trim: number) {
+        decodeResult.raw.trim = trim;
+        decodeResult.formatted.items.push({
+            type: 'trim',
+            code: 'TRIM',
+            label: 'Trim',
+            value: `${trim} units`,
         });
     }
 

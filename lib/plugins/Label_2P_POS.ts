@@ -18,7 +18,15 @@ export class Label_2P_POS extends DecoderPlugin {
       decodeResult.message = message;
 
       const msg = message.text.replace(/\n|\r/g, "");
-      const decoded = H1Helper.decodeH1Message(decodeResult, msg);
+      const parts = msg.split('/');
+      let decoded = false;
+      if (parts[0].length > 3) {
+        decoded = H1Helper.decodeH1Message(decodeResult, msg.slice(parts[0].length - 3));
+        // flight number is already decoded in other fields
+        decodeResult.remaining.text = parts[0].slice(0,3) + '/' + decodeResult.remaining.text;
+      } else {
+      decoded = H1Helper.decodeH1Message(decodeResult, msg);
+      }
       decodeResult.decoded = decoded;
 
       decodeResult.decoder.decodeLevel = !decodeResult.remaining.text ? 'full' : 'partial';
