@@ -10,7 +10,6 @@ describe('Label_H1 FTX', () => {
     plugin = new Label_H1(decoder);
   });
 
-
   // disabled due to checksum failure. could be hidden characters in the source message
   test.skip('decodes Label H1 Preamble FTX valid', () => {
     // https://app.airframes.io/messages/3402014738
