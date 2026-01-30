@@ -123,7 +123,7 @@ describe('Label_13Through18_Slash', () => {
     // ADS-B confirms it took off from IAD at the correct time 
     // Despite all this, it shows that positions may be in decimal minutes instead of DMS when using NSEW instead of +/-
     // so i'm putting it here for reference
-    xtest('decodes position invalid', () => {
+    test.skip('decodes position invalid', () => {
       const text = '/14 OFF EVENT      / KIAD KSAT 10 122555/TIME 1225' + '\r\n' +
         '/AU 55808910/AON 55729908/AIN 55731908/AOT 55804909' + '\r\n' +
         '/LOC N169380,E1334348'

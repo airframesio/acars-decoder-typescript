@@ -22,7 +22,7 @@ describe('Label 4J POS', () => {
   });
 
   // Disabled due to checksum mismatch. Possibly non-ascii characters in message?
-  xtest('decodes msg 1', () => {
+  test.skip('decodes msg 1', () => {
     // https://app.airframes.io/messages/2434848463
     const text = 'POS/ID91459S,BANKR31,/DC03032024,142813/MR64,0/ET31539/PSN39277W077359,142800,240,N39300W077110,031430,N38560W077150,M28,27619,MT370/CG311,160,350/FB732/VR329071';
     const decodeResult = plugin.decode({ text: text });

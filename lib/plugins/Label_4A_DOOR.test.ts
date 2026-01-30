@@ -36,7 +36,7 @@ test('decodes Label 4A_DOOR', () => {
 });
 
 // disabled because all messages should decode
-xtest('decodes Label 4A_DOOR <invalid>', () => {
+test.skip('decodes Label 4A_DOOR <invalid>', () => {
   const decoder = new MessageDecoder();
   const decoderPlugin = new Label_4A_DOOR(decoder);
 

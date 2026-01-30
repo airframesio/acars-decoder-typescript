@@ -54,7 +54,7 @@ test('decodes Label 44 Preamble POS02 variant 1', () => {
 });
 
 // disabled because current parser decodes 'full'
-xtest('decodes Label 44 Preamble POS02 <invalid>', () => {
+test.skip('decodes Label 44 Preamble POS02 <invalid>', () => {
   const decoder = new MessageDecoder();
   const decoderPlugin = new Label_44_POS(decoder);
 

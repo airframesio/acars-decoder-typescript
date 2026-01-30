@@ -117,7 +117,7 @@ describe('Label_H1 POS', () => {
 
 
   // TODO Fix this test
-  xtest('decodes named runway', () => {
+  test.skip('decodes named runway', () => {
     const text = 'PRG/DT,KMDW,31R,62,031854,524,N38584W077333,171,732B3C';
     const decodeResult = plugin.decode({ text: text });
     console.log(JSON)

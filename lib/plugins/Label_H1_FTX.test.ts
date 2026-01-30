@@ -12,7 +12,7 @@ describe('Label_H1 FTX', () => {
 
 
   // disabled due to checksum failure. could be hidden characters in the source message
-  xtest('decodes Label H1 Preamble FTX valid', () => {
+  test.skip('decodes Label H1 Preamble FTX valid', () => {
     // https://app.airframes.io/messages/3402014738
     const text = 'FTX/ID23544S,HIFI21,7VZ007B1S276/MR2,/FXFYI .. TAF KSUX 021720Z 0218 0318 20017G28KT P6SM SKC FM022200 22012G18KT P6SM SKC .. PUTS YOUR CXWIND AT 26KT ON RWY 13 .. REDUCES TO 18KT AT 22Z4FEF'
     const decodeResult = plugin.decode({ text: text });
@@ -33,7 +33,7 @@ describe('Label_H1 FTX', () => {
   });
 
   // disabled due to checksum failure. could be hidden characters in the source message
-  xtest('decodes Label H1 Preamble - #MDFTX valid', () => {
+  test.skip('decodes Label H1 Preamble - #MDFTX valid', () => {
     // https://app.airframes.io/messages/3400555283
     const text = '- #MDFTX/ID77170A,RCH836,ABZ01G6XH273/MR2,/FXIRAN IS LAUNCHING MISSILES TOWARDS ISRAEL. YOUR FLIGHT PATH IS CURRENTLY NORTH OF PROJECTED MISSILE TRACKS. EXERCIZE EXTREME CAUTION.4A99'
     const decodeResult = plugin.decode({ text: text });

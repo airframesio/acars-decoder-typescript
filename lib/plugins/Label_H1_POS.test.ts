@@ -238,7 +238,7 @@ describe('Label_H1 POS', () => {
   });
 
   // broken as there is no checksum
-  xtest('# long variant', () => {
+  test.skip('# long variant', () => {
 
     // https://app.airframes.io/messages/2366921571
     const text = '#M1BPOSN29510W098448,RW04,140407,188,TATAR,4,140445,ALISS,M12,246048,374K,282K,1223,133,KSAT,KELP,,70,151437,415,73/PR1223,222,240,133,,44,40,252074,M22,180,P0,P0/RI:DA:KSAT:AA:KELP..TATAR:D:ALISS6:F:ALISS..FST';

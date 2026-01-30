@@ -11,7 +11,7 @@ describe('Label_2P Preamble POS', () => {
   });
 
   // Disabled due to checksum mismatch. Possibly copy-paste issue due to non-ascii characters in message?
-  xtest('variant 1', () => {
+  test.skip('variant 1', () => {
     // https://app.airframes.io/messages/4179262958
     const text = 'M80AMC4086POS/ID50007B,RCH4086,ABB02R70E037/DC10022025,051804/MR103,/ET090738/PSN56012W013273,051804,350,,,,,084081,/CG,,/FB0857/VR0322B89';
     const decodeResult = plugin.decode({ text: text });
