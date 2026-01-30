@@ -30,10 +30,11 @@ describe('Label_2P Preamble POS', () => {
     expect(decodeResult.raw.route.waypoints[0].time).toBe(19084);
     expect(decodeResult.raw.route.waypoints[2].name).toBe('?');
     expect(decodeResult.raw.altitude).toBe(35000);
-    expect(decodeResult.raw.fuel_burned).toBe(857);
+    expect(decodeResult.raw.fuel_on_board).toBe(857);
+    expect(decodeResult.raw.version).toBe(3.2);
     expect(decodeResult.raw.checksum).toBe(0x2b89);
-    expect(decodeResult.formatted.items.length).toBe(11);
-    expect(decodeResult.remaining.text).toBe('M80/MR103,,084081,,/VR032');
+    expect(decodeResult.formatted.items.length).toBe(10);
+    expect(decodeResult.remaining.text).toBe('M80/MR103,,084081,');
   });
 
   test('<invalid>', () => {

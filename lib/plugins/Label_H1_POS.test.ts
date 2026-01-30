@@ -295,12 +295,14 @@ describe('Label_H1 POS', () => {
     expect(decodeResult.raw.route.waypoints[1].name).toBe('WEDAK');
     expect(decodeResult.raw.route.waypoints[1].time).toBe(11879);
     expect(decodeResult.raw.route.waypoints[2].name).toBe('?');
-    expect(decodeResult.raw.mac).toBe(26.4);
-    expect(decodeResult.raw.trim).toBe(1.1);
-    expect(decodeResult.raw.fuel_burned).toBe(742);
+    expect(decodeResult.raw.center_of_gravity).toBe(26.4);
+    expect(decodeResult.raw.cg_lower_limit).toBe(11.0);
+    expect(decodeResult.raw.cg_upper_limit).toBe(36.0);
+    expect(decodeResult.raw.fuel_on_board).toBe(742);
+    expect(decodeResult.raw.version).toBe(3.2);
     expect(decodeResult.raw.checksum).toBe(0x4e17);
-    expect(decodeResult.formatted.items.length).toBe(12);
-    expect(decodeResult.remaining.text).toBe('F37A#M1B/MR1,,267070,T468,360/VR32');
+    expect(decodeResult.formatted.items.length).toBe(14);
+    expect(decodeResult.remaining.text).toBe('F37A#M1B/MR1,,267070,T468');
   });
 
   test('variant 8', () => {

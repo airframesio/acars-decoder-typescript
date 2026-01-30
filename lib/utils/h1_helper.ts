@@ -46,7 +46,7 @@ export class H1Helper {
                 processETA(data, decodeResult, fields, i);
                 break;
             case 'FB':
-                ResultFormatter.burnedFuel(decodeResult, parseInt(data, 10));
+                ResultFormatter.currentFuel(decodeResult, parseInt(data, 10));
                 break;
             case 'FN':
                 decodeResult.raw.flight_number = data;
@@ -78,13 +78,16 @@ export class H1Helper {
                 decodeResult.raw.serial_number = data;
                 break;
             case 'TD':
-                processTimeOfDeparture(decodeResult, data.split(',')); // Strip off TD
+                processTimeOfDeparture(decodeResult, data.split(','));
                 break;
             case 'TS':
                 H1Helper.processTimeStamp(decodeResult, data.split(','));
                 break;
+            case 'VR':
+                ResultFormatter.version(decodeResult, parseInt(data, 10)/10);
+                break;
             case 'WD':
-                processWindData(decodeResult, data); // Strip off WD
+                processWindData(decodeResult, data);
                 break;
             default:
                 ResultFormatter.unknown(decodeResult, fields[i], '/');
@@ -242,11 +245,19 @@ function processLandingReport(decodeResult: DecodeResult, data: string[]) {
 
 function processCenterOfGravity(decodeResult: DecodeResult, data: string[]) {
     if(data.length === 1) {
-        ResultFormatter.mac(decodeResult, parseInt(data[0], 10) / 10);
+        if(!!data) {
+            ResultFormatter.cg(decodeResult, parseInt(data[0], 10) / 10);
+        }
     } else if (data.length === 3) {
-        ResultFormatter.mac(decodeResult, parseInt(data[0], 10) / 10);
-        ResultFormatter.trim(decodeResult, parseInt(data[1], 10) / 100);
-        ResultFormatter.unknown(decodeResult, data[2],',');
+        if(!!data[0]) {
+            ResultFormatter.cg(decodeResult, parseInt(data[0], 10) / 10, 'center');
+        }
+        if(!!data[1]) {
+            ResultFormatter.cg(decodeResult, parseInt(data[1], 10) / 10, 'lower');
+        }
+        if(!!data[2]) {
+            ResultFormatter.cg(decodeResult, parseInt(data[2], 10) / 10, 'upper');
+        }
 
     } else {
         ResultFormatter.unknown(decodeResult, data.join(','));
