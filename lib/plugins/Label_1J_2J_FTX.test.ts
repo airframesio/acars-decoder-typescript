@@ -1,4 +1,3 @@
-import { decode } from 'node:punycode';
 import { MessageDecoder } from '../MessageDecoder';
 import { Label_1J_2J_FTX } from './Label_1J_2J_FTX';
 
