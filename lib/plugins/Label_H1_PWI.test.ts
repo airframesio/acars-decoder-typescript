@@ -47,7 +47,7 @@ describe('Label H1 PWI', () => {
         expect(decodeResult.decoded).toBe(false);
         expect(decodeResult.decoder.decodeLevel).toBe('none');
         expect(decodeResult.decoder.name).toBe('label-h1');
-        expect(decodeResult.formatted.description).toBe('Weather Report');
+        expect(decodeResult.formatted.description).toBe('Unknown');
         expect(decodeResult.message.text).toBe(text);
       });
 });

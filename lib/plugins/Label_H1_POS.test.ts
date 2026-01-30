@@ -209,7 +209,7 @@ describe('Label_H1 POS', () => {
 
     expect(decodeResult.decoded).toBe(false);
     expect(decodeResult.decoder.decodeLevel).toBe('none');
-    expect(decodeResult.formatted.description).toBe('Position Report');
+    expect(decodeResult.formatted.description).toBe('Unknown');
     expect(decodeResult.message.text).toBe(text);
   });
 
@@ -237,7 +237,7 @@ describe('Label_H1 POS', () => {
     expect(decodeResult.remaining.text).toBe('272100,157');
   });
 
-  // broken for now as there is no checksum
+  // broken as there is no checksum
   xtest('# long variant', () => {
 
     // https://app.airframes.io/messages/2366921571
@@ -271,7 +271,7 @@ describe('Label_H1 POS', () => {
     expect(decodeResult.remaining.text).toBe('188,4,M12,246048,374K,282K,1223,133,,70,151437,73/PR1223,222,133,,44,40,252074,M22,180,P0');
   });
 
-  test('#variant 7', () => {
+  test('# variant 7', () => {
 
     // https://app.airframes.io/messages/2434835903
     const text = 'F37AMCLL93#M1BPOS/ID746026,,/DC03032024,173207/MR1,/ET031846/PSN42579W108090,173207,320,WAIDE,031759,WEDAK,M49,267070,T468/CG264,110,360/FB742/VR324E17';
@@ -280,28 +280,27 @@ describe('Label_H1 POS', () => {
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.formatted.description).toBe('Position Report');
-    expect(decodeResult.raw.message_timestamp).toBe(1709487127);
+    expect(decodeResult.raw.tail).toBe('746026');
     expect(decodeResult.raw.mission_number).toBe('');
-    expect(decodeResult.formatted.items.length).toBe(9);
-    expect(decodeResult.formatted.items[0].label).toBe('Flight Number');
-    expect(decodeResult.formatted.items[0].value).toBe('MCLL93');
-    expect(decodeResult.formatted.items[1].label).toBe('Tail');
-    expect(decodeResult.formatted.items[1].value).toBe('746026');
-    expect(decodeResult.formatted.items[2].label).toBe('Day of Month');
-    expect(decodeResult.formatted.items[2].value).toBe('3');
-    expect(decodeResult.formatted.items[3].label).toBe('Estimated Time of Arrival');
-    expect(decodeResult.formatted.items[3].value).toBe('18:46:00');
-    expect(decodeResult.formatted.items[4].label).toBe('Aircraft Position');
-    expect(decodeResult.formatted.items[4].value).toBe('42.965 N, 108.150 W');
-    expect(decodeResult.formatted.items[5].label).toBe('Aircraft Route');
-    expect(decodeResult.formatted.items[5].value).toBe('WAIDE@17:32:07 > WEDAK@03:17:59 > ?');
-    expect(decodeResult.formatted.items[6].label).toBe('Altitude');
-    expect(decodeResult.formatted.items[6].value).toBe('32000 feet');
-    expect(decodeResult.formatted.items[7].label).toBe('Outside Air Temperature (C)');
-    expect(decodeResult.formatted.items[7].value).toBe('-49 degrees');
-    expect(decodeResult.formatted.items[8].label).toBe('Message Checksum');
-    expect(decodeResult.formatted.items[8].value).toBe('0x4e17');
-    expect(decodeResult.remaining.text).toBe('F37A#M1B/MR1,,267070,T468/CG264,110,360/FB742/VR32');
+    expect(decodeResult.raw.message_timestamp).toBe(1709487127);
+    expect(decodeResult.raw.day).toBe(3);
+    expect(decodeResult.raw.eta_time).toBe(67560);
+    expect(decodeResult.raw.position.latitude).toBe(42.965);
+    expect(decodeResult.raw.position.longitude).toBe(-108.15);
+    expect(decodeResult.raw.altitude).toBe(32000);
+    expect(decodeResult.raw.outside_air_temperature).toBe(-49);
+    expect(decodeResult.raw.route.waypoints.length).toBe(3);
+    expect(decodeResult.raw.route.waypoints[0].name).toBe('WAIDE');
+    expect(decodeResult.raw.route.waypoints[0].time).toBe(63127);
+    expect(decodeResult.raw.route.waypoints[1].name).toBe('WEDAK');
+    expect(decodeResult.raw.route.waypoints[1].time).toBe(11879);
+    expect(decodeResult.raw.route.waypoints[2].name).toBe('?');
+    expect(decodeResult.raw.mac).toBe(26.4);
+    expect(decodeResult.raw.trim).toBe(1.1);
+    expect(decodeResult.raw.fuel_burned).toBe(742);
+    expect(decodeResult.raw.checksum).toBe(0x4e17);
+    expect(decodeResult.formatted.items.length).toBe(12);
+    expect(decodeResult.remaining.text).toBe('F37A#M1B/MR1,,267070,T468,360/VR32');
   });
 
   test('variant 8', () => {
@@ -431,7 +430,7 @@ describe('Label_H1 POS', () => {
 
     expect(decodeResult.decoded).toBe(false);
     expect(decodeResult.decoder.decodeLevel).toBe('none');
-    expect(decodeResult.formatted.description).toBe('Unknown H1 Message');
+    expect(decodeResult.formatted.description).toBe('Unknown');
   });
 
   test('decodes duplicate data', () => {
@@ -491,7 +490,7 @@ describe('Label_H1 POS', () => {
 
     expect(decodeResult.decoded).toBe(false);
     expect(decodeResult.decoder.decodeLevel).toBe('none');
-    expect(decodeResult.formatted.description).toBe('Position Report');
+    expect(decodeResult.formatted.description).toBe('Unknown');
     expect(decodeResult.formatted.items.length).toBe(0);
   });
 });

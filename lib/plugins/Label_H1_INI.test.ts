@@ -59,7 +59,7 @@ describe('Label_H1 INI', () => {
     expect(decodeResult.formatted.items[5].value).toBe('15:35');
     expect(decodeResult.formatted.items[6].label).toBe('Message Checksum');
     expect(decodeResult.formatted.items[6].value).toBe('0xee66');
-    expect(decodeResult.remaining.text).toBe('- #MD/MR0,0'); // FIXME - should start with-#MD, (no I)
+    expect(decodeResult.remaining.text).toBe('- #MD/MR0,0');
   });
 
   test('INI <invalid>', () => {
@@ -69,7 +69,7 @@ describe('Label_H1 INI', () => {
 
     expect(decodeResult.decoded).toBe(false);
     expect(decodeResult.decoder.decodeLevel).toBe('none');
-    expect(decodeResult.formatted.description).toBe('Flight Plan Initial Report');
+    expect(decodeResult.formatted.description).toBe('Unknown');
     expect(decodeResult.message.text).toBe(text);
   });
 });

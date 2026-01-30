@@ -86,6 +86,14 @@ export class FlightPlanUtils {
         label: 'Route Status',
         value: 'Route Inactive',
       });
+    } else if (header.startsWith('RM')) {
+      decodeResult.raw.route_status = 'RM';
+      decodeResult.formatted.items.push({
+        type: 'status',
+        code: 'ROUTE_STATUS',
+        label: 'Route Status',
+        value: 'Route Mapped',
+      });
     } else {
       decodeResult.remaining.text += header;
       allKnownFields = false
