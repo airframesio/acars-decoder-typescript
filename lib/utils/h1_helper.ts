@@ -245,17 +245,17 @@ function processLandingReport(decodeResult: DecodeResult, data: string[]) {
 
 function processCenterOfGravity(decodeResult: DecodeResult, data: string[]) {
     if(data.length === 1) {
-        if(!!data) {
+        if(data[0] !== undefined && data[0] !== '') {
             ResultFormatter.cg(decodeResult, parseInt(data[0], 10) / 10);
         }
     } else if (data.length === 3) {
-        if(!!data[0]) {
+        if(data[0] !== undefined && data[0] !== '') {
             ResultFormatter.cg(decodeResult, parseInt(data[0], 10) / 10, 'center');
         }
-        if(!!data[1]) {
+        if(data[1] !== undefined && data[1] !== '') {
             ResultFormatter.cg(decodeResult, parseInt(data[1], 10) / 10, 'lower');
         }
-        if(!!data[2]) {
+        if(data[2] !== undefined && data[2] !== '') {
             ResultFormatter.cg(decodeResult, parseInt(data[2], 10) / 10, 'upper');
         }
 
