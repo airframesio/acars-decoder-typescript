@@ -74,6 +74,20 @@ const isMIAMFid= (x: string): x is MIAMFid => Object.values(MIAMFid).includes(x 
 const isMIAMCoreApp= (x: number): x is MIAMCoreApp => Object.values(MIAMCoreApp).includes(x as MIAMCoreApp);
 const isMIAMCorePdu= (x: number): x is MIAMCorePdu => Object.values(MIAMCorePdu).includes(x as MIAMCorePdu);
 
+interface PduDecodingSuccess {
+  decoded: true;
+  message: {
+    data: Pdu;
+  };
+}
+
+interface PduDecodingFailure {
+  decoded: false;
+  error: string;
+}
+
+type PduDecodingResult = PduDecodingSuccess | PduDecodingFailure;
+
 export class MIAMCoreUtils {
   static AppTypeToAppIdLenTable: Record<MIAMVersion, Record<MIAMCoreApp, number>> = {
     [MIAMVersion.V1]: {
@@ -90,7 +104,7 @@ export class MIAMCoreUtils {
     },
   }
 
-  static FidHandlerTable: Record<MIAMFid, (txt: string) => {decoded: boolean, error?: string}> = {
+  static FidHandlerTable: Record<MIAMFid, (txt: string) => PduDecodingResult> = {
     [MIAMFid.SingleTransfer]: (txt: string) => {
       if (txt.length < 3) {
         return {
@@ -302,7 +316,7 @@ export class MIAMCoreUtils {
     return crc;
   }
 
-  public static parse(txt: string) {
+  public static parse(txt: string): PduDecodingResult {
     const fidType = txt[0];
 
     if(isMIAMFid(fidType)) {
@@ -317,7 +331,7 @@ export class MIAMCoreUtils {
 
   }
 
-  private static corePduDataHandler(version: MIAMVersion, minHdrSize: number, crcLen: number, hdr: Buffer, body?: Buffer) {
+  private static corePduDataHandler(version: MIAMVersion, minHdrSize: number, crcLen: number, hdr: Buffer, body?: Buffer): PduDecodingResult {
     if (hdr.length < minHdrSize) {
       return {
         decoded: false,
@@ -481,7 +495,7 @@ export class MIAMCoreUtils {
     };
   }
 
-  static VersionPduHandlerTable: Record<MIAMVersion, Record<MIAMCorePdu, ((hdr: Buffer, body?: Buffer) => {decoded: boolean, error?: string, message?: {data: Pdu}})>> = {
+  static VersionPduHandlerTable: Record<MIAMVersion, Record<MIAMCorePdu, ((hdr: Buffer, body?: Buffer) => PduDecodingResult)>> = {
     [MIAMVersion.V1]: {
       [MIAMCorePdu.Data]: (hdr: Buffer, body?: Buffer) => { return this.corePduDataHandler(MIAMVersion.V1, 20, MIAMCoreV1CRCLength, hdr, body); },
       [MIAMCorePdu.Ack]: () => {return {decoded: false, error: 'v1 Ack PDU not implemented'}},
