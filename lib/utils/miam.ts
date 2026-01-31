@@ -90,7 +90,7 @@ export class MIAMCoreUtils {
     },
   }
 
-  static FidHandlerTable: Record<MIAMFid, (txt: string) => {decoded: boolean, error?: string} | undefined> = {
+  static FidHandlerTable: Record<MIAMFid, (txt: string) => {decoded: boolean, error?: string}> = {
     [MIAMFid.SingleTransfer]: (txt: string) => {
       if (txt.length < 3) {
         return {
@@ -172,12 +172,12 @@ export class MIAMCoreUtils {
         };
       }
     },
-    [MIAMFid.FileTransferRequest]: () => {return undefined},
-    [MIAMFid.FileTransferAccept]: () => {return undefined},
-    [MIAMFid.FileSegment]: () => {return undefined},
-    [MIAMFid.FileTransferAbort]: () => {return undefined},
-    [MIAMFid.XOFFIndication]: () => {return undefined},
-    [MIAMFid.XONIndication]: () => {return undefined},
+    [MIAMFid.FileTransferRequest]: () => {return {decoded: false, error: 'File Transfer Request not implemented'}},
+    [MIAMFid.FileTransferAccept]: () => {return {decoded: false, error: 'File Transfer Accept not implemented'}},
+    [MIAMFid.FileSegment]: () => {return {decoded: false, error: 'File Segment not implemented'}},
+    [MIAMFid.FileTransferAbort]: () => {return {decoded: false, error: 'File Transfer Abort not implemented'}},
+    [MIAMFid.XOFFIndication]: () => {return {decoded: false, error: 'XOFF Indication not implemented'}},
+    [MIAMFid.XONIndication]: () => {return {decoded: false, error: 'XON Indication not implemented'}},
   }
 
   private static arincCrc16(buf: Buffer, seed?: number) {
@@ -481,18 +481,18 @@ export class MIAMCoreUtils {
     };
   }
 
-  static VersionPduHandlerTable: Record<MIAMVersion, Record<MIAMCorePdu, ((hdr: Buffer, body?: Buffer) => {decoded: boolean, error?: string, message?: {data: Pdu}}| undefined)>> = {
+  static VersionPduHandlerTable: Record<MIAMVersion, Record<MIAMCorePdu, ((hdr: Buffer, body?: Buffer) => {decoded: boolean, error?: string, message?: {data: Pdu}})>> = {
     [MIAMVersion.V1]: {
       [MIAMCorePdu.Data]: (hdr: Buffer, body?: Buffer) => { return this.corePduDataHandler(MIAMVersion.V1, 20, MIAMCoreV1CRCLength, hdr, body); },
-      [MIAMCorePdu.Ack]: () => {return undefined},
-      [MIAMCorePdu.Aloha]: () => {return undefined},
-      [MIAMCorePdu.AlohaReply]: () => {return undefined},
+      [MIAMCorePdu.Ack]: () => {return {decoded: false, error: 'v1 Ack PDU not implemented'}},
+      [MIAMCorePdu.Aloha]: () => { return {decoded: false, error: 'v1 Aloha PDU not implemented'}},
+      [MIAMCorePdu.AlohaReply]: () => {return {decoded: false, error: 'v1 AlohaReply PDU not implemented'}},
     },
     [MIAMVersion.V2]: {
       [MIAMCorePdu.Data]: (hdr: Buffer, body?: Buffer) => { return this.corePduDataHandler(MIAMVersion.V2, 7, MIAMCoreV2CRCLength, hdr, body); },
-      [MIAMCorePdu.Ack]: () => {return undefined},
-      [MIAMCorePdu.Aloha]: () => {return undefined},
-      [MIAMCorePdu.AlohaReply]: () => {return undefined},
+      [MIAMCorePdu.Ack]: () => {return {decoded: false, error: 'v2 Ack PDU not implemented'}},
+      [MIAMCorePdu.Aloha]: () => {return {decoded: false, error: 'v2 Aloha PDU not implemented'}},
+      [MIAMCorePdu.AlohaReply]: () => {return {decoded: false, error: 'v2 Aloha eply PDU not implemented'}},
     }
   }
 }
