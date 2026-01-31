@@ -459,6 +459,48 @@ export class ResultFormatter {
     }
     }
 
+  static cg(decodeResult: DecodeResult, value: number, type: "center" | "lower" | "upper" = "center") {
+    switch(type) {
+      case "center":
+        decodeResult.raw.center_of_gravity = value;
+        decodeResult.formatted.items.push({
+          type: "center_of_gravity",
+          code: "CG",
+          label: "Center of Gravity",
+          value: `${decodeResult.raw.center_of_gravity} %`,
+        });
+        break;
+        case "lower":
+            decodeResult.raw.cg_lower_limit = value;
+            decodeResult.formatted.items.push({
+              type: "cg_lower_limit",
+              code: "CG_LOWER",
+              label: "Center of Gravity Lower Limit",
+              value: `${decodeResult.raw.cg_lower_limit} %`,
+            });
+            break;
+        case "upper":
+            decodeResult.raw.cg_upper_limit = value;
+            decodeResult.formatted.items.push({
+              type: "cg_upper_limit",
+              code: "CG_UPPER",
+              label: "Center of Gravity Upper Limit",
+              value: `${decodeResult.raw.cg_upper_limit} %`,
+            });
+            break;
+        }
+    }
+    
+  static version(decodeResult: DecodeResult, value: number) {
+    decodeResult.raw.version = value;
+    decodeResult.formatted.items.push({
+      type: "version",
+      code: "VERSION",
+      label: "Message Version",
+      value: `v${decodeResult.raw.version.toFixed(1)}`,
+    });
+  }
+
     static unknown(decodeResult: DecodeResult, value: string, sep: string = ',') {
         if (!decodeResult.remaining.text)
             decodeResult.remaining.text = value;
