@@ -506,7 +506,7 @@ export class MIAMCoreUtils {
       [MIAMCorePdu.Data]: (hdr: Buffer, body?: Buffer) => { return this.corePduDataHandler(MIAMVersion.V2, 7, MIAMCoreV2CRCLength, hdr, body); },
       [MIAMCorePdu.Ack]: () => {return {decoded: false, error: 'v2 Ack PDU not implemented'}},
       [MIAMCorePdu.Aloha]: () => {return {decoded: false, error: 'v2 Aloha PDU not implemented'}},
-      [MIAMCorePdu.AlohaReply]: () => {return {decoded: false, error: 'v2 Aloha eply PDU not implemented'}},
+      [MIAMCorePdu.AlohaReply]: () => {return {decoded: false, error: 'v2 Aloha reply PDU not implemented'}},
     }
   }
 }

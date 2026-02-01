@@ -11,7 +11,7 @@ function debugMessage(message: Message, decoding: DecodeResult) {
   console.log("Decoded Message:");
   console.log(decoding.formatted.description);
   if (decoding.formatted.items && decoding.formatted.items.length > 0) {
-    decoding.formatted.items.forEach((item: any) => {
+    decoding.formatted.items.forEach((item) => {
       console.log(`${item.label} - ${item.value}`);
     });
   }
