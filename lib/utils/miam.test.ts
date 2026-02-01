@@ -4,7 +4,10 @@ test('v1, compressed, acars', () => {
   const msg = 'T32!<<,W/jVEJ5u(@\\!\'s.16q/)<:-JXX|Q&a)r_CuOS?R65eRb:E8<DV/R(\'OXUd&Vsp5njIZhc3K&["hCafn>bHPILl$J-V*::RL,d]?So_4M_VS;Ln"U,;8u?`,7j=ACsP@,t.rGoaFFQm1S7*\'>kRs>,:u>X?oe2->Z-5`_Ztu,Fr.R(jR7>J^s-94:^OqFYrF][5q?tMocL[p%^T#7).P:W;.$4Ym1#&8iu%ac;%S_9i<e!Lp`bDFhu;eR!R&T>qkLZ_rC^NA6gllCR_sE-?$k^?N:\'+';
   const decodeResult = MIAMCoreUtils.parse(msg);
 
-  expect(decodeResult.decoded).toBe(true);
+  if(!decodeResult.decoded) {
+      expect(decodeResult.decoded).toBe(true);
+      return;
+  }
   expect(decodeResult.message.data.version).toBe(1);
   expect(decodeResult.message.data.complete).toBe(true);
   expect(decodeResult.message.data.crcOk).toBe(true);
@@ -12,6 +15,10 @@ test('v1, compressed, acars', () => {
   expect(decodeResult.message.data.compression).toBe(MIAMCoreV1Compression.Deflate);
   expect(decodeResult.message.data.msgNum).toBe(86);
   expect(decodeResult.message.data.ackOptions).toBe(1);
+  if(!decodeResult.message.data.acars) {
+      expect(decodeResult.message.data.acars).toBeDefined();
+      return;
+  }
   expect(decodeResult.message.data.acars.tail).toBe('.A7-ANS');
   expect(decodeResult.message.data.acars.label).toBe('H1');
   expect(decodeResult.message.data.acars.sublabel).toBe('DF');
@@ -29,14 +36,20 @@ test('v1, compressed, acars', () => {
 test('v2, uncompressed, non-acars', () => {
   const msg = 'T-3!YPJ?0L8c"VuQet|KJFK,KBOS,CYHZ,KPHL';
   const decodeResult = MIAMCoreUtils.parse(msg);
-
-  expect(decodeResult.decoded).toBe(true);
+  if(!decodeResult.decoded) {
+      expect(decodeResult.decoded).toBe(true);
+      return;
+  }
   expect(decodeResult.message.data.version).toBe(2);
   expect(decodeResult.message.data.msgNum).toBe(9);
   expect(decodeResult.message.data.ackOptions).toBe(0);
   expect(decodeResult.message.data.compression).toBe(MIAMCoreV2Compression.None);
   expect(decodeResult.message.data.crcOk).toBe(true);
   expect(decodeResult.message.data.crc).toBe(0x38a8);
+  if(!decodeResult.message.data.non_acars) {
+    expect(decodeResult.message.data.non_acars).toBeDefined();
+    return;
+  }
   expect(decodeResult.message.data.non_acars.appId).toBe('0AW');
   expect(decodeResult.message.data.non_acars.text).toBe('KJFK,KBOS,CYHZ,KPHL');
 
@@ -47,7 +60,11 @@ test('v1, compressed, acars, incomplete', () => {
   const msg = 'T12!<<B[67joO3AE3:!\'s.16q2Tb:9FQs|X]eG[j2M]0.rudB<$2(Xj>:Whn0\'KEp#_@kN+<G\'I.G-DIX^RW,uJ,M,&9<XO?406A(Bnse^_UPF+su$OC:KOI/*p=F8Gh5:Or%)B`e/.%tN-jYGidD%+[OhHG_Wc9K^E3Skpit$/,N);FlMj%g)Orhs^"es8)BPa6C51Im?a^0@S64/';
   const decodeResult = MIAMCoreUtils.parse(msg);
 
-  expect(decodeResult.decoded).toBe(true);
+
+  if(!decodeResult.decoded) {
+      expect(decodeResult.decoded).toBe(true);
+      return;
+  }
   expect(decodeResult.message.data.version).toBe(1);
   expect(decodeResult.message.data.complete).toBe(false);
   expect(decodeResult.message.data.crcOk).toBe(false);
@@ -55,6 +72,10 @@ test('v1, compressed, acars, incomplete', () => {
   expect(decodeResult.message.data.compression).toBe(MIAMCoreV1Compression.Deflate);
   expect(decodeResult.message.data.msgNum).toBe(20);
   expect(decodeResult.message.data.ackOptions).toBe(1);
+    if(!decodeResult.message.data.acars) {
+      expect(decodeResult.message.data.acars).toBeDefined();
+      return;
+  }
   expect(decodeResult.message.data.acars.tail).toBe('B-18910');
   expect(decodeResult.message.data.acars.label).toBe('H1');
   expect(decodeResult.message.data.acars.sublabel).toBe('DF');
