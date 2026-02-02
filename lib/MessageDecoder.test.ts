@@ -20,9 +20,10 @@ describe('MessageDecoder', () => {
       expect(decodeResult.message).toBeDefined();
     return;
     }
-    expect(decodeResult.message.label).toBe('H1');
-    expect(decodeResult.message.sublabel).toBe('DF');
-    expect(decodeResult.message.text).toContain('A350,000354');
+    expect(decodeResult.message.label).toBe('MA');
+    expect(decodeResult.message.sublabel).toBeUndefined();
+    expect(decodeResult.message.text).toContain('T02!<<,');
+    expect(decodeResult.raw.text).toContain('A350,000354');
   })
 
   test('Handles Multiple decodes', () => {

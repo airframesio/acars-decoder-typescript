@@ -20,7 +20,6 @@ export class Label_MA extends DecoderPlugin {
     if (miamResult.decoded && miamResult.message.data && miamResult.message.data.acars) {
 
       decodeResult.decoded = true;
-      decodeResult.decoder.decodeLevel = 'partial';
       ResultFormatter.label(decodeResult, miamResult.message.data.acars.label);
       if(miamResult.message.data.acars.sublabel) {
         ResultFormatter.sublabel(decodeResult, miamResult.message.data.acars.sublabel);
@@ -32,6 +31,7 @@ export class Label_MA extends DecoderPlugin {
       const messageText = miamResult.message.data.acars.text;
       // Only transplant message text if the MIAM core decoded message passed CRC and is complete
       if(miamResult.message.data.crcOk && miamResult.message.data.complete && messageText) {
+        decodeResult.decoder.decodeLevel = 'full';
         const decoded = this.decoder.decode({
           label: miamResult.message.data.acars.label,
           sublabel: miamResult.message.data.acars.sublabel,
@@ -39,23 +39,18 @@ export class Label_MA extends DecoderPlugin {
         }, options);
 
         if(decoded.decoded) {
-          decodeResult.decoder.decodeLevel = decoded.decoder.decodeLevel;
+          // decodeResult.decoder.decodeLevel = decoded.decoder.decodeLevel;
           decodeResult.raw = {...decodeResult.raw, ...decoded.raw};
           decodeResult.formatted.items.push(...decoded.formatted.items);
         } else {
           ResultFormatter.text(decodeResult, messageText);
         }
-        // for existing unit tetsts - do we want to do this?
-        message.text = messageText
       } else if(messageText) {
+        decodeResult.decoder.decodeLevel = 'partial';
         ResultFormatter.text(decodeResult, messageText);
+      } else {
+        decodeResult.decoder.decodeLevel = 'partial';
       }
-
-      // This is for the existing unit test, i don't know if we actually want to do this
-      message.label = miamResult.message.data.acars.label;
-      message.sublabel = miamResult.message.data.acars.sublabel;
-
-      return decodeResult;
     }
     return decodeResult;
   }
