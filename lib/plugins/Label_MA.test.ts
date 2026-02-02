@@ -24,7 +24,7 @@ describe('Label_MA', () => {
     const decodeResult = plugin.decode({ text: text });
 
     expect(decodeResult.decoded).toBe(true);
-    expect(decodeResult.decoder.decodeLevel).toBe('partial');
+    expect(decodeResult.decoder.decodeLevel).toBe('full');
     expect(decodeResult.formatted.description).toBe('Unknown');
     expect(decodeResult.raw.label).toBe('H1');
     expect(decodeResult.raw.sublabel).toBe('DF');
