@@ -41,7 +41,7 @@ export class Label_MA extends DecoderPlugin {
 
         if(decoded.decoded) {
           decodeResult.raw = {...decodeResult.raw, ...decoded.raw};
-          decodeResult.formatted.items.concat(decoded.formatted.items);
+          decodeResult.formatted.items.push(...decoded.formatted.items);
         } else if(miamResult.message.data.acars.text) {
           ResultFormatter.text(decodeResult, miamResult.message.data.acars.text);
         }
