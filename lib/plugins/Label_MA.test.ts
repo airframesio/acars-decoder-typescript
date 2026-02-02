@@ -32,4 +32,18 @@ describe('Label_MA', () => {
     expect(decodeResult.raw.text).toBe('A350,000354,1,1,TB000000/REP035,01,02;H01,035,01,02,4000,00066,.F-HREV,3,0,08,12,19,06,58,42,071/H02,KSFO LFPO,FBU711  ,S0285,S0385,S0142S0185/H03,  /A10,06,58,40,+26535,+01198,045,+0493,321723,XXXXXX,--------,0423,+0573/A11,06,58,32,+26356,+01221,041,+0502,324326,XXXXXX,--------,0424,+0614/:');
     expect(decodeResult.formatted.items.length).toBe(4);
   });
+
+  test('decodes partial message', () => {
+    const text = 'T22!<<2>\/k&_k6:\"c1!\'s.16q0U2odKk@|D,eVtdm+WF(#Ll8Dja==EY8V4KISInKk%((%5&@p?Z\\NSZ9tj[Xr0rXqe`+A(J,f[fotFmHmS';
+    const decodeResult = plugin.decode({ text: text });
+
+    expect(decodeResult.decoded).toBe(true);
+    expect(decodeResult.decoder.decodeLevel).toBe('partial');
+    expect(decodeResult.formatted.description).toBe('Unknown');
+    expect(decodeResult.raw.label).toBe('H1');
+    expect(decodeResult.raw.sublabel).toBe('DF');
+    expect(decodeResult.raw.tail).toBe('.ET-BAY');
+    expect(decodeResult.raw.text).toBe('A350,000243,1,1,');
+    expect(decodeResult.formatted.items.length).toBe(4);
+  });
 });
