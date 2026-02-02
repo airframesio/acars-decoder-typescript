@@ -1,7 +1,8 @@
 import { DecodeResult, DecoderPluginInterface, Message, Options } from './DecoderPluginInterface';
+import { MessageDecoder } from './MessageDecoder';
 
 export abstract class DecoderPlugin implements DecoderPluginInterface {
-  decoder!: any;
+  decoder!: MessageDecoder;
 
   name: string = 'unknown';
 
@@ -24,7 +25,7 @@ export abstract class DecoderPlugin implements DecoderPluginInterface {
 
   options: Object;
 
-  constructor(decoder : any, options : Options = {}) {
+  constructor(decoder : MessageDecoder, options : Options = {}) {
     this.decoder = decoder;
     this.options = options;
   }

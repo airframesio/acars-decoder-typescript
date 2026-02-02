@@ -6,7 +6,6 @@ export class CoordinateUtils {
    * @returns An object with latitude and longitude properties
    */
   public static decodeStringCoordinates(stringCoords: string) : {latitude: number, longitude: number} | undefined{ // eslint-disable-line class-methods-use-this
-    var results : any = {};
     // format: N12345W123456 or N12345 W123456
     const firstChar = stringCoords.substring(0, 1);
     let middleChar = stringCoords.substring(6, 7);
@@ -16,13 +15,13 @@ export class CoordinateUtils {
       longitudeChars = stringCoords.substring(8, 14);
     }
     if ((firstChar === 'N' || firstChar === 'S') && (middleChar === 'W' || middleChar === 'E')) {
-      results.latitude = (Number(stringCoords.substring(1, 6)) / 1000) * CoordinateUtils.getDirection(firstChar);
-      results.longitude = (Number(longitudeChars) / 1000) * CoordinateUtils.getDirection(middleChar);
-    } else {
-      return;
-    }
+      return {
+        latitude: (Number(stringCoords.substring(1, 6)) / 1000) * CoordinateUtils.getDirection(firstChar),
+        longitude: (Number(longitudeChars) / 1000) * CoordinateUtils.getDirection(middleChar)
+      };
+    } 
 
-    return results;
+    return undefined;
   }
 
     /**
@@ -32,7 +31,6 @@ export class CoordinateUtils {
    * @returns An object with latitude and longitude properties
    */
   public static decodeStringCoordinatesDecimalMinutes(stringCoords: string) : {latitude: number, longitude: number} | undefined{ // eslint-disable-line class-methods-use-this
-    var results : any = {};
     // format: N12345W123456 or N12345 W123456
     const firstChar = stringCoords.substring(0, 1);
     let middleChar = stringCoords.substring(6, 7);
@@ -47,13 +45,12 @@ export class CoordinateUtils {
     const lonMin = (Number(longitudeChars) % 1000) / 10;
 
     if ((firstChar === 'N' || firstChar === 'S') && (middleChar === 'W' || middleChar === 'E')) {
-      results.latitude = (latDeg +  (latMin / 60)) * CoordinateUtils.getDirection(firstChar);
-      results.longitude = (lonDeg + (lonMin / 60)) * CoordinateUtils.getDirection(middleChar);
-    } else {
-      return;
-    }
-
-    return results;
+      return {
+        latitude: (latDeg +  (latMin / 60)) * CoordinateUtils.getDirection(firstChar),
+        longitude: (lonDeg + (lonMin / 60)) * CoordinateUtils.getDirection(middleChar)
+      };
+    } 
+    return undefined;
   }
   public static coordinateString(coords: {latitude: number, longitude: number}) : string {
     const latDir = coords.latitude > 0 ? 'N' : 'S';

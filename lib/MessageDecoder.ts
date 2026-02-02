@@ -71,6 +71,7 @@ export class MessageDecoder {
     this.registerPlugin(new Plugins.Label_83(this));
     this.registerPlugin(new Plugins.Label_8E(this));
     this.registerPlugin(new Plugins.Label_1M_Slash(this));
+    this.registerPlugin(new Plugins.Label_MA(this));
     this.registerPlugin(new Plugins.Label_SQ(this));
     this.registerPlugin(new Plugins.Label_QP(this));
     this.registerPlugin(new Plugins.Label_QQ(this));
@@ -86,29 +87,10 @@ export class MessageDecoder {
   }
 
   decode(message: Message, options: Options = {}): DecodeResult {
-    if (message.label === 'MA') {
-      const decodeResult = MIAMCoreUtils.parse(message.text);
-
-      // Only transplant message text if the MIAM core decoded message passed CRC and is complete
-      if (decodeResult.decoded &&
-        decodeResult.message.data !== undefined &&
-        decodeResult.message.data.crcOk &&
-        decodeResult.message.data.complete &&
-        decodeResult.message.data.acars !== undefined) {
-        message = {
-          ...message,
-          label: decodeResult.message.data.acars.label,
-          ...(decodeResult.message.data.acars.sublabel ? { sublabel: decodeResult.message.data.acars.sublabel } : {}),
-          ...(decodeResult.message.data.acars.mfi ? { mfi: decodeResult.message.data.acars.mfi } : {}),
-          ...(decodeResult.message.data.acars.text ? { text: decodeResult.message.data.acars.text } : {}),
-        }
-      }
-    }
-
     // console.log('All plugins');
     // console.log(this.plugins);
     const usablePlugins = this.plugins.filter((plugin) => {
-      const qualifiers: any = plugin.qualifiers();
+      const qualifiers = plugin.qualifiers();
 
       if (qualifiers.labels.includes(message.label)) {
         if (qualifiers.preambles && qualifiers.preambles.length > 0) {
@@ -166,14 +148,6 @@ export class MessageDecoder {
     }
 
     return result;
-  }
-
-  lookupAirportByIata(iata: string): any {
-    const airportsArray: Array<any> = []; // = this.store.state.acarsData.airports;
-    // console.log(airportsArray);
-    const airport = airportsArray.filter((e: any) => e.iata === iata);
-
-    return airport;
   }
 }
 

@@ -55,7 +55,7 @@ export class Label_80 extends DecoderPlugin {
     return decodeResult;
   }
 
-  private parseHeader(header: string, results: any) {
+  private parseHeader(header: string, results: DecodeResult) {
     //3N01 POSRPT 0581/27 KIAD/MSLP .N962AV/04H 11:02
     const fields = header.split('/');
     if(fields.length < 3) {

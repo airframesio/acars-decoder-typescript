@@ -490,7 +490,7 @@ export class ResultFormatter {
             break;
         }
     }
-    
+
   static version(decodeResult: DecodeResult, value: number) {
     decodeResult.raw.version = value;
     decodeResult.formatted.items.push({
@@ -498,6 +498,26 @@ export class ResultFormatter {
       code: "VERSION",
       label: "Message Version",
       value: `v${decodeResult.raw.version.toFixed(1)}`,
+    });
+    }
+
+  static label(decodeResult: DecodeResult, value: string) {
+    decodeResult.raw.label = value;
+    decodeResult.formatted.items.push({
+      type: "label",
+      code: "LABEL",
+      label: "Message Label",
+      value: `${decodeResult.raw.label}`,
+    });
+  }
+
+  static sublabel(decodeResult: DecodeResult, value: string) {
+    decodeResult.raw.sublabel = value;
+    decodeResult.formatted.items.push({
+      type: "sublabel",
+      code: "SUBLABEL",
+      label: "Message Sublabel",
+      value: `${decodeResult.raw.sublabel}`,
     });
   }
 

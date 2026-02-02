@@ -34,7 +34,7 @@ export interface DecodeResult {
           value: string,
       }[]
   },
-  message?: any,
+  message?: Message,
   raw: any,
   remaining: {
       text?: string
