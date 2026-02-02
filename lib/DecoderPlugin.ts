@@ -58,4 +58,3 @@ export abstract class DecoderPlugin implements DecoderPluginInterface {
   }
 }
 
-export default {};

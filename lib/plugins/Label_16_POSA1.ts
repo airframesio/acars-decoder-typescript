@@ -49,5 +49,3 @@ export class Label_16_POSA1 extends DecoderPlugin {
     return decodeResult;
   }
 }
-
-export default {};

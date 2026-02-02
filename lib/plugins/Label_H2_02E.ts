@@ -110,4 +110,3 @@ export class Label_H2_02E extends DecoderPlugin {
     };
   }
 }
-export default {};

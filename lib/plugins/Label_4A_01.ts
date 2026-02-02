@@ -47,5 +47,3 @@ export class Label_4A_01 extends DecoderPlugin {
     return decodeResult;
   }
 }
-
-export default {};

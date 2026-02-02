@@ -131,6 +131,3 @@ export class IcaoDecoder {
   }
 
 }
-
-export default {
-};

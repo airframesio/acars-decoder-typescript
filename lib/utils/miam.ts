@@ -510,5 +510,3 @@ export class MIAMCoreUtils {
     }
   }
 }
-
-export default {};

@@ -25,5 +25,3 @@ export class Label_B6_Forwardslash extends DecoderPlugin {
     return decodeResult;
   }
 }
-
-export default {};

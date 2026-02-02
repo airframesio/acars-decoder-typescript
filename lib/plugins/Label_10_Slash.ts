@@ -67,5 +67,3 @@ export class Label_10_Slash extends DecoderPlugin { // eslint-disable-line camel
     return decodeResult;
   }
 }
-
-export default {};

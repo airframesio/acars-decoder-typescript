@@ -92,5 +92,3 @@ export class Label_22_OFF extends DecoderPlugin {
     return decodeResult;
   }
 }
-
-export default {};

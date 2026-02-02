@@ -81,8 +81,6 @@ export class Label_13Through18_Slash extends DecoderPlugin { // eslint-disable-l
   }
 }
 
-export default {};
-
 function getMsgType(labelNumber: number): string {
   if (labelNumber === 13) {
     return 'Out of Gate Report'

@@ -116,5 +116,3 @@ export class Label_SQ extends DecoderPlugin {
     return decodeResult;
   }
 }
-
-export default {};

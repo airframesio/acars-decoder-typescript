@@ -61,5 +61,3 @@ export class Label_H1_FLR extends DecoderPlugin {
 	  return decodeResult;
   }
 }
-
-export default {};

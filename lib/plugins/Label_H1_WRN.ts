@@ -58,5 +58,3 @@ export class Label_H1_WRN extends DecoderPlugin {
     return decodeResult;
   }
 }
-
-export default {};

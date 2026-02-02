@@ -52,5 +52,3 @@ export class Label_24_Slash extends DecoderPlugin {
   }
 }
 
-export default {};
-

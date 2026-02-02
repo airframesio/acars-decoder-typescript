@@ -50,5 +50,3 @@ export class Label_1M_Slash extends DecoderPlugin {
     return decodeResult;
   }
 }
-
-export default {};
