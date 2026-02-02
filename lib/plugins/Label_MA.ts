@@ -25,38 +25,41 @@ export class Label_MA extends DecoderPlugin {
         miamResult.message.data.complete &&
         miamResult.message.data.acars !== undefined) {
 
-          ResultFormatter.label(decodeResult, miamResult.message.data.acars.label);
-          if(miamResult.message.data.acars.sublabel) {
+        decodeResult.decoded = true;
+        decodeResult.decoder.decodeLevel = 'partial';
+        ResultFormatter.label(decodeResult, miamResult.message.data.acars.label);
+        if(miamResult.message.data.acars.sublabel) {
           ResultFormatter.sublabel(decodeResult, miamResult.message.data.acars.sublabel);
-          }
-          if(miamResult.message.data.acars.tail) {
-            ResultFormatter.tail(decodeResult, miamResult.message.data.acars.tail);
-          }
+        }
+        if(miamResult.message.data.acars.tail) {
+          ResultFormatter.tail(decodeResult, miamResult.message.data.acars.tail);
+        }
 
+        const messageText = miamResult.message.data.acars.text;
+        if(messageText) {
         const decoded = this.decoder.decode({
           label: miamResult.message.data.acars.label,
           sublabel: miamResult.message.data.acars.sublabel,
-          text: miamResult.message.data.acars.text? miamResult.message.data.acars.text : '',
+          text: messageText,
         }, options);
 
         if(decoded.decoded) {
+          decodeResult.decoder.decodeLevel = decoded.decoder.decodeLevel;
           decodeResult.raw = {...decodeResult.raw, ...decoded.raw};
           decodeResult.formatted.items.push(...decoded.formatted.items);
-        } else if(miamResult.message.data.acars.text) {
-          ResultFormatter.text(decodeResult, miamResult.message.data.acars.text);
+        } else {
+          ResultFormatter.text(decodeResult, messageText);
         }
+        // for existing unit tetsts - do we want to do this?
+        message.text = messageText
+      }
 
-        decodeResult.decoded = true;
-        decodeResult.decoder.decodeLevel = decoded.decoder.decodeLevel === 'full' ? 'full' : 'partial';
         // This is for the existing unit test, i don't know if we actually want to do this
         message.label = miamResult.message.data.acars.label;
         message.sublabel = miamResult.message.data.acars.sublabel;
-        message.text = miamResult.message.data.acars.text? miamResult.message.data.acars.text : '';
 
         return decodeResult;
       }
     return decodeResult;
   }
 }
-
-export default {};
