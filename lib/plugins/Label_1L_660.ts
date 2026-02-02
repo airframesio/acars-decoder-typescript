@@ -61,5 +61,3 @@ export class Label_1L_660 extends DecoderPlugin { // eslint-disable-line camelca
     return decodeResult;
   }
 }
-
-export default {};

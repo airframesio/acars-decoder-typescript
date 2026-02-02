@@ -62,5 +62,3 @@ export class Label_2P_FM4 extends DecoderPlugin {
       return decodeResult;
   }
 }
-
-export default {};

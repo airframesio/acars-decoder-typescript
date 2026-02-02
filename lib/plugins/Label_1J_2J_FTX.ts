@@ -40,5 +40,3 @@ export class Label_1J_2J_FTX extends DecoderPlugin {
     return decodeResult;
   }
 }
-
-export default {};

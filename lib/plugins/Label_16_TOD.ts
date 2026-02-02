@@ -54,5 +54,3 @@ export class Label_16_TOD extends DecoderPlugin {
     return decodeResult;
   }
 }
-
-export default {};

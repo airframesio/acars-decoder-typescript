@@ -96,5 +96,3 @@ export class Label_1L_3Line extends DecoderPlugin { // eslint-disable-line camel
     return decodeResult;
   }
 }
-
-export default {};

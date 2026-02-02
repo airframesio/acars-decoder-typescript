@@ -60,5 +60,3 @@ export class Label_2P_FM5 extends DecoderPlugin {
       return decodeResult;
   }
 }
-
-export default {};

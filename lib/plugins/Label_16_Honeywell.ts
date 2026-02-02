@@ -81,5 +81,3 @@ export class Label_16_Honeywell extends DecoderPlugin {
     return decodeResult;
   }
 }
-
-export default {};

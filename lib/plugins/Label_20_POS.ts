@@ -59,5 +59,3 @@ export class Label_20_POS extends DecoderPlugin {
     return decodeResult;
   }
 }
-
-export default {};

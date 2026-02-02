@@ -81,5 +81,3 @@ export class Label_44_Slash extends DecoderPlugin {
     return decodeResult;
   }
 }
-
-export default {};

@@ -75,5 +75,3 @@ export class Label_H1_Slash extends DecoderPlugin {
     return decodeResult;
   }
 }
-
-export default {};

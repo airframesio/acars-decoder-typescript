@@ -57,5 +57,3 @@ export class Label_4T_AGFSR extends DecoderPlugin {
     return decodeResult;
   }
 }
-
-export default {};

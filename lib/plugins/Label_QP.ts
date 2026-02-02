@@ -31,5 +31,3 @@ export class Label_QP extends DecoderPlugin {
     return decodeResult;
   }
 }
-
-export default {};

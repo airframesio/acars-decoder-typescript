@@ -83,5 +83,3 @@ export class Label_83 extends DecoderPlugin {
     return decodeResult;
   }
 }
-
-export default {};

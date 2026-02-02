@@ -47,6 +47,3 @@ export interface DecoderPluginInterface {
   // onRegister(store: Store<any>) : void;
   qualifiers() : any;
 }
-
-export default {
-}

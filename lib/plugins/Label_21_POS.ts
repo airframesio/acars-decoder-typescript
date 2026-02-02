@@ -65,5 +65,3 @@ function processPosition(decodeResult: DecodeResult, value: string) {
   ResultFormatter.position(decodeResult, position);
 }
 
-export default {};
-

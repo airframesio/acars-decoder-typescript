@@ -150,6 +150,3 @@ export class MessageDecoder {
     return result;
   }
 }
-
-export default {
-};

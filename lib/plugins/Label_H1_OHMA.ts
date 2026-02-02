@@ -68,5 +68,3 @@ export class Label_H1_OHMA extends DecoderPlugin {
   }
 }
 
-export default {};
-

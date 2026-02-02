@@ -31,5 +31,3 @@ export class Label_QR extends DecoderPlugin {
     return decodeResult;
   }
 }
-
-export default {};

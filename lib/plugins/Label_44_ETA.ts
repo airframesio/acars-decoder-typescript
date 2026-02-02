@@ -62,5 +62,3 @@ export class Label_44_ETA extends DecoderPlugin {
     return decodeResult;
   }
 }
-
-export default {};

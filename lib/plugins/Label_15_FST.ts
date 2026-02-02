@@ -52,5 +52,3 @@ export class Label_15_FST extends DecoderPlugin {
     return decodeResult;
   }
 }
-
-export default {};

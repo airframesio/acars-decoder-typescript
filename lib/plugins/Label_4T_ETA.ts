@@ -46,5 +46,3 @@ export class Label_4T_ETA extends DecoderPlugin {
     return decodeResult;
   }
 }
-
-export default {};
