@@ -25,7 +25,7 @@ export class Label_MA extends DecoderPlugin {
         ResultFormatter.sublabel(decodeResult, miamResult.message.data.acars.sublabel);
       }
       if(miamResult.message.data.acars.tail) {
-        ResultFormatter.tail(decodeResult, miamResult.message.data.acars.tail);
+        ResultFormatter.tail(decodeResult, miamResult.message.data.acars.tail.replace('.', ''));
       }
 
       const messageText = miamResult.message.data.acars.text;
@@ -40,7 +40,7 @@ export class Label_MA extends DecoderPlugin {
 
         if(decoded.decoded) {
           // decodeResult.decoder.decodeLevel = decoded.decoder.decodeLevel;
-          decodeResult.raw = {...decodeResult.raw, ...decoded.raw};
+          decodeResult.raw = {...decoded.raw, ...decodeResult.raw };
           decodeResult.formatted.items.push(...decoded.formatted.items);
         } else {
           ResultFormatter.text(decodeResult, messageText);
