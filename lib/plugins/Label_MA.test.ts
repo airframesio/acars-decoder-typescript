@@ -43,8 +43,8 @@ describe('Label_MA', () => {
     expect(decodeResult.raw.label).toBe('H1');
     expect(decodeResult.raw.sublabel).toBe('DF');
     expect(decodeResult.raw.tail).toBe('ET-BAY');
-    expect(decodeResult.raw.text).toBe('A350,000243,1,1,');
-    expect(decodeResult.formatted.items.length).toBe(4);
+    expect(decodeResult.remaining.text).toBe('A350,000243,1,1,');
+    expect(decodeResult.formatted.items.length).toBe(3);
   });
 
   test('decodes twice', () => {
