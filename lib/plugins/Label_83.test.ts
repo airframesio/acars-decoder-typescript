@@ -1,112 +1,108 @@
 import { MessageDecoder } from '../MessageDecoder';
 import { Label_83 } from './Label_83';
+describe('Label_83', () => {
 
-test('matches Label 83 qualifiers', () => {
-  const decoder = new MessageDecoder();
-  const decoderPlugin = new Label_83(decoder);
+  let plugin: Label_83;
+  let message = { label: '83', text: '' };
 
-  expect(decoderPlugin.decode).toBeDefined();
-  expect(decoderPlugin.name).toBe('label-83');
-});
+  beforeEach(() => {
+    const decoder = new MessageDecoder();
+    plugin = new Label_83(decoder);
+  });
+  
+  test('matches qualifiers', () => {
+    expect(plugin.decode).toBeDefined();
+    expect(plugin.name).toBe('label-83');
+  });
 
-test('decodes Label 83 variant 1', () => {
-  const decoder = new MessageDecoder();
+  test('decodes variant 1', () => {
+    // https://globe.adsbexchange.com/?icao=A2A3B5&showTrace=2024-09-22&timestamp=1726967032
+    message.text = 'KLAX,KEWR,220103, 40.53,- 74.47, 3836,212, 140.0, 19700';
+    const decodeResult = plugin.decode(message);
 
-  // https://globe.adsbexchange.com/?icao=A2A3B5&showTrace=2024-09-22&timestamp=1726967032
-  const text = 'KLAX,KEWR,220103, 40.53,- 74.47, 3836,212, 140.0, 19700';
-  const decodeResult = decoder.decode({ label: "83", text: text });
+    expect(decodeResult.decoded).toBe(true);
+    expect(decodeResult.decoder.decodeLevel).toBe('partial');
+    expect(decodeResult.decoder.name).toBe('label-83');
+    expect(decodeResult.formatted.description).toBe('Airline Defined');
+    expect(decodeResult.raw.departure_icao).toBe('KLAX');
+    expect(decodeResult.raw.arrival_icao).toBe('KEWR');
+    expect(decodeResult.raw.day).toBe('22');
+    expect(decodeResult.raw.position.latitude).toBe(40.53);
+    expect(decodeResult.raw.position.longitude).toBe(-74.47);
+    expect(decodeResult.raw.altitude).toBe(3836);
+    expect(decodeResult.raw.groundspeed).toBe(212);
+    expect(decodeResult.raw.heading).toBe(140);
+    expect(decodeResult.remaining.text).toBe('19700');
+    expect(decodeResult.formatted.items.length).toBe(6);
+    expect(decodeResult.formatted.items[0].type).toBe('icao');
+    expect(decodeResult.formatted.items[0].value).toBe('KLAX');
+    expect(decodeResult.formatted.items[1].type).toBe('icao');
+    expect(decodeResult.formatted.items[1].value).toBe('KEWR');
+    expect(decodeResult.formatted.items[2].type).toBe('aircraft_position');
+    expect(decodeResult.formatted.items[2].value).toBe('40.530 N, 74.470 W');
+    expect(decodeResult.formatted.items[3].type).toBe('altitude');
+    expect(decodeResult.formatted.items[3].value).toBe('3836 feet');
+    expect(decodeResult.formatted.items[4].type).toBe('aircraft_groundspeed');
+    expect(decodeResult.formatted.items[4].value).toBe('212 knots');
+    expect(decodeResult.formatted.items[5].type).toBe('heading');
+    expect(decodeResult.formatted.items[5].value).toBe('140');
+  });
 
-  expect(decodeResult.decoded).toBe(true);
-  expect(decodeResult.decoder.decodeLevel).toBe('partial');
-  expect(decodeResult.decoder.name).toBe('label-83');
-  expect(decodeResult.formatted.description).toBe('Airline Defined');
-  expect(decodeResult.message.text).toBe(text);
-  expect(decodeResult.raw.departure_icao).toBe('KLAX');
-  expect(decodeResult.raw.arrival_icao).toBe('KEWR');
-  expect(decodeResult.raw.day).toBe('22');
-  expect(decodeResult.raw.position.latitude).toBe(40.53);
-  expect(decodeResult.raw.position.longitude).toBe(-74.47);
-  expect(decodeResult.raw.altitude).toBe(3836);
-  expect(decodeResult.raw.groundspeed).toBe(212);
-  expect(decodeResult.raw.heading).toBe(140);
-  expect(decodeResult.remaining.text).toBe('19700');
-  expect(decodeResult.formatted.items.length).toBe(6);
-  expect(decodeResult.formatted.items[0].type).toBe('icao');
-  expect(decodeResult.formatted.items[0].value).toBe('KLAX');
-  expect(decodeResult.formatted.items[1].type).toBe('icao');
-  expect(decodeResult.formatted.items[1].value).toBe('KEWR');
-  expect(decodeResult.formatted.items[2].type).toBe('aircraft_position');
-  expect(decodeResult.formatted.items[2].value).toBe('40.530 N, 74.470 W');
-  expect(decodeResult.formatted.items[3].type).toBe('altitude');
-  expect(decodeResult.formatted.items[3].value).toBe('3836 feet');
-  expect(decodeResult.formatted.items[4].type).toBe('aircraft_groundspeed');
-  expect(decodeResult.formatted.items[4].value).toBe('212 knots');
-  expect(decodeResult.formatted.items[5].type).toBe('heading');
-  expect(decodeResult.formatted.items[5].value).toBe('140');
-});
+  test('decodes variant 2', () => {
+    // https://globe.adsbexchange.com/?icao=478F43&showTrace=2024-09-22&timestamp=1727022863
+    message.text = '4DH3 ETAT2  0907/22 ENGM/KEWR .LN-RKO\r\n/ETA 1641';
+    const decodeResult = plugin.decode(message);
 
-test('decodes Label 83 variant 2', () => {
-  const decoder = new MessageDecoder();
+    expect(decodeResult.decoded).toBe(true);
+    expect(decodeResult.decoder.decodeLevel).toBe('partial');
+    expect(decodeResult.decoder.name).toBe('label-83');
+    expect(decodeResult.formatted.description).toBe('Airline Defined');
+    expect(decodeResult.raw.departure_icao).toBe('ENGM');
+    expect(decodeResult.raw.arrival_icao).toBe('KEWR');
+    expect(decodeResult.raw.day).toBe('22');
+    expect(decodeResult.raw.tail).toBe('LN-RKO');
+    expect(decodeResult.raw.eta_time).toBe(60060);
+    expect(decodeResult.remaining.text).toBe('0907');
+    expect(decodeResult.formatted.items.length).toBe(4);
+    expect(decodeResult.formatted.items[0].code).toBe('ORG');
+    expect(decodeResult.formatted.items[0].value).toBe('ENGM');
+    expect(decodeResult.formatted.items[1].code).toBe('DST');
+    expect(decodeResult.formatted.items[1].value).toBe('KEWR');
+    expect(decodeResult.formatted.items[2].code).toBe('TAIL');
+    expect(decodeResult.formatted.items[2].value).toBe('LN-RKO');
+    expect(decodeResult.formatted.items[3].code).toBe('ETA');
+    expect(decodeResult.formatted.items[3].value).toBe('16:41:00');
+  });
 
-  // https://globe.adsbexchange.com/?icao=478F43&showTrace=2024-09-22&timestamp=1727022863
-  const text = '4DH3 ETAT2  0907/22 ENGM/KEWR .LN-RKO\r\n/ETA 1641';
-  const decodeResult = decoder.decode({ label: "83", text: text });
+  test('decodes variant 3', () => {
+    // https://globe.adsbexchange.com/?icao=AC15A1&showTrace=2024-09-22&timestamp=1726977342
+    message.text = '001PR22035539N4038.6W07427.80292500008';
+    const decodeResult = plugin.decode(message);
 
-  expect(decodeResult.decoded).toBe(true);
-  expect(decodeResult.decoder.decodeLevel).toBe('partial');
-  expect(decodeResult.decoder.name).toBe('label-83');
-  expect(decodeResult.formatted.description).toBe('Airline Defined');
-  expect(decodeResult.message.text).toBe(text);
-  expect(decodeResult.raw.departure_icao).toBe('ENGM');
-  expect(decodeResult.raw.arrival_icao).toBe('KEWR');
-  expect(decodeResult.raw.day).toBe('22');
-  expect(decodeResult.raw.tail).toBe('LN-RKO');
-  expect(decodeResult.raw.eta_time).toBe(60060);
-  expect(decodeResult.remaining.text).toBe('0907');
-  expect(decodeResult.formatted.items.length).toBe(4);
-  expect(decodeResult.formatted.items[0].code).toBe('ORG');
-  expect(decodeResult.formatted.items[0].value).toBe('ENGM');
-  expect(decodeResult.formatted.items[1].code).toBe('DST');
-  expect(decodeResult.formatted.items[1].value).toBe('KEWR');
-  expect(decodeResult.formatted.items[2].code).toBe('TAIL');
-  expect(decodeResult.formatted.items[2].value).toBe('LN-RKO');
-  expect(decodeResult.formatted.items[3].code).toBe('ETA');
-  expect(decodeResult.formatted.items[3].value).toBe('16:41:00');
-});
+    expect(decodeResult.decoded).toBe(true);
+    expect(decodeResult.decoder.decodeLevel).toBe('partial');
+    expect(decodeResult.decoder.name).toBe('label-83');
+    expect(decodeResult.formatted.description).toBe('Airline Defined');
+    expect(decodeResult.raw.day).toBe('22');
+    expect(decodeResult.raw.position.latitude).toBe(40.64333333333333);
+    expect(decodeResult.raw.position.longitude).toBe(-74.46333333333334);
+    expect(decodeResult.raw.altitude).toBe(2925);
+    expect(decodeResult.remaining.text).toBe('00008');
+    expect(decodeResult.formatted.items.length).toBe(2);
+    expect(decodeResult.formatted.items[0].type).toBe('aircraft_position');
+    expect(decodeResult.formatted.items[0].value).toBe('40.643 N, 74.463 W');
+    expect(decodeResult.formatted.items[1].type).toBe('altitude');
+    expect(decodeResult.formatted.items[1].value).toBe('2925 feet');
+  });
 
-test('decodes Label 83 variant 3', () => {
-  const decoder = new MessageDecoder();
+  test('does not decode <invalid>', () => {
+    message.text = '83 Bogus message';
+    const decodeResult = plugin.decode(message);
 
-  // https://globe.adsbexchange.com/?icao=AC15A1&showTrace=2024-09-22&timestamp=1726977342
-  const text = '001PR22035539N4038.6W07427.80292500008';
-  const decodeResult = decoder.decode({ label: "83", text: text });
-
-  expect(decodeResult.decoded).toBe(true);
-  expect(decodeResult.decoder.decodeLevel).toBe('partial');
-  expect(decodeResult.decoder.name).toBe('label-83');
-  expect(decodeResult.formatted.description).toBe('Airline Defined');
-  expect(decodeResult.message.text).toBe(text);
-  expect(decodeResult.raw.day).toBe('22');
-  expect(decodeResult.raw.position.latitude).toBe(40.64333333333333);
-  expect(decodeResult.raw.position.longitude).toBe(-74.46333333333334);
-  expect(decodeResult.raw.altitude).toBe(2925);
-  expect(decodeResult.remaining.text).toBe('00008');
-  expect(decodeResult.formatted.items.length).toBe(2);
-  expect(decodeResult.formatted.items[0].type).toBe('aircraft_position');
-  expect(decodeResult.formatted.items[0].value).toBe('40.643 N, 74.463 W');
-  expect(decodeResult.formatted.items[1].type).toBe('altitude');
-  expect(decodeResult.formatted.items[1].value).toBe('2925 feet');
-});
-
-test('decodes Label 83 <invalid>', () => {
-  const decoder = new MessageDecoder();
-
-  const text = '83 Bogus message';
-  const decodeResult = decoder.decode({ label: "83", text: text });
-
-  expect(decodeResult.decoded).toBe(false);
-  expect(decodeResult.decoder.decodeLevel).toBe('none');
-  expect(decodeResult.decoder.name).toBe('label-83');
-  expect(decodeResult.formatted.description).toBe('Airline Defined');
-  expect(decodeResult.formatted.items.length).toBe(0);
+    expect(decodeResult.decoded).toBe(false);
+    expect(decodeResult.decoder.decodeLevel).toBe('none');
+    expect(decodeResult.decoder.name).toBe('label-83');
+    expect(decodeResult.formatted.description).toBe('Airline Defined');
+    expect(decodeResult.formatted.items.length).toBe(0);
+  });
 });

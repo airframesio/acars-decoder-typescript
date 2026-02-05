@@ -1,123 +1,120 @@
 import { MessageDecoder } from '../MessageDecoder';
 import { Label_4A } from './Label_4A';
 
-test('matches Label 4A qualifiers', () => {
-  const decoder = new MessageDecoder();
-  const decoderPlugin = new Label_4A(decoder);
+describe('Label 4A', () => {
 
-  expect(decoderPlugin.decode).toBeDefined();
-  expect(decoderPlugin.name).toBe('label-4a');
-  expect(decoderPlugin.qualifiers).toBeDefined();
-  expect(decoderPlugin.qualifiers()).toEqual({
-    labels: ['4A'],
+  let plugin: Label_4A;
+  const message = { label: '4A', text: '' };
+
+  beforeEach(() => {
+    const decoder = new MessageDecoder();
+    plugin = new Label_4A(decoder);
   });
-});
 
-test('decodes Label 4A, variant 1', () => {
-  const decoder = new MessageDecoder();
+  test('matches qualifiers', () => {
+    expect(plugin.decode).toBeDefined();
+    expect(plugin.name).toBe('label-4a');
+    expect(plugin.qualifiers).toBeDefined();
+    expect(plugin.qualifiers()).toEqual({
+      labels: ['4A'],
+    });
+  });
 
-  // https://app.airframes.io/messages/3451492279
-  const text = '063200,1910,.N343FR,FFT2028,KSLC,KORD,1,0632,RT0,LT0,';
-  const decodeResult = decoder.decode({ label: "4A", text: text });
+  test('decodes variant 1', () => {
+    // https://app.airframes.io/messages/3451492279
+    message.text = '063200,1910,.N343FR,FFT2028,KSLC,KORD,1,0632,RT0,LT0,';
+    const decodeResult = plugin.decode(message);
 
-  expect(decodeResult.decoded).toBe(true);
-  expect(decodeResult.decoder.decodeLevel).toBe('partial');
-  expect(decodeResult.decoder.name).toBe('label-4a');
-  expect(decodeResult.formatted.description).toBe('Latest New Format');
-  expect(decodeResult.remaining.text).toBe('RT0,LT0,');
-  expect(decodeResult.formatted.items.length).toBe(5);
-  expect(decodeResult.formatted.items[0].code).toBe('MSG_TOD');
-  expect(decodeResult.formatted.items[0].value).toBe('06:32:00');
-  expect(decodeResult.formatted.items[1].code).toBe('TAIL');
-  expect(decodeResult.formatted.items[1].value).toBe('N343FR');
-  expect(decodeResult.formatted.items[2].code).toBe('CALLSIGN');
-  expect(decodeResult.formatted.items[2].value).toBe('FFT2028');
-  expect(decodeResult.formatted.items[3].code).toBe('ORG');
-  expect(decodeResult.formatted.items[3].value).toBe('KSLC');
-  expect(decodeResult.formatted.items[4].code).toBe('DST');
-  expect(decodeResult.formatted.items[4].value).toBe('KORD');
-});
+    expect(decodeResult.decoded).toBe(true);
+    expect(decodeResult.decoder.decodeLevel).toBe('partial');
+    expect(decodeResult.decoder.name).toBe('label-4a');
+    expect(decodeResult.formatted.description).toBe('Latest New Format');
+    expect(decodeResult.remaining.text).toBe('RT0,LT0,');
+    expect(decodeResult.formatted.items.length).toBe(5);
+    expect(decodeResult.formatted.items[0].code).toBe('MSG_TOD');
+    expect(decodeResult.formatted.items[0].value).toBe('06:32:00');
+    expect(decodeResult.formatted.items[1].code).toBe('TAIL');
+    expect(decodeResult.formatted.items[1].value).toBe('N343FR');
+    expect(decodeResult.formatted.items[2].code).toBe('CALLSIGN');
+    expect(decodeResult.formatted.items[2].value).toBe('FFT2028');
+    expect(decodeResult.formatted.items[3].code).toBe('ORG');
+    expect(decodeResult.formatted.items[3].value).toBe('KSLC');
+    expect(decodeResult.formatted.items[4].code).toBe('DST');
+    expect(decodeResult.formatted.items[4].value).toBe('KORD');
+  });
 
-test('decodes Label 4A, variant 1, no callsign', () => {
-  const decoder = new MessageDecoder();
+  test('decodes variant 1, no callsign', () => {
+    // https://app.airframes.io/messages/3452310240
+    message.text = '101606,1910,.N317FR,,KMDW,----,1,1016,RT0,LT1,';
+    const decodeResult = plugin.decode(message);
 
-  // https://app.airframes.io/messages/3452310240
-  const text = '101606,1910,.N317FR,,KMDW,----,1,1016,RT0,LT1,';
-  const decodeResult = decoder.decode({ label: "4A", text: text });
+    expect(decodeResult.decoded).toBe(true);
+    expect(decodeResult.decoder.decodeLevel).toBe('partial');
+    expect(decodeResult.decoder.name).toBe('label-4a');
+    expect(decodeResult.formatted.description).toBe('Latest New Format');
+    expect(decodeResult.remaining.text).toBe('RT0,LT1,');
+    expect(decodeResult.formatted.items.length).toBe(4);
+    expect(decodeResult.formatted.items[0].code).toBe('MSG_TOD');
+    expect(decodeResult.formatted.items[0].value).toBe('10:16:06');
+    expect(decodeResult.formatted.items[1].code).toBe('TAIL');
+    expect(decodeResult.formatted.items[1].value).toBe('N317FR');
+    expect(decodeResult.formatted.items[2].code).toBe('ORG');
+    expect(decodeResult.formatted.items[2].value).toBe('KMDW');
+    expect(decodeResult.formatted.items[3].code).toBe('DST');
+    expect(decodeResult.formatted.items[3].value).toBe('----');
+  });
 
-  expect(decodeResult.decoded).toBe(true);
-  expect(decodeResult.decoder.decodeLevel).toBe('partial');
-  expect(decodeResult.decoder.name).toBe('label-4a');
-  expect(decodeResult.formatted.description).toBe('Latest New Format');
-  expect(decodeResult.remaining.text).toBe('RT0,LT1,');
-  expect(decodeResult.formatted.items.length).toBe(4);
-  expect(decodeResult.formatted.items[0].code).toBe('MSG_TOD');
-  expect(decodeResult.formatted.items[0].value).toBe('10:16:06');
-  expect(decodeResult.formatted.items[1].code).toBe('TAIL');
-  expect(decodeResult.formatted.items[1].value).toBe('N317FR');
-  expect(decodeResult.formatted.items[2].code).toBe('ORG');
-  expect(decodeResult.formatted.items[2].value).toBe('KMDW');
-  expect(decodeResult.formatted.items[3].code).toBe('DST');
-  expect(decodeResult.formatted.items[3].value).toBe('----');
-});
+  test('decodes variant 2', () => {
+    message.text = 'N45129W093113MSP/07 ,204436123VECTORS,,P04,268044858,46904221';
+    const decodeResult = plugin.decode(message);
 
-test('decodes Label 4A, variant 2', () => {
-  const decoder = new MessageDecoder();
-
-  // https://app.airframes.io/messages/3461807403
-  const text = 'N45129W093113MSP/07 ,204436123VECTORS,,P04,268044858,46904221';
-  const decodeResult = decoder.decode({ label: "4A", text: text });
-
-  expect(decodeResult.decoded).toBe(true);
-  expect(decodeResult.decoder.decodeLevel).toBe('partial');
-  expect(decodeResult.decoder.name).toBe('label-4a');
-  expect(decodeResult.formatted.description).toBe('Latest New Format');
-  expect(decodeResult.remaining.text).toBe('268044858,46904221');
-  expect(decodeResult.formatted.items.length).toBe(4);
-  expect(decodeResult.formatted.items[0].code).toBe('POS');
-  expect(decodeResult.formatted.items[0].value).toBe('45.129 N, 93.113 W');
-  expect(decodeResult.formatted.items[1].code).toBe('ALT');
-  expect(decodeResult.formatted.items[1].value).toBe('12300 feet');
-  expect(decodeResult.formatted.items[2].code).toBe('ROUTE');
-  expect(decodeResult.formatted.items[2].value).toBe('MSP/07@20:44:36 > VECTORS');
-  expect(decodeResult.formatted.items[3].code).toBe('OATEMP');
-  expect(decodeResult.formatted.items[3].value).toBe('4 degrees');
-});
+    expect(decodeResult.decoded).toBe(true);
+    expect(decodeResult.decoder.decodeLevel).toBe('partial');
+    expect(decodeResult.decoder.name).toBe('label-4a');
+    expect(decodeResult.formatted.description).toBe('Latest New Format');
+    expect(decodeResult.remaining.text).toBe('268044858,46904221');
+    expect(decodeResult.formatted.items.length).toBe(4);
+    expect(decodeResult.formatted.items[0].code).toBe('POS');
+    expect(decodeResult.formatted.items[0].value).toBe('45.129 N, 93.113 W');
+    expect(decodeResult.formatted.items[1].code).toBe('ALT');
+    expect(decodeResult.formatted.items[1].value).toBe('12300 feet');
+    expect(decodeResult.formatted.items[2].code).toBe('ROUTE');
+    expect(decodeResult.formatted.items[2].value).toBe('MSP/07@20:44:36 > VECTORS');
+    expect(decodeResult.formatted.items[3].code).toBe('OATEMP');
+    expect(decodeResult.formatted.items[3].value).toBe('4 degrees');
+  });
 
 
-test('decodes Label 4A, variant 3', () => {
-  const decoder = new MessageDecoder();
+  test('decodes variant 3', () => {
+    // https://globe.adsbexchange.com/?icao=A39AC6&showTrace=2024-09-22&timestamp=1727009085
+    message.text = '124442,1320, 138,33467,N 41.093,W 72.677';
+    const decodeResult = plugin.decode(message);
 
-  // https://globe.adsbexchange.com/?icao=A39AC6&showTrace=2024-09-22&timestamp=1727009085
-  const text = '124442,1320, 138,33467,N 41.093,W 72.677';
-  const decodeResult = decoder.decode({ label: "4A", text: text });
+    expect(decodeResult.decoded).toBe(true);
+    expect(decodeResult.decoder.decodeLevel).toBe('partial');
+    expect(decodeResult.decoder.name).toBe('label-4a');
+    expect(decodeResult.formatted.description).toBe('Latest New Format');
+    expect(decodeResult.remaining.text).toBe(' 138');
+    expect(decodeResult.formatted.items.length).toBe(4);
+    expect(decodeResult.formatted.items[0].code).toBe('MSG_TOD');
+    expect(decodeResult.formatted.items[0].value).toBe('12:44:42');
+    expect(decodeResult.formatted.items[1].code).toBe('ETA');
+    expect(decodeResult.formatted.items[1].value).toBe('13:20:00');
+    expect(decodeResult.formatted.items[2].code).toBe('ALT');
+    expect(decodeResult.formatted.items[2].value).toBe('33467 feet');
+    expect(decodeResult.formatted.items[3].code).toBe('POS');
+    expect(decodeResult.formatted.items[3].value).toBe('41.093 N, 72.677 W');
+  });
 
-  expect(decodeResult.decoded).toBe(true);
-  expect(decodeResult.decoder.decodeLevel).toBe('partial');
-  expect(decodeResult.decoder.name).toBe('label-4a');
-  expect(decodeResult.formatted.description).toBe('Latest New Format');
-  expect(decodeResult.remaining.text).toBe(' 138');
-  expect(decodeResult.formatted.items.length).toBe(4);
-  expect(decodeResult.formatted.items[0].code).toBe('MSG_TOD');
-  expect(decodeResult.formatted.items[0].value).toBe('12:44:42');
-  expect(decodeResult.formatted.items[1].code).toBe('ETA');
-  expect(decodeResult.formatted.items[1].value).toBe('13:20:00');
-  expect(decodeResult.formatted.items[2].code).toBe('ALT');
-  expect(decodeResult.formatted.items[2].value).toBe('33467 feet');
-  expect(decodeResult.formatted.items[3].code).toBe('POS');
-  expect(decodeResult.formatted.items[3].value).toBe('41.093 N, 72.677 W');
-});
+  test('decodes Label 4A_DIS <invalid>', () => { // FIXME: this should not decode
+    // https://app.airframes.io/messages/3449413366
+    message.text = 'DIS01,182103,WEN3100,WRONG CREW HAHAHA';
+    const decodeResult = plugin.decode(message);
 
-test('decodes Label 4A_DIS <invalid>', () => {
-  const decoder = new MessageDecoder();
-
-  // https://app.airframes.io/messages/3449413366
-  const text = 'DIS01,182103,WEN3100,WRONG CREW HAHAHA';
-  const decodeResult = decoder.decode({ label: "4A", text: text });
-  
-//  expect(decodeResult.decoded).toBe(false);
-//  expect(decodeResult.decoder.decodeLevel).toBe('none');
-  expect(decodeResult.decoder.name).not.toBe('label-4a');
-//  expect(decodeResult.formatted.description).toBe('Latest New Format');
-//  expect(decodeResult.formatted.items.length).toBe(0);
+  //  expect(decodeResult.decoded).toBe(false);
+  //  expect(decodeResult.decoder.decodeLevel).toBe('none');
+    expect(decodeResult.decoder.name).not.toBe('label-4a');
+  //  expect(decodeResult.formatted.description).toBe('Latest New Format');
+  //  expect(decodeResult.formatted.items.length).toBe(0);
+  });
 });
