@@ -1,5 +1,11 @@
 import * as Base85 from 'base85';
 import * as zlib  from "minizlib";
+import { Buffer } from 'node:buffer';
+
+enum MIAMVersion {
+  V1 = 1,
+  V2 = 2,
+}
 
 enum MIAMFid {
   SingleTransfer = 'T',
@@ -18,14 +24,7 @@ enum MIAMCorePdu {
   AlohaReply = 3,
 }
 
-enum MIAMCoreV1App {
-  ACARS2Char = 0x0,
-  ACARS4Char = 0x1,
-  ACARS6Char = 0x2,
-  NonACARS6Char = 0x3,
-}
-
-enum MIAMCoreV2App {
+enum MIAMCoreApp {
   ACARS2Char = 0x0,
   ACARS4Char = 0x1,
   ACARS6Char = 0x2,
@@ -59,7 +58,7 @@ interface PduNonACARSData {
 }
 
 interface Pdu {
-  version: number,
+  version: MIAMVersion,
   crc: number,
   crcOk: boolean,
   complete: boolean,
@@ -70,24 +69,42 @@ interface Pdu {
   acars?: PduACARSData,
   non_acars?: PduNonACARSData,
 }
+const isMIAMVersion= (x: number): x is MIAMVersion => Object.values(MIAMVersion).includes(x as MIAMVersion);
+const isMIAMFid= (x: string): x is MIAMFid => Object.values(MIAMFid).includes(x as MIAMFid);
+const isMIAMCoreApp= (x: number): x is MIAMCoreApp => Object.values(MIAMCoreApp).includes(x as MIAMCoreApp);
+const isMIAMCorePdu= (x: number): x is MIAMCorePdu => Object.values(MIAMCorePdu).includes(x as MIAMCorePdu);
+
+interface PduDecodingSuccess {
+  decoded: true;
+  message: {
+    data: Pdu;
+  };
+}
+
+interface PduDecodingFailure {
+  decoded: false;
+  error: string;
+}
+
+type PduDecodingResult = PduDecodingSuccess | PduDecodingFailure;
 
 export class MIAMCoreUtils {
-  static AppTypeToAppIdLenTable: any = {
-    1: {
-      [MIAMCoreV1App.ACARS2Char]: 2,
-      [MIAMCoreV1App.ACARS4Char]: 4,
-      [MIAMCoreV1App.ACARS6Char]: 6,
-      [MIAMCoreV1App.NonACARS6Char]: 6,
+  static AppTypeToAppIdLenTable: Record<MIAMVersion, Record<MIAMCoreApp, number>> = {
+    [MIAMVersion.V1]: {
+      [MIAMCoreApp.ACARS2Char]: 2,
+      [MIAMCoreApp.ACARS4Char]: 4,
+      [MIAMCoreApp.ACARS6Char]: 6,
+      [MIAMCoreApp.NonACARS6Char]: 6,
     },
-    2: {
-      [MIAMCoreV2App.ACARS2Char]: 2,
-      [MIAMCoreV2App.ACARS4Char]: 4,
-      [MIAMCoreV2App.ACARS6Char]: 6,
-      [MIAMCoreV2App.NonACARS6Char]: 6,
+    [MIAMVersion.V2]: {
+      [MIAMCoreApp.ACARS2Char]: 2,
+      [MIAMCoreApp.ACARS4Char]: 4,
+      [MIAMCoreApp.ACARS6Char]: 6,
+      [MIAMCoreApp.NonACARS6Char]: 6,
     },
   }
 
-  static FidHandlerTable: any = {
+  static FidHandlerTable: Record<MIAMFid, (txt: string) => PduDecodingResult> = {
     [MIAMFid.SingleTransfer]: (txt: string) => {
       if (txt.length < 3) {
         return {
@@ -159,22 +176,22 @@ export class MIAMCoreUtils {
       const version = hdr.readUInt8(0) & 0xf;
       const pduType = (hdr.readUInt8(0) >> 4) & 0xf;
 
-      const versionPduHandler = this.VersionPduHandlerTable[version][pduType];
-      if (versionPduHandler === undefined) {
+      if(isMIAMVersion(version) && isMIAMCorePdu(pduType)) {
+        const versionPduHandler = this.VersionPduHandlerTable[version][pduType];
+        return versionPduHandler(hdr, body);
+      } else {
         return {
           decoded: false,
           error: 'Invalid version and PDU type combination: v=' + version + ', pdu=' + pduType,
         };
       }
-
-      return versionPduHandler(hdr, body);
     },
-    [MIAMFid.FileTransferRequest]: undefined,
-    [MIAMFid.FileTransferAccept]: undefined,
-    [MIAMFid.FileSegment]: undefined,
-    [MIAMFid.FileTransferAbort]: undefined,
-    [MIAMFid.XOFFIndication]: undefined,
-    [MIAMFid.XONIndication]: undefined,
+    [MIAMFid.FileTransferRequest]: () => {return {decoded: false, error: 'File Transfer Request not implemented'}},
+    [MIAMFid.FileTransferAccept]: () => {return {decoded: false, error: 'File Transfer Accept not implemented'}},
+    [MIAMFid.FileSegment]: () => {return {decoded: false, error: 'File Segment not implemented'}},
+    [MIAMFid.FileTransferAbort]: () => {return {decoded: false, error: 'File Transfer Abort not implemented'}},
+    [MIAMFid.XOFFIndication]: () => {return {decoded: false, error: 'XOFF Indication not implemented'}},
+    [MIAMFid.XONIndication]: () => {return {decoded: false, error: 'XON Indication not implemented'}},
   }
 
   private static arincCrc16(buf: Buffer, seed?: number) {
@@ -299,21 +316,22 @@ export class MIAMCoreUtils {
     return crc;
   }
 
-  public static parse(txt: string) {
+  public static parse(txt: string): PduDecodingResult {
     const fidType = txt[0];
 
-    const handler = this.FidHandlerTable[fidType];
-    if (handler === undefined) {
+    if(isMIAMFid(fidType)) {
+      const handler = this.FidHandlerTable[fidType];
+      return handler(txt.substring(1));
+    }else {
       return {
         decoded: false,
         error: 'Unsupported FID type: ' + fidType,
       };
     }
 
-    return handler(txt.substring(1));
   }
 
-  private static corePduDataHandler(version: number, minHdrSize: number, crcLen: number, hdr: Buffer, body?: Buffer) {
+  private static corePduDataHandler(version: MIAMVersion, minHdrSize: number, crcLen: number, hdr: Buffer, body?: Buffer): PduDecodingResult {
     if (hdr.length < minHdrSize) {
       return {
         decoded: false,
@@ -327,7 +345,7 @@ export class MIAMCoreUtils {
     let pduAppType: number = 0;
     let pduAppId: string = '';
     let pduCrc: number = 0;
-    let pduData: Buffer | undefined = undefined;
+    let pduData: Buffer | null = null;
     let pduCrcIsOk: boolean = false;
     let pduIsComplete: boolean = true;
 
@@ -337,7 +355,7 @@ export class MIAMCoreUtils {
     let msgNum: number = 0;
     let ackOptions: number = 0;
 
-    if (version === 1) {
+    if (version === MIAMVersion.V1) {
       pduSize = (hdr.readUInt8(1) << 16) | (hdr.readUInt8(2) << 8) | hdr.readUInt8(3);
 
       const msgSize = hdr.length + (body === undefined ? 0 : body.length);
@@ -349,7 +367,7 @@ export class MIAMCoreUtils {
 
       tail = hdr.subarray(0, 7).toString('ascii');
       hdr = hdr.subarray(7);
-    } else if (version === 2) {
+    } else if (version === MIAMVersion.V2) {
       hdr = hdr.subarray(1);
     }
 
@@ -362,9 +380,11 @@ export class MIAMCoreUtils {
     pduAppType = hdr.readUInt8(1) & 0xf;
     hdr = hdr.subarray(2)
 
-    let appIdLen = this.AppTypeToAppIdLenTable[version][pduAppType];
-    if (appIdLen === undefined) {
-      if (version === 2 && (pduAppType & 0x8) !== 0 && pduAppType !== 0xd) {
+    let appIdLen;
+    if(isMIAMCoreApp(pduAppType)) {
+      appIdLen = this.AppTypeToAppIdLenTable[version][pduAppType];
+    } else {
+      if (version === MIAMVersion.V2 && (pduAppType & 0x8) !== 0 && pduAppType !== 0xd) {
         appIdLen = (pduAppType & 0x7) + 1;
       } else {
         return {
@@ -375,8 +395,8 @@ export class MIAMCoreUtils {
     }
 
     const pduIsACARS = ([
-      MIAMCoreV1App.ACARS2Char, MIAMCoreV1App.ACARS4Char, MIAMCoreV1App.ACARS6Char,
-      MIAMCoreV2App.ACARS2Char, MIAMCoreV2App.ACARS4Char, MIAMCoreV2App.ACARS6Char].indexOf(pduAppType) >= 0);
+      MIAMCoreApp.ACARS2Char, MIAMCoreApp.ACARS4Char, MIAMCoreApp.ACARS6Char
+    ].indexOf(pduAppType) >= 0);
 
     if (hdr.length < appIdLen + crcLen) {
       return {
@@ -398,7 +418,7 @@ export class MIAMCoreUtils {
     if (body !== undefined && body.length > 0) {
       if ([MIAMCoreV1Compression.Deflate, MIAMCoreV2Compression.Deflate].indexOf(pduCompression) >= 0) {
         try {
-          const decompress = new zlib.InflateRaw({windowBits: 15});
+          const decompress = new zlib.InflateRaw({});
           decompress.write(body);
           decompress.flush(zlib.constants.Z_SYNC_FLUSH);
           pduData = decompress.read();
@@ -411,17 +431,17 @@ export class MIAMCoreUtils {
         pduErrors.push('Unsupported v' + version + ' compression type: ' + pduCompression)
       }
 
-      if (pduData !== undefined) {
-        const crcAlgoHandlerByVersion: any = {
-          1: (buf: Buffer, seed?: number) => { return ~this.arinc665Crc32(buf, seed); },
-          2: this.arincCrc16,
+      if (pduData !== null) {
+        const crcAlgoHandlerByVersion: Record<MIAMVersion, (buf: Buffer, seed?: number) => number> = {
+          [MIAMVersion.V1]: (buf: Buffer, seed?: number) => { return ~this.arinc665Crc32(buf, seed); },
+          [MIAMVersion.V2]: this.arincCrc16,
         };
 
         const crcAlgoHandler = crcAlgoHandlerByVersion[version];
         if (crcAlgoHandler === undefined) {
           return {
             decoded: false,
-            errors: 'No CRC handler for v' + version,
+            error: 'No CRC handler for v' + version,
           };
         }
 
@@ -475,20 +495,18 @@ export class MIAMCoreUtils {
     };
   }
 
-  static VersionPduHandlerTable: any = {
-    1: {
-      [MIAMCorePdu.Data]: (hdr: Buffer, body?: Buffer) => { return this.corePduDataHandler(1, 20, MIAMCoreV1CRCLength, hdr, body); },
-      [MIAMCorePdu.Ack]: undefined,
-      [MIAMCorePdu.Aloha]: undefined,
-      [MIAMCorePdu.AlohaReply]: undefined,
+  static VersionPduHandlerTable: Record<MIAMVersion, Record<MIAMCorePdu, ((hdr: Buffer, body?: Buffer) => PduDecodingResult)>> = {
+    [MIAMVersion.V1]: {
+      [MIAMCorePdu.Data]: (hdr: Buffer, body?: Buffer) => { return this.corePduDataHandler(MIAMVersion.V1, 20, MIAMCoreV1CRCLength, hdr, body); },
+      [MIAMCorePdu.Ack]: () => {return {decoded: false, error: 'v1 Ack PDU not implemented'}},
+      [MIAMCorePdu.Aloha]: () => { return {decoded: false, error: 'v1 Aloha PDU not implemented'}},
+      [MIAMCorePdu.AlohaReply]: () => {return {decoded: false, error: 'v1 AlohaReply PDU not implemented'}},
     },
-    2: {
-      [MIAMCorePdu.Data]: (hdr: Buffer, body?: Buffer) => { return this.corePduDataHandler(2, 7, MIAMCoreV2CRCLength, hdr, body); },
-      [MIAMCorePdu.Ack]: undefined,
-      [MIAMCorePdu.Aloha]: undefined,
-      [MIAMCorePdu.AlohaReply]: undefined,
+    [MIAMVersion.V2]: {
+      [MIAMCorePdu.Data]: (hdr: Buffer, body?: Buffer) => { return this.corePduDataHandler(MIAMVersion.V2, 7, MIAMCoreV2CRCLength, hdr, body); },
+      [MIAMCorePdu.Ack]: () => {return {decoded: false, error: 'v2 Ack PDU not implemented'}},
+      [MIAMCorePdu.Aloha]: () => {return {decoded: false, error: 'v2 Aloha PDU not implemented'}},
+      [MIAMCorePdu.AlohaReply]: () => {return {decoded: false, error: 'v2 Aloha reply PDU not implemented'}},
     }
   }
 }
-
-export default {};

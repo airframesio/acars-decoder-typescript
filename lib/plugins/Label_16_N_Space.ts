@@ -78,5 +78,3 @@ export class Label_16_N_Space extends DecoderPlugin {
     return decodeResult;
   }
 }
-
-export default {};

@@ -30,5 +30,3 @@ export class Label_ColonComma extends DecoderPlugin {
     return decodeResult;
   }
 }
-
-export default {};

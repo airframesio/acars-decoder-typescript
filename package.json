@@ -1,6 +1,6 @@
 {
   "name": "@airframes/acars-decoder",
-  "version": "1.6.16",
+  "version": "1.8.6",
   "description": "ACARS Message Decoder for TypeScript/JavaScript",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -16,6 +16,9 @@
     "build": "tsup",
     "test": "jest"
   },
+  "engines": {
+    "node": ">=18"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/airframesio/acars-decoder-typescript.git"
@@ -27,25 +30,24 @@
   "author": "Kevin Elliott <kevin@welikeinc.com>",
   "license": "UNLICENSED",
   "dependencies": {
-    "@types/node": "^22.0.0",
     "base85": "^3.1.0",
-    "minizlib": "^2.1.2"
+    "minizlib": "^3.0.1"
   },
   "devDependencies": {
-    "@babel/core": "^7.18.13",
-    "@babel/preset-env": "^7.18.10",
-    "@babel/preset-typescript": "^7.18.6",
-    "@types/jest": "^28.1.7",
-    "@types/minizlib": "^2.1.7",
-    "babel-jest": "^28.0.0",
-    "jest": "^28.1.3",
-    "ts-jest": "^28.0.8",
-    "ts-node": "^10.9.1",
-    "tsup": "^8.0.2",
-    "typescript": "^5.3.3"
+    "@babel/core": "^7.26.9",
+    "@babel/preset-env": "^7.26.9",
+    "@babel/preset-typescript": "^7.26.0",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^25.0.9",
+    "babel-jest": "^30.2.0",
+    "jest": "^30.2.0",
+    "ts-jest": "^29.2.6",
+    "ts-node": "^10.9.2",
+    "tsup": "^8.4.0",
+    "typescript": "^5.8.2"
   },
   "publishConfig": {
     "access": "public"
   },
-  "packageManager": "yarn@4.5.1"
+  "packageManager": "npm@10.9.3"
 }

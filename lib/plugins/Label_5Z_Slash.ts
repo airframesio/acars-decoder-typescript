@@ -134,5 +134,3 @@ export class Label_5Z_Slash extends DecoderPlugin {
     return decodeResult;
   }
 }
-
-export default {};

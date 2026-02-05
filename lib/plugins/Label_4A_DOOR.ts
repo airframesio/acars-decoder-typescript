@@ -40,5 +40,3 @@ export class Label_4A_DOOR extends DecoderPlugin {
     return decodeResult;
   }
 }
-
-export default {};

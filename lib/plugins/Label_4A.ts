@@ -30,6 +30,10 @@ export class Label_4A extends DecoderPlugin {
             ResultFormatter.callsign(decodeResult, fields[3]);
         ResultFormatter.departureAirport(decodeResult, fields[4]);
         ResultFormatter.arrivalAirport(decodeResult, fields[5]);
+        const alt = text.substring(48, 51);
+        if(alt !== '') {
+            ResultFormatter.altitude(decodeResult, Number(alt) * 100);
+        }
         ResultFormatter.unknownArr(decodeResult, fields.slice(8));
     } else if (fields.length === 6) {
         if (fields[0].match(/^[NS]/)) {
@@ -74,5 +78,3 @@ export class Label_4A extends DecoderPlugin {
     return decodeResult;
   }
 }
-
-export default {};

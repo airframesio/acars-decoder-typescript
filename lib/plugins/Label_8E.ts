@@ -39,5 +39,3 @@ export class Label_8E extends DecoderPlugin {
     return decodeResult;
   }
 }
-
-export default {};

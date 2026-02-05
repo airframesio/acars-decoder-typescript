@@ -31,30 +31,30 @@ test('decodes Label 44 Preamble POS02 variant 1', () => {
   expect(decodeResult.raw.altitude).toBe(31900);
   expect(decodeResult.raw.departure_icao).toBe('KJFK');
   expect(decodeResult.raw.arrival_icao).toBe('KUZA');
-  expect(decodeResult.raw.current_time).toBe(1727318700000);
-  expect(decodeResult.raw.eta_time).toBe(1727321220000);
+  expect(decodeResult.raw.time_of_day).toBe(9900);
+  expect(decodeResult.raw.eta_time).toBe(12420);
   expect(decodeResult.raw.fuel_in_tons).toBe(4.6);
-  expect(decodeResult.formatted.items.length).toBe(4);
-  expect(decodeResult.formatted.items[0].type).toBe('aircraft_position');
-  expect(decodeResult.formatted.items[0].code).toBe('POS');
+  expect(decodeResult.formatted.items.length).toBe(8);
   expect(decodeResult.formatted.items[0].label).toBe('Aircraft Position');
-  expect(decodeResult.formatted.items[0].value).toBe('38.285 N, 77.845 W');
-  expect(decodeResult.formatted.items[1].type).toBe('icao');
-  expect(decodeResult.formatted.items[1].code).toBe('ORG');
-  expect(decodeResult.formatted.items[1].label).toBe('Origin');
-  expect(decodeResult.formatted.items[1].value).toBe('KJFK');
-  expect(decodeResult.formatted.items[2].type).toBe('icao');
-  expect(decodeResult.formatted.items[2].code).toBe('DST');
-  expect(decodeResult.formatted.items[2].label).toBe('Destination');
-  expect(decodeResult.formatted.items[2].value).toBe('KUZA');
-  expect(decodeResult.formatted.items[3].type).toBe('altitude');
-  expect(decodeResult.formatted.items[3].code).toBe('ALT');
-  expect(decodeResult.formatted.items[3].label).toBe('Altitude');
-  expect(decodeResult.formatted.items[3].value).toBe('31900 feet');
+  expect(decodeResult.formatted.items[0].value).toBe('38.285 N, 77.845 W')
+  expect(decodeResult.formatted.items[1].label).toBe('Month of Year');
+  expect(decodeResult.formatted.items[1].value).toBe('9');
+  expect(decodeResult.formatted.items[2].label).toBe('Day of Month');
+  expect(decodeResult.formatted.items[2].value).toBe('26');
+  expect(decodeResult.formatted.items[3].label).toBe('Message Timestamp');
+  expect(decodeResult.formatted.items[3].value).toBe('02:45:00');
+  expect(decodeResult.formatted.items[4].label).toBe('Estimated Time of Arrival');
+  expect(decodeResult.formatted.items[4].value).toBe('03:27:00');
+  expect(decodeResult.formatted.items[5].label).toBe('Origin');
+  expect(decodeResult.formatted.items[5].value).toBe('KJFK');
+  expect(decodeResult.formatted.items[6].label).toBe('Destination');
+  expect(decodeResult.formatted.items[6].value).toBe('KUZA');
+  expect(decodeResult.formatted.items[7].label).toBe('Altitude');
+  expect(decodeResult.formatted.items[7].value).toBe('31900 feet');
 });
 
 // disabled because current parser decodes 'full'
-xtest('decodes Label 44 Preamble POS02 <invalid>', () => {
+test.skip('decodes Label 44 Preamble POS02 <invalid>', () => {
   const decoder = new MessageDecoder();
   const decoderPlugin = new Label_44_POS(decoder);
 

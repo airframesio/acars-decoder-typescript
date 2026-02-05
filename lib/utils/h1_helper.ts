@@ -1,6 +1,7 @@
 import { DateTimeUtils } from "../DateTimeUtils";
 import { DecodeResult } from "../DecoderPluginInterface";
 import { Waypoint } from "../types/waypoint";
+import { Wind } from "../types/wind";
 import { CoordinateUtils } from "./coordinate_utils";
 import { FlightPlanUtils } from "./flight_plan_utils";
 import { ResultFormatter } from "./result_formatter";
@@ -10,63 +11,91 @@ export class H1Helper {
     public static decodeH1Message(decodeResult: DecodeResult, message: string) {
         const checksum = message.slice(-4);
         const data = message.slice(0, message.length - 4);
+        if(calculateChecksum(data) !== checksum) {
+            decodeResult.decoded = false;
+            decodeResult.decoder.decodeLevel = 'none';
+
+            return false;
+        }
 
         const fields = data.split('/');
         const canDecode = parseMessageType(decodeResult, fields[0]);
         if (!canDecode) {
             decodeResult.decoded = false;
             decodeResult.decoder.decodeLevel = 'none';
-            return;
+            return false;
         }
 
         for (let i = 1; i < fields.length; ++i) {
-            if (fields[i].startsWith('FN')) {
-                decodeResult.raw.flight_number = fields[i].substring(2); // Strip off 'FN'
-            } else if (fields[i].startsWith('SN')) {
-                decodeResult.raw.serial_number = fields[i].substring(2); // Strip off 'SN'
-            } else if (fields[i].startsWith('DC')) {
-                processDC(decodeResult, fields[i].substring(2).split(',')); // Strip off 'DC'
-            } else if (fields[i].startsWith('TS')) {
-                H1Helper.processTS(decodeResult, fields[i].substring(2).split(',')); // Strip off PS
-            } else if (fields[i].startsWith('PS')) {
-                H1Helper.processPS(decodeResult, fields[i].substring(2).split(',')); // Strip off PS
-            } else if (fields[i].startsWith('DT')) {
-                const data = fields[i].substring(2).split(','); // Strip off DT
-                processDT(decodeResult, data);
-            } else if (fields[i].startsWith('ID')) {
-                processIdentification(decodeResult, fields[i].substring(2).split(',')); // Strip off ID
-            } else if (fields[i].startsWith('LR')) {
-                const data = fields[i].substring(2).split(','); // Strip off LR
-                processLR(decodeResult, data);
-            } else if (fields[i].startsWith('RI') || fields[i].startsWith('RF') || fields[i].startsWith('RP')) {
-                FlightPlanUtils.processFlightPlan(decodeResult, fields[i].split(':'));
-            } else if (fields[i].startsWith('PR')) {
-                // process PR data
-                // data[8] is temperature
+            const key = fields[i].substring(0, 2);
+            const data = fields[i].substring(2);
+            switch (key) {
+            case 'AF':
+                processAirField(decodeResult, data.split(','));
+                break;
+            case 'CG':
+                processCenterOfGravity(decodeResult, data.split(','));
+                break;
+            case 'DC':
+                processDateCode(decodeResult, data.split(','));
+                break;
+            case 'DT': //processDestination?
+                processDT(decodeResult, data.split(','));
+                break;
+            case 'ET':
+                processETA(data, decodeResult, fields, i);
+                break;
+            case 'FB':
+                ResultFormatter.currentFuel(decodeResult, parseInt(data, 10));
+                break;
+            case 'FN':
+                decodeResult.raw.flight_number = data;
+                break;
+            case 'FX':
+                ResultFormatter.freetext(decodeResult, data);
+                break;
+            case 'ID':
+                processIdentification(decodeResult, data.split(','));
+                break;
+            case 'LR':
+                processLandingReport(decodeResult, data.split(','));
+                break;
+            case 'PR':
+                // TODO: decode /PR fields
                 ResultFormatter.unknown(decodeResult, fields[i], '/');
-            } else if (fields[i].startsWith('AF')) {
-                processAirField(decodeResult, fields[i].substring(2).split(',')); // Strip off AF
-            } else if (fields[i].startsWith('TD')) {
-                processTimeOfDeparture(decodeResult, fields[i].substring(2).split(',')); // Strip off TD
-            } else if (fields[i].startsWith('FX')) {
-                ResultFormatter.freetext(decodeResult, fields[i].substring(2));
-            } else if (fields[i].startsWith('ET')) {
-                if (fields[i].length === 7) { // 1 digit day
-                    ResultFormatter.day(decodeResult, Number(fields[i].substring(2, 3)));
-                    ResultFormatter.eta(decodeResult, DateTimeUtils.convertHHMMSSToTod(fields[i].substring(3)));
-                } else if (fields[i].length === 8) { // 2 digit day
-                    ResultFormatter.day(decodeResult, Number(fields[i].substring(2, 4)));
-                    ResultFormatter.eta(decodeResult, DateTimeUtils.convertHHMMSSToTod(fields[i].substring(4)));
-                } else {
-                    ResultFormatter.unknown(decodeResult, fields[i], '/');
-                }
-            } else {
+                break;
+            case 'PS': // Position
+                H1Helper.processPS(decodeResult, data.split(','));
+                break;
+            case 'RF':
+            case 'RI':
+            case 'RM':
+            case 'RP':
+                // TODO - use key/data instead of whole message
+                FlightPlanUtils.processFlightPlan(decodeResult, fields[i].split(':'));
+                break;
+            case 'SN':
+                decodeResult.raw.serial_number = data;
+                break;
+            case 'TD':
+                processTimeOfDeparture(decodeResult, data.split(','));
+                break;
+            case 'TS':
+                H1Helper.processTimeStamp(decodeResult, data.split(','));
+                break;
+            case 'VR':
+                ResultFormatter.version(decodeResult, parseInt(data, 10)/10);
+                break;
+            case 'WD':
+                processWindData(decodeResult, data);
+                break;
+            default:
                 ResultFormatter.unknown(decodeResult, fields[i], '/');
             }
         }
-        if (decodeResult.formatted.items.length > 0) {
-            ResultFormatter.checksum(decodeResult, checksum);
-        }
+
+        ResultFormatter.checksum(decodeResult, checksum);
+
         return true;
     }
 
@@ -113,15 +142,26 @@ export class H1Helper {
         }
     }
 
-    public static processTS(decodeResult: DecodeResult, data: string[]) {
+    public static processTimeStamp(decodeResult: DecodeResult, data: string[]) {
         let time = DateTimeUtils.convertDateTimeToEpoch(data[0], data[1]);
 
         if (Number.isNaN(time)) {  // convert DDMMYY to MMDDYY - TODO figure out a better way to determine
             const date = data[1].substring(2, 4) + data[1].substring(0, 2) + data[1].substring(4, 6);
             time = DateTimeUtils.convertDateTimeToEpoch(data[0], date);
         }
-        decodeResult.raw.message_date = data[1];
         decodeResult.raw.message_timestamp = time;
+    }
+}
+
+function processETA(data: string, decodeResult: DecodeResult, fields: string[], i: number) {
+    if (data.length === 5) { // 1 digit day
+        ResultFormatter.day(decodeResult, Number(data.substring(0, 1)));
+        ResultFormatter.eta(decodeResult, DateTimeUtils.convertHHMMSSToTod(data.substring(1)));
+    } else if (data.length === 6) { // 2 digit day
+        ResultFormatter.day(decodeResult, Number(data.substring(0, 2)));
+        ResultFormatter.eta(decodeResult, DateTimeUtils.convertHHMMSSToTod(data.substring(2)));
+    } else {
+        ResultFormatter.unknown(decodeResult, fields[i], '/');
     }
 }
 
@@ -158,7 +198,7 @@ function processTimeOfDeparture(decodeResult: DecodeResult, data: string[]) {
 function processIdentification(decodeResult: DecodeResult, data: string[]) {
     ResultFormatter.tail(decodeResult, data[0])
     if (data.length > 1) {
-        decodeResult.raw.flight_number = data[1];
+        ResultFormatter.flightNumber(decodeResult, data[1]);
     }
     if (data.length > 2) { //TODO: figure out what this is
         decodeResult.raw.mission_number = data[2];
@@ -190,7 +230,7 @@ function processDT(decodeResult: DecodeResult, data: string[]) {
     }
 };
 
-function processLR(decodeResult: DecodeResult, data: string[]) {
+function processLandingReport(decodeResult: DecodeResult, data: string[]) {
     if (data.length === 19) {
         ResultFormatter.unknown(decodeResult, data[1]);
         ResultFormatter.flightNumber(decodeResult, data[2]);
@@ -203,32 +243,41 @@ function processLR(decodeResult: DecodeResult, data: string[]) {
     }
 };
 
+function processCenterOfGravity(decodeResult: DecodeResult, data: string[]) {
+    if(data.length === 1) {
+        if(data[0] !== undefined && data[0] !== '') {
+            ResultFormatter.cg(decodeResult, parseInt(data[0], 10) / 10);
+        }
+    } else if (data.length === 3) {
+        if(data[0] !== undefined && data[0] !== '') {
+            ResultFormatter.cg(decodeResult, parseInt(data[0], 10) / 10, 'center');
+        }
+        if(data[1] !== undefined && data[1] !== '') {
+            ResultFormatter.cg(decodeResult, parseInt(data[1], 10) / 10, 'lower');
+        }
+        if(data[2] !== undefined && data[2] !== '') {
+            ResultFormatter.cg(decodeResult, parseInt(data[2], 10) / 10, 'upper');
+        }
+
+    } else {
+        ResultFormatter.unknown(decodeResult, data.join(','));
+    }
+};
+
 
 function parseMessageType(decodeResult: DecodeResult, messageType: string): boolean {
-    const parts = messageType.split('#');
-    if (parts.length == 1) {
-        const type = parts[0].substring(0, 3);
-        if (type === 'POS' && parts[0].length !== 3) {
-            H1Helper.processPosition(decodeResult, parts[0].substring(3).split(','));
+
+        if (messageType.startsWith('POS')) {
+            H1Helper.processPosition(decodeResult, messageType.substring(3).split(','));
+            return processMessageType(decodeResult, 'POS');
+        } else if(messageType.length === 13) {
+            if(processMessageType(decodeResult, messageType.substring(10))) {
+                ResultFormatter.unknown(decodeResult, messageType.substring(0, 4));
+                ResultFormatter.flightNumber(decodeResult, messageType.slice(4, 10));
+                return true;
+            }
         }
-        return processMessageType(decodeResult, type);
-    } else if (parts.length == 2) {
-        if (parts[0].length > 0) {
-            ResultFormatter.unknown(decodeResult, parts[0].substring(0, 3));
-            decodeResult.raw.flight_number = parts[0].substring(3);
-            ResultFormatter.unknown(decodeResult, parts[1].length == 5 ? parts[1].substring(0, 2) : parts[1].substring(0, 3), '#');
-        }
-        // TODO - see if there's a better way to determine the type
-        const type = parts[1].length == 5 ? parts[1].substring(2, 5) : parts[1].substring(3, 6);
-        if (parts[1].substring(3, 6) === 'POS' && parts[1].length > 6) {
-            H1Helper.processPosition(decodeResult, parts[1].substring(6).split(','));
-        }
-        return processMessageType(decodeResult, type);
-    }
-    else {
-        ResultFormatter.unknown(decodeResult, messageType);
-        return false;
-    }
+        return processMessageType(decodeResult, messageType.substring(0,3));
 }
 
 function processMessageType(decodeResult: DecodeResult, type: string): boolean {
@@ -238,10 +287,14 @@ function processMessageType(decodeResult: DecodeResult, type: string): boolean {
         decodeResult.formatted.description = 'Free Text';
     } else if (type === 'INI') {
         decodeResult.formatted.description = 'Flight Plan Initial Report';
+    } else if (type === 'PER') {
+        decodeResult.formatted.description = 'Performance Report';
     } else if (type === 'POS') {
         decodeResult.formatted.description = 'Position Report';
     } else if (type === 'PRG') {
         decodeResult.formatted.description = 'Progress Report';
+    } else if (type === 'PWI') {
+        decodeResult.formatted.description = 'Pilot Weather Information';
     } else {
         decodeResult.formatted.description = 'Unknown H1 Message';
         return false;
@@ -249,7 +302,7 @@ function processMessageType(decodeResult: DecodeResult, type: string): boolean {
     return true;
 }
 
-function processDC(decodeResult: DecodeResult, data: string[]) {
+function processDateCode(decodeResult: DecodeResult, data: string[]) {
     decodeResult.raw.message_date = data[0]; // DDMMYYYY;
 
     if (data.length === 1) {
@@ -287,3 +340,71 @@ function processRoute(decodeResult: DecodeResult, last: string, time: string, ne
         value: RouteUtils.routeToString(decodeResult.raw.route),
     });
 }
+
+
+function processWindData(decodeResult: DecodeResult, message: string) {
+    const wind = [] as Wind[];
+
+    const flightLevel = Number(message.slice(0, 3));
+    const fields = message.slice(4).split('.'); // strip off altitude and comma
+    fields.forEach((field) => {
+        const data = field.split(',');
+        const waypoint = {name: data[0]};
+        const windData = data[1];
+        const windDirection = Number(windData.slice(0, 3));
+        const windSpeed = Number(windData.slice(3));
+
+        if (data.length === 3) {
+            const tempData = data[2];
+            const tempFlightLevel = Number(tempData.slice(0, 3));
+            const tempString = tempData.slice(3);
+            const tempDegrees = Number(tempString.substring(1)) * (tempString.charAt(0) === 'M' ? -1 : 1);
+            wind.push({
+                waypoint: waypoint,
+                flightLevel: flightLevel,
+                windDirection: windDirection,
+                windSpeed: windSpeed,
+                temperature: {
+                    flightLevel: tempFlightLevel,
+                    degreesC: tempDegrees
+                },
+            });
+
+        } else {
+            wind.push({
+                waypoint: waypoint,
+                flightLevel: flightLevel,
+                windDirection: windDirection,
+                windSpeed: windSpeed,
+            });
+        }
+    });
+
+    ResultFormatter.windData(decodeResult, wind);
+}
+
+// CRC-16/IBM-SDLC but nibbles are reversed
+function calculateChecksum(data: string): string {
+    let crc = 0xFFFF;
+    const bytes = Buffer.from(data, 'ascii');
+
+    for (const byte of bytes) {
+        crc ^= byte;
+        for (let i = 0; i < 8; i++) {
+            if ((crc & 0x0001) !== 0) {
+                crc = (crc >>> 1) ^ 0x8408;
+            } else {
+                crc = (crc >>> 1);
+            }
+        }
+    }
+    crc = (crc ^ 0xFFFF) & 0xFFFF;
+
+    const nibble1 = (crc >> 12) & 0xF;
+    const nibble2 = (crc >> 8) & 0xF;
+    const nibble3 = (crc >> 4) & 0xF;
+    const nibble4 = crc & 0xF;
+
+return `${nibble4.toString(16)}${nibble3.toString(16)}${nibble2.toString(16)}${nibble1.toString(16)}`.toUpperCase();
+}
+

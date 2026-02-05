@@ -59,5 +59,3 @@ export class Label_1L_070 extends DecoderPlugin { // eslint-disable-line camelca
     return decodeResult;
   }
 }
-
-export default {};

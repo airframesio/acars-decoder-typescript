@@ -19,15 +19,4 @@ describe('Label_H1 INI', () => {
       labels: ['H1'],
     });
   });
-
-  test('INI <invalid>', () => {
-
-    const text = 'Bogus message';
-    const decodeResult = plugin.decode({ text: text });
-
-    expect(decodeResult.decoded).toBe(false);
-    expect(decodeResult.decoder.decodeLevel).toBe('none');
-    expect(decodeResult.formatted.description).toBe('Unknown H1 Message');
-    expect(decodeResult.message.text).toBe(text);
-  });
 });

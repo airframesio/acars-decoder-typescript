@@ -56,7 +56,7 @@ test('decodes Label H1 Preamble OHMA RTN', () => {
   expect(decodeResult.formatted.items[0].value).toBe('undefined');
 }); 
 
-xtest('decodes Label H1 Preamble OHMA partial', () => {
+test.skip('decodes Label H1 Preamble OHMA partial', () => {
   const decoder = new MessageDecoder();
   const decoderPlugin = new Label_H1_OHMA(decoder);
 

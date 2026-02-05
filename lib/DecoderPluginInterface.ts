@@ -34,7 +34,7 @@ export interface DecodeResult {
           value: string,
       }[]
   },
-  message?: any,
+  message?: Message,
   raw: any,
   remaining: {
       text?: string
@@ -46,7 +46,4 @@ export interface DecoderPluginInterface {
   meetsStateRequirements() : boolean;
   // onRegister(store: Store<any>) : void;
   qualifiers() : any;
-}
-
-export default {
 }

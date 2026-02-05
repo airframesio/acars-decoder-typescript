@@ -24,7 +24,11 @@ export class MessageDecoder {
     this.registerPlugin(new Plugins.Label_13Through18_Slash(this));
     this.registerPlugin(new Plugins.Label_15(this));
     this.registerPlugin(new Plugins.Label_15_FST(this));
+    this.registerPlugin(new Plugins.Label_16_Honeywell(this));
     this.registerPlugin(new Plugins.Label_16_N_Space(this));
+    this.registerPlugin(new Plugins.Label_16_POSA1(this));
+    this.registerPlugin(new Plugins.Label_16_TOD(this));
+    this.registerPlugin(new Plugins.Label_1J_2J_FTX(this));
     this.registerPlugin(new Plugins.Label_1L_3Line(this));
     this.registerPlugin(new Plugins.Label_1L_070(this));
     this.registerPlugin(new Plugins.Label_1L_660(this));
@@ -34,12 +38,17 @@ export class MessageDecoder {
     this.registerPlugin(new Plugins.Label_22_OFF(this));
     this.registerPlugin(new Plugins.Label_22_POS(this));
     this.registerPlugin(new Plugins.Label_24_Slash(this));
+    this.registerPlugin(new Plugins.Label_2P_FM3(this));
+    this.registerPlugin(new Plugins.Label_2P_FM4(this));
+    this.registerPlugin(new Plugins.Label_2P_FM5(this));
+    this.registerPlugin(new Plugins.Label_2P_POS(this));
     this.registerPlugin(new Plugins.Label_30_Slash_EA(this));
     this.registerPlugin(new Plugins.Label_44_ETA(this));
     this.registerPlugin(new Plugins.Label_44_IN(this));
     this.registerPlugin(new Plugins.Label_44_OFF(this));
     this.registerPlugin(new Plugins.Label_44_ON(this));
-    this.registerPlugin(new Plugins.Label_44_POS(this));    
+    this.registerPlugin(new Plugins.Label_44_POS(this));
+    this.registerPlugin(new Plugins.Label_44_Slash(this));
     this.registerPlugin(new Plugins.Label_4A(this));
     this.registerPlugin(new Plugins.Label_4A_01(this));
     this.registerPlugin(new Plugins.Label_4A_DIS(this));
@@ -50,6 +59,7 @@ export class MessageDecoder {
     this.registerPlugin(new Plugins.Label_4T_AGFSR(this));
     this.registerPlugin(new Plugins.Label_4T_ETA(this));
     this.registerPlugin(new Plugins.Label_B6_Forwardslash(this));
+    this.registerPlugin(new Plugins.Label_H2_02E(this));
     this.registerPlugin(new Plugins.Label_H1_FLR(this));
     this.registerPlugin(new Plugins.Label_H1_OHMA(this));
     this.registerPlugin(new Plugins.Label_H1_WRN(this));
@@ -62,6 +72,7 @@ export class MessageDecoder {
     this.registerPlugin(new Plugins.Label_83(this));
     this.registerPlugin(new Plugins.Label_8E(this));
     this.registerPlugin(new Plugins.Label_1M_Slash(this));
+    this.registerPlugin(new Plugins.Label_MA(this));
     this.registerPlugin(new Plugins.Label_SQ(this));
     this.registerPlugin(new Plugins.Label_QP(this));
     this.registerPlugin(new Plugins.Label_QQ(this));
@@ -77,25 +88,6 @@ export class MessageDecoder {
   }
 
   decode(message: Message, options: Options = {}): DecodeResult {
-    if (message.label === 'MA') {
-      const decodeResult = MIAMCoreUtils.parse(message.text);
-
-      // Only transplant message text if the MIAM core decoded message passed CRC and is complete
-      if (decodeResult.decoded &&
-        decodeResult.message.data !== undefined &&
-        decodeResult.message.data.crcOk &&
-        decodeResult.message.data.complete &&
-        decodeResult.message.data.acars !== undefined) {
-        message = {
-          ...message,
-          label: decodeResult.message.data.acars.label,
-          ...(decodeResult.message.data.acars.sublabel ? { sublabel: decodeResult.message.data.acars.sublabel } : {}),
-          ...(decodeResult.message.data.acars.mfi ? { mfi: decodeResult.message.data.acars.mfi } : {}),
-          ...(decodeResult.message.data.acars.text ? { text: decodeResult.message.data.acars.text } : {}),
-        }
-      }
-    }
-
     // C-Band puts a 10 char header in front of some message types
     // First 4 chars are some kind of message number
     // Last 6 chars are the flight number
@@ -107,7 +99,7 @@ export class MessageDecoder {
     // console.log('All plugins');
     // console.log(this.plugins);
     const usablePlugins = this.plugins.filter((plugin) => {
-      const qualifiers: any = plugin.qualifiers();
+      const qualifiers = plugin.qualifiers();
 
       if (qualifiers.labels.includes(message.label)) {
         if (qualifiers.preambles && qualifiers.preambles.length > 0) {
@@ -171,15 +163,4 @@ export class MessageDecoder {
 
     return result;
   }
-
-  lookupAirportByIata(iata: string): any {
-    const airportsArray: Array<any> = []; // = this.store.state.acarsData.airports;
-    // console.log(airportsArray);
-    const airport = airportsArray.filter((e: any) => e.iata === iata);
-
-    return airport;
-  }
 }
-
-export default {
-};

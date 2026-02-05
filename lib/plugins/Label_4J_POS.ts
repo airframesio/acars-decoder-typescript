@@ -36,5 +36,3 @@ export class Label_4J_POS extends DecoderPlugin {
     return decodeResult;
   }
 }
-
-export default {};

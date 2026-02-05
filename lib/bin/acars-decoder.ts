@@ -17,7 +17,7 @@ const result = decoder.decode(message, { debug: true });
 console.log("Decoded Message:");
 console.log(result.formatted.description);
 if (result.formatted.items && result.formatted.items.length > 0) {
-  result.formatted.items.forEach((item: any) => {
+  result.formatted.items.forEach((item) => {
     console.log(`${item.label} - ${item.value}`);
   });
 }

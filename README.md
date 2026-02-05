@@ -1,11 +1,23 @@
+# Node.js Support Policy
+
+- Runtime support: Node.js >= 18
+- Development and CI: validated on Node 18.x, 20.x, 22.x, and 24.x
+- TypeScript development uses the latest stable Node types (currently v24) without forcing consumers to use a specific Node types version, since `@types/node` is a devDependency.
+- The published builds are compiled targeting Node 18 runtime via `tsup` so they remain compatible across supported Node versions.
+
+
+# @airframes/acars-decoder
+
+This is a no-op documentation tweak to verify repository access, build/lint, tests, and PR workflow. No functional code changes are included.
 # acars-decoder-typescript
 
 [![NPM Version](https://badge.fury.io/js/@airframes%2Facars-decoder.svg)](https://badge.fury.io/js/@airframes%2Facars-decoder)
 [![GitHub Actions Workflow Status](https://github.com/airframesio/acars-decoder-typescript/actions/workflows/yarn-test.yml/badge.svg)
 ](https://github.com/airframesio/acars-decoder-typescript/actions/workflows/yarn-test.yml)
+![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/airframesio/acars-decoder-typescript?utm_source=oss&utm_medium=github&utm_campaign=airframesio%2Facars-decoder-typescript&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
 [![Contributors](https://img.shields.io/github/contributors/airframesio/acars-decoder-typescript)](https://github.com/airframesio/acars-decoder-typescript/graphs/contributors)
 [![Activity](https://img.shields.io/github/commit-activity/m/airframesio/acars-decoder-typescript)](https://github.com/airframesio/acars-decoder-typescript/pulse)
-[![Discord](https://img.shields.io/discord/1067697487927853077?logo=discord)](https://discord.gg/8Ksch7zE)
+[![Discord](https://img.shields.io/discord/1067697487927853077?logo=discord)](https://discord.gg/airframes)
 
 ACARS is an aircraft communications messaging protocol that has been in use worldwide for a few decades. This library exists to specifically decode the text portion of the ACARS message payload.
 

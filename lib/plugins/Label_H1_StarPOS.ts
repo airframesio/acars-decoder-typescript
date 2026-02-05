@@ -45,5 +45,3 @@ export class Label_H1_StarPOS extends DecoderPlugin {
     return decodeResult;
   }
 }
-
-export default {};

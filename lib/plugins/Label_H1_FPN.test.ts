@@ -232,31 +232,23 @@ describe('Label_H1 FPN', () => {
 
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
-    expect(decodeResult.raw.flight_number).toBe('AKL0767');
     expect(decodeResult.raw.message_timestamp).toBe(1708730408);
+    expect(decodeResult.raw.flight_number).toBe('KL0767');
+    expect(decodeResult.raw.route_status).toBe('RP');
+    expect(decodeResult.raw.departure_icao).toBe('TNCA');
+    expect(decodeResult.raw.arrival_icao).toBe('TNCB');
+    expect(decodeResult.raw.departure_runway).toBe('11O');
+    expect(decodeResult.raw.procedures.length).toBe(2);
+    expect(decodeResult.raw.procedures[0].type).toBe('departure');
+    expect(decodeResult.raw.procedures[0].route.name).toBe('ADRI1F');
+    expect(decodeResult.raw.procedures[1].type).toBe('approach');
+    expect(decodeResult.raw.procedures[1].route.name).toBe('RNV10(10O)');
+    expect(decodeResult.raw.fuel_on_board).toBe(119);
+    expect(decodeResult.raw.eta_time).toBe(85448);
+    expect(decodeResult.raw.checksum).toBe(0x47c0);
     expect(decodeResult.formatted.description).toBe('Flight Plan');
-    expect(decodeResult.formatted.items.length).toBe(10);
-    expect(decodeResult.formatted.items[0].label).toBe('Route Status');
-    expect(decodeResult.formatted.items[0].value).toBe('Route Planned');
-    expect(decodeResult.formatted.items[1].label).toBe('Origin');
-    expect(decodeResult.formatted.items[1].value).toBe('TNCA');
-    expect(decodeResult.formatted.items[2].label).toBe('Destination');
-    expect(decodeResult.formatted.items[2].value).toBe('TNCB');
-    expect(decodeResult.formatted.items[3].label).toBe('Departure Runway');
-    expect(decodeResult.formatted.items[3].value).toBe('11O');
-    expect(decodeResult.formatted.items[4].label).toBe('Departure Procedure');
-    expect(decodeResult.formatted.items[4].value).toBe('ADRI1F: >> IRLEP > A574 >> PJG');
-    expect(decodeResult.formatted.items[5].label).toBe('Approach Procedure');
-    expect(decodeResult.formatted.items[5].value).toBe('RNV10(10O)');
-    expect(decodeResult.formatted.items[6].label).toBe('Arrival Runway');
-    expect(decodeResult.formatted.items[6].value).toBe('10O');
-    expect(decodeResult.formatted.items[7].label).toBe('Fuel On Board');
-    expect(decodeResult.formatted.items[7].value).toBe('119');
-    expect(decodeResult.formatted.items[8].label).toBe('Estimated Time of Arrival');
-    expect(decodeResult.formatted.items[8].value).toBe('23:44:08');
-    expect(decodeResult.formatted.items[9].label).toBe('Message Checksum');
-    expect(decodeResult.formatted.items[9].value).toBe('0x47c0');
-    expect(decodeResult.remaining.text).toBe('F37#M1B/PR,,110,,183,7,13,,M7,25,,,P30,M40,36090,13,3455,300');
+    expect(decodeResult.formatted.items.length).toBe(11);
+    expect(decodeResult.remaining.text).toBe('F37A#M1B/PR,,110,,183,7,13,,M7,25,,,P30,M40,36090,13,3455,300');
   });
 
   test('decodes Label H1 Preamble FPN <invalid>', () => {
@@ -265,7 +257,37 @@ describe('Label_H1 FPN', () => {
 
     expect(decodeResult.decoded).toBe(false);
     expect(decodeResult.decoder.decodeLevel).toBe('none');
-    expect(decodeResult.formatted.description).toBe('Flight Plan');
+    expect(decodeResult.formatted.description).toBe('Unknown');
     expect(decodeResult.message.text).toBe(text);
+  });
+
+  test('decode RM', () => { // TODO: enable
+    const text = 'FPN/ID88194A,RCH857,PMZM107QP021/MR2,/RM:AA:FJDG:F:DOH.N300..NOLSU.P307..SETSI.P307..PARAR..N20000E063000..RIGLO.L516..ELKEL.L516..BUMMR/WP,,,,E3E9';
+    const decodeResult = plugin.decode({ text: text });
+
+    expect(decodeResult.decoded).toBe(true);
+    expect(decodeResult.decoder.decodeLevel).toBe('partial');
+    expect(decodeResult.raw.tail).toBe('88194A');
+    expect(decodeResult.raw.flight_number).toBe('RCH857');
+    expect(decodeResult.raw.mission_number).toBe('PMZM107QP021');
+    expect(decodeResult.raw.route_status).toBe('RM');
+    expect(decodeResult.raw.arrival_icao).toBe('FJDG');
+    expect(decodeResult.raw.route.waypoints.length).toBe(20);
+    expect(decodeResult.raw.route.waypoints[0].name).toBe('DOH');
+    expect(decodeResult.raw.route.waypoints[19].name).toBe('BUMMR');
+    expect(decodeResult.raw.checksum).toBe(0xe3e9);
+    expect(decodeResult.formatted.description).toBe('Flight Plan');
+    expect(decodeResult.formatted.items.length).toBe(6);
+    expect(decodeResult.message.text).toBe(text);
+  });
+
+    test('Decodes Empty Message', () => {
+    const text = 'FPNEEE6';
+    const decodeResult = plugin.decode({ text: text });
+
+    expect(decodeResult.decoded).toBe(true);
+    expect(decodeResult.decoder.decodeLevel).toBe('full');
+    expect(decodeResult.raw.checksum).toBe(0xeee6);
+    expect(decodeResult.formatted.items.length).toBe(1);
   });
 });

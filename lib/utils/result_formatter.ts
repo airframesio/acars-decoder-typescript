@@ -1,10 +1,9 @@
-import { decode } from "punycode";
 import { DecodeResult } from "../DecoderPluginInterface";
 import { CoordinateUtils } from "./coordinate_utils";
 import { DateTimeUtils } from "../DateTimeUtils";
 import { RouteUtils } from "./route_utils";
-import { Waypoint } from "../types/waypoint";
 import { Route } from "../types/route";
+import { Wind } from "../types/wind";
 
 /**
  * Class to format the results of common fields
@@ -74,6 +73,9 @@ export class ResultFormatter {
     }
 
     static altitude(decodeResult: DecodeResult, value: number) {
+        if(isNaN(value)) {
+            return;
+        }
         decodeResult.raw.altitude = value;
         decodeResult.formatted.items.push({
             type: 'altitude',
@@ -84,6 +86,9 @@ export class ResultFormatter {
     }
 
     static flightNumber(decodeResult: DecodeResult, value: string) {
+        if(value.length === 0 ) {
+            return;
+        }
         decodeResult.raw.flight_number = value;
         decodeResult.formatted.items.push({
             type: 'flight_number',
@@ -213,6 +218,16 @@ export class ResultFormatter {
         });
     };
 
+    static burnedFuel(decodeResult: DecodeResult, value: number) {
+        decodeResult.raw.fuel_burned = value;
+        decodeResult.formatted.items.push({
+            type: 'fuel_burned',
+            code: 'FB',
+            label: 'Fuel Burned',
+            value: decodeResult.raw.fuel_burned.toString(),
+        });
+    };
+
     static remainingFuel(decodeResult: DecodeResult, value: number) {
         decodeResult.raw.fuel_remaining = value;
         decodeResult.formatted.items.push({
@@ -244,7 +259,30 @@ export class ResultFormatter {
         });
     }
 
+    static airspeed(decodeResult: DecodeResult, value: number) {
+        decodeResult.raw.airspeed = value;
+        decodeResult.formatted.items.push({
+            type: 'airspeed',
+            code: 'ASPD',
+            label: 'True Airspeed',
+            value: `${decodeResult.raw.airspeed} knots`
+        });
+    }
+
+    static mach(decodeResult: DecodeResult, value: number) {
+        decodeResult.raw.mach = value;
+        decodeResult.formatted.items.push({
+            type: 'mach',
+            code: 'MACH',
+            label: 'Mach Number',
+            value: `${decodeResult.raw.mach} mach`
+        });
+    }
+
     static temperature(decodeResult: DecodeResult, value: string) {
+        if(value.length === 0 ) {
+            return;
+        }
         decodeResult.raw.outside_air_temperature = Number(value.replace("M", "-").replace("P", "+"));
         decodeResult.formatted.items.push({
             type: 'outside_air_temperature',
@@ -384,6 +422,105 @@ export class ResultFormatter {
         });
     }
 
+    static mac(decodeResult: DecodeResult, mac: number) {
+        decodeResult.raw.mac = mac;
+        decodeResult.formatted.items.push({
+            type: 'mac',
+            code: 'MAC',
+            label: 'Mean Aerodynamic Chord',
+            value: `${mac} %`,
+        });
+    }
+
+    static trim(decodeResult: DecodeResult, trim: number) {
+        decodeResult.raw.trim = trim;
+        decodeResult.formatted.items.push({
+            type: 'trim',
+            code: 'TRIM',
+            label: 'Trim',
+            value: `${trim} units`,
+        });
+    }
+
+        static windData(decodeResult: DecodeResult, windData: Wind[]) {
+        decodeResult.raw.wind_data = windData;
+        for(const wind of windData) {
+            let text = `${RouteUtils.waypointToString(wind.waypoint)} at FL${wind.flightLevel}: ${wind.windDirection}° at ${wind.windSpeed}kt`;
+            if (wind.temperature) {
+                text += `, ${wind.temperature.degreesC}°C at FL${wind.temperature.flightLevel}`;
+
+            }
+            decodeResult.formatted.items.push({
+                type: 'wind_data',
+                code: 'WIND',
+                label: 'Wind Data',
+                value: text,
+            });
+    }
+    }
+
+  static cg(decodeResult: DecodeResult, value: number, type: "center" | "lower" | "upper" = "center") {
+    switch(type) {
+      case "center":
+        decodeResult.raw.center_of_gravity = value;
+        decodeResult.formatted.items.push({
+          type: "center_of_gravity",
+          code: "CG",
+          label: "Center of Gravity",
+          value: `${decodeResult.raw.center_of_gravity} %`,
+        });
+        break;
+        case "lower":
+            decodeResult.raw.cg_lower_limit = value;
+            decodeResult.formatted.items.push({
+              type: "cg_lower_limit",
+              code: "CG_LOWER",
+              label: "Center of Gravity Lower Limit",
+              value: `${decodeResult.raw.cg_lower_limit} %`,
+            });
+            break;
+        case "upper":
+            decodeResult.raw.cg_upper_limit = value;
+            decodeResult.formatted.items.push({
+              type: "cg_upper_limit",
+              code: "CG_UPPER",
+              label: "Center of Gravity Upper Limit",
+              value: `${decodeResult.raw.cg_upper_limit} %`,
+            });
+            break;
+        }
+    }
+
+  static version(decodeResult: DecodeResult, value: number) {
+    decodeResult.raw.version = value;
+    decodeResult.formatted.items.push({
+      type: "version",
+      code: "VERSION",
+      label: "Message Version",
+      value: `v${decodeResult.raw.version.toFixed(1)}`,
+    });
+    }
+
+  static label(decodeResult: DecodeResult, value: string) {
+    decodeResult.raw.label = value;
+    decodeResult.formatted.items.push({
+      type: "label",
+      code: "LABEL",
+      label: "Message Label",
+      value: `${decodeResult.raw.label}`,
+    });
+  }
+
+  static sublabel(decodeResult: DecodeResult, value: string) {
+    decodeResult.raw.sublabel = value;
+    decodeResult.formatted.items.push({
+      type: "sublabel",
+      code: "SUBLABEL",
+      label: "Message Sublabel",
+      value: `${decodeResult.raw.sublabel}`,
+    });
+  }
+
     static unknown(decodeResult: DecodeResult, value: string, sep: string = ',') {
         if (!decodeResult.remaining.text)
             decodeResult.remaining.text = value;
@@ -394,4 +531,5 @@ export class ResultFormatter {
     static unknownArr(decodeResult: DecodeResult, value: string[], sep: string = ',') {
         this.unknown(decodeResult, value.join(sep), sep);
     };
+
 }

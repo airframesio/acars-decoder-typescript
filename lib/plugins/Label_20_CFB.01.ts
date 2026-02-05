@@ -54,5 +54,3 @@ export class Label_20_CFB01 extends DecoderPlugin {
     return decodeResult;
   }
 }
-
-export default {};

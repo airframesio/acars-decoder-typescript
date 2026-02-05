@@ -122,7 +122,7 @@ test('decodes Label QQ variant 3', () => {
 });
 
 // disabled because all messages should decode
-xtest('decodes Label QQ <invalid>', () => {
+test.skip('decodes Label QQ <invalid>', () => {
   const decoder = new MessageDecoder();
   const decoderPlugin = new Label_QQ(decoder);
 
