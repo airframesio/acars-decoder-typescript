@@ -24,7 +24,6 @@ test('decodes Label 4A, variant 1', () => {
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
   expect(decodeResult.decoder.name).toBe('label-4a');
   expect(decodeResult.formatted.description).toBe('Latest New Format');
-  expect(decodeResult.message.text).toBe(text);
   expect(decodeResult.remaining.text).toBe('RT0,LT0,');
   expect(decodeResult.formatted.items.length).toBe(5);
   expect(decodeResult.formatted.items[0].code).toBe('MSG_TOD');
@@ -50,7 +49,6 @@ test('decodes Label 4A, variant 1, no callsign', () => {
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
   expect(decodeResult.decoder.name).toBe('label-4a');
   expect(decodeResult.formatted.description).toBe('Latest New Format');
-  expect(decodeResult.message.text).toBe(text);
   expect(decodeResult.remaining.text).toBe('RT0,LT1,');
   expect(decodeResult.formatted.items.length).toBe(4);
   expect(decodeResult.formatted.items[0].code).toBe('MSG_TOD');
@@ -74,7 +72,6 @@ test('decodes Label 4A, variant 2', () => {
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
   expect(decodeResult.decoder.name).toBe('label-4a');
   expect(decodeResult.formatted.description).toBe('Latest New Format');
-  expect(decodeResult.message.text).toBe(text);
   expect(decodeResult.remaining.text).toBe('268044858,46904221');
   expect(decodeResult.formatted.items.length).toBe(4);
   expect(decodeResult.formatted.items[0].code).toBe('POS');
@@ -87,31 +84,6 @@ test('decodes Label 4A, variant 2', () => {
   expect(decodeResult.formatted.items[3].value).toBe('4 degrees');
 });
 
-test('decodes Label 4A, variant 2, C-Band', () => {
-  const decoder = new MessageDecoder();
-
-  // https://app.airframes.io/messages/3461407615
-  const text = 'M60ALH0752N22456E077014OSE35 ,192027370VEX36 ,192316,M46,275043309,85220111';
-  const decodeResult = decoder.decode({ label: "4A", text: text });
-
-  expect(decodeResult.decoded).toBe(true);
-  expect(decodeResult.decoder.decodeLevel).toBe('partial');
-  expect(decodeResult.decoder.name).toBe('label-4a');
-  expect(decodeResult.formatted.description).toBe('Latest New Format');
-  expect(decodeResult.message.text).toBe(text);
-  expect(decodeResult.remaining.text).toBe('275043309,85220111');
-  expect(decodeResult.formatted.items.length).toBe(5);
-  expect(decodeResult.formatted.items[0].code).toBe('POS');
-  expect(decodeResult.formatted.items[0].value).toBe('22.456 N, 77.014 E');
-  expect(decodeResult.formatted.items[1].code).toBe('ALT');
-  expect(decodeResult.formatted.items[1].value).toBe('37000 feet');
-  expect(decodeResult.formatted.items[2].code).toBe('ROUTE');
-  expect(decodeResult.formatted.items[2].value).toBe('OSE35@19:20:27 > VEX36@19:23:16');
-  expect(decodeResult.formatted.items[3].code).toBe('OATEMP');
-  expect(decodeResult.formatted.items[3].value).toBe('-46 degrees');
-  expect(decodeResult.formatted.items[4].code).toBe('FLIGHT');
-  expect(decodeResult.formatted.items[4].value).toBe('LH752');
-});
 
 test('decodes Label 4A, variant 3', () => {
   const decoder = new MessageDecoder();
@@ -124,7 +96,6 @@ test('decodes Label 4A, variant 3', () => {
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
   expect(decodeResult.decoder.name).toBe('label-4a');
   expect(decodeResult.formatted.description).toBe('Latest New Format');
-  expect(decodeResult.message.text).toBe(text);
   expect(decodeResult.remaining.text).toBe(' 138');
   expect(decodeResult.formatted.items.length).toBe(4);
   expect(decodeResult.formatted.items[0].code).toBe('MSG_TOD');

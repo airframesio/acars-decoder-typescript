@@ -2,7 +2,7 @@
  * Representation of a Message
  */
 export interface Message {
-  label?: string,
+  label: string,
   sublabel?: string,
   text: string,
 }
@@ -45,5 +45,5 @@ export interface DecoderPluginInterface {
   decode(message: Message) : DecodeResult;
   meetsStateRequirements() : boolean;
   // onRegister(store: Store<any>) : void;
-  qualifiers() : any;
+  qualifiers() : {labels: string[], preambles?: string[]};
 }

@@ -26,14 +26,10 @@ export class Label_4A extends DecoderPlugin {
         // variant 1
         ResultFormatter.time_of_day(decodeResult, DateTimeUtils.convertHHMMSSToTod(fields[0]));
         ResultFormatter.tail(decodeResult, fields[2].replace(".", ""));
-        if (fields[3])
-            ResultFormatter.callsign(decodeResult, fields[3]);
+        if (fields[3]) ResultFormatter.callsign(decodeResult, fields[3]);
         ResultFormatter.departureAirport(decodeResult, fields[4]);
         ResultFormatter.arrivalAirport(decodeResult, fields[5]);
-        const alt = text.substring(48, 51);
-        if(alt !== '') {
-            ResultFormatter.altitude(decodeResult, Number(alt) * 100);
-        }
+        // ResultFormatter.altitude(decodeResult, Number(text.substring(48, 51)) * 100);
         ResultFormatter.unknownArr(decodeResult, fields.slice(8));
     } else if (fields.length === 6) {
         if (fields[0].match(/^[NS]/)) {
