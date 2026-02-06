@@ -1,6 +1,6 @@
 export class IcaoDecoder {
-  name : string;
-  icao : string;
+  name: string;
+  icao: string;
 
   // Military ICAO address ranges (as [start, end] tuples, inclusive)
   private static readonly MILITARY_RANGES: Array<[number, number]> = [

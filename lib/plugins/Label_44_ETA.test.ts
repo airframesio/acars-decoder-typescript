@@ -3,7 +3,7 @@ import { Label_44_ETA } from './Label_44_ETA';
 
 describe('Label 44 Preamble ETA', () => {
   let plugin: Label_44_ETA;
-  const message = {label: '44', text: ''};
+  const message = { label: '44', text: '' };
 
   beforeEach(() => {
     const decoder = new MessageDecoder();
@@ -50,14 +50,15 @@ describe('Label 44 Preamble ETA', () => {
     expect(decodeResult.formatted.items[5].value).toBe('7');
     expect(decodeResult.formatted.items[6].label).toBe('Message Timestamp');
     expect(decodeResult.formatted.items[6].value).toBe('01:23:00');
-    expect(decodeResult.formatted.items[7].label).toBe('Estimated Time of Arrival');
+    expect(decodeResult.formatted.items[7].label).toBe(
+      'Estimated Time of Arrival',
+    );
     expect(decodeResult.formatted.items[7].value).toBe('02:08:00');
     expect(decodeResult.formatted.items[8].label).toBe('Fuel Remaining');
     expect(decodeResult.formatted.items[8].value).toBe('8.1');
   });
 
   test('does not decode invalid', () => {
-
     message.text = '00OFF01 Bogus message';
     const decodeResult = plugin.decode(message);
 

@@ -8,7 +8,7 @@ import { ResultFormatter } from '../utils/result_formatter';
 export class Label_44_ON extends DecoderPlugin {
   name = 'label-44-on';
 
-  qualifiers() { // eslint-disable-line class-methods-use-this
+  qualifiers() {
     return {
       labels: ['44'],
       preambles: ['00ON01', '00ON02', '00ON03', 'ON01', 'ON02', 'ON03'],
@@ -24,16 +24,22 @@ export class Label_44_ON extends DecoderPlugin {
     const data = message.text.split(',');
     if (data.length >= 7) {
       if (options.debug) {
-        console.log(`Label 44 On Runway Report: groups`);
+        console.log('Label 44 On Runway Report: groups');
         console.log(data);
       }
 
-      ResultFormatter.position(decodeResult, CoordinateUtils.decodeStringCoordinatesDecimalMinutes(data[1]));
+      ResultFormatter.position(
+        decodeResult,
+        CoordinateUtils.decodeStringCoordinatesDecimalMinutes(data[1]),
+      );
       ResultFormatter.departureAirport(decodeResult, data[2]);
       ResultFormatter.arrivalAirport(decodeResult, data[3]);
       ResultFormatter.month(decodeResult, Number(data[4].substring(0, 2)));
       ResultFormatter.day(decodeResult, Number(data[4].substring(2, 4)));
-      ResultFormatter.on(decodeResult, DateTimeUtils.convertHHMMSSToTod(data[5]));
+      ResultFormatter.on(
+        decodeResult,
+        DateTimeUtils.convertHHMMSSToTod(data[5]),
+      );
       const fuel = Number(data[6]);
       if (!isNaN(fuel)) {
         ResultFormatter.remainingFuel(decodeResult, Number(fuel));
@@ -42,7 +48,6 @@ export class Label_44_ON extends DecoderPlugin {
       if (data.length > 7) {
         ResultFormatter.unknownArr(decodeResult, data.slice(7));
       }
-
     } else {
       if (options.debug) {
         console.log(`Decoder: Unknown 44 message: ${message.text}`);

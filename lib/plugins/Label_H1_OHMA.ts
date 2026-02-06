@@ -2,21 +2,20 @@ import { DecoderPlugin } from '../DecoderPlugin';
 import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
 import { ResultFormatter } from '../utils/result_formatter';
 
-import * as zlib  from "minizlib";
+import * as zlib from 'minizlib';
 import { Buffer } from 'node:buffer';
-
 
 export class Label_H1_OHMA extends DecoderPlugin {
   name = 'label-h1-ohma';
 
-  qualifiers() { // eslint-disable-line class-methods-use-this
+  qualifiers() {
     return {
-      labels: ["H1"],
+      labels: ['H1'],
       preambles: ['OHMA', '/RTNBOCR.OHMA', '#T1B/RTNBOCR.OHMA'],
     };
   }
 
-  decode(message: Message, options: Options = {}) : DecodeResult {
+  decode(message: Message, options: Options = {}): DecodeResult {
     let decodeResult = this.defaultResult();
     decodeResult.decoder.name = this.name;
     decodeResult.formatted.description = 'OHMA Message';
@@ -30,7 +29,7 @@ export class Label_H1_OHMA extends DecoderPlugin {
       decompress.flush(zlib.constants.Z_SYNC_FLUSH);
       const result = decompress.read();
       const jsonText = result?.toString() || '';
-      
+
       let formattedMsg;
       let jsonMessage;
       try {
@@ -50,7 +49,7 @@ export class Label_H1_OHMA extends DecoderPlugin {
       decodeResult.raw.ohma = jsonText;
       decodeResult.formatted.items.push({
         type: 'ohma',
-        code: 'OHMA' ,
+        code: 'OHMA',
         label: 'OHMA Downlink',
         value: formattedMsg,
       });
@@ -64,7 +63,6 @@ export class Label_H1_OHMA extends DecoderPlugin {
       decodeResult.decoder.decodeLevel = 'none';
     }
 
-	  return decodeResult;
+    return decodeResult;
   }
 }
-

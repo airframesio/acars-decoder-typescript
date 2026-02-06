@@ -2,9 +2,8 @@ import { MessageDecoder } from '../MessageDecoder';
 import { Label_16_N_Space } from './Label_16_N_Space';
 
 describe('Label_16_N_Space', () => {
-
   let plugin: Label_16_N_Space;
-  const message = {label: '16', text: ''};
+  const message = { label: '16', text: '' };
 
   beforeEach(() => {
     const decoder = new MessageDecoder();

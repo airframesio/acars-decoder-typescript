@@ -2,9 +2,8 @@ import { MessageDecoder } from '../MessageDecoder';
 import { Label_16_TOD } from './Label_16_TOD';
 
 describe('Label 16 Time of Day', () => {
-
   let plugin: Label_16_TOD;
-  const message = {label: '16', text: ''};
+  const message = { label: '16', text: '' };
 
   beforeEach(() => {
     const decoder = new MessageDecoder();
@@ -34,7 +33,9 @@ describe('Label 16 Time of Day', () => {
     expect(decodeResult.formatted.items[0].value).toBe('00:52:36');
     expect(decodeResult.formatted.items[1].label).toBe('Altitude');
     expect(decodeResult.formatted.items[1].value).toBe('36787 feet');
-    expect(decodeResult.formatted.items[2].label).toBe('Estimated Time of Arrival');
+    expect(decodeResult.formatted.items[2].label).toBe(
+      'Estimated Time of Arrival',
+    );
     expect(decodeResult.formatted.items[2].value).toBe('01:35:00');
     expect(decodeResult.formatted.items[3].label).toBe('Aircraft Position');
     expect(decodeResult.formatted.items[3].value).toBe('38.364 N, 75.226 W');
@@ -56,7 +57,9 @@ describe('Label 16 Time of Day', () => {
     expect(decodeResult.formatted.items[0].value).toBe('11:01:12');
     expect(decodeResult.formatted.items[1].label).toBe('Altitude');
     expect(decodeResult.formatted.items[1].value).toBe('36000 feet');
-    expect(decodeResult.formatted.items[2].label).toBe('Estimated Time of Arrival');
+    expect(decodeResult.formatted.items[2].label).toBe(
+      'Estimated Time of Arrival',
+    );
     expect(decodeResult.formatted.items[2].value).toBe('12:06:00');
     expect(decodeResult.formatted.items[3].label).toBe('Aircraft Position');
     expect(decodeResult.formatted.items[3].value).toBe('45.140 N, 16.341 E');
@@ -64,7 +67,6 @@ describe('Label 16 Time of Day', () => {
     expect(decodeResult.formatted.items[4].value).toBe('SXS7SL');
     expect(decodeResult.remaining.text).toBe(' 51');
   });
-
 
   test('decodes no position', () => {
     // https://app.airframes.io/messages/4260590899
@@ -79,7 +81,9 @@ describe('Label 16 Time of Day', () => {
     expect(decodeResult.formatted.items.length).toBe(2);
     expect(decodeResult.formatted.items[0].label).toBe('Message Timestamp');
     expect(decodeResult.formatted.items[0].value).toBe('11:01:22');
-    expect(decodeResult.formatted.items[1].label).toBe('Estimated Time of Arrival');
+    expect(decodeResult.formatted.items[1].label).toBe(
+      'Estimated Time of Arrival',
+    );
     expect(decodeResult.formatted.items[1].value).toBe('12:06:00');
     expect(decodeResult.remaining.text).toBe(' 92');
   });

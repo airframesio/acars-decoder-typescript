@@ -4,13 +4,13 @@ import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
 export class Label_SQ extends DecoderPlugin {
   name = 'label-sq';
 
-  qualifiers() { // eslint-disable-line class-methods-use-this
+  qualifiers() {
     return {
       labels: ['SQ'],
     };
   }
 
-  decode(message: Message, options: Options = {}) : DecodeResult {
+  decode(message: Message, options: Options = {}): DecodeResult {
     const decodeResult = this.defaultResult();
     decodeResult.decoder.name = this.name;
 
@@ -19,7 +19,8 @@ export class Label_SQ extends DecoderPlugin {
     decodeResult.raw.network = message.text.substring(3, 4);
 
     if (decodeResult.raw.version === '2') {
-      const regex = /0(\d)X(?<org>\w)(?<iata>\w\w\w)(?<icao>\w\w\w\w)(?<station>\d)(?<lat>\d+)(?<latd>[NS])(?<lng>\d+)(?<lngd>[EW])V(?<vfreq>\d+)\/.*/;
+      const regex =
+        /0(\d)X(?<org>\w)(?<iata>\w\w\w)(?<icao>\w\w\w\w)(?<station>\d)(?<lat>\d+)(?<latd>[NS])(?<lng>\d+)(?<lngd>[EW])V(?<vfreq>\d+)\/.*/;
       const result = message.text.match(regex);
 
       if (result?.groups && result.length >= 8) {
@@ -28,10 +29,14 @@ export class Label_SQ extends DecoderPlugin {
           iataCode: result.groups.iata,
           icaoCode: result.groups.icao,
           coordinates: {
-            latitude: (Number(result.groups.lat) / 100) * (result.groups.latd === 'S' ? -1 : 1),
-            longitude: (Number(result.groups.lng) / 100) * (result.groups.lngd === 'W' ? -1 : 1)
-          }
-        }
+            latitude:
+              (Number(result.groups.lat) / 100) *
+              (result.groups.latd === 'S' ? -1 : 1),
+            longitude:
+              (Number(result.groups.lng) / 100) *
+              (result.groups.lngd === 'W' ? -1 : 1),
+          },
+        };
         decodeResult.raw.vdlFrequency = Number(result.groups.vfreq) / 1000.0;
       }
     }
@@ -56,11 +61,14 @@ export class Label_SQ extends DecoderPlugin {
         code: 'VER',
         label: 'Version',
         value: decodeResult.raw.version,
-      }
+      },
     ];
 
     if (decodeResult.raw.groundStation) {
-      if (decodeResult.raw.groundStation.icaoCode && decodeResult.raw.groundStation.number) {
+      if (
+        decodeResult.raw.groundStation.icaoCode &&
+        decodeResult.raw.groundStation.number
+      ) {
         decodeResult.formatted.items.push({
           type: 'ground_station',
           code: 'GNDSTN',
@@ -107,7 +115,7 @@ export class Label_SQ extends DecoderPlugin {
         type: 'vdlFrequency',
         code: 'VDLFRQ',
         label: 'VDL Frequency',
-        value: `${decodeResult.raw.vdlFrequency} MHz`
+        value: `${decodeResult.raw.vdlFrequency} MHz`,
       });
     }
     decodeResult.decoded = true;

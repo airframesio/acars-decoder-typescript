@@ -2,9 +2,8 @@ import { MessageDecoder } from '../MessageDecoder';
 import { Label_H1 } from './Label_H1';
 
 describe('Label_H1 INI', () => {
-
   let plugin: Label_H1;
-  const message = {label: 'H1', text: ''};
+  const message = { label: 'H1', text: '' };
 
   beforeEach(() => {
     const decoder = new MessageDecoder();
@@ -13,7 +12,8 @@ describe('Label_H1 INI', () => {
 
   test('decodes valid', () => {
     // https://app.airframes.io/messages/3401344857
-    message.text = 'INI/ID70045B,RCH2050,AJM363201271/MR2,000/AFKDOV,KBHM/TD271115,131545EE'
+    message.text =
+      'INI/ID70045B,RCH2050,AJM363201271/MR2,000/AFKDOV,KBHM/TD271115,131545EE';
     const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
@@ -28,9 +28,13 @@ describe('Label_H1 INI', () => {
     expect(decodeResult.formatted.items[2].value).toBe('KDOV');
     expect(decodeResult.formatted.items[3].label).toBe('Destination');
     expect(decodeResult.formatted.items[3].value).toBe('KBHM');
-    expect(decodeResult.formatted.items[4].label).toBe('Planned Departure Time');
+    expect(decodeResult.formatted.items[4].label).toBe(
+      'Planned Departure Time',
+    );
     expect(decodeResult.formatted.items[4].value).toBe('YYYY-MM-27T11:15:00Z');
-    expect(decodeResult.formatted.items[5].label).toBe('Estimated Departure Time');
+    expect(decodeResult.formatted.items[5].label).toBe(
+      'Estimated Departure Time',
+    );
     expect(decodeResult.formatted.items[5].value).toBe('13:15');
     expect(decodeResult.formatted.items[6].label).toBe('Message Checksum');
     expect(decodeResult.formatted.items[6].value).toBe('0x45ee');
@@ -39,7 +43,8 @@ describe('Label_H1 INI', () => {
 
   test('#MD valid', () => {
     // https://app.airframes.io/messages/3400583424
-    message.text = '- #MDINI/ID99206A,RCH206,AAM7029H1275/MR0,0/AFKSUU,KBUR/TD011535,1535EE66'
+    message.text =
+      '- #MDINI/ID99206A,RCH206,AAM7029H1275/MR0,0/AFKSUU,KBUR/TD011535,1535EE66';
     const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
@@ -54,9 +59,13 @@ describe('Label_H1 INI', () => {
     expect(decodeResult.formatted.items[2].value).toBe('KSUU');
     expect(decodeResult.formatted.items[3].label).toBe('Destination');
     expect(decodeResult.formatted.items[3].value).toBe('KBUR');
-    expect(decodeResult.formatted.items[4].label).toBe('Planned Departure Time');
+    expect(decodeResult.formatted.items[4].label).toBe(
+      'Planned Departure Time',
+    );
     expect(decodeResult.formatted.items[4].value).toBe('YYYY-MM-01T15:35:00Z');
-    expect(decodeResult.formatted.items[5].label).toBe('Estimated Departure Time');
+    expect(decodeResult.formatted.items[5].label).toBe(
+      'Estimated Departure Time',
+    );
     expect(decodeResult.formatted.items[5].value).toBe('15:35');
     expect(decodeResult.formatted.items[6].label).toBe('Message Checksum');
     expect(decodeResult.formatted.items[6].value).toBe('0xee66');
@@ -64,7 +73,6 @@ describe('Label_H1 INI', () => {
   });
 
   test('INI <invalid>', () => {
-
     message.text = 'INI Bogus message';
     const decodeResult = plugin.decode(message);
 

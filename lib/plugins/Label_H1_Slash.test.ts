@@ -3,7 +3,7 @@ import { Label_H1_Slash } from './Label_H1_Slash';
 
 describe('Label H1 /', () => {
   let plugin: Label_H1_Slash;
-  const message = {label: 'H1', text: ''};
+  const message = { label: 'H1', text: '' };
 
   beforeEach(() => {
     const decoder = new MessageDecoder();
@@ -22,7 +22,8 @@ describe('Label H1 /', () => {
 
   test('decodes variant 1', () => {
     // https://app.airframes.io/messages/2500488708
-    message.text = '/.POS/TS100316,210324/PSS35333W058220,,100316,250,S37131W059150,101916,S39387W060377,M23,27282,241,780,MANUAL,0,813E711';
+    message.text =
+      '/.POS/TS100316,210324/PSS35333W058220,,100316,250,S37131W059150,101916,S39387W060377,M23,27282,241,780,MANUAL,0,813E711';
     const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
@@ -35,8 +36,12 @@ describe('Label H1 /', () => {
     expect(decodeResult.formatted.items[1].label).toBe('Altitude');
     expect(decodeResult.formatted.items[1].value).toBe('25000 feet');
     expect(decodeResult.formatted.items[2].label).toBe('Aircraft Route');
-    expect(decodeResult.formatted.items[2].value).toBe('@10:03:16 > (37.218 S, 59.250 W)@10:19:16 > (39.645 S, 60.628 W)');
-    expect(decodeResult.formatted.items[3].label).toBe('Outside Air Temperature (C)');
+    expect(decodeResult.formatted.items[2].value).toBe(
+      '@10:03:16 > (37.218 S, 59.250 W)@10:19:16 > (39.645 S, 60.628 W)',
+    );
+    expect(decodeResult.formatted.items[3].label).toBe(
+      'Outside Air Temperature (C)',
+    );
     expect(decodeResult.formatted.items[3].value).toBe('-23 degrees');
     expect(decodeResult.formatted.items[4].label).toBe('Message Checksum');
     expect(decodeResult.formatted.items[4].value).toBe('0xe711');
@@ -44,7 +49,8 @@ describe('Label H1 /', () => {
   });
 
   test('decodes variant 2', () => {
-    message.text = '/HDQDLUA.POSN38332W080082,RONZZ,135753,320,LEVII,140454,WISTA,M45,20967,194/GAHDQDLUA/CA/TS135753,1411240721';
+    message.text =
+      '/HDQDLUA.POSN38332W080082,RONZZ,135753,320,LEVII,140454,WISTA,M45,20967,194/GAHDQDLUA/CA/TS135753,1411240721';
     const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
@@ -57,8 +63,12 @@ describe('Label H1 /', () => {
     expect(decodeResult.formatted.items[1].label).toBe('Altitude');
     expect(decodeResult.formatted.items[1].value).toBe('32000 feet');
     expect(decodeResult.formatted.items[2].label).toBe('Aircraft Route');
-    expect(decodeResult.formatted.items[2].value).toBe('RONZZ@13:57:53 > LEVII@14:04:54 > WISTA');
-    expect(decodeResult.formatted.items[3].label).toBe('Outside Air Temperature (C)');
+    expect(decodeResult.formatted.items[2].value).toBe(
+      'RONZZ@13:57:53 > LEVII@14:04:54 > WISTA',
+    );
+    expect(decodeResult.formatted.items[3].label).toBe(
+      'Outside Air Temperature (C)',
+    );
     expect(decodeResult.formatted.items[3].value).toBe('-45 degrees');
     expect(decodeResult.formatted.items[4].label).toBe('Message Checksum');
     expect(decodeResult.formatted.items[4].value).toBe('0x0721');
@@ -66,7 +76,8 @@ describe('Label H1 /', () => {
   });
 
   test('decodes variant 3', () => {
-    message.text = '/.POS/TS140122,141124N38321W078003,,140122,450,,140122,,M56,24739,127,8306763';
+    message.text =
+      '/.POS/TS140122,141124N38321W078003,,140122,450,,140122,,M56,24739,127,8306763';
     const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
@@ -79,8 +90,12 @@ describe('Label H1 /', () => {
     expect(decodeResult.formatted.items[1].label).toBe('Altitude');
     expect(decodeResult.formatted.items[1].value).toBe('45000 feet');
     expect(decodeResult.formatted.items[2].label).toBe('Aircraft Route');
-    expect(decodeResult.formatted.items[2].value).toBe('@14:01:22 > @14:01:22 > ?');
-    expect(decodeResult.formatted.items[3].label).toBe('Outside Air Temperature (C)');
+    expect(decodeResult.formatted.items[2].value).toBe(
+      '@14:01:22 > @14:01:22 > ?',
+    );
+    expect(decodeResult.formatted.items[3].label).toBe(
+      'Outside Air Temperature (C)',
+    );
     expect(decodeResult.formatted.items[3].value).toBe('-56 degrees');
     expect(decodeResult.formatted.items[4].label).toBe('Message Checksum');
     expect(decodeResult.formatted.items[4].value).toBe('0x6763');
@@ -88,7 +103,6 @@ describe('Label H1 /', () => {
   });
 
   test('does not decode invalid', () => {
-
     message.text = '/.POS Bogus message';
     const decodeResult = plugin.decode(message);
 

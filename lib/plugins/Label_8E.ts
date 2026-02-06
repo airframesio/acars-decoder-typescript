@@ -7,13 +7,13 @@ import { ResultFormatter } from '../utils/result_formatter';
 export class Label_8E extends DecoderPlugin {
   name = 'label-8e';
 
-  qualifiers() { // eslint-disable-line class-methods-use-this
+  qualifiers() {
     return {
-      labels: ["8E"],
+      labels: ['8E'],
     };
   }
 
-  decode(message: Message, options: Options = {}) : DecodeResult {
+  decode(message: Message, options: Options = {}): DecodeResult {
     const decodeResult = this.defaultResult();
     decodeResult.decoder.name = this.name;
     decodeResult.formatted.description = 'ETA Report';
@@ -25,11 +25,14 @@ export class Label_8E extends DecoderPlugin {
     const results = message.text.match(regex);
     if (results?.groups) {
       if (options.debug) {
-        console.log(`Label 8E ETA: groups`);
+        console.log('Label 8E ETA: groups');
         console.log(results.groups);
       }
 
-      ResultFormatter.eta(decodeResult, DateTimeUtils.convertHHMMSSToTod(results.groups.arrival_eta));
+      ResultFormatter.eta(
+        decodeResult,
+        DateTimeUtils.convertHHMMSSToTod(results.groups.arrival_eta),
+      );
       ResultFormatter.arrivalAirport(decodeResult, results.groups.arrival_icao);
     }
 

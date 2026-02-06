@@ -8,7 +8,7 @@ import { ResultFormatter } from '../utils/result_formatter';
 export class Label_58 extends DecoderPlugin {
   name = 'label-58';
 
-  qualifiers() { // eslint-disable-line class-methods-use-this
+  qualifiers() {
     return {
       labels: ['58'],
     };
@@ -24,12 +24,17 @@ export class Label_58 extends DecoderPlugin {
     if (data.length === 8) {
       ResultFormatter.flightNumber(decodeResult, data[0]);
       ResultFormatter.day(decodeResult, Number(data[1]));
-      ResultFormatter.time_of_day(decodeResult, DateTimeUtils.convertHHMMSSToTod(data[2]));
+      ResultFormatter.time_of_day(
+        decodeResult,
+        DateTimeUtils.convertHHMMSSToTod(data[2]),
+      );
       const lat = data[3];
       const lon = data[4];
       ResultFormatter.position(decodeResult, {
-        latitude: CoordinateUtils.getDirection(lat[0]) * Number(lat.substring(1)), 
-        longitude:CoordinateUtils.getDirection(lon[0]) * Number(lon.substring(1))
+        latitude:
+          CoordinateUtils.getDirection(lat[0]) * Number(lat.substring(1)),
+        longitude:
+          CoordinateUtils.getDirection(lon[0]) * Number(lon.substring(1)),
       });
       ResultFormatter.altitude(decodeResult, Number(data[5]));
       ResultFormatter.unknown(decodeResult, data[6], '/');

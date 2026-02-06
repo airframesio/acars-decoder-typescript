@@ -8,7 +8,7 @@ import { ResultFormatter } from '../utils/result_formatter';
 export class Label_44_ETA extends DecoderPlugin {
   name = 'label-44-eta';
 
-  qualifiers() { // eslint-disable-line class-methods-use-this
+  qualifiers() {
     return {
       labels: ['44'],
       preambles: ['00ETA01', '00ETA02', '00ETA03', 'ETA01', 'ETA02', 'ETA03'],
@@ -24,19 +24,28 @@ export class Label_44_ETA extends DecoderPlugin {
     const data = message.text.split(',');
     if (data.length >= 9) {
       if (options.debug) {
-        console.log(`Label 44 ETA Report: groups`);
+        console.log('Label 44 ETA Report: groups');
         console.log(data);
       }
 
-      ResultFormatter.position(decodeResult, CoordinateUtils.decodeStringCoordinatesDecimalMinutes(data[1]));
+      ResultFormatter.position(
+        decodeResult,
+        CoordinateUtils.decodeStringCoordinatesDecimalMinutes(data[1]),
+      );
       ResultFormatter.altitude(decodeResult, 100 * Number(data[2]));
       ResultFormatter.departureAirport(decodeResult, data[3]);
       ResultFormatter.arrivalAirport(decodeResult, data[4]);
 
       ResultFormatter.month(decodeResult, Number(data[5].substring(0, 2)));
       ResultFormatter.day(decodeResult, Number(data[5].substring(2, 4)));
-      ResultFormatter.time_of_day(decodeResult, DateTimeUtils.convertHHMMSSToTod(data[6]));
-      ResultFormatter.eta(decodeResult, DateTimeUtils.convertHHMMSSToTod(data[7]));
+      ResultFormatter.time_of_day(
+        decodeResult,
+        DateTimeUtils.convertHHMMSSToTod(data[6]),
+      );
+      ResultFormatter.eta(
+        decodeResult,
+        DateTimeUtils.convertHHMMSSToTod(data[7]),
+      );
       const fuel = Number(data[8]);
       if (!isNaN(fuel)) {
         ResultFormatter.remainingFuel(decodeResult, Number(fuel));
@@ -45,7 +54,6 @@ export class Label_44_ETA extends DecoderPlugin {
       if (data.length > 9) {
         ResultFormatter.unknownArr(decodeResult, data.slice(9));
       }
-
     } else {
       if (options.debug) {
         console.log(`Decoder: Unknown 44 message: ${message.text}`);

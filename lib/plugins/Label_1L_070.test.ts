@@ -40,7 +40,9 @@ describe('Label_1L 070', () => {
     expect(decodeResult.formatted.items[1].value).toBe('KEWR');
     expect(decodeResult.formatted.items[2].label).toBe('Message Timestamp');
     expect(decodeResult.formatted.items[2].value).toBe('09:32:00');
-    expect(decodeResult.formatted.items[3].label).toBe('Estimated Time of Arrival');
+    expect(decodeResult.formatted.items[3].label).toBe(
+      'Estimated Time of Arrival',
+    );
     expect(decodeResult.formatted.items[3].value).toBe('17:44:00');
     expect(decodeResult.formatted.items[4].label).toBe('Aircraft Position');
     expect(decodeResult.formatted.items[4].value).toBe('49.223 N, 12.038 E');
@@ -48,7 +50,6 @@ describe('Label_1L 070', () => {
   });
 
   test('does not decode <invalid>', () => {
-
     message.text = 'POS Bogus Message';
     const decodeResult = plugin.decode(message);
 

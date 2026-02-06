@@ -2,16 +2,14 @@ import { MessageDecoder } from '../MessageDecoder';
 import { Label_4T_ETA } from './Label_4T_ETA';
 
 describe('Label 4T ETA', () => {
-
   let plugin: Label_4T_ETA;
-  const message = {label: '4T', text: ''};
+  const message = { label: '4T', text: '' };
 
   beforeEach(() => {
     const decoder = new MessageDecoder();
     plugin = new Label_4T_ETA(decoder);
   });
 
-  
   test('matches qualifiers', () => {
     expect(plugin.decode).toBeDefined();
     expect(plugin.name).toBe('label-4t-eta');
@@ -22,7 +20,6 @@ describe('Label 4T ETA', () => {
     });
   });
 
-  
   test('decodes msg 1', () => {
     message.text = 'ETA AC7221/13/14 YYZ 0902Z';
 
@@ -40,13 +37,13 @@ describe('Label 4T ETA', () => {
     expect(decodeResult.formatted.items[2].value).toBe('14');
     expect(decodeResult.formatted.items[3].label).toBe('Destination');
     expect(decodeResult.formatted.items[3].value).toBe('YYZ');
-    expect(decodeResult.formatted.items[4].label).toBe('Estimated Time of Arrival');
+    expect(decodeResult.formatted.items[4].label).toBe(
+      'Estimated Time of Arrival',
+    );
     expect(decodeResult.formatted.items[4].value).toBe('09:02:00');
   });
 
-
   test('decodes <invalid>', () => {
-
     message.text = 'ETA Bogus message';
     const decodeResult = plugin.decode(message);
 

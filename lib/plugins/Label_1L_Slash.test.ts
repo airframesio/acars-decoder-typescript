@@ -21,7 +21,8 @@ describe('Label_1L Slash', () => {
   });
 
   test('decodes variant 1', () => {
-    message.text = '+ 39.126/- 77.358/UTC 085208/FOB   8.2/ALT  3997/CAS  239/ETA 0903'
+    message.text =
+      '+ 39.126/- 77.358/UTC 085208/FOB   8.2/ALT  3997/CAS  239/ETA 0903';
     const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
@@ -42,13 +43,14 @@ describe('Label_1L Slash', () => {
     expect(decodeResult.formatted.items[2].value).toBe('3997 feet');
     expect(decodeResult.formatted.items[3].label).toBe('Fuel On Board');
     expect(decodeResult.formatted.items[3].value).toBe('8.2'); // tons?
-    expect(decodeResult.formatted.items[4].label).toBe('Estimated Time of Arrival');
+    expect(decodeResult.formatted.items[4].label).toBe(
+      'Estimated Time of Arrival',
+    );
     expect(decodeResult.formatted.items[4].value).toBe('09:03:00');
     expect(decodeResult.remaining.text).toBe('/CAS  239');
   });
 
   test('does not decode <invalid>', () => {
-
     message.text = 'POS Bogus Message';
     const decodeResult = plugin.decode(message);
 

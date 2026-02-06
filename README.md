@@ -5,10 +5,10 @@
 - TypeScript development uses the latest stable Node types (currently v24) without forcing consumers to use a specific Node types version, since `@types/node` is a devDependency.
 - The published builds are compiled targeting Node 18 runtime via `tsup` so they remain compatible across supported Node versions.
 
-
 # @airframes/acars-decoder
 
 This is a no-op documentation tweak to verify repository access, build/lint, tests, and PR workflow. No functional code changes are included.
+
 # acars-decoder-typescript
 
 [![NPM Version](https://badge.fury.io/js/@airframes%2Facars-decoder.svg)](https://badge.fury.io/js/@airframes%2Facars-decoder)
@@ -32,11 +32,13 @@ You are welcome to contribute (please see https://github.com/airframesio/acars-m
 Add the `@airframes/acars-decoder` library to your JavaScript or TypeScript project.
 
 With `yarn`:
+
 ```
 yarn add @airframes/acars-decoder
 ```
 
 With `npm`:
+
 ```
 npm install @airframes/acars-decoder
 ```
@@ -51,8 +53,8 @@ Contributions are welcome! Please follow the [ACARS Message Documentation](https
 
 # Contributors
 
-| Contributor | Description |
-| ----------- | ----------- |
-| [Kevin Elliott](https://github.com/kevinelliott) | Primary Airframes contributor |
-| [Michael Johnson](https://github.com/johnsom) | Decoder plugins, testing framework |
-| [Mark Bumiller](https://github.com/makrsmark) | Decoder plugins, tests, utilities |
+| Contributor                                      | Description                        |
+| ------------------------------------------------ | ---------------------------------- |
+| [Kevin Elliott](https://github.com/kevinelliott) | Primary Airframes contributor      |
+| [Michael Johnson](https://github.com/johnsom)    | Decoder plugins, testing framework |
+| [Mark Bumiller](https://github.com/makrsmark)    | Decoder plugins, tests, utilities  |

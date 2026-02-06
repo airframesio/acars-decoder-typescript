@@ -3,7 +3,7 @@ import { Label_44_ON } from './Label_44_ON';
 
 describe('Label 44 ON', () => {
   let plugin: Label_44_ON;
-  const message = {label: '44', text: ''};
+  const message = { label: '44', text: '' };
 
   beforeEach(() => {
     const decoder = new MessageDecoder();
@@ -22,7 +22,7 @@ describe('Label 44 ON', () => {
 
   test('decodes variant 1', () => {
     // https://app.airframes.io/messages/3563679058
-    message.text = 'ON01,N33522W084181,KCLT,KPDK,1106,004023,---.-,'
+    message.text = 'ON01,N33522W084181,KCLT,KPDK,1106,004023,---.-,';
     const decodeResult = plugin.decode(message);
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('full');
@@ -49,7 +49,7 @@ describe('Label 44 ON', () => {
   });
 
   test('decodes variant 2', () => {
-    message.text = 'ON02,N38333W121178,KRNO,KMHR,0806,2350,005.2'
+    message.text = 'ON02,N38333W121178,KRNO,KMHR,0806,2350,005.2';
     const decodeResult = plugin.decode(message);
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('full');
@@ -78,7 +78,6 @@ describe('Label 44 ON', () => {
   });
 
   test('does not decode invalid', () => {
-
     message.text = '00OFF01 Bogus message';
     const decodeResult = plugin.decode(message);
 

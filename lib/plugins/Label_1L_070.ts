@@ -4,10 +4,10 @@ import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
 import { CoordinateUtils } from '../utils/coordinate_utils';
 import { ResultFormatter } from '../utils/result_formatter';
 
-export class Label_1L_070 extends DecoderPlugin { // eslint-disable-line camelcase
+export class Label_1L_070 extends DecoderPlugin {
   name = 'label-1l-070';
 
-  qualifiers() { // eslint-disable-line class-methods-use-this
+  qualifiers() {
     return {
       labels: ['1L'],
       preambles: ['000000070'],
@@ -44,13 +44,22 @@ export class Label_1L_070 extends DecoderPlugin { // eslint-disable-line camelca
 
     ResultFormatter.departureAirport(decodeResult, parts[0]);
     ResultFormatter.arrivalAirport(decodeResult, parts[1]);
-    ResultFormatter.time_of_day(decodeResult, DateTimeUtils.convertHHMMSSToTod(parts[2]));
-    ResultFormatter.eta(decodeResult, DateTimeUtils.convertHHMMSSToTod(parts[3]));
+    ResultFormatter.time_of_day(
+      decodeResult,
+      DateTimeUtils.convertHHMMSSToTod(parts[2]),
+    );
+    ResultFormatter.eta(
+      decodeResult,
+      DateTimeUtils.convertHHMMSSToTod(parts[3]),
+    );
     ResultFormatter.position(decodeResult, {
-      latitude: CoordinateUtils.getDirection(parts[4][0]) * Number(parts[4].substring(1)),
-      longitude: CoordinateUtils.getDirection(parts[5][0]) * Number(parts[5].substring(1)),
+      latitude:
+        CoordinateUtils.getDirection(parts[4][0]) *
+        Number(parts[4].substring(1)),
+      longitude:
+        CoordinateUtils.getDirection(parts[5][0]) *
+        Number(parts[5].substring(1)),
     });
-
 
     decodeResult.remaining.text = parts[6];
 
