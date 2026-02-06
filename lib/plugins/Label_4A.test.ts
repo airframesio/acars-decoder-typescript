@@ -106,15 +106,14 @@ describe('Label 4A', () => {
     expect(decodeResult.formatted.items[3].value).toBe('41.093 N, 72.677 W');
   });
 
-  test('decodes Label 4A_DIS <invalid>', () => { // FIXME: this should not decode
+  test('decodes Label <invalid>', () => {
     // https://app.airframes.io/messages/3449413366
     message.text = 'DIS01,182103,WEN3100,WRONG CREW HAHAHA';
     const decodeResult = plugin.decode(message);
 
-  //  expect(decodeResult.decoded).toBe(false);
-  //  expect(decodeResult.decoder.decodeLevel).toBe('none');
-    expect(decodeResult.decoder.name).not.toBe('label-4a');
+    expect(decodeResult.decoded).toBe(false);
+    expect(decodeResult.decoder.decodeLevel).toBe('none');
   //  expect(decodeResult.formatted.description).toBe('Latest New Format');
-  //  expect(decodeResult.formatted.items.length).toBe(0);
+    expect(decodeResult.formatted.items.length).toBe(0);
   });
 });

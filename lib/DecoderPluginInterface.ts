@@ -2,7 +2,7 @@
  * Representation of a Message
  */
 export interface Message {
-  label: string,
+  label?: string,
   sublabel?: string,
   text: string,
 }
