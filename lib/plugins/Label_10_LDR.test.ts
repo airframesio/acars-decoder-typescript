@@ -21,7 +21,7 @@ describe('Label_10_LDR', () => {
       });
 
       test('decodes Label 10 Preamble LDR variant 1', () => {
-        message.text = 'LDR01,189,C,SWA-2600-016,0,N 38.151,W 76.623,37003, 10.2,KATL,KLGA,KLGA,22/,/,/,0,0,,,,,,,0,0,0,00,,135.1,08.6,143.7,,,'
+        message.text = 'LDR01,189,C,SWA-2600-016,0,N 38.151,W 76.623,37003, 10.2,KATL,KLGA,KLGA,22/,/,/,0,0,,,,,,,0,0,0,00,,135.1,08.6,143.7,,,';
         const decodeResult = plugin.decode(message);
 
         expect(decodeResult.decoded).toBe(true);
@@ -43,7 +43,7 @@ describe('Label_10_LDR', () => {
     });
 
     test('decodes Label 10 Preamble LDR variant 2', () => {
-      message.text = 'LDR01,189,C,SWA-2600-016,0,N 37.873,W 79.541,30998, 16.6,KBNA,KBOS,KBOS,27/,33L/,22L/,0,1,,,,,,,0,0,0,00,,131.2,11.4,142.6,,,'
+      message.text = 'LDR01,189,C,SWA-2600-016,0,N 37.873,W 79.541,30998, 16.6,KBNA,KBOS,KBOS,27/,33L/,22L/,0,1,,,,,,,0,0,0,00,,131.2,11.4,142.6,,,';
       const decodeResult = plugin.decode(message);
 
       expect(decodeResult.decoded).toBe(true);

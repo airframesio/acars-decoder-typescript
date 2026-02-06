@@ -22,7 +22,7 @@ describe('Label_1L 070', () => {
 
   test('decodes variant 1', () => {
     // https://app.airframes.io/messages/3492019143
-    message.text = '000000070LOWW,KEWR,0932,1744,N 49.223,E 12.038,0659'
+    message.text = '000000070LOWW,KEWR,0932,1744,N 49.223,E 12.038,0659';
     const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);

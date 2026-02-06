@@ -9,7 +9,7 @@ describe('Label H1 Preamble FLR', () => {
     const decoder = new MessageDecoder();
     plugin = new Label_H1_FLR(decoder);
   });
-test('matches  qualifiers', () => {
+test('matches qualifiers', () => {
   expect(plugin.decode).toBeDefined();
   expect(plugin.name).toBe('label-h1-flr');
   expect(plugin.qualifiers).toBeDefined();

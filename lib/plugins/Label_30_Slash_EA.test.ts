@@ -10,7 +10,7 @@ describe('Label 30 preamble /EA', () => {
     plugin = new Label_30_Slash_EA(decoder);
   });
 
-test('matches qualfiers', () => {
+test('matches qualifiers', () => {
   expect(plugin.decode).toBeDefined();
   expect(plugin.name).toBe('label-30-slash-ea');
   expect(plugin.qualifiers).toBeDefined();

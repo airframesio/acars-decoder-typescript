@@ -14,7 +14,7 @@ describe('Label_H1 FTX', () => {
   // disabled due to checksum failure. could be hidden characters in the source message
   test.skip('decodes Label H1 Preamble FTX valid', () => {
     // https://app.airframes.io/messages/3402014738
-    message.text = 'FTX/ID23544S,HIFI21,7VZ007B1S276/MR2,/FXFYI .. TAF KSUX 021720Z 0218 0318 20017G28KT P6SM SKC FM022200 22012G18KT P6SM SKC .. PUTS YOUR CXWIND AT 26KT ON RWY 13 .. REDUCES TO 18KT AT 22Z4FEF'
+    message.text = 'FTX/ID23544S,HIFI21,7VZ007B1S276/MR2,/FXFYI .. TAF KSUX 021720Z 0218 0318 20017G28KT P6SM SKC FM022200 22012G18KT P6SM SKC .. PUTS YOUR CXWIND AT 26KT ON RWY 13 .. REDUCES TO 18KT AT 22Z4FEF';
     const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
@@ -54,7 +54,7 @@ describe('Label_H1 FTX', () => {
   });
 
   test('decodes example 3', () => {
-    message.text = '- #MDFTX/ID80052A,RCH648,PAM362201029/MR1,/FXHID0B1'
+    message.text = '- #MDFTX/ID80052A,RCH648,PAM362201029/MR1,/FXHID0B1';
     const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);

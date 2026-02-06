@@ -1,7 +1,7 @@
 import { MessageDecoder } from '../MessageDecoder';
 import { Label_H1 } from './Label_H1';
 
-describe('Label_H1 POS', () => {
+describe('Label H1 Preamble PRG', () => {
 
   let plugin: Label_H1;
   const message = {label: 'H1', text: ''};
@@ -121,7 +121,7 @@ describe('Label_H1 POS', () => {
   test.skip('decodes named runway', () => {
     message.text = 'PRG/DT,KMDW,31R,62,031854,524,N38584W077333,171,732B3C';
     const decodeResult = plugin.decode(message);
-    console.log(JSON)
+
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.raw.arrival_icao).toBe('KMDW');

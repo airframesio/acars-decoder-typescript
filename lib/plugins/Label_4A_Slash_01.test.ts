@@ -10,7 +10,7 @@ describe('Label 4A preamble /01', () => {
     plugin = new Label_4A_Slash_01(decoder);
   });
 
-test('matches  qualifiers', () => {
+test('matches qualifiers', () => {
   expect(plugin.decode).toBeDefined();
   expect(plugin.name).toBe('label-4a-slash-01');
   expect(plugin.qualifiers).toBeDefined();

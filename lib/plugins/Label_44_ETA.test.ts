@@ -1,7 +1,7 @@
 import { MessageDecoder } from '../MessageDecoder';
 import { Label_44_ETA } from './Label_44_ETA';
 
-describe('Label 44 IN', () => {
+describe('Label 44 Preamble ETA', () => {
   let plugin: Label_44_ETA;
   const message = {label: '44', text: ''};
 

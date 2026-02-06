@@ -3,7 +3,6 @@ import { Label_13Through18_Slash } from './Label_13Through18_Slash';
 
 describe('Label_13Through18_Slash', () => {
   let plugin: Label_13Through18_Slash;
-  const message = {label: '13', text: ''};
 
   beforeEach(() => {
     const decoder = new MessageDecoder();
@@ -21,6 +20,7 @@ describe('Label_13Through18_Slash', () => {
   });
 
   describe('Label 13', () => {
+    const message = {label: '13', text: ''};
     test('decodes 1-line', () => {
       // https://app.airframes.io/messages/3423349335
       message.text = '/13 OUT EVENT      / KSFO KEWR 12 231445/TIME 2314'
@@ -62,6 +62,7 @@ describe('Label_13Through18_Slash', () => {
   });
 
   describe('Label 14', () => {
+    const message = {label: '14', text: ''};
     test('decodes 1-line', () => {
       message.text = '/14 OFF EVENT      / KIAD KDEN 08 124438/TIME 1244'
       const decodeResult = plugin.decode(message);
@@ -147,6 +148,7 @@ describe('Label_13Through18_Slash', () => {
   });
 
   describe('Label 15', () => {
+    const message = {label: '15', text: ''};
     test('decodes 1-line', () => {
       // https://app.airframes.io/messages/3424704396
       message.text = '/15 ON EVENT       / PHOG KSFO 12 064852/TIME 0648'
@@ -189,6 +191,7 @@ describe('Label_13Through18_Slash', () => {
 
 
   describe('Label 16', () => {
+    const message = {label: '16', text: ''};
     test('decodes 3-line', () => {
       // https://app.airframes.io/messages/3424584522
       message.text = '/16 1ST PDOOR OPEN / KLAX KSEA 12 053340/TIME 0533' + '\r\n' +
@@ -215,6 +218,7 @@ describe('Label_13Through18_Slash', () => {
 
 
   describe('Label 17', () => {
+    const message = {label: '17', text: ''};
     test('decodes 3-line', () => {
       // https://app.airframes.io/messages/3423349335
       message.text = '/17 POST RPT       / KIAD KSFO 12 034537/TIME 0343' + '\r\n' +
@@ -262,6 +266,7 @@ describe('Label_13Through18_Slash', () => {
 
 
   describe('Label 18', () => {
+    const message = {label: '18', text: ''};
     test('decodes location', () => {
       // https://app.airframes.io/messages/3424453669
       message.text = '/18 POST TIMES SECS/ KLAX KSEA 12 053340/IN TIME 0530/PDOOR 053340/CDOOR 053024/BR SET 052942' + '\r\n' +
@@ -301,8 +306,7 @@ describe('Label_13Through18_Slash', () => {
   });
 
   test('does not decode <invalid>', () => {
-
-    message.text = '/14 Bogus Message';
+    const message = {label: '14', text: '/14 Bogus Message'};
     const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(false);
