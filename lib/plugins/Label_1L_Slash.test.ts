@@ -3,6 +3,7 @@ import { Label_1L_Slash } from './Label_1L_Slash';
 
 describe('Label_1L Slash', () => {
   let plugin: Label_1L_Slash;
+  const message = { label: '1L', text: '' };
 
   beforeEach(() => {
     const decoder = new MessageDecoder();
@@ -20,11 +21,12 @@ describe('Label_1L Slash', () => {
   });
 
   test('decodes variant 1', () => {
-    const text = '+ 39.126/- 77.358/UTC 085208/FOB   8.2/ALT  3997/CAS  239/ETA 0903'
-    const decodeResult = plugin.decode({ text: text });
+    message.text = '+ 39.126/- 77.358/UTC 085208/FOB   8.2/ALT  3997/CAS  239/ETA 0903'
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
+    expect(decodeResult.message).toBe(message);
     expect(decodeResult.raw.position.latitude).toBe(39.126);
     expect(decodeResult.raw.position.longitude).toBe(-77.358);
     expect(decodeResult.raw.time_of_day).toBe(31928);
@@ -47,13 +49,13 @@ describe('Label_1L Slash', () => {
 
   test('does not decode <invalid>', () => {
 
-    const text = 'POS Bogus Message';
-    const decodeResult = plugin.decode({ text: text });
+    message.text = 'POS Bogus Message';
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(false);
     expect(decodeResult.decoder.decodeLevel).toBe('none');
     expect(decodeResult.decoder.name).toBe('label-1l-1-line');
     expect(decodeResult.formatted.description).toBe('Position Report');
-    expect(decodeResult.message.text).toBe(text);
+    expect(decodeResult.message).toBe(message);
   });
 });

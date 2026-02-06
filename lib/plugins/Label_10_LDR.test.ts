@@ -3,6 +3,7 @@ import { Label_10_LDR } from './Label_10_LDR';
 
 describe('Label_10_LDR', () => {
     let plugin: Label_10_LDR;
+    const message = {label: '10', text: ''};
 
     beforeEach(() => {
         const decoder = new MessageDecoder();
@@ -20,8 +21,8 @@ describe('Label_10_LDR', () => {
       });
 
       test('decodes Label 10 Preamble LDR variant 1', () => {
-        const text = 'LDR01,189,C,SWA-2600-016,0,N 38.151,W 76.623,37003, 10.2,KATL,KLGA,KLGA,22/,/,/,0,0,,,,,,,0,0,0,00,,135.1,08.6,143.7,,,'
-        const decodeResult = plugin.decode({ text: text });
+        message.text = 'LDR01,189,C,SWA-2600-016,0,N 38.151,W 76.623,37003, 10.2,KATL,KLGA,KLGA,22/,/,/,0,0,,,,,,,0,0,0,00,,135.1,08.6,143.7,,,';
+        const decodeResult = plugin.decode(message);
 
         expect(decodeResult.decoded).toBe(true);
         expect(decodeResult.decoder.decodeLevel).toBe('partial');
@@ -42,8 +43,8 @@ describe('Label_10_LDR', () => {
     });
 
     test('decodes Label 10 Preamble LDR variant 2', () => {
-      const text = 'LDR01,189,C,SWA-2600-016,0,N 37.873,W 79.541,30998, 16.6,KBNA,KBOS,KBOS,27/,33L/,22L/,0,1,,,,,,,0,0,0,00,,131.2,11.4,142.6,,,'
-      const decodeResult = plugin.decode({ text: text });
+      message.text = 'LDR01,189,C,SWA-2600-016,0,N 37.873,W 79.541,30998, 16.6,KBNA,KBOS,KBOS,27/,33L/,22L/,0,1,,,,,,,0,0,0,00,,131.2,11.4,142.6,,,';
+      const decodeResult = plugin.decode(message);
 
       expect(decodeResult.decoded).toBe(true);
       expect(decodeResult.decoder.decodeLevel).toBe('partial');
@@ -68,13 +69,13 @@ describe('Label_10_LDR', () => {
 
     test('decodes Label 10 Preamble LDR <invalid>', () => {
       
-        const text = 'LDR Bogus Message';
-        const decodeResult = plugin.decode({ text: text });
+        message.text = 'LDR Bogus Message';
+        const decodeResult = plugin.decode(message);
       
         expect(decodeResult.decoded).toBe(false);
         expect(decodeResult.decoder.decodeLevel).toBe('none');
         expect(decodeResult.decoder.name).toBe('label-10-ldr');
         expect(decodeResult.formatted.description).toBe('Position Report');
-        expect(decodeResult.message.text).toBe(text);
+        expect(decodeResult.message).toBe(message);
       });
 });

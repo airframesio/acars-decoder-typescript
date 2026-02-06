@@ -3,6 +3,7 @@ import { Label_21_POS } from './Label_21_POS';
 
 describe('Label_21_POS', () => {
     let plugin: Label_21_POS;
+    const message = {label: '21', text: ''};
 
     beforeEach(() => {
         const decoder = new MessageDecoder();
@@ -21,8 +22,8 @@ describe('Label_21_POS', () => {
     
 
     test('decodes valid', () => {
-        const text = 'POSN 39.841W 75.790, 220,184218,17222,22051,  34,- 4,204748,KTPA'
-        const decodeResult = plugin.decode({ text: text });
+        message.text = 'POSN 39.841W 75.790, 220,184218,17222,22051,  34,- 4,204748,KTPA'
+        const decodeResult = plugin.decode(message);
         expect(decodeResult.decoded).toBe(true);
         expect(decodeResult.decoder.decodeLevel).toBe('partial');
         expect(decodeResult.formatted.items.length).toBe(6);
@@ -55,13 +56,13 @@ describe('Label_21_POS', () => {
 
     test('does not decode invalid', () => {
       
-        const text = 'POS Bogus message';
-        const decodeResult = plugin.decode({ text: text });
+        message.text = 'POS Bogus message';
+        const decodeResult = plugin.decode(message);
               
         expect(decodeResult.decoded).toBe(false);
         expect(decodeResult.decoder.decodeLevel).toBe('none');
         expect(decodeResult.decoder.name).toBe('label-21-pos');
         expect(decodeResult.formatted.description).toBe('Position Report');
-        expect(decodeResult.message.text).toBe(text);
+        expect(decodeResult.message).toBe(message);
       });
 });

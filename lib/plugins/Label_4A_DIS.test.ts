@@ -1,32 +1,34 @@
 import { MessageDecoder } from '../MessageDecoder';
 import { Label_4A_DIS } from './Label_4A_DIS';
 
-test('matches Label 4A_DIS  qualifiers', () => {
-  const decoder = new MessageDecoder();
-  const decoderPlugin = new Label_4A_DIS(decoder);
+describe('Label 4A preamble DIS', () => {
+  let plugin: Label_4A_DIS;
+  const message = {label: '4A', text: ''};
+  beforeEach(() => {
+    const decoder = new MessageDecoder();
+    plugin = new Label_4A_DIS(decoder);
+  });
 
-  expect(decoderPlugin.decode).toBeDefined();
-  expect(decoderPlugin.name).toBe('label-4a-dis');
-  expect(decoderPlugin.qualifiers).toBeDefined();
-  expect(decoderPlugin.qualifiers()).toEqual({
+test('matches Label 4A_DIS  qualifiers', () => {
+  expect(plugin.decode).toBeDefined();
+  expect(plugin.name).toBe('label-4a-dis');
+  expect(plugin.qualifiers).toBeDefined();
+  expect(plugin.qualifiers()).toEqual({
     labels: ['4A'],
     preambles: ['DIS'],
   });
 });
 
 test('decodes Label 4A_DIS', () => {
-  const decoder = new MessageDecoder();
-  const decoderPlugin = new Label_4A_DIS(decoder);
-
   // https://app.airframes.io/messages/3450166197
-  const text = 'DIS01,190009,WEN3140,@HOLD CNX';
-  const decodeResult = decoderPlugin.decode({ text: text });
+  message.text = 'DIS01,190009,WEN3140,@HOLD CNX';
+  const decodeResult = plugin.decode(message);
   
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('full');
   expect(decodeResult.decoder.name).toBe('label-4a-dis');
   expect(decodeResult.formatted.description).toBe('Latest New Format');
-  expect(decodeResult.message.text).toBe(text);
+  expect(decodeResult.message).toBe(message);
   expect(decodeResult.remaining.text).toBe(undefined);
   expect(decodeResult.formatted.items.length).toBe(3);
   expect(decodeResult.formatted.items[0].code).toBe('MSG_TOD');
@@ -39,15 +41,13 @@ test('decodes Label 4A_DIS', () => {
 
 // disabled because all messages should decode
 test.skip('decodes Label 4A_DIS <invalid>', () => {
-  const decoder = new MessageDecoder();
-  const decoderPlugin = new Label_4A_DIS(decoder);
-
-  const text = '4A_DIS Bogus message';
-  const decodeResult = decoderPlugin.decode({ text: text });
+  message.text = '4A_DIS Bogus message';
+  const decodeResult = plugin.decode(message);
   
   expect(decodeResult.decoded).toBe(false);
   expect(decodeResult.decoder.decodeLevel).toBe('none');
   expect(decodeResult.decoder.name).toBe('label-4a-dis');
   expect(decodeResult.formatted.description).toBe('Latest New Format');
   expect(decodeResult.formatted.items.length).toBe(0);
+});
 });

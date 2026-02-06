@@ -3,6 +3,7 @@ import { Label_22_POS } from './Label_22_POS';
 
 describe('Label 22', () => {
   let plugin: Label_22_POS;
+  const message = {label: '22', text: ''};
 
   beforeEach(() => {
     const decoder = new MessageDecoder();
@@ -20,8 +21,8 @@ describe('Label 22', () => {
   });
 
   test('decodes valid', () => {
-    const text = 'N 370824W 760010,-------,194936,30418, ,      , ,M 42,27335  42, 107,'
-    const decodeResult = plugin.decode({ text: text });
+    message.text = 'N 370824W 760010,-------,194936,30418, ,      , ,M 42,27335  42, 107,'
+    const decodeResult = plugin.decode(message);
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.raw.position.latitude).toBe(37.0824);
@@ -40,11 +41,11 @@ describe('Label 22', () => {
 
   test('does not decode invalid', () => {
 
-    const text = 'POS Bogus message';
-    const decodeResult = plugin.decode({ text: text });
+    message.text = 'POS Bogus message';
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(false);
     expect(decodeResult.decoder.decodeLevel).toBe('none');
-    expect(decodeResult.message.text).toBe(text);
+    expect(decodeResult.message).toBe(message);
   });
 });

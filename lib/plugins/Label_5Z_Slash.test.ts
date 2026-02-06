@@ -3,6 +3,7 @@ import { Label_5Z_Slash } from './Label_5Z_Slash';
 
 describe('Label 5Z', () => {
   let plugin: Label_5Z_Slash;
+  const message = {label: '5Z', text: ''};
 
   beforeEach(() => {
     const decoder = new MessageDecoder();
@@ -21,8 +22,8 @@ describe('Label 5Z', () => {
 
 
   test('/TXT', () => {
-    const text = '/TXT\r\nDID U GET THE TIMES';
-    const decodeResult = plugin.decode({ text: text });
+    message.text = '/TXT\r\nDID U GET THE TIMES';
+    const decodeResult = plugin.decode(message);
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('full');
     expect(decodeResult.raw.airline).toBeUndefined()
@@ -33,8 +34,8 @@ describe('Label 5Z', () => {
   });
 
   test('/B3 variant 1', () => {
-    const text = '/B3 ATLIAD 14 R1C G1273';
-    const decodeResult = plugin.decode({ text: text });
+    message.text = '/B3 ATLIAD 14 R1C G1273';
+    const decodeResult = plugin.decode(message);
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.raw.airline).toBe('United Airlines');
@@ -58,8 +59,8 @@ describe('Label 5Z', () => {
   });
 
   test('/B3 variant 2', () => {
-    const text = '/B3 DCAORD 14 R27C';
-    const decodeResult = plugin.decode({ text: text });
+    message.text = '/B3 DCAORD 14 R27C';
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('full');
@@ -83,8 +84,8 @@ describe('Label 5Z', () => {
   });
 
   test('/B3 request', () => {
-    const text = '/B3 TO DATA REQ    / KIAH KBOS 14 152532 R4R /---- BOPT/OFF C0.000/1 LNO  G1600';
-    const decodeResult = plugin.decode({ text: text });
+    message.text = '/B3 TO DATA REQ    / KIAH KBOS 14 152532 R4R /---- BOPT/OFF C0.000/1 LNO  G1600';
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
@@ -113,8 +114,8 @@ describe('Label 5Z', () => {
 
   test('/ET variant 1', () => {
     // https://app.airframes.io/messages/3459203875
-    const text = '/ET EXP TIME       / KEWR KBNA 20 122559/EON 1336 AUTO';
-    const decodeResult = plugin.decode({ text: text });
+    message.text = '/ET EXP TIME       / KEWR KBNA 20 122559/EON 1336 AUTO';
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
@@ -138,8 +139,8 @@ describe('Label 5Z', () => {
   });
 
   test('/C3 variant1', () => {
-    const text = '/C3 IADDFW';
-    const decodeResult = plugin.decode({ text: text });
+    message.text = '/C3 IADDFW';
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('full');
@@ -158,8 +159,8 @@ describe('Label 5Z', () => {
   });
 
   test('/C3 Request', () => {
-    const text = '/C3 GATE REQ       / KBNA KEWR 22 115400 0554 ---- ---- ---- ----';
-    const decodeResult = plugin.decode({ text: text });
+    message.text = '/C3 GATE REQ       / KBNA KEWR 22 115400 0554 ---- ---- ---- ----';
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
@@ -185,11 +186,11 @@ describe('Label 5Z', () => {
 
   test('/ does not decode invalid', () => {
 
-    const text = '/ Bogus message';
-    const decodeResult = plugin.decode({ text: text });
+    message.text = '/ Bogus message';
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(false);
     expect(decodeResult.decoder.decodeLevel).toBe('none');
-    expect(decodeResult.remaining.text).toBe(text);
+    expect(decodeResult.remaining.text).toBe(message.text);
   });
 });

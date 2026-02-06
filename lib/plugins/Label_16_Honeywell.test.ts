@@ -3,6 +3,7 @@ import { Label_16_Honeywell } from "./Label_16_Honeywell";
 
 describe("Label_16_Honeywell", () => {
   let plugin: Label_16_Honeywell;
+  const message = { label: "16", text: "" };
 
   beforeEach(() => {
     const decoder = new MessageDecoder();
@@ -20,8 +21,8 @@ describe("Label_16_Honeywell", () => {
   });
 
   test("decodes variant 1", () => {
-    const text = "(2AAABN39211W 77144KTEBMMTO-/A(Z";
-    const decodeResult = plugin.decode({ text: text });
+    message.text = "(2AAABN39211W 77144KTEBMMTO-/A(Z";
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe("partial");
@@ -34,8 +35,8 @@ describe("Label_16_Honeywell", () => {
   });
 
   test("decodes variant 2", () => {
-    const text = "(2AAAAN37265W 78334-SSI  /O(Z";
-    const decodeResult = plugin.decode({ text: text });
+    message.text = "(2AAAAN37265W 78334-SSI  /O(Z";
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe("partial");
@@ -47,8 +48,8 @@ describe("Label_16_Honeywell", () => {
   });
 
   test("decodes variant 3", () => {
-    const text = "(2AAABN37197W 78404-SLOJOGRONK/O(Z";
-    const decodeResult = plugin.decode({ text: text });
+    message.text = "(2AAABN37197W 78404-SLOJOGRONK/O(Z";
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe("partial");
@@ -61,11 +62,11 @@ describe("Label_16_Honeywell", () => {
   });
 
   test("does not decode <invalid>", () => {
-    const text = "(2 Bogus message";
-    const decodeResult = plugin.decode({ text: text });
+    message.text = "(2 Bogus message";
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(false);
     expect(decodeResult.decoder.decodeLevel).toBe("none");
-    expect(decodeResult.message.text).toBe(text);
+    expect(decodeResult.message).toBe(message);
   });
 });

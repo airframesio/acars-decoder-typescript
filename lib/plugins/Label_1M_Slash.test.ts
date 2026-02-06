@@ -1,26 +1,34 @@
 import { MessageDecoder } from '../MessageDecoder';
 import { Label_1M_Slash } from './Label_1M_Slash';
 
-test('decodes Label 8E sample 1', () => {
-  const decoder = new MessageDecoder();
-  const decoderPlugin = new Label_1M_Slash(decoder);
+describe('Label 1M Slash', () => {
+  let plugin: Label_1M_Slash;
+  const message = { label: '1M', text: '' };
 
-  expect(decoderPlugin.decode).toBeDefined();
-  expect(decoderPlugin.name).toBe('label-1m-slash');
-  expect(decoderPlugin.qualifiers).toBeDefined();
-  expect(decoderPlugin.qualifiers()).toEqual({
+  beforeEach(() => {
+    const decoder = new MessageDecoder();
+    plugin = new Label_1M_Slash(decoder);
+  });
+
+test('matches qualifiers', () => {
+  expect(plugin.decode).toBeDefined();
+  expect(plugin.name).toBe('label-1m-slash');
+  expect(plugin.qualifiers).toBeDefined();
+  expect(plugin.qualifiers()).toEqual({
     labels: ['1M'],
     preambles: ['/'],
   });
+});
 
-  const text = '/BA0843/ETA01/230822/LDSP/EGLL/EGSS/2JK0\n1940/EGLL27L/10';
-  const decodeResult = decoderPlugin.decode({ text: text });
+test('decodes variant 1', () => {
+  message.text = '/BA0843/ETA01/230822/LDSP/EGLL/EGSS/2JK0\n1940/EGLL27L/10';
+  const decodeResult = plugin.decode(message);
 
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
   expect(decodeResult.decoder.name).toBe('label-1m-slash');
   expect(decodeResult.formatted.description).toBe('ETA Report');
-  expect(decodeResult.message.text).toBe(text);
+  expect(decodeResult.message).toBe(message);
   expect(decodeResult.raw.alternate_icao).toBe('EGSS');
   expect(decodeResult.raw.arrival_icao).toBe('EGLL');
   expect(decodeResult.raw.arrival_runway).toBe('27L');
@@ -47,4 +55,5 @@ test('decodes Label 8E sample 1', () => {
   expect(decodeResult.formatted.items[4].code).toBe('ETA');
   expect(decodeResult.formatted.items[4].label).toBe('Estimated Time of Arrival');
   expect(decodeResult.formatted.items[4].value).toBe('2023-08-22T19:40:00Z');
+});
 });

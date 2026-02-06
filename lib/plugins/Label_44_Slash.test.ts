@@ -3,6 +3,7 @@ import { Label_44_Slash } from "./Label_44_Slash";
 
 describe("Label 44 Slash", () => {
   let plugin: Label_44_Slash;
+  const message = { label: "44", text: "" };
 
   beforeEach(() => {
     const decoder = new MessageDecoder();
@@ -21,8 +22,8 @@ describe("Label 44 Slash", () => {
 
   test("decodes variant 1", () => {
     // https://app.airframes.io/messages/3563679058
-    const text = " /FB 0160/AD KORH/N 38.655,W 75.325,JBU2834,INA03,KORH,2043";
-    const decodeResult = plugin.decode({ text: text });
+    message.text = " /FB 0160/AD KORH/N 38.655,W 75.325,JBU2834,INA03,KORH,2043";
+    const decodeResult = plugin.decode(message);
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe("partial");
     expect(decodeResult.raw.flight_number).toBe("JBU2834");
@@ -35,9 +36,9 @@ describe("Label 44 Slash", () => {
   });
 
   test("decodes variant 2", () => {
-    const text =
+    message.text =
       " /FB ----/AD KTPA/N 27.971,W 82.558,JBU91,FLS03,KTPA,53988,53988,----,1943,1943,1,1L,VIS1L,0,2,0,,";
-    const decodeResult = plugin.decode({ text: text });
+    const decodeResult = plugin.decode(message);
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe("partial");
     expect(decodeResult.raw.flight_number).toBe("JBU91");
@@ -53,11 +54,11 @@ describe("Label 44 Slash", () => {
   });
 
   test("does not decode invalid", () => {
-    const text = "00OFF01 Bogus message";
-    const decodeResult = plugin.decode({ text: text });
+    message.text = "00OFF01 Bogus message";
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(false);
     expect(decodeResult.decoder.decodeLevel).toBe("none");
-    expect(decodeResult.message.text).toBe(text);
+    expect(decodeResult.message).toBe(message);
   });
 });

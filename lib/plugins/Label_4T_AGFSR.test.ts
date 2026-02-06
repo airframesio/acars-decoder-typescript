@@ -4,6 +4,7 @@ import { Label_4T_AGFSR } from './Label_4T_AGFSR';
 describe('Label 4T ETA', () => {
 
   let plugin: Label_4T_AGFSR;
+  const message = {label: '4T', text: ''}; 
 
   beforeEach(() => {
     const decoder = new MessageDecoder();
@@ -26,9 +27,9 @@ describe('Label 4T ETA', () => {
     // https://app.airframes.io/messages/3576265474
     // https://www.flightaware.com/live/flight/ACA620/history/20241108/0245Z/CYYZ/CYHZ
     // https://globe.airplanes.live/?icao=c05bd2
-    const text = 'AGFSR AC0620/07/08/YYZYHZ/0340Z/453/4435.1N07143.4W/350/ /0063/0035/ /281065/----/ /512/0240/0253/----/----';
+    message.text = 'AGFSR AC0620/07/08/YYZYHZ/0340Z/453/4435.1N07143.4W/350/ /0063/0035/ /281065/----/ /512/0240/0253/----/----';
 
-    const decodeResult = plugin.decode({ text: text });
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
@@ -57,8 +58,8 @@ describe('Label 4T ETA', () => {
     // https://app.airframes.io/messages/3576317322
     // https://www.flightaware.com/live/flight/CFNOH/history/20241108/0335Z/CYUL/SBGR
     // https://globe.airplanes.live/?icao=c023c8
-    const text = 'AGFSR AC0096/07/08/YULGRU/0354Z/833/4417.8N07232.6W/254/CLIMB /0565/0033/-33/275049/0289/144/453/0319/0339/****/****';
-    const decodeResult = plugin.decode({ text: text });
+    message.text = 'AGFSR AC0096/07/08/YULGRU/0354Z/833/4417.8N07232.6W/254/CLIMB /0565/0033/-33/275049/0289/144/453/0319/0339/****/****';
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial')
@@ -85,8 +86,8 @@ describe('Label 4T ETA', () => {
 
   test('decodes <invalid>', () => {
 
-    const text = 'POS/ Bogus message';
-    const decodeResult = plugin.decode({ text: text });
+    message.text = 'POS/ Bogus message';
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(false);
     expect(decodeResult.decoder.decodeLevel).toBe('none');

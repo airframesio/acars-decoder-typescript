@@ -4,6 +4,7 @@ import { Label_H1_StarPOS } from './Label_H1_StarPOS';
 describe('Label H1 *POS', () => {
 
   let plugin: Label_H1_StarPOS;
+  const message = {label: 'H1', text: ''};
 
   beforeEach(() => {
     const decoder = new MessageDecoder();
@@ -12,12 +13,12 @@ describe('Label H1 *POS', () => {
 
   test('decodes variant 1', () => {
 
-    const text = '*POS10300950N3954W07759363312045802M5230175';
-    const decodeResult = plugin.decode({ text: text });
+    message.text = '*POS10300950N3954W07759363312045802M5230175';
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
-    expect(decodeResult.message.text).toBe(text);
+    expect(decodeResult.message).toBe(message);
     expect(decodeResult.raw.day).toBe(30);
     expect(decodeResult.raw.month).toBe(10);
     expect(decodeResult.raw.time_of_day).toBe(35400);
@@ -42,8 +43,8 @@ describe('Label H1 *POS', () => {
 
   test('does not decode <invalid>', () => {
 
-    const text = '*POS Bogus message';
-    const decodeResult = plugin.decode({ text: text });
+    message.text = '*POS Bogus message';
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(false);
     expect(decodeResult.decoder.decodeLevel).toBe('none');

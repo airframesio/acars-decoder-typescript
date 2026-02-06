@@ -3,6 +3,7 @@ import { Label_58 } from './Label_58';
 
 describe('Label_58', () => {
     let plugin: Label_58;
+    const message = {label: '58', text: ''};
 
     beforeEach(() => {
         const decoder = new MessageDecoder();
@@ -19,8 +20,8 @@ describe('Label_58', () => {
     });
 
     test('decodes variant 1', () => {
-        const text = 'OG0704/06/230942/N39.214/W76.106/22683/N/'
-        const decodeResult = plugin.decode({ text: text });
+        message.text = 'OG0704/06/230942/N39.214/W76.106/22683/N/'
+        const decodeResult = plugin.decode(message);
         
         expect(decodeResult.decoded).toBe(true);
         expect(decodeResult.decoder.decodeLevel).toBe('partial');
@@ -46,13 +47,13 @@ describe('Label_58', () => {
 
     test('does not decode <invalid>', () => {
 
-        const text = 'Bogus/message';
-        const decodeResult = plugin.decode({ text: text });
+        message.text = 'Bogus/message';
+        const decodeResult = plugin.decode(message);
 
         expect(decodeResult.decoded).toBe(false);
         expect(decodeResult.decoder.decodeLevel).toBe('none');
         expect(decodeResult.decoder.name).toBe('label-58');
         expect(decodeResult.formatted.description).toBe('Position Report');
-        expect(decodeResult.message.text).toBe(text);
+        expect(decodeResult.message).toBe(message);
     });
 });

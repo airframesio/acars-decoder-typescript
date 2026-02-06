@@ -3,6 +3,7 @@ import { Label_12_N_Space } from './Label_12_N_Space';
 
 describe('Label_12_N_Space', () => {
   let plugin: Label_12_N_Space;
+  const message = {label: '12', text: ''};
 
   beforeEach(() => {
     const decoder = new MessageDecoder();
@@ -20,14 +21,14 @@ describe('Label_12_N_Space', () => {
   });
 
   test('decodes variant 1', () => {
-    const text = 'N 42.150,W121.187,39000,161859, 109,.C-GWSO,1742';
-    const decodeResult = plugin.decode({ text: text });
+    message.text = 'N 42.150,W121.187,39000,161859, 109,.C-GWSO,1742';
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.decoder.name).toBe('label-12-n-space');
     expect(decodeResult.formatted.description).toBe('Position Report');
-    expect(decodeResult.message.text).toBe(text);
+    expect(decodeResult.message).toBe(message);
     expect(decodeResult.raw.position.latitude).toBe(42.150);
     expect(decodeResult.raw.position.longitude).toBe(-121.187);
     expect(decodeResult.raw.altitude).toBe(39000);
@@ -43,14 +44,14 @@ describe('Label_12_N_Space', () => {
   });
 
   test('decodes variant 2', () => {
-    const text = 'N 28.371,W 80.458,38000,170546, 100,.C-GVWJ,1736';
-    const decodeResult = plugin.decode({ text: text });
+    message.text = 'N 28.371,W 80.458,38000,170546, 100,.C-GVWJ,1736';
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.decoder.name).toBe('label-12-n-space');
     expect(decodeResult.formatted.description).toBe('Position Report');
-    expect(decodeResult.message.text).toBe(text);
+    expect(decodeResult.message).toBe(message);
     expect(decodeResult.raw.position.latitude).toBe(28.371);
     expect(decodeResult.raw.position.longitude).toBe(-80.458);
     expect(decodeResult.raw.altitude).toBe(38000);
@@ -66,13 +67,13 @@ describe('Label_12_N_Space', () => {
   });
 
   test('does not decode <invalid>', () => {
-    const text = 'N Bogus message';
-    const decodeResult = plugin.decode({ text: text });
+    message.text = 'N Bogus message';
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(false);
     expect(decodeResult.decoder.decodeLevel).toBe('none');
     expect(decodeResult.decoder.name).toBe('label-12-n-space');
     expect(decodeResult.formatted.description).toBe('Position Report');
-    expect(decodeResult.message.text).toBe(text);
+    expect(decodeResult.message).toBe(message);
   });
 });

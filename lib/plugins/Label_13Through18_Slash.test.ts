@@ -20,10 +20,11 @@ describe('Label_13Through18_Slash', () => {
   });
 
   describe('Label 13', () => {
+    const message = {label: '13', text: ''};
     test('decodes 1-line', () => {
       // https://app.airframes.io/messages/3423349335
-      const text = '/13 OUT EVENT      / KSFO KEWR 12 231445/TIME 2314'
-      const decodeResult = plugin.decode({ text: text });
+      message.text = '/13 OUT EVENT      / KSFO KEWR 12 231445/TIME 2314'
+      const decodeResult = plugin.decode(message);
 
       expect(decodeResult.decoded).toBe(true);
 
@@ -40,9 +41,9 @@ describe('Label_13Through18_Slash', () => {
     });
     test('decodes 2-line', () => {
       // https://app.airframes.io/messages/3424584522
-      const text = '/13 OUT EVENT      / KSFO KMSP 12 024518/TIME 0245' + '\r\n' +
+      message.text = '/13 OUT EVENT      / KSFO KMSP 12 024518/TIME 0245' + '\r\n' +
         '/LOC N373703,W1222251'
-      const decodeResult = plugin.decode({ text: text });
+      const decodeResult = plugin.decode(message);
 
       expect(decodeResult.decoded).toBe(true);
       expect(decodeResult.decoder.decodeLevel).toBe('full');
@@ -61,9 +62,10 @@ describe('Label_13Through18_Slash', () => {
   });
 
   describe('Label 14', () => {
+    const message = {label: '14', text: ''};
     test('decodes 1-line', () => {
-      const text = '/14 OFF EVENT      / KIAD KDEN 08 124438/TIME 1244'
-      const decodeResult = plugin.decode({ text: text });
+      message.text = '/14 OFF EVENT      / KIAD KDEN 08 124438/TIME 1244'
+      const decodeResult = plugin.decode(message);
 
       expect(decodeResult.decoded).toBe(true);
       expect(decodeResult.decoder.decodeLevel).toBe('full');
@@ -79,9 +81,9 @@ describe('Label_13Through18_Slash', () => {
     });
 
     test('decodes 2-line', () => {
-      const text = '/14 OFF EVENT      / KIAD EDDF 09 025055/TIME 0250' + '\r\n' +
+      message.text = '/14 OFF EVENT      / KIAD EDDF 09 025055/TIME 0250' + '\r\n' +
         '/LOC +38.9603,-077.4595'
-      const decodeResult = plugin.decode({ text: text });
+      const decodeResult = plugin.decode(message);
 
       expect(decodeResult.decoded).toBe(true);
       expect(decodeResult.decoder.decodeLevel).toBe('full');
@@ -98,10 +100,10 @@ describe('Label_13Through18_Slash', () => {
     });
 
     test('decodes 3-line', () => {
-      const text = '/14 OFF EVENT      / KIAD KATL 09 123630/TIME 1236' + '\r\n' +
+      message.text = '/14 OFF EVENT      / KIAD KATL 09 123630/TIME 1236' + '\r\n' +
         '/AU 08752167/AON 08716165/AIN 08717165/AOT 08744166' + '\r\n' +
         '/LOC N385618,W0772823'
-      const decodeResult = plugin.decode({ text: text });
+      const decodeResult = plugin.decode(message);
 
       expect(decodeResult.decoded).toBe(true);
       expect(decodeResult.decoder.decodeLevel).toBe('partial');
@@ -124,10 +126,10 @@ describe('Label_13Through18_Slash', () => {
     // Despite all this, it shows that positions may be in decimal minutes instead of DMS when using NSEW instead of +/-
     // so i'm putting it here for reference
     test.skip('decodes position invalid', () => {
-      const text = '/14 OFF EVENT      / KIAD KSAT 10 122555/TIME 1225' + '\r\n' +
+      message.text = '/14 OFF EVENT      / KIAD KSAT 10 122555/TIME 1225' + '\r\n' +
         '/AU 55808910/AON 55729908/AIN 55731908/AOT 55804909' + '\r\n' +
         '/LOC N169380,E1334348'
-      const decodeResult = plugin.decode({ text: text });
+      const decodeResult = plugin.decode(message);
 
       expect(decodeResult.decoded).toBe(true);
       expect(decodeResult.decoder.decodeLevel).toBe('partial');
@@ -146,10 +148,11 @@ describe('Label_13Through18_Slash', () => {
   });
 
   describe('Label 15', () => {
+    const message = {label: '15', text: ''};
     test('decodes 1-line', () => {
       // https://app.airframes.io/messages/3424704396
-      const text = '/15 ON EVENT       / PHOG KSFO 12 064852/TIME 0648'
-      const decodeResult = plugin.decode({ text: text });
+      message.text = '/15 ON EVENT       / PHOG KSFO 12 064852/TIME 0648'
+      const decodeResult = plugin.decode(message);
 
       expect(decodeResult.decoded).toBe(true);
 
@@ -166,9 +169,9 @@ describe('Label_13Through18_Slash', () => {
     });
     test('decodes 2-line', () => {
       // https://app.airframes.io/messages/3425113893
-      const text = '/15 ON EVENT       / KCMH KSFO 12 044401/TIME 0444' + '\r\n' +
+      message.text = '/15 ON EVENT       / KCMH KSFO 12 044401/TIME 0444' + '\r\n' +
         '/LOC N373705,W1222208'
-      const decodeResult = plugin.decode({ text: text });
+      const decodeResult = plugin.decode(message);
 
       expect(decodeResult.decoded).toBe(true);
       expect(decodeResult.decoder.decodeLevel).toBe('full');
@@ -188,12 +191,13 @@ describe('Label_13Through18_Slash', () => {
 
 
   describe('Label 16', () => {
+    const message = {label: '16', text: ''};
     test('decodes 3-line', () => {
       // https://app.airframes.io/messages/3424584522
-      const text = '/16 1ST PDOOR OPEN / KLAX KSEA 12 053340/TIME 0533' + '\r\n' +
+      message.text = '/16 1ST PDOOR OPEN / KLAX KSEA 12 053340/TIME 0533' + '\r\n' +
         '/BR SET 0529' + '\r\n' +
         '/LOC S101043,W1530624'
-      const decodeResult = plugin.decode({ text: text });
+      const decodeResult = plugin.decode(message);
 
       expect(decodeResult.decoded).toBe(true);
       expect(decodeResult.decoder.decodeLevel).toBe('partial');
@@ -214,12 +218,13 @@ describe('Label_13Through18_Slash', () => {
 
 
   describe('Label 17', () => {
+    const message = {label: '17', text: ''};
     test('decodes 3-line', () => {
       // https://app.airframes.io/messages/3423349335
-      const text = '/17 POST RPT       / KIAD KSFO 12 034537/TIME 0343' + '\r\n' +
+      message.text = '/17 POST RPT       / KIAD KSFO 12 034537/TIME 0343' + '\r\n' +
         '/FOB 0215/LP U246680/OP        /CAT NR' + '\r\n' +
         '/AL NN/SUC  /SAV  /BR ACT NO REPORT/RWY 28R /PDOOR 0343 -----/CDOOR 0343/BR SET 0341'
-      const decodeResult = plugin.decode({ text: text });
+      const decodeResult = plugin.decode(message);
 
       expect(decodeResult.decoded).toBe(true);
 
@@ -235,12 +240,12 @@ describe('Label_13Through18_Slash', () => {
     });
     test('decodes 5-line', () => {
       // https://app.airframes.io/messages/3424453568
-      const text = '/17 POST RPT       / KLAX KSEA 12 053340/TIME 0530' + '\r\n' +
+      message.text = '/17 POST RPT       / KLAX KSEA 12 053340/TIME 0530' + '\r\n' +
         '/FOB 0074/LP U423108/MP U332185/CAT NR' + '\r\n' +
         '/AL N-/SUC -/SAV -/BR ACT NO REPORT/RWY ---' + '\r\n' +
         '/PDOOR 0533 MCD1 /CDOOR 0530/BR SET 0529' + '\r\n' +
         '/LOC S101043,W1530624'
-      const decodeResult = plugin.decode({ text: text });
+      const decodeResult = plugin.decode(message);
 
       expect(decodeResult.decoded).toBe(true);
       expect(decodeResult.decoder.decodeLevel).toBe('partial');
@@ -261,11 +266,12 @@ describe('Label_13Through18_Slash', () => {
 
 
   describe('Label 18', () => {
+    const message = {label: '18', text: ''};
     test('decodes location', () => {
       // https://app.airframes.io/messages/3424453669
-      const text = '/18 POST TIMES SECS/ KLAX KSEA 12 053340/IN TIME 0530/PDOOR 053340/CDOOR 053024/BR SET 052942' + '\r\n' +
+      message.text = '/18 POST TIMES SECS/ KLAX KSEA 12 053340/IN TIME 0530/PDOOR 053340/CDOOR 053024/BR SET 052942' + '\r\n' +
         '/LOC S101043,W1530624'
-      const decodeResult = plugin.decode({ text: text });
+      const decodeResult = plugin.decode(message);
 
       expect(decodeResult.decoded).toBe(true);
       expect(decodeResult.decoder.decodeLevel).toBe('partial');
@@ -282,9 +288,9 @@ describe('Label_13Through18_Slash', () => {
     });
     test('decodes no location', () => {
       // https://app.airframes.io/messages/3424453669
-      const text = '/18 POST TIMES SECS/ KSFO CYVR 12 040416/IN TIME0353/PDOOR 035414/CDOOR 035315/BR SET 035223' + '\r\n' +
+      message.text = '/18 POST TIMES SECS/ KSFO CYVR 12 040416/IN TIME0353/PDOOR 035414/CDOOR 035315/BR SET 035223' + '\r\n' +
         '/LOC        ,        '
-      const decodeResult = plugin.decode({ text: text });
+      const decodeResult = plugin.decode(message);
 
       expect(decodeResult.decoded).toBe(true);
       expect(decodeResult.decoder.decodeLevel).toBe('partial');
@@ -300,13 +306,12 @@ describe('Label_13Through18_Slash', () => {
   });
 
   test('does not decode <invalid>', () => {
-
-    const text = '/14 Bogus Message';
-    const decodeResult = plugin.decode({ text: text });
+    const message = {label: '14', text: '/14 Bogus Message'};
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(false);
     expect(decodeResult.decoder.decodeLevel).toBe('none');
     expect(decodeResult.decoder.name).toBe('label-13-18-slash');
-    expect(decodeResult.message.text).toBe(text);
+    expect(decodeResult.message).toBe(message);
   });
 });

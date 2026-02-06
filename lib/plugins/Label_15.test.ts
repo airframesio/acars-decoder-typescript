@@ -3,6 +3,7 @@ import { Label_15 } from './Label_15';
 
 describe('Label_15', () => {
     let plugin: Label_15;
+    const message = {label: '15', text: ''};
 
     beforeEach(() => {
         const decoder = new MessageDecoder();
@@ -20,8 +21,8 @@ describe('Label_15', () => {
     });
 
     test('decodes short variant missing unkown', () => {
-        const text = '(2N38448W 77216--- 28 20  7(Z'
-        const decodeResult = plugin.decode({ text: text });
+        message.text = '(2N38448W 77216--- 28 20  7(Z'
+        const decodeResult = plugin.decode(message);
         
         expect(decodeResult.decoded).toBe(true);
         expect(decodeResult.decoder.decodeLevel).toBe('partial');
@@ -36,8 +37,8 @@ describe('Label_15', () => {
     });
 
     test('decodes short variant all fields', () => {
-        const text = '(2N40492W 77179248 99380-53(Z'
-        const decodeResult = plugin.decode({ text: text });
+        message.text = '(2N40492W 77179248 99380-53(Z'
+        const decodeResult = plugin.decode(message);
         
         expect(decodeResult.decoded).toBe(true);
         expect(decodeResult.decoder.decodeLevel).toBe('partial');
@@ -52,8 +53,8 @@ describe('Label_15', () => {
     });
     
     test('decodes short variant missing alt', () => {
-        const text = '(2N39269W 77374--- 42---- 5(Z'
-        const decodeResult = plugin.decode({ text: text });
+        message.text = '(2N39269W 77374--- 42---- 5(Z'
+        const decodeResult = plugin.decode(message);
         
         expect(decodeResult.decoded).toBe(true);
         expect(decodeResult.decoder.decodeLevel).toBe('partial');
@@ -66,8 +67,8 @@ describe('Label_15', () => {
     });
     
     test('decodes off variant no unkown', () => {
-        const text = '(2N39018W 77284OFF11112418101313--------(Z'
-        const decodeResult = plugin.decode({ text: text });
+        message.text = '(2N39018W 77284OFF11112418101313--------(Z'
+        const decodeResult = plugin.decode(message);
         
         expect(decodeResult.decoded).toBe(true);
         expect(decodeResult.decoder.decodeLevel).toBe('partial');
@@ -81,8 +82,8 @@ describe('Label_15', () => {
     
     test('decodes off variant no date and unknown', () => {
         // https://app.airframes.io/messages/3593342701
-        const text = '(2N42589W 83520OFF------13280606--------(Z'
-        const decodeResult = plugin.decode({ text: text });
+        message.text = '(2N42589W 83520OFF------13280606--------(Z'
+        const decodeResult = plugin.decode(message);
         
         expect(decodeResult.decoded).toBe(true);
         expect(decodeResult.decoder.decodeLevel).toBe('partial');
@@ -96,8 +97,8 @@ describe('Label_15', () => {
 
     test('decodes off variant all fields', () => {
         // https://app.airframes.io/messages/3603048708
-        const text = '(2N39042W 77308OFF1311240327B1818 015(Z'
-        const decodeResult = plugin.decode({ text: text });
+        message.text = '(2N39042W 77308OFF1311240327B1818 015(Z'
+        const decodeResult = plugin.decode(message);
         
         expect(decodeResult.decoded).toBe(true);
         expect(decodeResult.decoder.decodeLevel).toBe('partial');
@@ -111,13 +112,13 @@ describe('Label_15', () => {
 
     test('does not decode Label 15 <invalid>', () => {
 
-        const text = '(2 Bogus message';
-        const decodeResult = plugin.decode({ text: text });
+        message.text = '(2 Bogus message';
+        const decodeResult = plugin.decode(message);
 
         expect(decodeResult.decoded).toBe(false);
         expect(decodeResult.decoder.decodeLevel).toBe('none');
         expect(decodeResult.decoder.name).toBe('label-15');
         expect(decodeResult.formatted.description).toBe('Position Report');
-        expect(decodeResult.message.text).toBe(text);
+        expect(decodeResult.message).toBe(message);
     });
 });

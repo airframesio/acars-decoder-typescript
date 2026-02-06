@@ -4,6 +4,7 @@ import { Label_MA } from './Label_MA';
 describe('Label_MA', () => {
 
   let plugin: Label_MA;
+  const message = { label: 'MA', text: '' };
 
   beforeEach(() => {
     const decoder = new MessageDecoder();
@@ -20,8 +21,8 @@ describe('Label_MA', () => {
   });
 
   test('decodes MIAM message', () => {
-    const text = 'T02!<<,:/k.E`;FOV@!\'s.16q6R+p(RK,|D2ujNJhRah?_qrNftWiI-V,@*RQs,tn,FYN$/V1!gNIc6CO;$D,1:.4?dF952;>XP$"B"Ok-Fr\'0^k?rP]3&UGoPX;\\<F`1mQ_(5_Z\\J01]+t9T9eu6ecjOlC7.H):6MAR4XuqGajJRp&=T3T7j1ipU;\'tGF-f0nNn,XY\\/!!G&F*18E3l:kWakhBW"b31<%oM6)jcY9:;p2\\5E\'k3Yr1,d';
-    const decodeResult = plugin.decode({ text: text });
+    message.text = 'T02!<<,:/k.E`;FOV@!\'s.16q6R+p(RK,|D2ujNJhRah?_qrNftWiI-V,@*RQs,tn,FYN$/V1!gNIc6CO;$D,1:.4?dF952;>XP$"B"Ok-Fr\'0^k?rP]3&UGoPX;\\<F`1mQ_(5_Z\\J01]+t9T9eu6ecjOlC7.H):6MAR4XuqGajJRp&=T3T7j1ipU;\'tGF-f0nNn,XY\\/!!G&F*18E3l:kWakhBW"b31<%oM6)jcY9:;p2\\5E\'k3Yr1,d';
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('full');
@@ -34,8 +35,8 @@ describe('Label_MA', () => {
   });
 
   test('decodes partial message', () => {
-    const text = 'T22!<<2>\/k&_k6:\"c1!\'s.16q0U2odKk@|D,eVtdm+WF(#Ll8Dja==EY8V4KISInKk%((%5&@p?Z\\NSZ9tj[Xr0rXqe`+A(J,f[fotFmHmS';
-    const decodeResult = plugin.decode({ text: text });
+    message.text = 'T22!<<2>\/k&_k6:\"c1!\'s.16q0U2odKk@|D,eVtdm+WF(#Ll8Dja==EY8V4KISInKk%((%5&@p?Z\\NSZ9tj[Xr0rXqe`+A(J,f[fotFmHmS';
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
@@ -48,10 +49,10 @@ describe('Label_MA', () => {
   });
 
   test('decodes twice', () => {
-    const text = "T20!<<,B/k&,Z:/=Hs!'iLt0/1h8|*KJNa__;Kes\"hV'&4]J&&&;\"X/O6%0d7TMg5=d7'gcZ:j\"2EiA7k`-`$]f/<L\\63L-&,<Pi[2<O9p^t+Khl*&\\e^,*%4:H<-9Lm>r>q-b^jGP>WX4Dk3IrQ:U4%?]H$4HCd0Z(^Yq+lXXR!=niT!#;:5UAQ`JU@Bfn/*)TSu?G=LuOlLaFSmkGi]eE[!o&j@iX^g0r)T9!Ye)k6aOmSf`8G)8,hS5Fq_trW*!!";
+    message.text = "T20!<<,B/k&,Z:/=Hs!'iLt0/1h8|*KJNa__;Kes\"hV'&4]J&&&;\"X/O6%0d7TMg5=d7'gcZ:j\"2EiA7k`-`$]f/<L\\63L-&,<Pi[2<O9p^t+Khl*&\\e^,*%4:H<-9Lm>r>q-b^jGP>WX4Dk3IrQ:U4%?]H$4HCd0Z(^Yq+lXXR!=niT!#;:5UAQ`JU@Bfn/*)TSu?G=LuOlLaFSmkGi]eE[!o&j@iX^g0r)T9!Ye)k6aOmSf`8G)8,hS5Fq_trW*!!";
     // decodes to label 80
     // 3D01 RMPSRV 2501/02 LEMD/MMUN .EC-NOI\n/LAV Y/CAB Y/MEDA N/SEC N/WAS N/WAT N/FUEL N/WCHRR 01/WCHRS --/WCHRC --/UMNR --/MAAS N\nBUENAS NOCHES, ETA 0055Z Y NOS HAN PEDIDO UNA WCHR QUE AL PARECER NO TENIAMOS CONSTANCIA DE ELLA, POR SI PODEIS PEDIRLO A OPS CUN. MUCHAS GRACIAS
-    const decodeResult = plugin.decode({ text: text });
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('full');
