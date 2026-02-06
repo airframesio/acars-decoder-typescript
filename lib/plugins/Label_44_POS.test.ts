@@ -1,31 +1,33 @@
 import { MessageDecoder } from '../MessageDecoder';
 import { Label_44_POS } from './Label_44_POS';
 
-test('matches Label 44 Preamble POS qualifiers', () => {
-  const decoder = new MessageDecoder();
-  const decoderPlugin = new Label_44_POS(decoder);
+describe('Label 44 Preamble POS', () => {
+  let plugin: Label_44_POS;
+  const message = {label: '44', text: ''};
+  beforeEach(() => {
+    const decoder = new MessageDecoder();
+    plugin = new Label_44_POS(decoder);
+  });
 
-  expect(decoderPlugin.decode).toBeDefined();
-  expect(decoderPlugin.name).toBe('label-44-pos');
-  expect(decoderPlugin.qualifiers).toBeDefined();
-  expect(decoderPlugin.qualifiers()).toEqual({
+test('matches Label 44 Preamble POS qualifiers', () => {
+  expect(plugin.decode).toBeDefined();
+  expect(plugin.name).toBe('label-44-pos');
+  expect(plugin.qualifiers).toBeDefined();
+  expect(plugin.qualifiers()).toEqual({
     labels: ['44'],
     preambles: ['00POS01', '00POS02', '00POS03', 'POS01', 'POS02', 'POS03'],
   });
 });
 test('decodes Label 44 Preamble POS02 variant 1', () => {
-  const decoder = new MessageDecoder();
-  const decoderPlugin = new Label_44_POS(decoder);
-
   // https://app.airframes.io/messages/3389060301
-  const text = 'POS02,N38171W077507,319,KJFK,KUZA,0926,0245,0327,004.6';
-  const decodeResult = decoderPlugin.decode({ text: text });
+  message.text = 'POS02,N38171W077507,319,KJFK,KUZA,0926,0245,0327,004.6';
+  const decodeResult = plugin.decode(message);
   
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('full');
   expect(decodeResult.decoder.name).toBe('label-44-pos');
   expect(decodeResult.formatted.description).toBe('Position Report');
-  expect(decodeResult.message.text).toBe(text);
+  expect(decodeResult.message).toBe(message);
   expect(decodeResult.raw.position.latitude).toBe(38.285);
   expect(decodeResult.raw.position.longitude).toBe(-77.845);
   expect(decodeResult.raw.altitude).toBe(31900);
@@ -55,15 +57,13 @@ test('decodes Label 44 Preamble POS02 variant 1', () => {
 
 // disabled because current parser decodes 'full'
 test.skip('decodes Label 44 Preamble POS02 <invalid>', () => {
-  const decoder = new MessageDecoder();
-  const decoderPlugin = new Label_44_POS(decoder);
-
-  const text = 'POS02 Bogus message';
-  const decodeResult = decoderPlugin.decode({ text: text });
+  message.text = 'POS02 Bogus message';
+  const decodeResult = plugin.decode(message);
   
   expect(decodeResult.decoded).toBe(false);
   expect(decodeResult.decoder.decodeLevel).toBe('none');
   expect(decodeResult.decoder.name).toBe('label-44-pos');
   expect(decodeResult.formatted.description).toBe('Position Report');
   expect(decodeResult.formatted.items.length).toBe(0);
+});
 });

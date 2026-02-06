@@ -4,6 +4,7 @@ import { Label_4J_POS } from './Label_4J_POS';
 describe('Label 4J POS', () => {
 
   let plugin: Label_4J_POS;
+  const message = {label: '4J', text: ''};
 
   beforeEach(() => {
     const decoder = new MessageDecoder();
@@ -24,8 +25,8 @@ describe('Label 4J POS', () => {
   // Disabled due to checksum mismatch. Possibly non-ascii characters in message?
   test.skip('decodes msg 1', () => {
     // https://app.airframes.io/messages/2434848463
-    const text = 'POS/ID91459S,BANKR31,/DC03032024,142813/MR64,0/ET31539/PSN39277W077359,142800,240,N39300W077110,031430,N38560W077150,M28,27619,MT370/CG311,160,350/FB732/VR329071';
-    const decodeResult = plugin.decode({ text: text });
+    message.text = 'POS/ID91459S,BANKR31,/DC03032024,142813/MR64,0/ET31539/PSN39277W077359,142800,240,N39300W077110,031430,N38560W077150,M28,27619,MT370/CG311,160,350/FB732/VR329071';
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
@@ -56,8 +57,8 @@ describe('Label 4J POS', () => {
 
   test('decodes <invalid>', () => {
 
-    const text = 'POS/ Bogus message';
-    const decodeResult = plugin.decode({ text: text });
+    message.text = 'POS/ Bogus message';
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(false);
     expect(decodeResult.decoder.decodeLevel).toBe('none');

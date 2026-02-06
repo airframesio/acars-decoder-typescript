@@ -1,6 +1,15 @@
 import { MessageDecoder } from '../MessageDecoder';
 import { Label_4N } from './Label_4N';
 
+describe('Label 4N', () => {
+  let plugin: Label_4N;
+  const message = {label: '4N', text: ''};
+
+  beforeEach(() => {
+    const decoder = new MessageDecoder();
+    plugin = new Label_4N(decoder);
+  });
+
 test('matches Label 4N qualifiers', () => {
   const decoder = new MessageDecoder();
   const decoderPlugin = new Label_4N(decoder);
@@ -10,18 +19,15 @@ test('matches Label 4N qualifiers', () => {
 });
 
 test('decodes Label 4N variant 1', () => {
-  const decoder = new MessageDecoder();
-  const decoderPlugin = new Label_4N(decoder);
-
   // https://globe.adsbexchange.com/?icao=A15027&showTrace=2024-09-23&timestamp=1727057017
-  const text = '22024N  MCI  JFK1\r\n0013  0072 N040586 W074421   230';
-  const decodeResult = decoderPlugin.decode({ text: text });
+  message.text = '22024N  MCI  JFK1\r\n0013  0072 N040586 W074421   230';
+  const decodeResult = plugin.decode(message);
 
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
   expect(decodeResult.decoder.name).toBe('label-4n');
   expect(decodeResult.formatted.description).toBe('Airline Defined');
-  expect(decodeResult.message.text).toBe(text);
+  expect(decodeResult.message).toBe(message);
   expect(decodeResult.raw.day).toBe('22');
   expect(decodeResult.remaining.text).toBe('02 0013  0072');
   expect(decodeResult.formatted.items.length).toBe(4);
@@ -35,19 +41,15 @@ test('decodes Label 4N variant 1', () => {
   expect(decodeResult.formatted.items[3].value).toBe('23000 feet');
 });
 
-test('decodes Label 4N variant 2B', () => {
-  const decoder = new MessageDecoder();
-  const decoderPlugin = new Label_4N(decoder);
-
-  // https://app.airframes.io/messages/3421601874
-  const text = '285,B,69005074-507,10/12,+36.081,-094.810,35014,002.3,ELP,SDF,SDF,17R/,17L/,0,0,,,,,,0,0,0,0,1,,,,,247.0,014.2,261.2,421A';
-  const decodeResult = decoderPlugin.decode({ text: text });
+test('decodes Label 4N variant 2B', () => {// https://app.airframes.io/messages/3421601874
+  message.text = '285,B,69005074-507,10/12,+36.081,-094.810,35014,002.3,ELP,SDF,SDF,17R/,17L/,0,0,,,,,,0,0,0,0,1,,,,,247.0,014.2,261.2,421A';
+  const decodeResult = plugin.decode(message);
 
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
   expect(decodeResult.decoder.name).toBe('label-4n');
   expect(decodeResult.formatted.description).toBe('Airline Defined');
-  expect(decodeResult.message.text).toBe(text);
+  expect(decodeResult.message).toBe(message);
   expect(decodeResult.raw.date).toBe('10/12');
   expect(decodeResult.remaining.text).toBe('B,69005074-507,002.3,0,0,0,0,0,0,1,247.0,014.2,261.2');
   expect(decodeResult.formatted.items.length).toBe(8);
@@ -70,18 +72,15 @@ test('decodes Label 4N variant 2B', () => {
 });
 
 test('decodes Label 4N variant 2C', () => {
-  const decoder = new MessageDecoder();
-  const decoderPlugin = new Label_4N(decoder);
-
   // https://globe.adsbexchange.com/?icao=A3E08D&showTrace=2024-09-24&timestamp=1727181643
-  const text = '285,C,,09/24,,,,,EWR,PHL,PHL,09R/,/,0,0,,,,,,1,0,0,0,1,0,,0,0,198.5,014.5,213.0,9BCD';
-  const decodeResult = decoderPlugin.decode({ text: text });
+  message.text = '285,C,,09/24,,,,,EWR,PHL,PHL,09R/,/,0,0,,,,,,1,0,0,0,1,0,,0,0,198.5,014.5,213.0,9BCD';
+  const decodeResult = plugin.decode(message);
 
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
   expect(decodeResult.decoder.name).toBe('label-4n');
   expect(decodeResult.formatted.description).toBe('Airline Defined');
-  expect(decodeResult.message.text).toBe(text);
+  expect(decodeResult.message).toBe(message);
   expect(decodeResult.raw.date).toBe('09/24');
   expect(decodeResult.remaining.text).toBe('C,0,0,1,0,0,0,1,0,0,0,198.5,014.5,213.0');
   expect(decodeResult.formatted.items.length).toBe(5);
@@ -98,18 +97,15 @@ test('decodes Label 4N variant 2C', () => {
 });
 
 test('decodes Label 4N variant 2C (C-band)', () => {
-  const decoder = new MessageDecoder();
-  const decoderPlugin = new Label_4N(decoder);
-
   // https://app.airframes.io/messages/3422221702
-  const text = 'M85AUP0109285,C,,10/12,,,,,NRT,ANC,ANC,07R/,33/,0,0,,,,,,0,0,0,0,1,0,,0,0,709.8,048.7,758.5,75F3';
-  const decodeResult = decoderPlugin.decode({ text: text });
+  message.text = 'M85AUP0109285,C,,10/12,,,,,NRT,ANC,ANC,07R/,33/,0,0,,,,,,0,0,0,0,1,0,,0,0,709.8,048.7,758.5,75F3';
+  const decodeResult = plugin.decode(message);
 
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
   expect(decodeResult.decoder.name).toBe('label-4n');
   expect(decodeResult.formatted.description).toBe('Airline Defined');
-  expect(decodeResult.message.text).toBe(text);
+  expect(decodeResult.message).toBe(message);
   expect(decodeResult.raw.flight_number).toBe('UP109');
   expect(decodeResult.raw.date).toBe('10/12');
   expect(decodeResult.remaining.text).toBe('C,0,0,0,0,0,0,1,0,0,0,709.8,048.7,758.5');
@@ -131,15 +127,13 @@ test('decodes Label 4N variant 2C (C-band)', () => {
 });
 
 test('decodes Label 4N <invalid>', () => {
-  const decoder = new MessageDecoder();
-  const decoderPlugin = new Label_4N(decoder);
-
-  const text = '4N Bogus message';
-  const decodeResult = decoderPlugin.decode({ text: text });
+  message.text = '4N Bogus message';
+  const decodeResult = plugin.decode(message);
 
   expect(decodeResult.decoded).toBe(false);
   expect(decodeResult.decoder.decodeLevel).toBe('none');
   expect(decodeResult.decoder.name).toBe('label-4n');
   expect(decodeResult.formatted.description).toBe('Airline Defined');
   expect(decodeResult.formatted.items.length).toBe(0);
+});
 });

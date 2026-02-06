@@ -4,6 +4,7 @@ import { Label_2P_FM4 } from './Label_2P_FM4';
 describe('Label_2P Preamble FM4', () => {
 
   let plugin: Label_2P_FM4;
+  const message = { label: '2P', text: '' };
 
   beforeEach(() => {
     const decoder = new MessageDecoder();
@@ -12,13 +13,13 @@ describe('Label_2P Preamble FM4', () => {
 
   test('variant 1', () => {
     // https://app.airframes.io/messages/4206449201
-    const text = 'FM4KIAD,OMAA,140256,1448, 39.43,- 75.62,23228,328,  43.5, 72500';
-    const decodeResult = plugin.decode({ text: text });
+    message.text = 'FM4KIAD,OMAA,140256,1448, 39.43,- 75.62,23228,328,  43.5, 72500';
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.formatted.description).toBe('Flight Report');
-    expect(decodeResult.message.text).toBe(text);
+    expect(decodeResult.message).toBe(message);
     expect(decodeResult.formatted.items.length).toBe(8);
     expect(decodeResult.formatted.items[0].label).toBe('Origin');
     expect(decodeResult.formatted.items[0].value).toBe('KIAD');
@@ -41,13 +42,13 @@ describe('Label_2P Preamble FM4', () => {
 
   test('variant 2', () => {
     // https://app.airframes.io/messages/4209103135
-    const text = 'M58AEY0801FM4RJAA,OMAA,141234,2105, 38.92, 115.44,34099,296,-105.5, 52800';
-    const decodeResult = plugin.decode({ text: text });
+    message.text = 'M58AEY0801FM4RJAA,OMAA,141234,2105, 38.92, 115.44,34099,296,-105.5, 52800';
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.formatted.description).toBe('Flight Report');
-    expect(decodeResult.message.text).toBe(text);
+    expect(decodeResult.message).toBe(message);
     expect(decodeResult.formatted.items.length).toBe(9);
     expect(decodeResult.formatted.items[0].label).toBe('Flight Number');
     expect(decodeResult.formatted.items[0].value).toBe('EY0801');
@@ -72,8 +73,8 @@ describe('Label_2P Preamble FM4', () => {
 
   test('<invalid>', () => {
 
-    const text = 'FM4 Bogus message';
-    const decodeResult = plugin.decode({ text: text });
+    message.text = 'FM4 Bogus message';
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(false);
     expect(decodeResult.decoder.decodeLevel).toBe('none');

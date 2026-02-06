@@ -3,6 +3,7 @@ import { Label_H2_02E } from "./Label_H2_02E";
 
 describe("Label_H2 02E", () => {
   let plugin: Label_H2_02E;
+  const message = { label: "H2", text: "" };
 
   beforeEach(() => {
     const decoder = new MessageDecoder();
@@ -21,7 +22,7 @@ describe("Label_H2 02E", () => {
   test("decodes discord example 1", () => {
     const text =
       "02E20HEGNLKPRN40359E02208116253601M627259020G    QN41179E02134316323599M617247037G    QN41591E02100516393603M610266040G    QN42393E02026716463602M600276033G    QN43197E01954316533598M592299037G    QN44023E01929517003596M587313033G    Q";
-    const decodeResult = plugin.decode({ text: text });
+    const decodeResult = plugin.decode(message);
     /*
   Route: HEGN-LKPR
 1    40°35.9'N, 022°08.1'E    16:25    FL360    36,000 ft    -62.7°C    259°/20kts
@@ -34,7 +35,7 @@ describe("Label_H2 02E", () => {
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe("full");
     expect(decodeResult.formatted.description).toBe("Weather Report");
-    expect(decodeResult.message.text).toBe(text);
+    expect(decodeResult.message).toBe(message);
     const weather = decodeResult.raw.wind_data;
     expect(weather.length).toBe(6);
     expect(decodeResult.formatted.items[0].label).toBe("Day of Month");
@@ -72,7 +73,7 @@ describe("Label_H2 02E", () => {
   test("decodes discord example 2", () => {
     const text =
       "02E20EGKKLBSFN45081E01757116493501M577327021G    QN44401E01903016563499M575352028G    QN44115E02008017033468M550319029G    QN43420E02112317103296M525299036G    QN43125E02214517172023M277271022G    Q";
-    const decodeResult = plugin.decode({ text: text });
+    const decodeResult = plugin.decode(message);
 
     /*
   Route: EGKK-LBSF
@@ -85,7 +86,7 @@ describe("Label_H2 02E", () => {
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe("full");
     expect(decodeResult.formatted.description).toBe("Weather Report");
-    expect(decodeResult.message.text).toBe(text);
+    expect(decodeResult.message).toBe(message);
     const weather = decodeResult.raw.wind_data;
     expect(weather.length).toBe(5);
     expect(decodeResult.formatted.items[0].label).toBe("Day of Month");
@@ -120,12 +121,12 @@ describe("Label_H2 02E", () => {
     // https://app.airframes.io/messages/6025352132
     const text =
       "02E20EIDWKORDN44087W08505523383800M470251091G QN43210W08520623452813M442251113G QN42461W08539523522189M295256121G QN42380W08623723591780M227266100G Q";
-    const decodeResult = plugin.decode({ text: text });
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe("full");
     expect(decodeResult.formatted.description).toBe("Weather Report");
-    expect(decodeResult.message.text).toBe(text);
+    expect(decodeResult.message).toBe(message);
     const weather = decodeResult.raw.wind_data;
     expect(weather.length).toBe(4);
     expect(decodeResult.formatted.items[0].label).toBe("Day of Month");
@@ -153,13 +154,13 @@ describe("Label_H2 02E", () => {
   });
 
   test("decodes invalid message", () => {
-    const text = "02E20INVALID MESSAGE TEXT";
-    const decodeResult = plugin.decode({ text: text });
+    message.text = "02E20INVALID MESSAGE TEXT";
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(false);
     expect(decodeResult.decoder.decodeLevel).toBe("none");
     expect(decodeResult.formatted.description).toBe("Weather Report");
-    expect(decodeResult.message.text).toBe(text);
+    expect(decodeResult.message).toBe(message);
     expect(decodeResult.remaining.text).toBe("02E20INVALID MESSAGE TEXT");
   });
 });

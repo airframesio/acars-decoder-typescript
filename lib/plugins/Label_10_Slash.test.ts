@@ -3,6 +3,7 @@ import { Label_10_Slash } from './Label_10_Slash';
 
 describe('Label_10_Slash', () => {
     let plugin: Label_10_Slash;
+    const message = {label: '10', text: ''};
 
     beforeEach(() => {
         const decoder = new MessageDecoder();
@@ -20,8 +21,8 @@ describe('Label_10_Slash', () => {
       });
 
       test('decodes Label 10 Preamble / variant 1', () => {
-        const text = '/N39.182/W077.217/10/0.42/180/055/KIAD/0004/0028/00015/MOWAT/HUSEL/2349/YACKK/2352/'
-        const decodeResult = plugin.decode({ text: text });
+        message.text = '/N39.182/W077.217/10/0.42/180/055/KIAD/0004/0028/00015/MOWAT/HUSEL/2349/YACKK/2352/'
+        const decodeResult = plugin.decode(message);
 
         expect(decodeResult.decoded).toBe(true);
         expect(decodeResult.decoder.decodeLevel).toBe('partial');
@@ -42,8 +43,8 @@ describe('Label_10_Slash', () => {
     });
 
     test('decodes Label 10 Preamble / variant 2', () => {
-      const text = '/N39.019/W078.468/10/0.83/246/400/KCVG/0155/0073/00018/COLNS/STEVY/0120/FAIIR/0126/KTEB/'
-      const decodeResult = plugin.decode({ text: text });
+      message.text = '/N39.019/W078.468/10/0.83/246/400/KCVG/0155/0073/00018/COLNS/STEVY/0120/FAIIR/0126/KTEB/'
+      const decodeResult = plugin.decode(message);
 
       expect(decodeResult.decoded).toBe(true);
       expect(decodeResult.decoder.decodeLevel).toBe('partial');
@@ -68,13 +69,13 @@ describe('Label_10_Slash', () => {
 
     test('decodes Label 10 Preamble / <invalid>', () => {
       
-        const text = '/Bogus Message/';
-        const decodeResult = plugin.decode({ text: text });
+        message.text = '/Bogus Message/';
+        const decodeResult = plugin.decode(message);
       
         expect(decodeResult.decoded).toBe(false);
         expect(decodeResult.decoder.decodeLevel).toBe('none');
         expect(decodeResult.decoder.name).toBe('label-10-slash');
         expect(decodeResult.formatted.description).toBe('Position Report');
-        expect(decodeResult.message.text).toBe(text);
+        expect(decodeResult.message).toBe(message);
       });
 });

@@ -3,6 +3,7 @@ import { Label_1L_660 } from './Label_1L_660';
 
 describe('Label_1L 660', () => {
     let plugin: Label_1L_660;
+    const message = { label: '1L', text: '' };
 
     beforeEach(() => {
         const decoder = new MessageDecoder();
@@ -21,8 +22,8 @@ describe('Label_1L 660', () => {
 
       test('decodes  variant 1', () => {
         // https://app.airframes.io/messages/3492135103
-        const text = '000000660N50442E005566,100444359SOG-06 ,,--- 21-,83617441'
-        const decodeResult = plugin.decode({ text: text });
+        message.text = '000000660N50442E005566,100444359SOG-06 ,,--- 21-,83617441'
+        const decodeResult = plugin.decode(message);
 
         expect(decodeResult.decoded).toBe(true);
         expect(decodeResult.decoder.decodeLevel).toBe('partial');
@@ -44,13 +45,13 @@ describe('Label_1L 660', () => {
 
     test('does not decode <invalid>', () => {
       
-        const text = 'POS Bogus Message';
-        const decodeResult = plugin.decode({ text: text });
+        message.text = 'POS Bogus Message';
+        const decodeResult = plugin.decode(message);
       
         expect(decodeResult.decoded).toBe(false);
         expect(decodeResult.decoder.decodeLevel).toBe('none');
         expect(decodeResult.decoder.name).toBe('label-1l-660');
         expect(decodeResult.formatted.description).toBe('Position Report');
-        expect(decodeResult.message.text).toBe(text);
+        expect(decodeResult.message).toBe(message);
       });
 });

@@ -3,6 +3,7 @@ import { Label_24_Slash } from './Label_24_Slash';
 
 describe('Label_24_Slash', () => {
   let plugin: Label_24_Slash;
+  const message = {label: '24', text: ''};
 
   beforeEach(() => {
     const decoder = new MessageDecoder();
@@ -22,8 +23,8 @@ describe('Label_24_Slash', () => {
 
   test('valid', () => {
     // https://app.airframes.io/messages/3439806391
-    const text = '/241710/1021/04WM/34962/N53.13/E001.33/3374/1056/';
-    const decodeResult = plugin.decode({ text: text });
+    message.text = '/241710/1021/04WM/34962/N53.13/E001.33/3374/1056/';
+    const decodeResult = plugin.decode(message);
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.raw.message_timestamp).toBe(1729160460);
@@ -47,11 +48,11 @@ describe('Label_24_Slash', () => {
 
   test('does not decode invalid', () => {
 
-    const text = '/ Bogus message';
-    const decodeResult = plugin.decode({ text: text });
+    message.text = '/ Bogus message';
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(false);
     expect(decodeResult.decoder.decodeLevel).toBe('none');
-    expect(decodeResult.message.text).toBe(text);
+    expect(decodeResult.message).toBe(message);
   });
 });

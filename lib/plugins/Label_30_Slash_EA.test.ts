@@ -1,26 +1,33 @@
 import { MessageDecoder } from '../MessageDecoder';
 import { Label_30_Slash_EA } from './Label_30_Slash_EA';
 
-test('decodes Label 30 sample 1', () => {
-  const decoder = new MessageDecoder();
-  const decoderPlugin = new Label_30_Slash_EA(decoder);
+describe('Label 30 preamble /EA', () => {
+  let plugin: Label_30_Slash_EA;
+  const message = {label: '30', text: ''};
 
-  expect(decoderPlugin.decode).toBeDefined();
-  expect(decoderPlugin.name).toBe('label-30-slash-ea');
-  expect(decoderPlugin.qualifiers).toBeDefined();
-  expect(decoderPlugin.qualifiers()).toEqual({
+  beforeEach(() => {
+    const decoder = new MessageDecoder();
+    plugin = new Label_30_Slash_EA(decoder);
+  });
+
+test('matches qualfiers', () => {
+  expect(plugin.decode).toBeDefined();
+  expect(plugin.name).toBe('label-30-slash-ea');
+  expect(plugin.qualifiers).toBeDefined();
+  expect(plugin.qualifiers()).toEqual({
     labels: ['30'],
     preambles: ['/EA'],
   });
-
-  const text = '/EA1719/DSKSFO/SK23';
-  const decodeResult = decoderPlugin.decode({ text: text });
+});
+test('decodes variant 1', () => {
+  message.text = '/EA1719/DSKSFO/SK23';
+  const decodeResult = plugin.decode(message);
   
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
   expect(decodeResult.decoder.name).toBe('label-30-slash-ea');
   expect(decodeResult.formatted.description).toBe('ETA Report');
-  expect(decodeResult.message.text).toBe(text);
+  expect(decodeResult.message).toBe(message);
   expect(decodeResult.raw.arrival_icao).toBe('KSFO');
   expect(decodeResult.formatted.items.length).toBe(2);
   expect(decodeResult.formatted.items[0].type).toBe('time_of_day');
@@ -31,4 +38,5 @@ test('decodes Label 30 sample 1', () => {
   expect(decodeResult.formatted.items[1].code).toBe('DST');
   expect(decodeResult.formatted.items[1].label).toBe('Destination');
   expect(decodeResult.formatted.items[1].value).toBe('KSFO');
+});
 });

@@ -4,6 +4,7 @@ import { Label_2P_POS } from './Label_2P_POS';
 describe('Label_2P Preamble POS', () => {
 
   let plugin: Label_2P_POS;
+  const message = { label: '2P', text: '' };
 
   beforeEach(() => {
     const decoder = new MessageDecoder();
@@ -12,13 +13,13 @@ describe('Label_2P Preamble POS', () => {
 
   test('variant 1', () => {
     // https://app.airframes.io/messages/4179262958
-    const text = 'M80AMC4086POS/ID50007B,RCH4086,ABB02R70E037/DC10022025,051804/MR103,/ET090738/PSN56012W013273,051804,350,,,,,084081,/CG,,/FB0857/VR0322B89';
-    const decodeResult = plugin.decode({ text: text });
+    message.text = 'M80AMC4086POS/ID50007B,RCH4086,ABB02R70E037/DC10022025,051804/MR103,/ET090738/PSN56012W013273,051804,350,,,,,084081,/CG,,/FB0857/VR0322B89';
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
+    expect(decodeResult.message).toBe(message);
     expect(decodeResult.formatted.description).toBe('Position Report');
-    expect(decodeResult.message.text).toBe(text);
     expect(decodeResult.raw.flight_number).toBe('RCH4086');
     expect(decodeResult.raw.tail).toBe('50007B');
     expect(decodeResult.raw.mission_number).toBe('ABB02R70E037');
@@ -39,8 +40,8 @@ describe('Label_2P Preamble POS', () => {
 
   test('<invalid>', () => {
 
-    const text = 'M01AFN1234POS Bogus message';
-    const decodeResult = plugin.decode({ text: text });
+    message.text = 'M01AFN1234POS Bogus message';
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(false);
     expect(decodeResult.decoder.decodeLevel).toBe('none');

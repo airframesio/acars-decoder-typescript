@@ -3,6 +3,7 @@ import { Label_H1_Slash } from './Label_H1_Slash';
 
 describe('Label H1 /', () => {
   let plugin: Label_H1_Slash;
+  const message = {label: 'H1', text: ''};
 
   beforeEach(() => {
     const decoder = new MessageDecoder();
@@ -21,8 +22,8 @@ describe('Label H1 /', () => {
 
   test('decodes variant 1', () => {
     // https://app.airframes.io/messages/2500488708
-    const text = '/.POS/TS100316,210324/PSS35333W058220,,100316,250,S37131W059150,101916,S39387W060377,M23,27282,241,780,MANUAL,0,813E711';
-    const decodeResult = plugin.decode({ text: text });
+    message.text = '/.POS/TS100316,210324/PSS35333W058220,,100316,250,S37131W059150,101916,S39387W060377,M23,27282,241,780,MANUAL,0,813E711';
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
@@ -43,8 +44,8 @@ describe('Label H1 /', () => {
   });
 
   test('decodes variant 2', () => {
-    const text = '/HDQDLUA.POSN38332W080082,RONZZ,135753,320,LEVII,140454,WISTA,M45,20967,194/GAHDQDLUA/CA/TS135753,1411240721';
-    const decodeResult = plugin.decode({ text: text });
+    message.text = '/HDQDLUA.POSN38332W080082,RONZZ,135753,320,LEVII,140454,WISTA,M45,20967,194/GAHDQDLUA/CA/TS135753,1411240721';
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
@@ -65,8 +66,8 @@ describe('Label H1 /', () => {
   });
 
   test('decodes variant 3', () => {
-    const text = '/.POS/TS140122,141124N38321W078003,,140122,450,,140122,,M56,24739,127,8306763';
-    const decodeResult = plugin.decode({ text: text });
+    message.text = '/.POS/TS140122,141124N38321W078003,,140122,450,,140122,,M56,24739,127,8306763';
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
@@ -88,11 +89,11 @@ describe('Label H1 /', () => {
 
   test('does not decode invalid', () => {
 
-    const text = '/.POS Bogus message';
-    const decodeResult = plugin.decode({ text: text });
+    message.text = '/.POS Bogus message';
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(false);
     expect(decodeResult.decoder.decodeLevel).toBe('none');
-    expect(decodeResult.message.text).toBe(text);
+    expect(decodeResult.message).toBe(message);
   });
 });

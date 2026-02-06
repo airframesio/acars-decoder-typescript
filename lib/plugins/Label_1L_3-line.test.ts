@@ -3,6 +3,7 @@ import { Label_1L_3Line } from './Label_1L_3-line';
 
 describe('Label_1L 3-line', () => {
   let plugin: Label_1L_3Line;
+  const message = { label: '1L', text: '' };
 
   beforeEach(() => {
     const decoder = new MessageDecoder();
@@ -19,10 +20,10 @@ describe('Label_1L 3-line', () => {
   });
 
   test('decodes variant 1', () => {
-    const text = '00018213200/GS 411500/DEP MDPC/DES CYYZ/ETA 0120/GW 479/ALT 39002' + '\r\n' +
+    message.text = '00018213200/GS 411500/DEP MDPC/DES CYYZ/ETA 0120/GW 479/ALT 39002' + '\r\n' +
       'CAS 229/SAT - 59.0/FN SWG9040/TFQ 48/DAY 22OCT24/UTC 002714' + '\r\n' +
       'LON W 78.289/LAT N 39.556/WD  20/WS  13'
-    const decodeResult = plugin.decode({ text: text });
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
@@ -51,10 +52,10 @@ describe('Label_1L 3-line', () => {
   });
 
   test('decodes no position', () => {
-    const text = '00086213200/GS 497000/DEP CYUL/DES MDPC/ETA 1705/GW 700/ALT 37002' + '\r\n' +
+    message.text = '00086213200/GS 497000/DEP CYUL/DES MDPC/ETA 1705/GW 700/ALT 37002' + '\r\n' +
       'CAS/SAT   15.0/FN SWG4426/TFQ 111/DAY 26SEP24/UTC 135139' + '\r\n' +
       'LON MMMM.MMM/LAT MMMM.MMM/WD ---/WS ---'
-    const decodeResult = plugin.decode({ text: text });
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
@@ -81,13 +82,12 @@ describe('Label_1L 3-line', () => {
 
   test('does not decode <invalid>', () => {
 
-    const text = 'POS Bogus Message';
-    const decodeResult = plugin.decode({ text: text });
+    message.text = 'POS Bogus Message';
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(false);
     expect(decodeResult.decoder.decodeLevel).toBe('none');
     expect(decodeResult.decoder.name).toBe('label-1l-3-line');
     expect(decodeResult.formatted.description).toBe('Position Report');
-    expect(decodeResult.message.text).toBe(text);
   });
 });

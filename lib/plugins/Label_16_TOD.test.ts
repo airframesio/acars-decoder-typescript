@@ -4,6 +4,7 @@ import { Label_16_TOD } from './Label_16_TOD';
 describe('Label 16 Time of Day', () => {
 
   let plugin: Label_16_TOD;
+  const message = {label: '16', text: ''};
 
   beforeEach(() => {
     const decoder = new MessageDecoder();
@@ -20,14 +21,14 @@ describe('Label 16 Time of Day', () => {
   });
 
   test('decodes variant 1', () => {
-    const text = '005236,36787,0135,  97,N 38.364 W 75.226';
-    const decodeResult = plugin.decode({ text: text });
+    message.text = '005236,36787,0135,  97,N 38.364 W 75.226';
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.decoder.name).toBe('label-16-tod');
     expect(decodeResult.formatted.description).toBe('Position Report');
-    expect(decodeResult.message.text).toBe(text);
+    expect(decodeResult.message).toBe(message);
     expect(decodeResult.formatted.items.length).toBe(4);
     expect(decodeResult.formatted.items[0].label).toBe('Message Timestamp');
     expect(decodeResult.formatted.items[0].value).toBe('00:52:36');
@@ -42,14 +43,14 @@ describe('Label 16 Time of Day', () => {
 
   test('decodes variant 2', () => {
     // https://app.airframes.io/messages/4260590297
-    const text = '110112,36000,1206, 51,N 45.140 E 16.341/SXS7SL';
-    const decodeResult = plugin.decode({ text: text });
+    message.text = '110112,36000,1206, 51,N 45.140 E 16.341/SXS7SL';
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.decoder.name).toBe('label-16-tod');
     expect(decodeResult.formatted.description).toBe('Position Report');
-    expect(decodeResult.message.text).toBe(text);
+    expect(decodeResult.message).toBe(message);
     expect(decodeResult.formatted.items.length).toBe(5);
     expect(decodeResult.formatted.items[0].label).toBe('Message Timestamp');
     expect(decodeResult.formatted.items[0].value).toBe('11:01:12');
@@ -67,14 +68,14 @@ describe('Label 16 Time of Day', () => {
 
   test('decodes no position', () => {
     // https://app.airframes.io/messages/4260590899
-    const text = '110122,,1206, 92,N . MMMM.MMM';
-    const decodeResult = plugin.decode({ text: text });
+    message.text = '110122,,1206, 92,N . MMMM.MMM';
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.decoder.name).toBe('label-16-tod');
     expect(decodeResult.formatted.description).toBe('Position Report');
-    expect(decodeResult.message.text).toBe(text);
+    expect(decodeResult.message).toBe(message);
     expect(decodeResult.formatted.items.length).toBe(2);
     expect(decodeResult.formatted.items[0].label).toBe('Message Timestamp');
     expect(decodeResult.formatted.items[0].value).toBe('11:01:22');
@@ -84,13 +85,13 @@ describe('Label 16 Time of Day', () => {
   });
 
   test('decodes Label 16 variant <invalid>', () => {
-    const text = 'N Bogus message';
-    const decodeResult = plugin.decode({ text: text });
+    message.text = 'N Bogus message';
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(false);
     expect(decodeResult.decoder.decodeLevel).toBe('none');
     expect(decodeResult.decoder.name).toBe('label-16-tod');
     expect(decodeResult.formatted.description).toBe('Position Report');
-    expect(decodeResult.message.text).toBe(text);
+    expect(decodeResult.message).toBe(message);
   });
 });

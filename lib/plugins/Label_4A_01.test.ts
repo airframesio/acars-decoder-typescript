@@ -1,32 +1,35 @@
 import { MessageDecoder } from '../MessageDecoder';
 import { Label_4A_01 } from './Label_4A_01';
 
-test('matches Label 4A_01  qualifiers', () => {
-  const decoder = new MessageDecoder();
-  const decoderPlugin = new Label_4A_01(decoder);
+describe('Label 4A preamble 01', () => {
+  let plugin : Label_4A_01;
+  const message = { label: '4A', text: '' };
 
-  expect(decoderPlugin.decode).toBeDefined();
-  expect(decoderPlugin.name).toBe('label-4a-01');
-  expect(decoderPlugin.qualifiers).toBeDefined();
-  expect(decoderPlugin.qualifiers()).toEqual({
+  beforeEach(() => {
+    const decoder = new MessageDecoder();
+    plugin = new Label_4A_01(decoder);
+  });
+
+test('matches qualifiers', () => {
+  expect(plugin.decode).toBeDefined();
+  expect(plugin.name).toBe('label-4a-01');
+  expect(plugin.qualifiers).toBeDefined();
+  expect(plugin.qualifiers()).toEqual({
     labels: ['4A'],
     preambles: ['01'],
   });
 });
 
-test('decodes Label 4A_01', () => {
-  const decoder = new MessageDecoder();
-  const decoderPlugin = new Label_4A_01(decoder);
-
+test('decodes variant 1', () => {
   // https://app.airframes.io/messages/3450562911
-  const text = '01DCAP VIR41R/190203EGLLKSFO\r\n+ 1418158.0+ 24.8';
-  const decodeResult = decoderPlugin.decode({ text: text });
+  message.text = '01DCAP VIR41R/190203EGLLKSFO\r\n+ 1418158.0+ 24.8';
+  const decodeResult = plugin.decode(message);
   
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
   expect(decodeResult.decoder.name).toBe('label-4a-01');
   expect(decodeResult.formatted.description).toBe('Latest New Format');
-  expect(decodeResult.message.text).toBe(text);
+  expect(decodeResult.message).toBe(message);
   expect(decodeResult.remaining.text).toBe('158.0');
   expect(decodeResult.formatted.items.length).toBe(7);
   expect(decodeResult.formatted.items[0].code).toBe('STATE_CHANGE');
@@ -50,12 +53,13 @@ test.skip('decodes Label 4A_01 <invalid>', () => {
   const decoder = new MessageDecoder();
   const decoderPlugin = new Label_4A_01(decoder);
 
-  const text = '4A_01 Bogus message';
-  const decodeResult = decoderPlugin.decode({ text: text });
+  message.text = '4A_01 Bogus message';
+  const decodeResult = decoderPlugin.decode(message);
   
   expect(decodeResult.decoded).toBe(false);
   expect(decodeResult.decoder.decodeLevel).toBe('none');
   expect(decodeResult.decoder.name).toBe('label-4a-01');
   expect(decodeResult.formatted.description).toBe('Latest New Format');
   expect(decodeResult.formatted.items.length).toBe(0);
+});
 });

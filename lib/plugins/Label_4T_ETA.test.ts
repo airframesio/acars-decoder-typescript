@@ -4,6 +4,7 @@ import { Label_4T_ETA } from './Label_4T_ETA';
 describe('Label 4T ETA', () => {
 
   let plugin: Label_4T_ETA;
+  const message = {label: '4T', text: ''};
 
   beforeEach(() => {
     const decoder = new MessageDecoder();
@@ -23,9 +24,9 @@ describe('Label 4T ETA', () => {
 
   
   test('decodes msg 1', () => {
-    const text = 'ETA AC7221/13/14 YYZ 0902Z';
+    message.text = 'ETA AC7221/13/14 YYZ 0902Z';
 
-    const decodeResult = plugin.decode({ text: text });
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('full');
@@ -46,8 +47,8 @@ describe('Label 4T ETA', () => {
 
   test('decodes <invalid>', () => {
 
-    const text = 'ETA Bogus message';
-    const decodeResult = plugin.decode({ text: text });
+    message.text = 'ETA Bogus message';
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(false);
     expect(decodeResult.decoder.decodeLevel).toBe('none');

@@ -4,6 +4,7 @@ import { Label_1J_2J_FTX } from './Label_1J_2J_FTX';
 describe('Label 1J/2J FTX', () => {
 
   let plugin: Label_1J_2J_FTX;
+  let message =  { label: '1J', text: '' };
 
   beforeEach(() => {
     const decoder = new MessageDecoder();
@@ -13,8 +14,8 @@ describe('Label 1J/2J FTX', () => {
 
   test('decodes Label 1J', () => {
     // https://app.airframes.io/messages/4178692503
-    const text = 'FTX/ID50007B,RCH4086,ABB02R70E037/MR6,/FX4 QTR PHILLY UP 37-6307A'
-    const decodeResult = plugin.decode({ text: text });
+    message.text = 'FTX/ID50007B,RCH4086,ABB02R70E037/MR6,/FX4 QTR PHILLY UP 37-6307A'
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
@@ -34,8 +35,8 @@ describe('Label 1J/2J FTX', () => {
   // Disabled due to checksum mismatch. Possibly copy-paste issue due to non-ascii characters in message?
   test('decodes Label 2J', () => {
     // https://app.airframes.io/messages/4178362466
-    const text = 'M74AMC4086FTX/ID50007B,RCH4086,ABB02R70E037/DC10022025,011728/MR049,/FXGOOD EVENING PLEASE PASS US THE SUPER BOWL SCORE WHEN ABLE. THANK YOU/FB1791/VR0328D70'
-    const decodeResult = plugin.decode({ text: text });
+    message.text = 'M74AMC4086FTX/ID50007B,RCH4086,ABB02R70E037/DC10022025,011728/MR049,/FXGOOD EVENING PLEASE PASS US THE SUPER BOWL SCORE WHEN ABLE. THANK YOU/FB1791/VR0328D70'
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
@@ -53,12 +54,12 @@ describe('Label 1J/2J FTX', () => {
 
   test('decodes <invalid>', () => {
 
-    const text = 'FTX Bogus message';
-    const decodeResult = plugin.decode({ text: text });
+    message.text = 'FTX Bogus message';
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(false);
     expect(decodeResult.decoder.decodeLevel).toBe('none');
     expect(decodeResult.formatted.description).toBe('Unknown');
-    expect(decodeResult.message.text).toBe(text);
+    expect(decodeResult.message).toBe(message);
   });
 });

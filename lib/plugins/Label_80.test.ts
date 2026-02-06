@@ -4,6 +4,7 @@ import { Label_80 } from './Label_80';
 describe('Label 80', () => {
 
   let plugin : Label_80;
+  const message = {label: '80', text: ''};
 
     beforeEach(() => {
       const decoder = new MessageDecoder();
@@ -21,8 +22,8 @@ test('matches qualifiers', () => {
 
 test('decodes POSRPT variant 1', () => {
   // https://app.airframes.io/messages/377573108
-  const text = '3N01 POSRPT 5891/04 KIAH/MMGL .XA-VOI\r\n/POS N29395W095133/ALT +15608/MCH 558/FOB 0100/ETA 0410';
-  const decodeResult = plugin.decode({ text: text });
+  message.text = '3N01 POSRPT 5891/04 KIAH/MMGL .XA-VOI\r\n/POS N29395W095133/ALT +15608/MCH 558/FOB 0100/ETA 0410';
+  const decodeResult = plugin.decode(message);
 
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
@@ -42,8 +43,8 @@ test('decodes POSRPT variant 1', () => {
 });
 test('decodes POSRPT variant 2', () => {
   // https://app.airframes.io/messages/2416917371
-  const text = '3N01 POSRPT 0581/27 KIAD/MSLP .N962AV/04H 11:02\r\n/NWYP CIGAR /HDG 233/MCH 782\r\n/POS N3539.2W07937.2/FL 360/TAS 445/SAT -060\r\n/SWND 110/DWND 306/FOB N009414/ETA 14:26.0 ';
-  const decodeResult = plugin.decode({ text: text });
+  message.text = '3N01 POSRPT 0581/27 KIAD/MSLP .N962AV/04H 11:02\r\n/NWYP CIGAR /HDG 233/MCH 782\r\n/POS N3539.2W07937.2/FL 360/TAS 445/SAT -060\r\n/SWND 110/DWND 306/FOB N009414/ETA 14:26.0 ';
+  const decodeResult = plugin.decode(message);
 
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
@@ -70,8 +71,8 @@ test('decodes POSRPT variant 2', () => {
 });
 
 test('decodes POSRPT variant 3', () => {
-  const text = '/FB 0105/AD KCHS/N3950.1,W07548.3,3P01 POSRPT  0267/20 KBOS/KCHS .N3275J\n/UTC 143605/POS N3950.1 W07548.3/ALT 38007\n/SPD 334/FOB 0105/ETA 1622';
-  const decodeResult = plugin.decode({ text: text });
+  message.text = '/FB 0105/AD KCHS/N3950.1,W07548.3,3P01 POSRPT  0267/20 KBOS/KCHS .N3275J\n/UTC 143605/POS N3950.1 W07548.3/ALT 38007\n/SPD 334/FOB 0105/ETA 1622';
+  const decodeResult = plugin.decode(message);
 
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
@@ -93,8 +94,8 @@ test('decodes POSRPT variant 3', () => {
 });
 
 test('decodes POS variant 1', () => {
-  const text = '3C01 POS N39328W077307  ,,143700,               ,      ,               ,P47,124,0069';
-  const decodeResult = plugin.decode({ text: text });
+  message.text = '3C01 POS N39328W077307  ,,143700,               ,      ,               ,P47,124,0069';
+  const decodeResult = plugin.decode(message);
 
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
@@ -109,8 +110,8 @@ test('decodes POS variant 1', () => {
 });
 
 test('decodes OPNORM variant 1', () => {
-  const text = '3M01 OPNORM 0411/20 KEWR/MMMX .XA-MAT ';
-  const decodeResult = plugin.decode({ text: text });
+  message.text = '3M01 OPNORM 0411/20 KEWR/MMMX .XA-MAT ';
+  const decodeResult = plugin.decode(message);
 
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.raw.flight_number).toBe('0411');
@@ -124,8 +125,8 @@ test('decodes OPNORM variant 1', () => {
 
 
 test('decodes INRANG variant 1', () => {
-  const text = '3701 INRANG 3451/20 KSBD/KBWI .N613AZ\n/ETA 1254/ERT      ';
-  const decodeResult = plugin.decode({ text: text });
+  message.text = '3701 INRANG 3451/20 KSBD/KBWI .N613AZ\n/ETA 1254/ERT      ';
+  const decodeResult = plugin.decode(message);
 
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
@@ -141,8 +142,8 @@ test('decodes INRANG variant 1', () => {
 
 
 test('does not decode invalid messages', () => {
-  const text = '3N01 POSRPT Bogus message';
-  const decodeResult = plugin.decode({ text: text });
+  message.text = '3N01 POSRPT Bogus message';
+  const decodeResult = plugin.decode(message);
 
   expect(decodeResult.decoded).toBe(false);
   expect(decodeResult.decoder.decodeLevel).toBe('none');

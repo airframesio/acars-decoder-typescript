@@ -1,27 +1,29 @@
 import { MessageDecoder } from '../MessageDecoder';
 import { Label_QQ } from './Label_QQ';
 
-test('matches Label QQ qualifiers', () => {
-  const decoder = new MessageDecoder();
-  const decoderPlugin = new Label_QQ(decoder);
+describe('Label QQ', () => {
+  let plugin: Label_QQ;
+  const message = {label: 'QQ', text: ''};
+  beforeEach(() => {
+    const decoder = new MessageDecoder();
+    plugin = new Label_QQ(decoder);
+  });
 
-  expect(decoderPlugin.decode).toBeDefined();
-  expect(decoderPlugin.name).toBe('label-qq');
+test('matches Label QQ qualifiers', () => {
+  expect(plugin.decode).toBeDefined();
+  expect(plugin.name).toBe('label-qq');
 });
 
 test('decodes Label QQ variant 1', () => {
-  const decoder = new MessageDecoder();
-  const decoderPlugin = new Label_QQ(decoder);
-
   // https://app.airframes.io/messages/3409269161
-  const text = 'KSDLKLAS0025\r\n001FE09002543N3336.6W11155.90281750042';
-  const decodeResult = decoderPlugin.decode({ text: text });
-  
+  message.text = 'KSDLKLAS0025\r\n001FE09002543N3336.6W11155.90281750042';
+  const decodeResult = plugin.decode(message);
+
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
   expect(decodeResult.decoder.name).toBe('label-qq');
   expect(decodeResult.formatted.description).toBe('OFF Report');
-  expect(decodeResult.message.text).toBe(text);
+  expect(decodeResult.message).toBe(message);
   expect(decodeResult.raw.departure_icao).toBe('KSDL');
   expect(decodeResult.raw.arrival_icao).toBe('KLAS');
   expect(decodeResult.raw.day).toBe('09');
@@ -53,18 +55,15 @@ test('decodes Label QQ variant 1', () => {
 });
 
 test('decodes Label QQ variant 2', () => {
-  const decoder = new MessageDecoder();
-  const decoderPlugin = new Label_QQ(decoder);
-
   // https://app.airframes.io/messages/3406443370
-  const text = 'KLGBKLAX0004\r\n001FE07000444N3349.8W11810.1---0200009';
-  const decodeResult = decoderPlugin.decode({ text: text });
-  
+  message.text = 'KLGBKLAX0004\r\n001FE07000444N3349.8W11810.1---0200009';
+  const decodeResult = plugin.decode(message);
+
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
   expect(decodeResult.decoder.name).toBe('label-qq');
   expect(decodeResult.formatted.description).toBe('OFF Report');
-  expect(decodeResult.message.text).toBe(text);
+  expect(decodeResult.message).toBe(message);
   expect(decodeResult.raw.departure_icao).toBe('KLGB');
   expect(decodeResult.raw.arrival_icao).toBe('KLAX');
   expect(decodeResult.raw.day).toBe('07');
@@ -91,18 +90,15 @@ test('decodes Label QQ variant 2', () => {
 });
 
 test('decodes Label QQ variant 3', () => {
-  const decoder = new MessageDecoder();
-  const decoderPlugin = new Label_QQ(decoder);
-
   // https://app.airframes.io/messages/3409293914
-  const text = 'CYOWKMEM0058/OFFRPT/090155';
-  const decodeResult = decoderPlugin.decode({ text: text });
+  message.text = 'CYOWKMEM0058/OFFRPT/090155';
+  const decodeResult = plugin.decode(message);
   
   expect(decodeResult.decoded).toBe(true);
   expect(decodeResult.decoder.decodeLevel).toBe('partial');
   expect(decodeResult.decoder.name).toBe('label-qq');
   expect(decodeResult.formatted.description).toBe('OFF Report');
-  expect(decodeResult.message.text).toBe(text);
+  expect(decodeResult.message).toBe(message);
   expect(decodeResult.raw.departure_icao).toBe('CYOW');
   expect(decodeResult.raw.arrival_icao).toBe('KMEM');
   expect(decodeResult.remaining.text).toBe('/OFFRPT/090155');
@@ -123,15 +119,13 @@ test('decodes Label QQ variant 3', () => {
 
 // disabled because all messages should decode
 test.skip('decodes Label QQ <invalid>', () => {
-  const decoder = new MessageDecoder();
-  const decoderPlugin = new Label_QQ(decoder);
-
-  const text = 'QQ Bogus message';
-  const decodeResult = decoderPlugin.decode({ text: text });
+  message.text = 'QQ Bogus message';
+  const decodeResult = plugin.decode(message);
   
   expect(decodeResult.decoded).toBe(false);
   expect(decodeResult.decoder.decodeLevel).toBe('none');
   expect(decodeResult.decoder.name).toBe('label-qq');
   expect(decodeResult.formatted.description).toBe('OFF Report');
   expect(decodeResult.formatted.items.length).toBe(0);
+});
 });

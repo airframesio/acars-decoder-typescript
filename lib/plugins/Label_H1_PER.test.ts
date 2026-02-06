@@ -4,6 +4,7 @@ import { Label_H1 } from './Label_H1';
 describe('Label_H1 PER', () => {
 
   let plugin: Label_H1;
+  const message = {label: 'H1', text: ''};
 
   beforeEach(() => {
     const decoder = new MessageDecoder();
@@ -12,8 +13,8 @@ describe('Label_H1 PER', () => {
 
 
   test('decodes short variant', () => {
-    const text = 'PER/PR1337,262,320,222,,60,24,275103,M53,180,P52,P02917'
-    const decodeResult = plugin.decode({ text: text });
+    message.text = 'PER/PR1337,262,320,222,,60,24,275103,M53,180,P52,P02917'
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
@@ -23,8 +24,8 @@ describe('Label_H1 PER', () => {
   });
 
   test('long variant', () => {
-    const text = 'PER/PR1218,276,340,134,,0,68,,M56,180,,,P30,P0,33936,,1084,284388D'
-    const decodeResult = plugin.decode({ text: text });
+    message.text = 'PER/PR1218,276,340,134,,0,68,,M56,180,,,P30,P0,33936,,1084,284388D'
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
@@ -35,12 +36,12 @@ describe('Label_H1 PER', () => {
 
   test('does not decode invalid message', () => {
 
-    const text = 'PER Bogus message';
-    const decodeResult = plugin.decode({ text: text });
+    message.text = 'PER Bogus message';
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(false);
     expect(decodeResult.decoder.decodeLevel).toBe('none');
     expect(decodeResult.formatted.description).toBe('Unknown');
-    expect(decodeResult.message.text).toBe(text);
+    expect(decodeResult.message).toBe(message);
   });
 });

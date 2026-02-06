@@ -4,6 +4,7 @@ import { Label_H1 } from './Label_H1';
 describe('Label_H1 POS', () => {
 
   let plugin: Label_H1;
+  const message = {label: 'H1', text: ''};
 
   beforeEach(() => {
     const decoder = new MessageDecoder();
@@ -13,8 +14,8 @@ describe('Label_H1 POS', () => {
 
   test('decodes Label H1 Preamble PRG message', () => {
     // https://app.airframes.io/messages/2400672008
-    const text = 'PRG/FNEXS67TP/DTEGPF,23O,67,214405,298262';
-    const decodeResult = plugin.decode({ text: text });
+    message.text = 'PRG/FNEXS67TP/DTEGPF,23O,67,214405,298262';
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('full');
@@ -37,8 +38,8 @@ describe('Label_H1 POS', () => {
 
   test('decodes Label H1 Preamble PRG/LR', () => {
     // https://app.airframes.io/messages/2400672684
-    const text = 'PRG/LR,000855,SWA786,KBWI,KBOS,04R,25,1285,1192,93,1284,P4,001004,8,141K,D713,000950,2,291483';
-    const decodeResult = plugin.decode({ text: text });
+    message.text = 'PRG/LR,000855,SWA786,KBWI,KBOS,04R,25,1285,1192,93,1284,P4,001004,8,141K,D713,000950,2,291483';
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
@@ -60,8 +61,8 @@ describe('Label_H1 POS', () => {
 
   test('decodes Label H1 Preamble #M1BPRG', () => {
     // https://app.airframes.io/messages/2403492320
-    const text = '#M1BPRG/DTEKCH,22L,69,141204,042/FNSAS87W/TS132645,2402246784';
-    const decodeResult = plugin.decode({ text: text });
+    message.text = '#M1BPRG/DTEKCH,22L,69,141204,042/FNSAS87W/TS132645,2402246784';
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('full');
@@ -85,8 +86,8 @@ describe('Label_H1 POS', () => {
 
   test('decodes Label H1 PRG with flightplan', () => {
     // https://app.airframes.io/messages/2403398879
-    const text = 'PRG/DTGCRR,03O,62,163055/PR1544,286,350,239,,0,66,,,50,,,P19,P0,27440,,1305,303/RP:DA:EDDB:AA:GCRR..N50059E004552..N49588E004338..N49241E002528..N49122E002199..PON.UN872..ERIGA..FUJTI:WS:FUJTI,360..BAKUP..BATAX..TAKAV..VEDOD:A:TERT1P:AP:ILSZ03.BAPAL(03O)226D';
-    const decodeResult = plugin.decode({ text: text });
+    message.text = 'PRG/DTGCRR,03O,62,163055/PR1544,286,350,239,,0,66,,,50,,,P19,P0,27440,,1305,303/RP:DA:EDDB:AA:GCRR..N50059E004552..N49588E004338..N49241E002528..N49122E002199..PON.UN872..ERIGA..FUJTI:WS:FUJTI,360..BAKUP..BATAX..TAKAV..VEDOD:A:TERT1P:AP:ILSZ03.BAPAL(03O)226D';
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
@@ -118,8 +119,8 @@ describe('Label_H1 POS', () => {
 
   // TODO Fix this test
   test.skip('decodes named runway', () => {
-    const text = 'PRG/DT,KMDW,31R,62,031854,524,N38584W077333,171,732B3C';
-    const decodeResult = plugin.decode({ text: text });
+    message.text = 'PRG/DT,KMDW,31R,62,031854,524,N38584W077333,171,732B3C';
+    const decodeResult = plugin.decode(message);
     console.log(JSON)
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
@@ -133,8 +134,8 @@ describe('Label_H1 POS', () => {
   });
 
   test('decodes Label H1 Preamble PRG <invalid>', () => {
-    const text = 'PRG Bogus message';
-    const decodeResult = plugin.decode({ text: text });
+    message.text = 'PRG Bogus message';
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(false);
     expect(decodeResult.decoder.decodeLevel).toBe('none');

@@ -3,6 +3,7 @@ import { Label_15_FST } from './Label_15_FST';
 
 describe('Label_15_FST', () => {
     let plugin: Label_15_FST;
+    const message = {label: '15', text: ''};
 
     beforeEach(() => {
         const decoder = new MessageDecoder();
@@ -21,8 +22,8 @@ describe('Label_15_FST', () => {
 
 
     test('decodes Label 15 Preamble FST variant 1', () => {
-        const text = 'FST01EGKKKMCON373488W0756927380 156 495 M53C 4427422721045313002518521710'
-        const decodeResult = plugin.decode({ text: text });
+        message.text = 'FST01EGKKKMCON373488W0756927380 156 495 M53C 4427422721045313002518521710'
+        const decodeResult = plugin.decode(message);
         
         expect(decodeResult.decoded).toBe(true);
         expect(decodeResult.decoder.decodeLevel).toBe('partial');
@@ -40,13 +41,13 @@ describe('Label_15_FST', () => {
 
     test('decodes Label 15 Preamble FST <invalid>', () => {
 
-        const text = 'INI Bogus message';
-        const decodeResult = plugin.decode({ text: text });
+        message.text = 'INI Bogus message';
+        const decodeResult = plugin.decode(message);
 
         expect(decodeResult.decoded).toBe(false);
         expect(decodeResult.decoder.decodeLevel).toBe('none');
         expect(decodeResult.decoder.name).toBe('label-15-fst');
         expect(decodeResult.formatted.description).toBe('Position Report');
-        expect(decodeResult.message.text).toBe(text);
+        expect(decodeResult.message).toBe(message);
     });
 });
