@@ -20,7 +20,7 @@ describe("Label_H2 02E", () => {
   });
 
   test("decodes discord example 1", () => {
-    const text =
+    message.text =
       "02E20HEGNLKPRN40359E02208116253601M627259020G    QN41179E02134316323599M617247037G    QN41591E02100516393603M610266040G    QN42393E02026716463602M600276033G    QN43197E01954316533598M592299037G    QN44023E01929517003596M587313033G    Q";
     const decodeResult = plugin.decode(message);
     /*
@@ -71,7 +71,7 @@ describe("Label_H2 02E", () => {
   });
 
   test("decodes discord example 2", () => {
-    const text =
+    message.text =
       "02E20EGKKLBSFN45081E01757116493501M577327021G    QN44401E01903016563499M575352028G    QN44115E02008017033468M550319029G    QN43420E02112317103296M525299036G    QN43125E02214517172023M277271022G    Q";
     const decodeResult = plugin.decode(message);
 
@@ -119,7 +119,7 @@ describe("Label_H2 02E", () => {
 
   test("decodes website example", () => {
     // https://app.airframes.io/messages/6025352132
-    const text =
+    message.text =
       "02E20EIDWKORDN44087W08505523383800M470251091G QN43210W08520623452813M442251113G QN42461W08539523522189M295256121G QN42380W08623723591780M227266100G Q";
     const decodeResult = plugin.decode(message);
 

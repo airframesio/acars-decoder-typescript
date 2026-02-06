@@ -36,7 +36,7 @@ describe("Label 44 Slash", () => {
   });
 
   test("decodes variant 2", () => {
-    const text =
+    message.text =
       " /FB ----/AD KTPA/N 27.971,W 82.558,JBU91,FLS03,KTPA,53988,53988,----,1943,1943,1,1L,VIS1L,0,2,0,,";
     const decodeResult = plugin.decode(message);
     expect(decodeResult.decoded).toBe(true);

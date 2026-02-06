@@ -17,6 +17,8 @@ describe('Label_SQ', () => {
     expect(plugin.qualifiers()).toEqual({
       labels: ['SQ'],
     });
+  });
+
   it('decodes version 2 ARINC ground station squitter with coordinates and frequency', () => {
     message.text = 'V2AA' + '0' + '1X' + 'A' + 'JFK' + 'KJFK' + '3' + '4075' + 'N' + '7398' + 'W' + 'V136975' + '/extra';
     const res = plugin.decode(message);
@@ -77,4 +79,3 @@ describe('Label_SQ', () => {
     expect(items.find(i => i.code === 'VER')?.value).toBe('1');
   });
 });
-  });
