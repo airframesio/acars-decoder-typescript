@@ -1,9 +1,7 @@
 import { MessageDecoder } from '../MessageDecoder';
 import { Label_4N } from './Label_4N';
 
-
 describe('Label 4N', () => {
-
   let plugin: Label_4N;
   const message = { label: '4N', text: '' };
 
@@ -12,9 +10,12 @@ describe('Label 4N', () => {
     plugin = new Label_4N(decoder);
   });
 
-  test('matches qualifiers', () => {
-    expect(plugin.decode).toBeDefined();
-    expect(plugin.name).toBe('label-4n');
+  test('matches Label 4N qualifiers', () => {
+    const decoder = new MessageDecoder();
+    const decoderPlugin = new Label_4N(decoder);
+
+    expect(decoderPlugin.decode).toBeDefined();
+    expect(decoderPlugin.name).toBe('label-4n');
   });
 
   test('decodes Label 4N variant 1', () => {
@@ -26,6 +27,7 @@ describe('Label 4N', () => {
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.decoder.name).toBe('label-4n');
     expect(decodeResult.formatted.description).toBe('Airline Defined');
+    expect(decodeResult.message).toBe(message);
     expect(decodeResult.raw.day).toBe('22');
     expect(decodeResult.remaining.text).toBe('02 0013  0072');
     expect(decodeResult.formatted.items.length).toBe(4);
@@ -39,17 +41,21 @@ describe('Label 4N', () => {
     expect(decodeResult.formatted.items[3].value).toBe('23000 feet');
   });
 
-  test('decodes variant 2B', () => {
+  test('decodes Label 4N variant 2B', () => {
     // https://app.airframes.io/messages/3421601874
-    message.text = '285,B,69005074-507,10/12,+36.081,-094.810,35014,002.3,ELP,SDF,SDF,17R/,17L/,0,0,,,,,,0,0,0,0,1,,,,,247.0,014.2,261.2,421A';
+    message.text =
+      '285,B,69005074-507,10/12,+36.081,-094.810,35014,002.3,ELP,SDF,SDF,17R/,17L/,0,0,,,,,,0,0,0,0,1,,,,,247.0,014.2,261.2,421A';
     const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.decoder.name).toBe('label-4n');
     expect(decodeResult.formatted.description).toBe('Airline Defined');
+    expect(decodeResult.message).toBe(message);
     expect(decodeResult.raw.date).toBe('10/12');
-    expect(decodeResult.remaining.text).toBe('B,69005074-507,002.3,0,0,0,0,0,0,1,247.0,014.2,261.2');
+    expect(decodeResult.remaining.text).toBe(
+      'B,69005074-507,002.3,0,0,0,0,0,0,1,247.0,014.2,261.2',
+    );
     expect(decodeResult.formatted.items.length).toBe(8);
     expect(decodeResult.formatted.items[0].code).toBe('POS');
     expect(decodeResult.formatted.items[0].value).toBe('36.081 N, 94.810 W');
@@ -69,17 +75,21 @@ describe('Label 4N', () => {
     expect(decodeResult.formatted.items[7].value).toBe('0x421a');
   });
 
-  test('decodes variant 2C', () => {
+  test('decodes Label 4N variant 2C', () => {
     // https://globe.adsbexchange.com/?icao=A3E08D&showTrace=2024-09-24&timestamp=1727181643
-    message.text = '285,C,,09/24,,,,,EWR,PHL,PHL,09R/,/,0,0,,,,,,1,0,0,0,1,0,,0,0,198.5,014.5,213.0,9BCD';
+    message.text =
+      '285,C,,09/24,,,,,EWR,PHL,PHL,09R/,/,0,0,,,,,,1,0,0,0,1,0,,0,0,198.5,014.5,213.0,9BCD';
     const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.decoder.name).toBe('label-4n');
     expect(decodeResult.formatted.description).toBe('Airline Defined');
+    expect(decodeResult.message).toBe(message);
     expect(decodeResult.raw.date).toBe('09/24');
-    expect(decodeResult.remaining.text).toBe('C,0,0,1,0,0,0,1,0,0,0,198.5,014.5,213.0');
+    expect(decodeResult.remaining.text).toBe(
+      'C,0,0,1,0,0,0,1,0,0,0,198.5,014.5,213.0',
+    );
     expect(decodeResult.formatted.items.length).toBe(5);
     expect(decodeResult.formatted.items[0].code).toBe('ORG');
     expect(decodeResult.formatted.items[0].value).toBe('EWR');
@@ -93,7 +103,8 @@ describe('Label 4N', () => {
     expect(decodeResult.formatted.items[4].value).toBe('0x9bcd');
   });
 
-  test('does not decode <invalid>', () => {
+
+  test('decodes Label 4N <invalid>', () => {
     message.text = '4N Bogus message';
     const decodeResult = plugin.decode(message);
 

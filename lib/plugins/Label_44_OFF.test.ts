@@ -3,6 +3,7 @@ import { Label_44_OFF } from './Label_44_OFF';
 
 describe('Label 44 OFF', () => {
   let plugin: Label_44_OFF;
+  const message = { label: '44', text: '' };
 
   beforeEach(() => {
     const decoder = new MessageDecoder();
@@ -20,8 +21,8 @@ describe('Label 44 OFF', () => {
   });
 
   test('decodes variant 1', () => {
-    const text = 'OFF02,N39247W077226,KFDK,KSNA,1106,2124,0248,011.1'
-    const decodeResult = plugin.decode({ text: text });
+    message.text = 'OFF02,N39247W077226,KFDK,KSNA,1106,2124,0248,011.1';
+    const decodeResult = plugin.decode(message);
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('full');
     expect(decodeResult.raw.position.latitude).toBe(39.41166666666667);
@@ -46,19 +47,20 @@ describe('Label 44 OFF', () => {
     expect(decodeResult.formatted.items[4].value).toBe('6');
     expect(decodeResult.formatted.items[5].label).toBe('Takeoff Time');
     expect(decodeResult.formatted.items[5].value).toBe('21:24:00');
-    expect(decodeResult.formatted.items[6].label).toBe('Estimated Time of Arrival');
+    expect(decodeResult.formatted.items[6].label).toBe(
+      'Estimated Time of Arrival',
+    );
     expect(decodeResult.formatted.items[6].value).toBe('02:48:00');
     expect(decodeResult.formatted.items[7].label).toBe('Fuel Remaining');
     expect(decodeResult.formatted.items[7].value).toBe('11.1');
   });
 
   test('does not decode invalid', () => {
-
-    const text = '00OFF01 Bogus message';
-    const decodeResult = plugin.decode({ text: text });
+    message.text = '00OFF01 Bogus message';
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(false);
     expect(decodeResult.decoder.decodeLevel).toBe('none');
-    expect(decodeResult.message.text).toBe(text);
+    expect(decodeResult.message).toBe(message);
   });
 });

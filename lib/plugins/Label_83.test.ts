@@ -5,17 +5,21 @@ describe('Label_83', () => {
   let plugin: Label_83;
   let message = { label: '83', text: '' };
 
+describe('Label 83', () => {
+  let plugin: Label_83;
+  const message = { label: '83', text: '' };
+
   beforeEach(() => {
     const decoder = new MessageDecoder();
     plugin = new Label_83(decoder);
   });
-  
-  test('matches qualifiers', () => {
+
+  test('matches Label 83 qualifiers', () => {
     expect(plugin.decode).toBeDefined();
     expect(plugin.name).toBe('label-83');
   });
 
-  test('decodes variant 1', () => {
+  test('decodes Label 83 variant 1', () => {
     // https://globe.adsbexchange.com/?icao=A2A3B5&showTrace=2024-09-22&timestamp=1726967032
     message.text = 'KLAX,KEWR,220103, 40.53,- 74.47, 3836,212, 140.0, 19700';
     const decodeResult = plugin.decode(message);
@@ -24,6 +28,7 @@ describe('Label_83', () => {
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.decoder.name).toBe('label-83');
     expect(decodeResult.formatted.description).toBe('Airline Defined');
+    expect(decodeResult.message).toBe(message);
     expect(decodeResult.raw.departure_icao).toBe('KLAX');
     expect(decodeResult.raw.arrival_icao).toBe('KEWR');
     expect(decodeResult.raw.day).toBe('22');
@@ -48,7 +53,8 @@ describe('Label_83', () => {
     expect(decodeResult.formatted.items[5].value).toBe('140');
   });
 
-  test('decodes variant 2', () => {
+
+  test('decodes Label 83 variant 2', () => {
     // https://globe.adsbexchange.com/?icao=478F43&showTrace=2024-09-22&timestamp=1727022863
     message.text = '4DH3 ETAT2  0907/22 ENGM/KEWR .LN-RKO\r\n/ETA 1641';
     const decodeResult = plugin.decode(message);
@@ -57,6 +63,7 @@ describe('Label_83', () => {
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.decoder.name).toBe('label-83');
     expect(decodeResult.formatted.description).toBe('Airline Defined');
+    expect(decodeResult.message).toBe(message);
     expect(decodeResult.raw.departure_icao).toBe('ENGM');
     expect(decodeResult.raw.arrival_icao).toBe('KEWR');
     expect(decodeResult.raw.day).toBe('22');
@@ -74,15 +81,19 @@ describe('Label_83', () => {
     expect(decodeResult.formatted.items[3].value).toBe('16:41:00');
   });
 
-  test('decodes variant 3', () => {
+  test('decodes Label 83 variant 3', () => {
+    const decoder = new MessageDecoder();
+    const decoderPlugin = new Label_83(decoder);
+
     // https://globe.adsbexchange.com/?icao=AC15A1&showTrace=2024-09-22&timestamp=1726977342
     message.text = '001PR22035539N4038.6W07427.80292500008';
-    const decodeResult = plugin.decode(message);
+    const decodeResult = decoderPlugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.decoder.name).toBe('label-83');
     expect(decodeResult.formatted.description).toBe('Airline Defined');
+    expect(decodeResult.message).toBe(message);
     expect(decodeResult.raw.day).toBe('22');
     expect(decodeResult.raw.position.latitude).toBe(40.64333333333333);
     expect(decodeResult.raw.position.longitude).toBe(-74.46333333333334);
@@ -95,7 +106,35 @@ describe('Label_83', () => {
     expect(decodeResult.formatted.items[1].value).toBe('2925 feet');
   });
 
-  test('does not decode <invalid>', () => {
+  test('decodes Label 83 variant 3 (C-band)', () => {
+    const decoder = new MessageDecoder();
+    const decoderPlugin = new Label_83(decoder);
+
+    // https://app.airframes.io/messages/3413346742
+    message.text = 'M09AXA0001001PR11013423N0556.6E11603.0000000----';
+    const decodeResult = decoderPlugin.decode(message);
+
+    expect(decodeResult.decoded).toBe(true);
+    expect(decodeResult.decoder.decodeLevel).toBe('partial');
+    expect(decodeResult.decoder.name).toBe('label-83');
+    expect(decodeResult.formatted.description).toBe('Airline Defined');
+    expect(decodeResult.message).toBe(message);
+    expect(decodeResult.raw.flight_number).toBe('XA1');
+    expect(decodeResult.raw.day).toBe('11');
+    expect(decodeResult.raw.position.latitude).toBe(5.943333333333333);
+    expect(decodeResult.raw.position.longitude).toBe(116.05);
+    expect(decodeResult.raw.altitude).toBe(0);
+    expect(decodeResult.remaining.text).toBe('0----');
+    expect(decodeResult.formatted.items.length).toBe(3);
+    expect(decodeResult.formatted.items[0].type).toBe('flight_number');
+    expect(decodeResult.formatted.items[0].value).toBe('XA1');
+    expect(decodeResult.formatted.items[1].type).toBe('aircraft_position');
+    expect(decodeResult.formatted.items[1].value).toBe('5.943 N, 116.050 E');
+    expect(decodeResult.formatted.items[2].type).toBe('altitude');
+    expect(decodeResult.formatted.items[2].value).toBe('0 feet');
+  });
+
+  test('decodes Label 83 <invalid>', () => {
     message.text = '83 Bogus message';
     const decodeResult = plugin.decode(message);
 

@@ -5,51 +5,67 @@ import { ResultFormatter } from '../utils/result_formatter';
 
 export class Label_MA extends DecoderPlugin {
   name = 'label-ma';
-  qualifiers() { // eslint-disable-line class-methods-use-this
+  qualifiers() {
     return {
       labels: ['MA'],
     };
   }
 
-  decode(message: Message, options: Options = {}) : DecodeResult {
+  decode(message: Message, options: Options = {}): DecodeResult {
     let decodeResult = this.defaultResult();
     decodeResult.decoder.name = this.name;
     decodeResult.message = message;
 
     const miamResult = MIAMCoreUtils.parse(message.text);
-    if (miamResult.decoded && miamResult.message.data && miamResult.message.data.acars) {
-
+    if (
+      miamResult.decoded &&
+      miamResult.message.data &&
+      miamResult.message.data.acars
+    ) {
       decodeResult.decoded = true;
       ResultFormatter.label(decodeResult, miamResult.message.data.acars.label);
-      if(miamResult.message.data.acars.sublabel) {
-        ResultFormatter.sublabel(decodeResult, miamResult.message.data.acars.sublabel);
+      if (miamResult.message.data.acars.sublabel) {
+        ResultFormatter.sublabel(
+          decodeResult,
+          miamResult.message.data.acars.sublabel,
+        );
       }
-      if(miamResult.message.data.acars.tail) {
-        ResultFormatter.tail(decodeResult, miamResult.message.data.acars.tail.replace('.', ''));
+      if (miamResult.message.data.acars.tail) {
+        ResultFormatter.tail(
+          decodeResult,
+          miamResult.message.data.acars.tail.replace('.', ''),
+        );
       }
 
       const messageText = miamResult.message.data.acars.text;
       // Only transplant message text if the MIAM core decoded message passed CRC and is complete
-      if(miamResult.message.data.crcOk && miamResult.message.data.complete && messageText) {
+      if (
+        miamResult.message.data.crcOk &&
+        miamResult.message.data.complete &&
+        messageText
+      ) {
         decodeResult.decoder.decodeLevel = 'full';
-        const decoded = this.decoder.decode({
-          label: miamResult.message.data.acars.label,
-          sublabel: miamResult.message.data.acars.sublabel,
-          text: messageText,
-        }, options);
+        const decoded = this.decoder.decode(
+          {
+            label: miamResult.message.data.acars.label,
+            sublabel: miamResult.message.data.acars.sublabel,
+            text: messageText,
+          },
+          options,
+        );
 
-        if(decoded.decoded) {
+        if (decoded.decoded) {
           // decodeResult.decoder.decodeLevel = decoded.decoder.decodeLevel;
-          decodeResult.raw = {...decodeResult.raw, ...decoded.raw };
+          decodeResult.raw = { ...decodeResult.raw, ...decoded.raw };
           decodeResult.formatted.items.push(...decoded.formatted.items);
           decodeResult.remaining = decoded.remaining;
         } else {
           ResultFormatter.text(decodeResult, messageText);
-          decodeResult.remaining = {text: messageText};
+          decodeResult.remaining = { text: messageText };
         }
-      } else if(messageText) {
+      } else if (messageText) {
         decodeResult.decoder.decodeLevel = 'partial';
-        decodeResult.remaining = {text: messageText};
+        decodeResult.remaining = { text: messageText };
       } else {
         decodeResult.decoder.decodeLevel = 'partial';
       }

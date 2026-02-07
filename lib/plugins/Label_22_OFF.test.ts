@@ -3,6 +3,7 @@ import { Label_22_OFF } from './Label_22_OFF';
 
 describe('Label 22 OFF', () => {
   let plugin: Label_22_OFF;
+  const message = { label: '22', text: '' };
 
   beforeEach(() => {
     const decoder = new MessageDecoder();
@@ -20,8 +21,8 @@ describe('Label 22 OFF', () => {
   });
 
   test('decodes variant 1', () => {
-    const text = 'OFF01YX3661/25251712KIADKPWM171207  92'
-    const decodeResult = plugin.decode({ text: text });
+    message.text = 'OFF01YX3661/25251712KIADKPWM171207  92';
+    const decodeResult = plugin.decode(message);
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.raw.flight_number).toBe('YX3661');
@@ -50,8 +51,8 @@ describe('Label 22 OFF', () => {
   });
 
   test('decodes variant 2', () => {
-    const text = 'OFF02XA0000/N38568 W077261251152KIADEPRZ1152****1958'
-    const decodeResult = plugin.decode({ text: text });
+    message.text = 'OFF02XA0000/N38568 W077261251152KIADEPRZ1152****1958';
+    const decodeResult = plugin.decode(message);
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.raw.position.latitude).toBe(38.946666666666665);
@@ -76,14 +77,16 @@ describe('Label 22 OFF', () => {
     expect(decodeResult.formatted.items[5].value).toBe('EPRZ');
     expect(decodeResult.formatted.items[6].label).toBe('Takeoff Time');
     expect(decodeResult.formatted.items[6].value).toBe('11:52:00');
-    expect(decodeResult.formatted.items[7].label).toBe('Estimated Time of Arrival');
+    expect(decodeResult.formatted.items[7].label).toBe(
+      'Estimated Time of Arrival',
+    );
     expect(decodeResult.formatted.items[7].value).toBe('19:58:00');
     expect(decodeResult.remaining.text).toBe('****');
   });
 
   test('decodes variant 3', () => {
-    const text = 'OFF02\r\nKBWI,KIND,1237,18.4'
-    const decodeResult = plugin.decode({ text: text });
+    message.text = 'OFF02\r\nKBWI,KIND,1237,18.4';
+    const decodeResult = plugin.decode(message);
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.raw.departure_icao).toBe('KBWI');
@@ -100,13 +103,12 @@ describe('Label 22 OFF', () => {
   });
 
   test('does not decode invalid', () => {
-
-    const text = 'POS Bogus message';
-    const decodeResult = plugin.decode({ text: text });
+    message.text = 'POS Bogus message';
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(false);
     expect(decodeResult.decoder.decodeLevel).toBe('none');
     expect(decodeResult.formatted.description).toBe('Takeoff Report');
-    expect(decodeResult.message.text).toBe(text);
+    expect(decodeResult.message).toBe(message);
   });
 });

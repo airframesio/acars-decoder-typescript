@@ -8,7 +8,7 @@ import { ResultFormatter } from '../utils/result_formatter';
 export class Label_44_OFF extends DecoderPlugin {
   name = 'label-44-off';
 
-  qualifiers() { // eslint-disable-line class-methods-use-this
+  qualifiers() {
     return {
       labels: ['44'],
       preambles: ['00OFF01', '00OFF02', '00OFF03', 'OFF01', 'OFF02', 'OFF03'],
@@ -21,21 +21,29 @@ export class Label_44_OFF extends DecoderPlugin {
     decodeResult.formatted.description = 'Off Runway Report';
     decodeResult.message = message;
 
-
     const data = message.text.split(',');
     if (data.length >= 8) {
       if (options.debug) {
-        console.log(`Label 44 Off Runway Report: groups`);
+        console.log('Label 44 Off Runway Report: groups');
         console.log(data);
       }
 
-      ResultFormatter.position(decodeResult, CoordinateUtils.decodeStringCoordinatesDecimalMinutes(data[1]));
+      ResultFormatter.position(
+        decodeResult,
+        CoordinateUtils.decodeStringCoordinatesDecimalMinutes(data[1]),
+      );
       ResultFormatter.departureAirport(decodeResult, data[2]);
       ResultFormatter.arrivalAirport(decodeResult, data[3]);
       ResultFormatter.month(decodeResult, Number(data[4].substring(0, 2)));
       ResultFormatter.day(decodeResult, Number(data[4].substring(2, 4)));
-      ResultFormatter.off(decodeResult, DateTimeUtils.convertHHMMSSToTod(data[5]));
-      ResultFormatter.eta(decodeResult, DateTimeUtils.convertHHMMSSToTod(data[6]));
+      ResultFormatter.off(
+        decodeResult,
+        DateTimeUtils.convertHHMMSSToTod(data[5]),
+      );
+      ResultFormatter.eta(
+        decodeResult,
+        DateTimeUtils.convertHHMMSSToTod(data[6]),
+      );
       const fuel = Number(data[7]);
       if (!isNaN(fuel)) {
         ResultFormatter.remainingFuel(decodeResult, Number(fuel));
@@ -44,7 +52,6 @@ export class Label_44_OFF extends DecoderPlugin {
       if (data.length > 8) {
         ResultFormatter.unknownArr(decodeResult, data.slice(8));
       }
-
     } else {
       if (options.debug) {
         console.log(`Decoder: Unknown 44 message: ${message.text}`);

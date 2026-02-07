@@ -6,14 +6,14 @@ import { ResultFormatter } from '../utils/result_formatter';
 export class Label_1M_Slash extends DecoderPlugin {
   name = 'label-1m-slash';
 
-  qualifiers() { // eslint-disable-line class-methods-use-this
+  qualifiers() {
     return {
-      labels: ["1M"],
+      labels: ['1M'],
       preambles: ['/'],
     };
   }
 
-  decode(message: Message, options: Options = {}) : DecodeResult {
+  decode(message: Message, options: Options = {}): DecodeResult {
     const decodeResult = this.defaultResult();
     decodeResult.decoder.name = this.name;
     decodeResult.formatted.description = 'ETA Report';
@@ -24,7 +24,7 @@ export class Label_1M_Slash extends DecoderPlugin {
 
     if (results) {
       if (options.debug) {
-        console.log(`Label 1M ETA: results`);
+        console.log('Label 1M ETA: results');
         console.log(results);
       }
 
@@ -36,12 +36,23 @@ export class Label_1M_Slash extends DecoderPlugin {
       ResultFormatter.alternateAirport(decodeResult, results[5]);
       // results[6]: 2JK0 (???)
       // results[7] 1940 - UTC eta
-      ResultFormatter.arrivalRunway(decodeResult, results[8].replace(results[4], "")); // results[8] EGLL27L
+      ResultFormatter.arrivalRunway(
+        decodeResult,
+        results[8].replace(results[4], ''),
+      ); // results[8] EGLL27L
       // results[9]: 10(space) (???)
 
       const yymmdd = results[2];
-      ResultFormatter.eta(decodeResult, DateTimeUtils.convertDateTimeToEpoch(results[7]+'00', yymmdd.substring(2,4)+yymmdd.substring(4,6)+yymmdd.substring(0,2)), 'epoch')
-      
+      ResultFormatter.eta(
+        decodeResult,
+        DateTimeUtils.convertDateTimeToEpoch(
+          results[7] + '00',
+          yymmdd.substring(2, 4) +
+            yymmdd.substring(4, 6) +
+            yymmdd.substring(0, 2),
+        ),
+        'epoch',
+      );
     }
 
     decodeResult.decoded = true;

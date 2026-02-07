@@ -4,10 +4,10 @@ import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
 import { CoordinateUtils } from '../utils/coordinate_utils';
 import { ResultFormatter } from '../utils/result_formatter';
 
-export class Label_1L_3Line extends DecoderPlugin { // eslint-disable-line camelcase
+export class Label_1L_3Line extends DecoderPlugin {
   name = 'label-1l-3-line';
 
-  qualifiers() { // eslint-disable-line class-methods-use-this
+  qualifiers() {
     return {
       labels: ['1L'],
     };
@@ -65,7 +65,9 @@ export class Label_1L_3Line extends DecoderPlugin { // eslint-disable-line camel
     const day = data.get('DAY');
     const utc = data.get('UTC');
     if (day && utc) {
-      decodeResult.raw.message_timestamp = (Date.parse(day + ' GMT+0000') / 1000) + DateTimeUtils.convertHHMMSSToTod(utc);
+      decodeResult.raw.message_timestamp =
+        Date.parse(day + ' GMT+0000') / 1000 +
+        DateTimeUtils.convertHHMMSSToTod(utc);
       data.delete('DAY');
       data.delete('UTC');
     }
@@ -74,8 +76,10 @@ export class Label_1L_3Line extends DecoderPlugin { // eslint-disable-line camel
     const lon = data.get('LON');
     if (lat && lon) {
       ResultFormatter.position(decodeResult, {
-        latitude: CoordinateUtils.getDirection(lat[0]) * Number(lat.substring(1)),
-        longitude: CoordinateUtils.getDirection(lon[0]) * Number(lon.substring(1)),
+        latitude:
+          CoordinateUtils.getDirection(lat[0]) * Number(lat.substring(1)),
+        longitude:
+          CoordinateUtils.getDirection(lon[0]) * Number(lon.substring(1)),
       });
       data.delete('LAT');
       data.delete('LON');

@@ -1,9 +1,9 @@
 import { MessageDecoder } from '../MessageDecoder';
 import { Label_2P_FM3 } from './Label_2P_FM3';
 
-describe('Label_2P Preamble FM3', () => {
-
+describe('Label 2P Preamble FM3', () => {
   let plugin: Label_2P_FM3;
+  const message = { label: '2P', text: '' };
 
   beforeEach(() => {
     const decoder = new MessageDecoder();
@@ -12,17 +12,18 @@ describe('Label_2P Preamble FM3', () => {
 
   test('variant 1', () => {
     // https://app.airframes.io/messages/4209002765
-    const text = 'FM3 1217,1312,+ 43.77,- 70.18, 39981, 426, 25';
-    const decodeResult = plugin.decode({ text: text });
+    message.text = 'FM3 1217,1312,+ 43.77,- 70.18, 39981, 426, 25';
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.formatted.description).toBe('Flight Report');
-    expect(decodeResult.message.text).toBe(text);
     expect(decodeResult.formatted.items.length).toBe(4);
     expect(decodeResult.formatted.items[0].label).toBe('Message Timestamp');
     expect(decodeResult.formatted.items[0].value).toBe('12:17:00');
-    expect(decodeResult.formatted.items[1].label).toBe('Estimated Time of Arrival');
+    expect(decodeResult.formatted.items[1].label).toBe(
+      'Estimated Time of Arrival',
+    );
     expect(decodeResult.formatted.items[1].value).toBe('13:12:00');
     expect(decodeResult.formatted.items[2].label).toBe('Aircraft Position');
     expect(decodeResult.formatted.items[2].value).toBe('43.770 N, 70.180 W');
@@ -33,19 +34,20 @@ describe('Label_2P Preamble FM3', () => {
 
   test('variant 2', () => {
     // https://app.airframes.io/messages/4209000440
-    const text = 'M40AEY093CFM3 1216,1454,+057.31,-075.58, 38002, 469, 23';
-    const decodeResult = plugin.decode({ text: text });
+    message.text = 'M40AEY093CFM3 1216,1454,+057.31,-075.58, 38002, 469, 23';
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.formatted.description).toBe('Flight Report');
-    expect(decodeResult.message.text).toBe(text);
     expect(decodeResult.formatted.items.length).toBe(5);
     expect(decodeResult.formatted.items[0].label).toBe('Flight Number');
     expect(decodeResult.formatted.items[0].value).toBe('EY093C');
     expect(decodeResult.formatted.items[1].label).toBe('Message Timestamp');
     expect(decodeResult.formatted.items[1].value).toBe('12:16:00');
-    expect(decodeResult.formatted.items[2].label).toBe('Estimated Time of Arrival');
+    expect(decodeResult.formatted.items[2].label).toBe(
+      'Estimated Time of Arrival',
+    );
     expect(decodeResult.formatted.items[2].value).toBe('14:54:00');
     expect(decodeResult.formatted.items[3].label).toBe('Aircraft Position');
     expect(decodeResult.formatted.items[3].value).toBe('57.310 N, 75.580 W');
@@ -56,18 +58,19 @@ describe('Label_2P Preamble FM3', () => {
 
   test('variant 3', () => {
     // https://app.airframes.io/messages/4217295798
-    const text = 'FM3 133818,1607,N 45.206,E 17.726,34030, 440,98';
-    const decodeResult = plugin.decode({ text: text });
-
+    message.text = 'FM3 133818,1607,N 45.206,E 17.726,34030, 440,98';
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.formatted.description).toBe('Flight Report');
-    expect(decodeResult.message.text).toBe(text);
+    expect(decodeResult.message).toBe(message);
     expect(decodeResult.formatted.items.length).toBe(4);
     expect(decodeResult.formatted.items[0].label).toBe('Message Timestamp');
     expect(decodeResult.formatted.items[0].value).toBe('13:38:18');
-    expect(decodeResult.formatted.items[1].label).toBe('Estimated Time of Arrival');
+    expect(decodeResult.formatted.items[1].label).toBe(
+      'Estimated Time of Arrival',
+    );
     expect(decodeResult.formatted.items[1].value).toBe('16:07:00');
     expect(decodeResult.formatted.items[2].label).toBe('Aircraft Position');
     expect(decodeResult.formatted.items[2].value).toBe('45.206 N, 17.726 E');
@@ -77,9 +80,8 @@ describe('Label_2P Preamble FM3', () => {
   });
 
   test('<invalid>', () => {
-
-    const text = 'FM4 Bogus message';
-    const decodeResult = plugin.decode({ text: text });
+    message.text = 'FM4 Bogus message';
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(false);
     expect(decodeResult.decoder.decodeLevel).toBe('none');

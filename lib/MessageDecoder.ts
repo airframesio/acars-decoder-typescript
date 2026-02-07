@@ -1,7 +1,11 @@
-import { DecodeResult, DecoderPluginInterface, Message, Options } from './DecoderPluginInterface'; // eslint-disable-line import/no-cycle
+import {
+  DecodeResult,
+  DecoderPluginInterface,
+  Message,
+  Options,
+} from './DecoderPluginInterface';
 
 import * as Plugins from './plugins/official';
-
 export class MessageDecoder {
   name: string;
   plugins: Array<DecoderPluginInterface>;
@@ -80,7 +84,6 @@ export class MessageDecoder {
   }
 
   registerPlugin(plugin: DecoderPluginInterface): boolean {
-    const pluginInstance = plugin;
     // plugin.onRegister(this.store);
     this.plugins.push(plugin);
     return true;
@@ -93,11 +96,13 @@ export class MessageDecoder {
       if ((qualifiers.labels.includes(message.label))
         || (qualifiers.labels.length === 1 && qualifiers.labels[0] === '*')) {
         if (qualifiers.preambles && qualifiers.preambles.length > 0) {
-          const matching = qualifiers.preambles.filter((preamble: string) => { // eslint-disable-line arrow-body-style,max-len
+          const matching = qualifiers.preambles.filter((preamble: string) => {
+            // console.log(message.text.substring(0, preamble.length));
+            // console.log(preamble);
             return message.text.substring(0, preamble.length) === preamble;
           });
           return matching.length >= 1;
-        } else { // eslint-disable-line no-else-return
+        } else {
           return true;
         }
       }

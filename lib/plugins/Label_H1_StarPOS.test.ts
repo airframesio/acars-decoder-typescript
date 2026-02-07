@@ -2,8 +2,8 @@ import { MessageDecoder } from '../MessageDecoder';
 import { Label_H1_StarPOS } from './Label_H1_StarPOS';
 
 describe('Label H1 *POS', () => {
-
   let plugin: Label_H1_StarPOS;
+  const message = { label: 'H1', text: '' };
 
   beforeEach(() => {
     const decoder = new MessageDecoder();
@@ -11,17 +11,16 @@ describe('Label H1 *POS', () => {
   });
 
   test('decodes variant 1', () => {
-
-    const text = '*POS10300950N3954W07759363312045802M5230175';
-    const decodeResult = plugin.decode({ text: text });
+    message.text = '*POS10300950N3954W07759363312045802M5230175';
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
-    expect(decodeResult.message.text).toBe(text);
+    expect(decodeResult.message).toBe(message);
     expect(decodeResult.raw.day).toBe(30);
     expect(decodeResult.raw.month).toBe(10);
     expect(decodeResult.raw.time_of_day).toBe(35400);
-    expect(decodeResult.raw.position.latitude).toBe(39.900000);
+    expect(decodeResult.raw.position.latitude).toBe(39.9);
     expect(decodeResult.raw.position.longitude).toBe(-77.98333333333333);
     expect(decodeResult.raw.altitude).toBe(36331);
     expect(decodeResult.formatted.items.length).toBe(5);
@@ -35,15 +34,13 @@ describe('Label H1 *POS', () => {
     expect(decodeResult.formatted.items[3].value).toBe('39.900 N, 77.983 W');
     expect(decodeResult.formatted.items[4].label).toBe('Altitude');
     expect(decodeResult.formatted.items[4].value).toBe('36331 feet');
-    
+
     expect(decodeResult.remaining.text).toBe('2045802M5230175');
   });
 
-
   test('does not decode <invalid>', () => {
-
-    const text = '*POS Bogus message';
-    const decodeResult = plugin.decode({ text: text });
+    message.text = '*POS Bogus message';
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(false);
     expect(decodeResult.decoder.decodeLevel).toBe('none');

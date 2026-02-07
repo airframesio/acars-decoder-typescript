@@ -2,8 +2,8 @@ import { MessageDecoder } from '../MessageDecoder';
 import { Label_16_N_Space } from './Label_16_N_Space';
 
 describe('Label_16_N_Space', () => {
-
   let plugin: Label_16_N_Space;
+  const message = { label: '16', text: '' };
 
   beforeEach(() => {
     const decoder = new MessageDecoder();
@@ -20,14 +20,14 @@ describe('Label_16_N_Space', () => {
     });
   });
   test('decodes variant 1', () => {
-    const text = 'N 44.203,W 86.546,31965,6, 290';
-    const decodeResult = plugin.decode({ text: text });
+    message.text = 'N 44.203,W 86.546,31965,6, 290';
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.decoder.name).toBe('label-16-n-space');
     expect(decodeResult.formatted.description).toBe('Position Report');
-    expect(decodeResult.message.text).toBe(text);
+    expect(decodeResult.message).toBe(message);
     expect(decodeResult.raw.position.latitude).toBe(44.203);
     expect(decodeResult.raw.position.longitude).toBe(-86.546);
     expect(decodeResult.raw.altitude).toBe(31965);
@@ -43,14 +43,14 @@ describe('Label_16_N_Space', () => {
   });
 
   test('decodes variant 2', () => {
-    const text = 'N 28.177/W 96.055';
-    const decodeResult = plugin.decode({ text: text });
+    message.text = 'N 28.177/W 96.055';
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('full');
     expect(decodeResult.decoder.name).toBe('label-16-n-space');
     expect(decodeResult.formatted.description).toBe('Position Report');
-    expect(decodeResult.message.text).toBe(text);
+    expect(decodeResult.message).toBe(message);
     expect(decodeResult.raw.position.latitude).toBe(28.177);
     expect(decodeResult.raw.position.longitude).toBe(-96.055);
     expect(decodeResult.formatted.items.length).toBe(1);
@@ -61,14 +61,14 @@ describe('Label_16_N_Space', () => {
   });
 
   test('decodes Label 16 variant 3', () => {
-    const text = 'N 44.988,W121.644,35940,6, 170';
-    const decodeResult = plugin.decode({ text: text });
+    message.text = 'N 44.988,W121.644,35940,6, 170';
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.decoder.name).toBe('label-16-n-space');
     expect(decodeResult.formatted.description).toBe('Position Report');
-    expect(decodeResult.message.text).toBe(text);
+    expect(decodeResult.message).toBe(message);
     expect(decodeResult.raw.position.latitude).toBe(44.988);
     expect(decodeResult.raw.position.longitude).toBe(-121.644);
     expect(decodeResult.raw.altitude).toBe(35940);
@@ -84,13 +84,13 @@ describe('Label_16_N_Space', () => {
   });
 
   test('decodes Label 16 variant <invalid>', () => {
-    const text = 'N Bogus message';
-    const decodeResult = plugin.decode({ text: text });
+    message.text = 'N Bogus message';
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(false);
     expect(decodeResult.decoder.decodeLevel).toBe('none');
     expect(decodeResult.decoder.name).toBe('label-16-n-space');
     expect(decodeResult.formatted.description).toBe('Position Report');
-    expect(decodeResult.message.text).toBe(text);
+    expect(decodeResult.message).toBe(message);
   });
 });

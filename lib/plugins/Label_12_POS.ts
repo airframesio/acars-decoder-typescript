@@ -8,7 +8,7 @@ import { ResultFormatter } from '../utils/result_formatter';
 export class Label_12_POS extends DecoderPlugin {
   name = 'label-12-pos';
 
-  qualifiers() { // eslint-disable-line class-methods-use-this
+  qualifiers() {
     return {
       labels: ['12'],
       preambles: ['POS'],
@@ -35,15 +35,36 @@ export class Label_12_POS extends DecoderPlugin {
     const lat = data[0].substring(0, 8);
     const lon = data[0].substring(8);
     ResultFormatter.position(decodeResult, {
-      latitude: CoordinateUtils.getDirection(lat[0]) * CoordinateUtils.dmsToDecimalDegrees(Number(lat.substring(1, 4)), Number(lat.substring(4, 6)), Number(lat.substring(6, 8))),
-      longitude: CoordinateUtils.getDirection(lon[0]) * CoordinateUtils.dmsToDecimalDegrees(Number(lon.substring(1, 4)), Number(lon.substring(4, 6)), Number(lon.substring(6, 8))),
+      latitude:
+        CoordinateUtils.getDirection(lat[0]) *
+        CoordinateUtils.dmsToDecimalDegrees(
+          Number(lat.substring(1, 4)),
+          Number(lat.substring(4, 6)),
+          Number(lat.substring(6, 8)),
+        ),
+      longitude:
+        CoordinateUtils.getDirection(lon[0]) *
+        CoordinateUtils.dmsToDecimalDegrees(
+          Number(lon.substring(1, 4)),
+          Number(lon.substring(4, 6)),
+          Number(lon.substring(6, 8)),
+        ),
     });
     ResultFormatter.unknown(decodeResult, data[1]);
-    ResultFormatter.time_of_day(decodeResult, DateTimeUtils.convertHHMMSSToTod(data[2]));
+    ResultFormatter.time_of_day(
+      decodeResult,
+      DateTimeUtils.convertHHMMSSToTod(data[2]),
+    );
     ResultFormatter.altitude(decodeResult, 10 * Number(data[3]));
     ResultFormatter.unknownArr(decodeResult, data.slice(4, 7));
-    ResultFormatter.currentFuel(decodeResult, Number(data[7].substring(3).trim())); // strip FOB
-    ResultFormatter.eta(decodeResult, DateTimeUtils.convertHHMMSSToTod(data[8].substring(3).trim())); // strip ETA
+    ResultFormatter.currentFuel(
+      decodeResult,
+      Number(data[7].substring(3).trim()),
+    ); // strip FOB
+    ResultFormatter.eta(
+      decodeResult,
+      DateTimeUtils.convertHHMMSSToTod(data[8].substring(3).trim()),
+    ); // strip ETA
     ResultFormatter.departureAirport(decodeResult, data[9]);
     ResultFormatter.arrivalAirport(decodeResult, data[10]);
     ResultFormatter.unknown(decodeResult, data[11]);

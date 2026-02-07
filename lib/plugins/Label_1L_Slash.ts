@@ -3,10 +3,10 @@ import { DecoderPlugin } from '../DecoderPlugin';
 import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
 import { ResultFormatter } from '../utils/result_formatter';
 
-export class Label_1L_Slash extends DecoderPlugin { // eslint-disable-line camelcase
+export class Label_1L_Slash extends DecoderPlugin {
   name = 'label-1l-1-line';
 
-  qualifiers() { // eslint-disable-line class-methods-use-this
+  qualifiers() {
     return {
       labels: ['1L'],
       preambles: ['+', '-'],
@@ -42,14 +42,17 @@ export class Label_1L_Slash extends DecoderPlugin { // eslint-disable-line camel
     const position = {
       latitude: Number(data.get('LAT')),
       longitude: Number(data.get('LON')),
-    }
+    };
     data.delete('LAT');
     data.delete('LON');
 
     ResultFormatter.position(decodeResult, position);
     const utc = data.get('UTC');
     if (utc) {
-      ResultFormatter.time_of_day(decodeResult, DateTimeUtils.convertHHMMSSToTod(utc));
+      ResultFormatter.time_of_day(
+        decodeResult,
+        DateTimeUtils.convertHHMMSSToTod(utc),
+      );
       data.delete('UTC');
     }
     const alt = data.get('ALT');

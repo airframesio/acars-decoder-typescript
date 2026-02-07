@@ -3,6 +3,7 @@ import { Label_44_IN } from './Label_44_IN';
 
 describe('Label 44 IN', () => {
   let plugin: Label_44_IN;
+  const message = { label: '44', text: '' };
 
   beforeEach(() => {
     const decoder = new MessageDecoder();
@@ -21,8 +22,8 @@ describe('Label 44 IN', () => {
 
   test('decodes variant 1', () => {
     // https://app.airframes.io/messages/3563679070
-    const text = 'IN01,N33528W084181,KCLT,KPDK,1106,0045,---.-'
-    const decodeResult = plugin.decode({ text: text });
+    message.text = 'IN01,N33528W084181,KCLT,KPDK,1106,0045,---.-';
+    const decodeResult = plugin.decode(message);
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('full');
     expect(decodeResult.raw.position.latitude).toBe(33.88);
@@ -48,8 +49,8 @@ describe('Label 44 IN', () => {
   });
 
   test('decodes variant 2', () => {
-    const text = 'IN02,N38338W121179,KMHR,KPDX,0806,2355,005.1'
-    const decodeResult = plugin.decode({ text: text });
+    message.text = 'IN02,N38338W121179,KMHR,KPDX,0806,2355,005.1';
+    const decodeResult = plugin.decode(message);
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('full');
     expect(decodeResult.raw.position.latitude).toBe(38.56333333333333);
@@ -77,12 +78,11 @@ describe('Label 44 IN', () => {
   });
 
   test('does not decode invalid', () => {
-
-    const text = '00OFF01 Bogus message';
-    const decodeResult = plugin.decode({ text: text });
+    message.text = '00OFF01 Bogus message';
+    const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(false);
     expect(decodeResult.decoder.decodeLevel).toBe('none');
-    expect(decodeResult.message.text).toBe(text);
+    expect(decodeResult.message).toBe(message);
   });
 });
