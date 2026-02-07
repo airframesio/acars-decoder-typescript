@@ -20,9 +20,10 @@ export class Label_83 extends DecoderPlugin {
     decodeResult.formatted.description = 'Airline Defined';
 
     decodeResult.decoded = true;
-    if (message.text.substring(0, 10) === '4DH3 ETAT2') {
+    const text = message.text;
+    if (text.substring(0, 10) === '4DH3 ETAT2') {
       // variant 2
-      const fields = message.text.split(/\s+/);
+      const fields = text.split(/\s+/);
       if (fields[2].length > 5) {
         decodeResult.raw.day = fields[2].substring(5);
       }
@@ -35,22 +36,19 @@ export class Label_83 extends DecoderPlugin {
         decodeResult,
         DateTimeUtils.convertHHMMSSToTod(fields[6] + '00'),
       );
-    } else if (message.text.substring(0, 5) === '001PR') {
+    } else if (text.substring(0, 5) === '001PR') {
       // variant 3
-      decodeResult.raw.day = message.text.substring(5, 7);
+      decodeResult.raw.day = text.substring(5, 7);
       const position = CoordinateUtils.decodeStringCoordinatesDecimalMinutes(
-        message.text.substring(13, 28).replace(/\./g, ''),
+        text.substring(13, 28).replace(/\./g, ''),
       );
       if (position) {
         ResultFormatter.position(decodeResult, position);
       }
-      ResultFormatter.altitude(
-        decodeResult,
-        Number(message.text.substring(28, 33)),
-      );
-      ResultFormatter.unknown(decodeResult, message.text.substring(33));
+      ResultFormatter.altitude(decodeResult, Number(text.substring(28, 33)));
+      ResultFormatter.unknown(decodeResult, text.substring(33));
     } else {
-      const fields = message.text.replace(/\s/g, '').split(',');
+      const fields = text.replace(/\s/g, '').split(',');
       if (fields.length === 9) {
         // variant 1
         ResultFormatter.departureAirport(decodeResult, fields[0]);
@@ -67,7 +65,7 @@ export class Label_83 extends DecoderPlugin {
         ResultFormatter.unknown(decodeResult, fields[8]);
       } else {
         decodeResult.decoded = false;
-        ResultFormatter.unknown(decodeResult, message.text);
+        ResultFormatter.unknown(decodeResult, text);
       }
     }
 
