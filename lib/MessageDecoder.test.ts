@@ -29,21 +29,21 @@ describe('MessageDecoder', () => {
   test('C-band core seamless decode', () => {
     const message = {
       label: '4N',
-      text: 'M85AUP0109285,C,,10/12,,,,,NRT,ANC,ANC,07R/,33/,0,0,,,,,,0,0,0,0,1,0,,0,0,709.8,048.7,758.5,75F3'
+      text: 'M85AUP0109285,C,,10/12,,,,,NRT,ANC,ANC,07R/,33/,0,0,,,,,,0,0,0,0,1,0,,0,0,709.8,048.7,758.5,75F3',
     };
 
     const decodeResult = decoder.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
-    if(!decodeResult.message) {
+    if (!decodeResult.message) {
       expect(decodeResult.message).toBeDefined();
-    return;
+      return;
     }
     expect(decodeResult.message.label).toBe('4N');
     expect(decodeResult.message.sublabel).toBeUndefined();
     expect(decodeResult.message.text).toContain('M85AUP0109285');
     expect(decodeResult.formatted.items.length).toBe(7);
-  })
+  });
 
   test('Handles Multiple decodes', () => {
     const message = {
@@ -52,7 +52,7 @@ describe('MessageDecoder', () => {
     };
 
     decoder.decode(message);
-    
+
     const decodeResult = decoder.decode(message);
     if (!decodeResult.message) {
       expect(decodeResult.message).toBeDefined();

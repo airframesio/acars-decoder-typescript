@@ -93,8 +93,10 @@ export class MessageDecoder {
     const usablePlugins = this.plugins.filter((plugin) => {
       const qualifiers = plugin.qualifiers();
 
-      if ((qualifiers.labels.includes(message.label))
-        || (qualifiers.labels.length === 1 && qualifiers.labels[0] === '*')) {
+      if (
+        qualifiers.labels.includes(message.label) ||
+        (qualifiers.labels.length === 1 && qualifiers.labels[0] === '*')
+      ) {
         if (qualifiers.preambles && qualifiers.preambles.length > 0) {
           const matching = qualifiers.preambles.filter((preamble: string) => {
             // console.log(message.text.substring(0, preamble.length));

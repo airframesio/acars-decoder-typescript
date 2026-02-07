@@ -23,7 +23,10 @@ export class Label_4N extends DecoderPlugin {
     if (message.text.length === 51) {
       // variant 1
       decodeResult.raw.day = message.text.substring(0, 2);
-      ResultFormatter.departureAirport(decodeResult, message.text.substring(8, 11));
+      ResultFormatter.departureAirport(
+        decodeResult,
+        message.text.substring(8, 11),
+      );
       ResultFormatter.arrivalAirport(
         decodeResult,
         message.text.substring(13, 16),

@@ -19,20 +19,10 @@ export class Label_83 extends DecoderPlugin {
     decodeResult.message = message;
     decodeResult.formatted.description = 'Airline Defined';
 
-    // Inmarsat C-band seems to prefix normal messages with a message number and flight number
-    let text = message.text;
-    if (text.match(/^M\d{2}A\w{6}/)) {
-      ResultFormatter.flightNumber(
-        decodeResult,
-        message.text.substring(4, 10).replace(/^([A-Z]+)0*/g, '$1'),
-      );
-      text = text.substring(10);
-    }
-
     decodeResult.decoded = true;
-    if (text.substring(0, 10) === '4DH3 ETAT2') {
+    if (message.text.substring(0, 10) === '4DH3 ETAT2') {
       // variant 2
-      const fields = text.split(/\s+/);
+      const fields = message.text.split(/\s+/);
       if (fields[2].length > 5) {
         decodeResult.raw.day = fields[2].substring(5);
       }
@@ -45,19 +35,22 @@ export class Label_83 extends DecoderPlugin {
         decodeResult,
         DateTimeUtils.convertHHMMSSToTod(fields[6] + '00'),
       );
-    } else if (text.substring(0, 5) === '001PR') {
+    } else if (message.text.substring(0, 5) === '001PR') {
       // variant 3
-      decodeResult.raw.day = text.substring(5, 7);
+      decodeResult.raw.day = message.text.substring(5, 7);
       const position = CoordinateUtils.decodeStringCoordinatesDecimalMinutes(
-        text.substring(13, 28).replace(/\./g, ''),
+        message.text.substring(13, 28).replace(/\./g, ''),
       );
       if (position) {
         ResultFormatter.position(decodeResult, position);
       }
-      ResultFormatter.altitude(decodeResult, Number(text.substring(28, 33)));
-      ResultFormatter.unknown(decodeResult, text.substring(33));
+      ResultFormatter.altitude(
+        decodeResult,
+        Number(message.text.substring(28, 33)),
+      );
+      ResultFormatter.unknown(decodeResult, message.text.substring(33));
     } else {
-      const fields = text.replace(/\s/g, '').split(',');
+      const fields = message.text.replace(/\s/g, '').split(',');
       if (fields.length === 9) {
         // variant 1
         ResultFormatter.departureAirport(decodeResult, fields[0]);

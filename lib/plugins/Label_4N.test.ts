@@ -103,7 +103,6 @@ describe('Label 4N', () => {
     expect(decodeResult.formatted.items[4].value).toBe('0x9bcd');
   });
 
-
   test('decodes Label 4N <invalid>', () => {
     message.text = '4N Bogus message';
     const decodeResult = plugin.decode(message);
