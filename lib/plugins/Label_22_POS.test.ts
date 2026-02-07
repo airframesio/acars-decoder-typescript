@@ -3,7 +3,7 @@ import { Label_22_POS } from './Label_22_POS';
 
 describe('Label 22', () => {
   let plugin: Label_22_POS;
-  const message = {label: '22', text: ''};
+  const message = { label: '22', text: '' };
 
   beforeEach(() => {
     const decoder = new MessageDecoder();
@@ -21,7 +21,8 @@ describe('Label 22', () => {
   });
 
   test('decodes valid', () => {
-    message.text = 'N 370824W 760010,-------,194936,30418, ,      , ,M 42,27335  42, 107,'
+    message.text =
+      'N 370824W 760010,-------,194936,30418, ,      , ,M 42,27335  42, 107,';
     const decodeResult = plugin.decode(message);
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
@@ -36,11 +37,12 @@ describe('Label 22', () => {
     expect(decodeResult.formatted.items[1].value).toBe('19:49:36');
     expect(decodeResult.formatted.items[2].label).toBe('Altitude');
     expect(decodeResult.formatted.items[2].value).toBe('30418 feet');
-    expect(decodeResult.remaining.text).toBe('-------, ,      , ,M 42,27335  42, 107,');
+    expect(decodeResult.remaining.text).toBe(
+      '-------, ,      , ,M 42,27335  42, 107,',
+    );
   });
 
   test('does not decode invalid', () => {
-
     message.text = 'POS Bogus message';
     const decodeResult = plugin.decode(message);
 

@@ -3,7 +3,7 @@ import { Label_20_POS } from './Label_20_POS';
 
 describe('Label_20_POS', () => {
   let plugin: Label_20_POS;
-  const message = {label: '20', text: ''};
+  const message = { label: '20', text: '' };
 
   beforeEach(() => {
     const decoder = new MessageDecoder();
@@ -21,11 +21,14 @@ describe('Label_20_POS', () => {
 
     expect(res.raw.preamble).toBe('POS');
     expect(res.raw.position).toBeDefined();
-    expect(res.raw.position.latitude).toBeCloseTo(38.160, 3);
+    expect(res.raw.position.latitude).toBeCloseTo(38.16, 3);
     expect(res.raw.position.longitude).toBeCloseTo(-77.075, 3);
 
-    const posItem = res.formatted.items.find(i => i.code === 'POS');
-    if(!posItem) {expect(posItem).toBeDefined(); return;}
+    const posItem = res.formatted.items.find((i) => i.code === 'POS');
+    if (!posItem) {
+      expect(posItem).toBeDefined();
+      return;
+    }
     expect(posItem.value).toContain('38.160');
     expect(posItem.value).toContain('77.075');
   });
@@ -41,11 +44,14 @@ describe('Label_20_POS', () => {
 
     expect(res.raw.preamble).toBe('POS');
     expect(res.raw.position).toBeDefined();
-    expect(res.raw.position.latitude).toBeCloseTo(38.160, 3);
+    expect(res.raw.position.latitude).toBeCloseTo(38.16, 3);
     expect(res.raw.position.longitude).toBeCloseTo(-77.075, 3);
 
-    const posItem = res.formatted.items.find(i => i.code === 'POS');
-    if(!posItem) {expect(posItem).toBeDefined(); return;}
+    const posItem = res.formatted.items.find((i) => i.code === 'POS');
+    if (!posItem) {
+      expect(posItem).toBeDefined();
+      return;
+    }
     expect(posItem.value).toContain('38.160');
     expect(posItem.value).toContain('77.075');
   });

@@ -2,9 +2,8 @@ import { MessageDecoder } from '../MessageDecoder';
 import { Label_16_POSA1 } from './Label_16_POSA1';
 
 describe('Label 16 POSA1', () => {
-
   let plugin: Label_16_POSA1;
-  const message = {label: '16', text: ''};
+  const message = { label: '16', text: '' };
 
   beforeEach(() => {
     const decoder = new MessageDecoder();
@@ -21,7 +20,8 @@ describe('Label 16 POSA1', () => {
     });
   });
   test('decodes variant 1', () => {
-    message.text = 'POSA1N37358W 77279,GEARS  ,221626,370,BBOBO  ,222053,,-61,139,1174,829';
+    message.text =
+      'POSA1N37358W 77279,GEARS  ,221626,370,BBOBO  ,222053,,-61,139,1174,829';
     const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
@@ -35,12 +35,15 @@ describe('Label 16 POSA1', () => {
     expect(decodeResult.formatted.items[1].label).toBe('Altitude');
     expect(decodeResult.formatted.items[1].value).toBe('37000 feet');
     expect(decodeResult.formatted.items[2].label).toBe('Aircraft Route');
-    expect(decodeResult.formatted.items[2].value).toBe('GEARS@22:16:26 > BBOBO@22:20:53');
+    expect(decodeResult.formatted.items[2].value).toBe(
+      'GEARS@22:16:26 > BBOBO@22:20:53',
+    );
     expect(decodeResult.remaining.text).toBe(',-61,139,1174,829');
   });
 
   test('decodes redacted', () => {
-    message.text = 'POSA1N38843W 78790,RONZZ  ,005159,390,RAMAY  ,010055,,*****,*****, 744,   0';
+    message.text =
+      'POSA1N38843W 78790,RONZZ  ,005159,390,RAMAY  ,010055,,*****,*****, 744,   0';
     const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
@@ -54,7 +57,9 @@ describe('Label 16 POSA1', () => {
     expect(decodeResult.formatted.items[1].label).toBe('Altitude');
     expect(decodeResult.formatted.items[1].value).toBe('39000 feet');
     expect(decodeResult.formatted.items[2].label).toBe('Aircraft Route');
-    expect(decodeResult.formatted.items[2].value).toBe('RONZZ@00:51:59 > RAMAY@01:00:55');
+    expect(decodeResult.formatted.items[2].value).toBe(
+      'RONZZ@00:51:59 > RAMAY@01:00:55',
+    );
     expect(decodeResult.remaining.text).toBe(',*****,*****, 744,   0');
   });
 

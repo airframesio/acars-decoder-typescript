@@ -3,7 +3,7 @@ import { Label_5Z_Slash } from './Label_5Z_Slash';
 
 describe('Label 5Z', () => {
   let plugin: Label_5Z_Slash;
-  const message = {label: '5Z', text: ''};
+  const message = { label: '5Z', text: '' };
 
   beforeEach(() => {
     const decoder = new MessageDecoder();
@@ -20,13 +20,12 @@ describe('Label 5Z', () => {
     });
   });
 
-
   test('/TXT', () => {
     message.text = '/TXT\r\nDID U GET THE TIMES';
     const decodeResult = plugin.decode(message);
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('full');
-    expect(decodeResult.raw.airline).toBeUndefined()
+    expect(decodeResult.raw.airline).toBeUndefined();
     expect(decodeResult.raw.text).toBe('DID U GET THE TIMES');
     expect(decodeResult.formatted.items.length).toBe(1);
     expect(decodeResult.formatted.items[0].label).toBe('Text Message');
@@ -48,7 +47,9 @@ describe('Label 5Z', () => {
     expect(decodeResult.formatted.items[0].label).toBe('Airline');
     expect(decodeResult.formatted.items[0].value).toBe('United Airlines');
     expect(decodeResult.formatted.items[1].label).toBe('Message Type');
-    expect(decodeResult.formatted.items[1].value).toBe('Request Departure Clearance (B3)');
+    expect(decodeResult.formatted.items[1].value).toBe(
+      'Request Departure Clearance (B3)',
+    );
     expect(decodeResult.formatted.items[2].label).toBe('Origin');
     expect(decodeResult.formatted.items[2].value).toBe('ATL');
     expect(decodeResult.formatted.items[3].label).toBe('Destination');
@@ -74,7 +75,9 @@ describe('Label 5Z', () => {
     expect(decodeResult.formatted.items[0].label).toBe('Airline');
     expect(decodeResult.formatted.items[0].value).toBe('United Airlines');
     expect(decodeResult.formatted.items[1].label).toBe('Message Type');
-    expect(decodeResult.formatted.items[1].value).toBe('Request Departure Clearance (B3)');
+    expect(decodeResult.formatted.items[1].value).toBe(
+      'Request Departure Clearance (B3)',
+    );
     expect(decodeResult.formatted.items[2].label).toBe('Origin');
     expect(decodeResult.formatted.items[2].value).toBe('DCA');
     expect(decodeResult.formatted.items[3].label).toBe('Destination');
@@ -84,7 +87,8 @@ describe('Label 5Z', () => {
   });
 
   test('/B3 request', () => {
-    message.text = '/B3 TO DATA REQ    / KIAH KBOS 14 152532 R4R /---- BOPT/OFF C0.000/1 LNO  G1600';
+    message.text =
+      '/B3 TO DATA REQ    / KIAH KBOS 14 152532 R4R /---- BOPT/OFF C0.000/1 LNO  G1600';
     const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
@@ -100,7 +104,9 @@ describe('Label 5Z', () => {
     expect(decodeResult.formatted.items[0].label).toBe('Airline');
     expect(decodeResult.formatted.items[0].value).toBe('United Airlines');
     expect(decodeResult.formatted.items[1].label).toBe('Message Type');
-    expect(decodeResult.formatted.items[1].value).toBe('Request Departure Clearance (B3)');
+    expect(decodeResult.formatted.items[1].value).toBe(
+      'Request Departure Clearance (B3)',
+    );
     expect(decodeResult.formatted.items[2].label).toBe('Origin');
     expect(decodeResult.formatted.items[2].value).toBe('KIAH');
     expect(decodeResult.formatted.items[3].label).toBe('Destination');
@@ -109,7 +115,9 @@ describe('Label 5Z', () => {
     expect(decodeResult.formatted.items[4].value).toBe('15:25:32');
     expect(decodeResult.formatted.items[5].label).toBe('Arrival Runway');
     expect(decodeResult.formatted.items[5].value).toBe('4R');
-    expect(decodeResult.remaining.text).toBe('---- BOPT/OFF C0.000/1 LNO  G1600');
+    expect(decodeResult.remaining.text).toBe(
+      '---- BOPT/OFF C0.000/1 LNO  G1600',
+    );
   });
 
   test('/ET variant 1', () => {
@@ -132,7 +140,9 @@ describe('Label 5Z', () => {
     expect(decodeResult.formatted.items[3].value).toBe('KBNA');
     expect(decodeResult.formatted.items[4].label).toBe('Message Timestamp');
     expect(decodeResult.formatted.items[4].value).toBe('12:25:59');
-    expect(decodeResult.formatted.items[5].label).toBe('Estimated Time of Arrival');
+    expect(decodeResult.formatted.items[5].label).toBe(
+      'Estimated Time of Arrival',
+    );
     expect(decodeResult.formatted.items[5].value).toBe('13:36:00');
 
     expect(decodeResult.remaining.text).toBe('AUTO');
@@ -159,7 +169,8 @@ describe('Label 5Z', () => {
   });
 
   test('/C3 Request', () => {
-    message.text = '/C3 GATE REQ       / KBNA KEWR 22 115400 0554 ---- ---- ---- ----';
+    message.text =
+      '/C3 GATE REQ       / KBNA KEWR 22 115400 0554 ---- ---- ---- ----';
     const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
@@ -185,7 +196,6 @@ describe('Label 5Z', () => {
   });
 
   test('/ does not decode invalid', () => {
-
     message.text = '/ Bogus message';
     const decodeResult = plugin.decode(message);
 

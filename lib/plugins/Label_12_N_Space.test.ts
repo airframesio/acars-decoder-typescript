@@ -3,7 +3,7 @@ import { Label_12_N_Space } from './Label_12_N_Space';
 
 describe('Label_12_N_Space', () => {
   let plugin: Label_12_N_Space;
-  const message = {label: '12', text: ''};
+  const message = { label: '12', text: '' };
 
   beforeEach(() => {
     const decoder = new MessageDecoder();
@@ -29,7 +29,7 @@ describe('Label_12_N_Space', () => {
     expect(decodeResult.decoder.name).toBe('label-12-n-space');
     expect(decodeResult.formatted.description).toBe('Position Report');
     expect(decodeResult.message).toBe(message);
-    expect(decodeResult.raw.position.latitude).toBe(42.150);
+    expect(decodeResult.raw.position.latitude).toBe(42.15);
     expect(decodeResult.raw.position.longitude).toBe(-121.187);
     expect(decodeResult.raw.altitude).toBe(39000);
     expect(decodeResult.formatted.items.length).toBe(2);

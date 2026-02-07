@@ -7,7 +7,7 @@ import { ResultFormatter } from '../utils/result_formatter';
 export class Label_20_POS extends DecoderPlugin {
   name = 'label-20-pos';
 
-  qualifiers() { // eslint-disable-line class-methods-use-this
+  qualifiers() {
     return {
       labels: ['20'],
       preambles: ['POS'],
@@ -32,7 +32,10 @@ export class Label_20_POS extends DecoderPlugin {
       }
       // Field 1: Coordinates
       const rawCoords = fields[0];
-      ResultFormatter.position(decodeResult, CoordinateUtils.decodeStringCoordinates(rawCoords));
+      ResultFormatter.position(
+        decodeResult,
+        CoordinateUtils.decodeStringCoordinates(rawCoords),
+      );
 
       decodeResult.decoded = true;
       decodeResult.decoder.decodeLevel = 'full';
@@ -51,7 +54,9 @@ export class Label_20_POS extends DecoderPlugin {
     } else {
       // Unknown!
       if (options.debug) {
-        console.log(`DEBUG: ${this.name}: Unknown variation. Field count: ${fields.length}, content: ${content}`);
+        console.log(
+          `DEBUG: ${this.name}: Unknown variation. Field count: ${fields.length}, content: ${content}`,
+        );
       }
       decodeResult.decoded = false;
       decodeResult.decoder.decodeLevel = 'none';

@@ -8,7 +8,7 @@ import { ResultFormatter } from '../utils/result_formatter';
 export class Label_22_OFF extends DecoderPlugin {
   name = 'label-22-off';
 
-  qualifiers() { // eslint-disable-line class-methods-use-this
+  qualifiers() {
     return {
       labels: ['22'],
       preambles: ['OFF'],
@@ -21,7 +21,8 @@ export class Label_22_OFF extends DecoderPlugin {
     decodeResult.formatted.description = 'Takeoff Report';
     decodeResult.message = message;
 
-    if (message.text.startsWith('OFF01')) { // variant 1
+    if (message.text.startsWith('OFF01')) {
+      // variant 1
       const fields = message.text.substring(5).split('/');
 
       if (fields.length != 2) {
@@ -31,18 +32,33 @@ export class Label_22_OFF extends DecoderPlugin {
       }
 
       ResultFormatter.flightNumber(decodeResult, fields[0]);
-      ResultFormatter.departureDay(decodeResult, Number(fields[1].substring(0, 2))); // departure day
-      ResultFormatter.arrivalDay(decodeResult, Number(fields[1].substring(2,4))); // arrival day
-      ResultFormatter.time_of_day(decodeResult, DateTimeUtils.convertHHMMSSToTod(fields[1].substring(4, 8)));
-      ResultFormatter.departureAirport(decodeResult, fields[1].substring(8, 12));
+      ResultFormatter.departureDay(
+        decodeResult,
+        Number(fields[1].substring(0, 2)),
+      ); // departure day
+      ResultFormatter.arrivalDay(
+        decodeResult,
+        Number(fields[1].substring(2, 4)),
+      ); // arrival day
+      ResultFormatter.time_of_day(
+        decodeResult,
+        DateTimeUtils.convertHHMMSSToTod(fields[1].substring(4, 8)),
+      );
+      ResultFormatter.departureAirport(
+        decodeResult,
+        fields[1].substring(8, 12),
+      );
       ResultFormatter.arrivalAirport(decodeResult, fields[1].substring(12, 16));
-      ResultFormatter.off(decodeResult, DateTimeUtils.convertHHMMSSToTod(fields[1].substring(16,22)));
+      ResultFormatter.off(
+        decodeResult,
+        DateTimeUtils.convertHHMMSSToTod(fields[1].substring(16, 22)),
+      );
       ResultFormatter.unknown(decodeResult, fields[1].substring(22));
 
       decodeResult.decoded = true;
       decodeResult.decoder.decodeLevel = 'partial';
-
-    } else if (message.text.startsWith('OFF02\r\n')) { // varaint 3
+    } else if (message.text.startsWith('OFF02\r\n')) {
+      // varaint 3
       const fields = message.text.substring(7).split(',');
       if (fields.length != 4) {
         decodeResult.decoded = false;
@@ -52,13 +68,16 @@ export class Label_22_OFF extends DecoderPlugin {
 
       ResultFormatter.departureAirport(decodeResult, fields[0]);
       ResultFormatter.arrivalAirport(decodeResult, fields[1]);
-      ResultFormatter.off(decodeResult, DateTimeUtils.convertHHMMSSToTod(fields[2]));
+      ResultFormatter.off(
+        decodeResult,
+        DateTimeUtils.convertHHMMSSToTod(fields[2]),
+      );
       ResultFormatter.unknown(decodeResult, fields[3]);
 
       decodeResult.decoded = true;
       decodeResult.decoder.decodeLevel = 'partial';
-
-    } else if (message.text.startsWith('OFF02')) { // varaint 2
+    } else if (message.text.startsWith('OFF02')) {
+      // varaint 2
       const fields = message.text.substring(5).split('/');
       if (fields.length != 2) {
         decodeResult.decoded = false;
@@ -67,21 +86,33 @@ export class Label_22_OFF extends DecoderPlugin {
       }
 
       ResultFormatter.flightNumber(decodeResult, fields[0]);
-      const position = CoordinateUtils.decodeStringCoordinatesDecimalMinutes(fields[1].substring(0, 14));
+      const position = CoordinateUtils.decodeStringCoordinatesDecimalMinutes(
+        fields[1].substring(0, 14),
+      );
       if (position) {
         ResultFormatter.position(decodeResult, position);
       }
       ResultFormatter.day(decodeResult, Number(fields[1].substring(14, 16)));
-      ResultFormatter.time_of_day(decodeResult, DateTimeUtils.convertHHMMSSToTod(fields[1].substring(16, 20) ));
-      ResultFormatter.departureAirport(decodeResult, fields[1].substring(20, 24));
+      ResultFormatter.time_of_day(
+        decodeResult,
+        DateTimeUtils.convertHHMMSSToTod(fields[1].substring(16, 20)),
+      );
+      ResultFormatter.departureAirport(
+        decodeResult,
+        fields[1].substring(20, 24),
+      );
       ResultFormatter.arrivalAirport(decodeResult, fields[1].substring(24, 28));
-      ResultFormatter.off(decodeResult, DateTimeUtils.convertHHMMSSToTod(fields[1].substring(28, 32)));
+      ResultFormatter.off(
+        decodeResult,
+        DateTimeUtils.convertHHMMSSToTod(fields[1].substring(28, 32)),
+      );
       ResultFormatter.unknown(decodeResult, fields[1].substring(32, 36));
-      ResultFormatter.eta(decodeResult, DateTimeUtils.convertHHMMSSToTod(fields[1].substring(36,40)));
+      ResultFormatter.eta(
+        decodeResult,
+        DateTimeUtils.convertHHMMSSToTod(fields[1].substring(36, 40)),
+      );
       decodeResult.decoded = true;
       decodeResult.decoder.decodeLevel = 'partial';
-
-
     } else {
       if (options.debug) {
         console.log(`DEBUG: ${this.name}: Unknown variation.`);

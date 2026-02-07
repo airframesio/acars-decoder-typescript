@@ -1,21 +1,20 @@
 import { DateTimeUtils } from '../DateTimeUtils';
 import { DecoderPlugin } from '../DecoderPlugin';
 import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
-import { CoordinateUtils } from '../utils/coordinate_utils';
 import { ResultFormatter } from '../utils/result_formatter';
 
 // General Aviation Position Report
 export class Label_4T_ETA extends DecoderPlugin {
   name = 'label-4t-eta';
 
-  qualifiers() { // eslint-disable-line class-methods-use-this
+  qualifiers() {
     return {
       labels: ['4T'],
       preambles: ['ETA'],
     };
   }
 
-  decode(message: Message, options: Options = {}) : DecodeResult {
+  decode(message: Message, options: Options = {}): DecodeResult {
     const decodeResult = this.defaultResult();
     decodeResult.decoder.name = this.name;
     decodeResult.formatted.description = 'ETA Report';
@@ -23,7 +22,7 @@ export class Label_4T_ETA extends DecoderPlugin {
 
     const data = message.text.substring(3).split('/');
 
-    if(!message.text.startsWith('ETA') || data.length !== 3) {
+    if (!message.text.startsWith('ETA') || data.length !== 3) {
       if (options.debug) {
         console.log(`Decoder: Unknown 4T message: ${message.text}`);
       }
@@ -38,7 +37,10 @@ export class Label_4T_ETA extends DecoderPlugin {
     const etaData = data[2].split(' ');
     ResultFormatter.arrivalDay(decodeResult, Number(etaData[0]));
     ResultFormatter.arrivalAirport(decodeResult, etaData[1], 'IATA');
-    ResultFormatter.eta(decodeResult, DateTimeUtils.convertHHMMSSToTod(etaData[2].substring(0,4)));
+    ResultFormatter.eta(
+      decodeResult,
+      DateTimeUtils.convertHHMMSSToTod(etaData[2].substring(0, 4)),
+    );
 
     decodeResult.decoded = true;
     decodeResult.decoder.decodeLevel = 'full';

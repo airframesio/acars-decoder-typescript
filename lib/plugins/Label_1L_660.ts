@@ -4,10 +4,10 @@ import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
 import { CoordinateUtils } from '../utils/coordinate_utils';
 import { ResultFormatter } from '../utils/result_formatter';
 
-export class Label_1L_660 extends DecoderPlugin { // eslint-disable-line camelcase
+export class Label_1L_660 extends DecoderPlugin {
   name = 'label-1l-660';
 
-  qualifiers() { // eslint-disable-line class-methods-use-this
+  qualifiers() {
     return {
       labels: ['1L'],
       preambles: ['000000660'],
@@ -30,7 +30,6 @@ export class Label_1L_660 extends DecoderPlugin { // eslint-disable-line camelca
       return decodeResult;
     }
 
-
     const parts = message.text.substring(9).split(',');
 
     if (parts.length !== 5) {
@@ -43,12 +42,17 @@ export class Label_1L_660 extends DecoderPlugin { // eslint-disable-line camelca
       return decodeResult;
     }
 
-    const position = CoordinateUtils.decodeStringCoordinatesDecimalMinutes(parts[0]);
+    const position = CoordinateUtils.decodeStringCoordinatesDecimalMinutes(
+      parts[0],
+    );
     if (position) {
       ResultFormatter.position(decodeResult, position);
     }
     const hhmmss = parts[1].substring(0, 6);
-    ResultFormatter.time_of_day(decodeResult, DateTimeUtils.convertHHMMSSToTod(hhmmss));
+    ResultFormatter.time_of_day(
+      decodeResult,
+      DateTimeUtils.convertHHMMSSToTod(hhmmss),
+    );
     const fl = parts[1].substring(6, 9);
     ResultFormatter.altitude(decodeResult, Number(fl) * 100);
     const next = parts[1].substring(9);

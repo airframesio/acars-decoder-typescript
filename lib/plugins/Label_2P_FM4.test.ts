@@ -2,7 +2,6 @@ import { MessageDecoder } from '../MessageDecoder';
 import { Label_2P_FM4 } from './Label_2P_FM4';
 
 describe('Label_2P Preamble FM4', () => {
-
   let plugin: Label_2P_FM4;
   const message = { label: '2P', text: '' };
 
@@ -13,7 +12,8 @@ describe('Label_2P Preamble FM4', () => {
 
   test('variant 1', () => {
     // https://app.airframes.io/messages/4206449201
-    message.text = 'FM4KIAD,OMAA,140256,1448, 39.43,- 75.62,23228,328,  43.5, 72500';
+    message.text =
+      'FM4KIAD,OMAA,140256,1448, 39.43,- 75.62,23228,328,  43.5, 72500';
     const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
@@ -29,7 +29,9 @@ describe('Label_2P Preamble FM4', () => {
     expect(decodeResult.formatted.items[2].value).toBe('14');
     expect(decodeResult.formatted.items[3].label).toBe('Message Timestamp');
     expect(decodeResult.formatted.items[3].value).toBe('02:56:00');
-    expect(decodeResult.formatted.items[4].label).toBe('Estimated Time of Arrival');
+    expect(decodeResult.formatted.items[4].label).toBe(
+      'Estimated Time of Arrival',
+    );
     expect(decodeResult.formatted.items[4].value).toBe('14:48:00');
     expect(decodeResult.formatted.items[5].label).toBe('Aircraft Position');
     expect(decodeResult.formatted.items[5].value).toBe('39.430 N, 75.620 W');
@@ -42,7 +44,8 @@ describe('Label_2P Preamble FM4', () => {
 
   test('variant 2', () => {
     // https://app.airframes.io/messages/4209103135
-    message.text = 'M58AEY0801FM4RJAA,OMAA,141234,2105, 38.92, 115.44,34099,296,-105.5, 52800';
+    message.text =
+      'M58AEY0801FM4RJAA,OMAA,141234,2105, 38.92, 115.44,34099,296,-105.5, 52800';
     const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
@@ -60,7 +63,9 @@ describe('Label_2P Preamble FM4', () => {
     expect(decodeResult.formatted.items[3].value).toBe('14');
     expect(decodeResult.formatted.items[4].label).toBe('Message Timestamp');
     expect(decodeResult.formatted.items[4].value).toBe('12:34:00');
-    expect(decodeResult.formatted.items[5].label).toBe('Estimated Time of Arrival');
+    expect(decodeResult.formatted.items[5].label).toBe(
+      'Estimated Time of Arrival',
+    );
     expect(decodeResult.formatted.items[5].value).toBe('21:05:00');
     expect(decodeResult.formatted.items[6].label).toBe('Aircraft Position');
     expect(decodeResult.formatted.items[6].value).toBe('38.920 N, 115.440 E');
@@ -72,7 +77,6 @@ describe('Label_2P Preamble FM4', () => {
   });
 
   test('<invalid>', () => {
-
     message.text = 'FM4 Bogus message';
     const decodeResult = plugin.decode(message);
 

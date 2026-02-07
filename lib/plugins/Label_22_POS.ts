@@ -8,7 +8,7 @@ import { ResultFormatter } from '../utils/result_formatter';
 export class Label_22_POS extends DecoderPlugin {
   name = 'label-22-pos';
 
-  qualifiers() { // eslint-disable-line class-methods-use-this
+  qualifiers() {
     return {
       labels: ['22'],
       preambles: ['N', 'S'],
@@ -25,7 +25,9 @@ export class Label_22_POS extends DecoderPlugin {
 
     if (fields.length !== 11) {
       if (options.debug) {
-        console.log(`DEBUG: ${this.name}: Unknown variation. Field count: ${fields.length}, content: ${fields.join(',')}`);
+        console.log(
+          `DEBUG: ${this.name}: Unknown variation. Field count: ${fields.length}, content: ${fields.join(',')}`,
+        );
       }
       decodeResult.decoded = false;
       decodeResult.decoder.decodeLevel = 'none';
@@ -41,7 +43,10 @@ export class Label_22_POS extends DecoderPlugin {
       longitude: CoordinateUtils.getDirection(fields[0][8]) * lon,
     });
 
-    ResultFormatter.time_of_day(decodeResult, DateTimeUtils.convertHHMMSSToTod(fields[2]));
+    ResultFormatter.time_of_day(
+      decodeResult,
+      DateTimeUtils.convertHHMMSSToTod(fields[2]),
+    );
     ResultFormatter.altitude(decodeResult, Number(fields[3]));
 
     ResultFormatter.unknownArr(decodeResult, [fields[1], ...fields.slice(4)]);

@@ -2,7 +2,6 @@ import { MessageDecoder } from '../MessageDecoder';
 import { Label_2P_FM3 } from './Label_2P_FM3';
 
 describe('Label 2P Preamble FM3', () => {
-
   let plugin: Label_2P_FM3;
   const message = { label: '2P', text: '' };
 
@@ -22,7 +21,9 @@ describe('Label 2P Preamble FM3', () => {
     expect(decodeResult.formatted.items.length).toBe(4);
     expect(decodeResult.formatted.items[0].label).toBe('Message Timestamp');
     expect(decodeResult.formatted.items[0].value).toBe('12:17:00');
-    expect(decodeResult.formatted.items[1].label).toBe('Estimated Time of Arrival');
+    expect(decodeResult.formatted.items[1].label).toBe(
+      'Estimated Time of Arrival',
+    );
     expect(decodeResult.formatted.items[1].value).toBe('13:12:00');
     expect(decodeResult.formatted.items[2].label).toBe('Aircraft Position');
     expect(decodeResult.formatted.items[2].value).toBe('43.770 N, 70.180 W');
@@ -44,7 +45,9 @@ describe('Label 2P Preamble FM3', () => {
     expect(decodeResult.formatted.items[0].value).toBe('EY093C');
     expect(decodeResult.formatted.items[1].label).toBe('Message Timestamp');
     expect(decodeResult.formatted.items[1].value).toBe('12:16:00');
-    expect(decodeResult.formatted.items[2].label).toBe('Estimated Time of Arrival');
+    expect(decodeResult.formatted.items[2].label).toBe(
+      'Estimated Time of Arrival',
+    );
     expect(decodeResult.formatted.items[2].value).toBe('14:54:00');
     expect(decodeResult.formatted.items[3].label).toBe('Aircraft Position');
     expect(decodeResult.formatted.items[3].value).toBe('57.310 N, 75.580 W');
@@ -58,7 +61,6 @@ describe('Label 2P Preamble FM3', () => {
     message.text = 'FM3 133818,1607,N 45.206,E 17.726,34030, 440,98';
     const decodeResult = plugin.decode(message);
 
-
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.formatted.description).toBe('Flight Report');
@@ -66,7 +68,9 @@ describe('Label 2P Preamble FM3', () => {
     expect(decodeResult.formatted.items.length).toBe(4);
     expect(decodeResult.formatted.items[0].label).toBe('Message Timestamp');
     expect(decodeResult.formatted.items[0].value).toBe('13:38:18');
-    expect(decodeResult.formatted.items[1].label).toBe('Estimated Time of Arrival');
+    expect(decodeResult.formatted.items[1].label).toBe(
+      'Estimated Time of Arrival',
+    );
     expect(decodeResult.formatted.items[1].value).toBe('16:07:00');
     expect(decodeResult.formatted.items[2].label).toBe('Aircraft Position');
     expect(decodeResult.formatted.items[2].value).toBe('45.206 N, 17.726 E');
@@ -76,7 +80,6 @@ describe('Label 2P Preamble FM3', () => {
   });
 
   test('<invalid>', () => {
-
     message.text = 'FM4 Bogus message';
     const decodeResult = plugin.decode(message);
 

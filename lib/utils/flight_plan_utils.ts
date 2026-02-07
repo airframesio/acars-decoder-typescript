@@ -1,18 +1,21 @@
-import { DecodeResult } from "../DecoderPluginInterface";
-import { ResultFormatter } from "./result_formatter";
-import { RouteUtils } from "./route_utils";
+import { DecodeResult } from '../DecoderPluginInterface';
+import { ResultFormatter } from './result_formatter';
+import { RouteUtils } from './route_utils';
 
 export class FlightPlanUtils {
   /**
    * Processes flight plan data
-   * 
+   *
    * Expected format is [header, key1, val1, ... keyN, valN]
-   * 
+   *
    * @param decodeResult - results
    * @param data - original message split by ':'
    * @returns whether all fields were processed or not
    */
-  public static processFlightPlan(decodeResult: DecodeResult, data: string[]): boolean {
+  public static processFlightPlan(
+    decodeResult: DecodeResult,
+    data: string[],
+  ): boolean {
     let allKnownFields = FlightPlanUtils.parseHeader(decodeResult, data[0]);
     for (let i = 1; i < data.length; i += 2) {
       const key = data[i];
@@ -56,7 +59,10 @@ export class FlightPlanUtils {
     }
     return allKnownFields;
   }
-  public static parseHeader(decodeResult: DecodeResult, header: string): boolean {
+  public static parseHeader(
+    decodeResult: DecodeResult,
+    header: string,
+  ): boolean {
     let allKnownFields = true;
     if (header.startsWith('RF')) {
       decodeResult.formatted.items.push({
@@ -96,40 +102,43 @@ export class FlightPlanUtils {
       });
     } else {
       decodeResult.remaining.text += header;
-      allKnownFields = false
+      allKnownFields = false;
     }
     return allKnownFields;
-  };
-
-
-public static addProcedure(decodeResult: DecodeResult, value: string, type: string) {
-  if (decodeResult.raw.procedures === undefined) {
-    decodeResult.raw.procedures = [];
   }
-  const data = value.split('.');
-  let waypoints;
-  if (data.length > 1) {
-    waypoints = data.slice(1).map((leg) => RouteUtils.getWaypoint(leg));
+
+  public static addProcedure(
+    decodeResult: DecodeResult,
+    value: string,
+    type: string,
+  ) {
+    if (decodeResult.raw.procedures === undefined) {
+      decodeResult.raw.procedures = [];
+    }
+    const data = value.split('.');
+    let waypoints;
+    if (data.length > 1) {
+      waypoints = data.slice(1).map((leg) => RouteUtils.getWaypoint(leg));
+    }
+    const route = { name: data[0], waypoints: waypoints };
+    decodeResult.raw.procedures.push({ type: type, route: route });
+    const procedureName = type.substring(0, 1).toUpperCase() + type.slice(1);
+    decodeResult.formatted.items.push({
+      type: 'procedure',
+      code: 'proc',
+      label: `${procedureName} Procedure`,
+      value: RouteUtils.routeToString(route),
+    });
   }
-  const route = { name: data[0], waypoints: waypoints };
-  decodeResult.raw.procedures.push({ type: type, route: route });
-  const procedureName = type.substring(0, 1).toUpperCase() + type.slice(1);
-  decodeResult.formatted.items.push({
-    type: `procedure`,
-    code: 'proc',
-    label: `${procedureName} Procedure`,
-    value: RouteUtils.routeToString(route),
-  });
-};
 }
 
 function addArrivalAirport(decodeResult: DecodeResult, value: string) {
   ResultFormatter.arrivalAirport(decodeResult, value);
-};
+}
 
 function addDepartureAirport(decodeResult: DecodeResult, value: string) {
   ResultFormatter.departureAirport(decodeResult, value);
-};
+}
 
 function addRunway(decodeResult: DecodeResult, value: string) {
   // xxx(yyy) where xxx is the departure runway and yyy is the arrival runway
@@ -138,12 +147,14 @@ function addRunway(decodeResult: DecodeResult, value: string) {
   }
 
   ResultFormatter.departureRunway(decodeResult, value.substring(0, 3));
-};
+}
 
 function addRoute(decodeResult: DecodeResult, value: string) {
   const route = value.split('.');
-  ResultFormatter.route(decodeResult, { waypoints: route.map((leg) => RouteUtils.getWaypoint(leg)) });
-};
+  ResultFormatter.route(decodeResult, {
+    waypoints: route.map((leg) => RouteUtils.getWaypoint(leg)),
+  });
+}
 
 function addCompanyRoute(decodeResult: DecodeResult, value: string) {
   const segments = value.split('.');
@@ -171,4 +182,4 @@ function addCompanyRoute(decodeResult: DecodeResult, value: string) {
     label: 'Company Route',
     value: RouteUtils.routeToString(decodeResult.raw.company_route),
   });
-};
+}

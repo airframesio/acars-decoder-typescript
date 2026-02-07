@@ -33,10 +33,10 @@ export class Label_5Z_Slash extends DecoderPlugin {
     W1: 'Request Weather for City',
   };
 
-  qualifiers() { // eslint-disable-line class-methods-use-this
+  qualifiers() {
     return {
       labels: ['5Z'],
-      preambles: ['/']
+      preambles: ['/'],
     };
   }
 
@@ -47,7 +47,8 @@ export class Label_5Z_Slash extends DecoderPlugin {
     decodeResult.formatted.description = 'Airline Designated Downlink';
 
     const lines = message.text.split('\r\n');
-    if (lines[0] === '/TXT') { // not UA, but starts with `/`
+    if (lines[0] === '/TXT') {
+      // not UA, but starts with `/`
       ResultFormatter.text(decodeResult, lines.slice(1).join('\r\n'));
       decodeResult.decoded = true;
       decodeResult.decoder.decodeLevel = 'full';
@@ -81,12 +82,23 @@ export class Label_5Z_Slash extends DecoderPlugin {
         ResultFormatter.departureAirport(decodeResult, info[1]);
         ResultFormatter.arrivalAirport(decodeResult, info[2]);
         decodeResult.raw.day = Number(info[3]);
-        ResultFormatter.time_of_day(decodeResult, DateTimeUtils.convertHHMMSSToTod(info[4]));
+        ResultFormatter.time_of_day(
+          decodeResult,
+          DateTimeUtils.convertHHMMSSToTod(info[4]),
+        );
         ResultFormatter.arrivalRunway(decodeResult, info[5].slice(1));
         ResultFormatter.unknownArr(decodeResult, data.slice(3), '/');
       } else if (type === 'B3') {
-        ResultFormatter.departureAirport(decodeResult, header[1].substring(0, 3), 'IATA');
-        ResultFormatter.arrivalAirport(decodeResult, header[1].substring(3), 'IATA');
+        ResultFormatter.departureAirport(
+          decodeResult,
+          header[1].substring(0, 3),
+          'IATA',
+        );
+        ResultFormatter.arrivalAirport(
+          decodeResult,
+          header[1].substring(3),
+          'IATA',
+        );
         decodeResult.raw.day = Number(header[2]);
         ResultFormatter.arrivalRunway(decodeResult, header[3].slice(1));
         if (header.length > 4) {
@@ -98,21 +110,38 @@ export class Label_5Z_Slash extends DecoderPlugin {
         ResultFormatter.departureAirport(decodeResult, info[1]);
         ResultFormatter.arrivalAirport(decodeResult, info[2]);
         decodeResult.raw.day = Number(info[3]);
-        ResultFormatter.time_of_day(decodeResult, DateTimeUtils.convertHHMMSSToTod(info[4]));
+        ResultFormatter.time_of_day(
+          decodeResult,
+          DateTimeUtils.convertHHMMSSToTod(info[4]),
+        );
         ResultFormatter.unknownArr(decodeResult, info.slice(5), ' ');
       } else if (type === 'C3') {
-        ResultFormatter.departureAirport(decodeResult, header[1].substring(0, 3), 'IATA');
-        ResultFormatter.arrivalAirport(decodeResult, header[1].substring(3), 'IATA');
+        ResultFormatter.departureAirport(
+          decodeResult,
+          header[1].substring(0, 3),
+          'IATA',
+        );
+        ResultFormatter.arrivalAirport(
+          decodeResult,
+          header[1].substring(3),
+          'IATA',
+        );
       } else if (type === 'ET') {
         const airports = data[2].split(' ');
         // aiports[0] is blank
         ResultFormatter.departureAirport(decodeResult, airports[1]);
         ResultFormatter.arrivalAirport(decodeResult, airports[2]);
         decodeResult.raw.day = Number(airports[3]);
-        ResultFormatter.time_of_day(decodeResult, DateTimeUtils.convertHHMMSSToTod(airports[4]));
+        ResultFormatter.time_of_day(
+          decodeResult,
+          DateTimeUtils.convertHHMMSSToTod(airports[4]),
+        );
 
         const estimates = data[3].split(' ');
-        ResultFormatter.eta(decodeResult, DateTimeUtils.convertHHMMSSToTod(estimates[1]));
+        ResultFormatter.eta(
+          decodeResult,
+          DateTimeUtils.convertHHMMSSToTod(estimates[1]),
+        );
         ResultFormatter.unknown(decodeResult, estimates[2]);
       } else {
         if (options.debug) {
@@ -120,13 +149,15 @@ export class Label_5Z_Slash extends DecoderPlugin {
         }
       }
       decodeResult.decoded = true;
-      decodeResult.decoder.decodeLevel = decodeResult.remaining.text ? 'partial' : 'full';
+      decodeResult.decoder.decodeLevel = decodeResult.remaining.text
+        ? 'partial'
+        : 'full';
     } else {
       // Unknown
       if (options.debug) {
         console.log(`Decoder: Unknown 5Z message: ${message.text}`);
       }
-        ResultFormatter.unknown(decodeResult, message.text);
+      ResultFormatter.unknown(decodeResult, message.text);
       decodeResult.decoded = false;
       decodeResult.decoder.decodeLevel = 'none';
     }
