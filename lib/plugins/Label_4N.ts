@@ -19,18 +19,13 @@ export class Label_4N extends DecoderPlugin {
     decodeResult.formatted.description = 'Airline Defined';
 
     decodeResult.decoded = true;
-    const fields = message.text.split(',');
-    if (message.text.length === 51) {
+    const text = message.text;
+    const fields = text.split(',');
+    if (text.length === 51) {
       // variant 1
-      decodeResult.raw.day = message.text.substring(0, 2);
-      ResultFormatter.departureAirport(
-        decodeResult,
-        message.text.substring(8, 11),
-      );
-      ResultFormatter.arrivalAirport(
-        decodeResult,
-        message.text.substring(13, 16),
-      );
+      decodeResult.raw.day = text.substring(0, 2);
+      ResultFormatter.departureAirport(decodeResult, text.substring(8, 11));
+      ResultFormatter.arrivalAirport(decodeResult, text.substring(13, 16));
       ResultFormatter.position(
         decodeResult,
         CoordinateUtils.decodeStringCoordinatesDecimalMinutes(
@@ -72,7 +67,7 @@ export class Label_4N extends DecoderPlugin {
       );
     } else {
       decodeResult.decoded = false;
-      ResultFormatter.unknown(decodeResult, message.text);
+      ResultFormatter.unknown(decodeResult, text);
     }
 
     if (decodeResult.decoded) {
