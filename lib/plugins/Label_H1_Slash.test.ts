@@ -1,23 +1,13 @@
 import { MessageDecoder } from '../MessageDecoder';
-import { Label_H1_Slash } from './Label_H1_Slash';
+import { Label_H1 } from './Label_H1';
 
 describe('Label H1 /', () => {
-  let plugin: Label_H1_Slash;
+  let plugin: Label_H1;
   const message = { label: 'H1', text: '' };
 
   beforeEach(() => {
     const decoder = new MessageDecoder();
-    plugin = new Label_H1_Slash(decoder);
-  });
-
-  test('matches qualifiers', () => {
-    expect(plugin.decode).toBeDefined();
-    expect(plugin.name).toBe('label-h1-slash');
-    expect(plugin.qualifiers).toBeDefined();
-    expect(plugin.qualifiers()).toEqual({
-      labels: ['H1'],
-      preambles: ['/'],
-    });
+    plugin = new Label_H1(decoder);
   });
 
   test('decodes variant 1', () => {
@@ -45,7 +35,7 @@ describe('Label H1 /', () => {
     expect(decodeResult.formatted.items[3].value).toBe('-23 degrees');
     expect(decodeResult.formatted.items[4].label).toBe('Message Checksum');
     expect(decodeResult.formatted.items[4].value).toBe('0xe711');
-    expect(decodeResult.remaining.text).toBe('27282,241,780,MANUAL,0,813');
+    expect(decodeResult.remaining.text).toBe('/.27282,241,780,MANUAL,0,813');
   });
 
   test('decodes variant 2', () => {
@@ -72,7 +62,7 @@ describe('Label H1 /', () => {
     expect(decodeResult.formatted.items[3].value).toBe('-45 degrees');
     expect(decodeResult.formatted.items[4].label).toBe('Message Checksum');
     expect(decodeResult.formatted.items[4].value).toBe('0x0721');
-    expect(decodeResult.remaining.text).toBe('HDQDLUA,20967,194/GAHDQDLUA/CA');
+    expect(decodeResult.remaining.text).toBe('/HDQDLUA.20967,194/GAHDQDLUA/CA');
   });
 
   test('decodes variant 3', () => {
@@ -99,7 +89,7 @@ describe('Label H1 /', () => {
     expect(decodeResult.formatted.items[3].value).toBe('-56 degrees');
     expect(decodeResult.formatted.items[4].label).toBe('Message Checksum');
     expect(decodeResult.formatted.items[4].value).toBe('0x6763');
-    expect(decodeResult.remaining.text).toBe('24739,127');
+    expect(decodeResult.remaining.text).toBe('/.24739,127');
   });
 
   test('does not decode invalid', () => {

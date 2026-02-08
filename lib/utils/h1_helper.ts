@@ -17,7 +17,6 @@ export class H1Helper {
 
       return false;
     }
-
     const fields = data.split('/');
     const canDecode = parseMessageType(decodeResult, fields[0]);
     if (!canDecode) {
@@ -33,14 +32,26 @@ export class H1Helper {
         case 'AF':
           processAirField(decodeResult, data.split(','));
           break;
+        case 'AK':
+          ResultFormatter.unknown(decodeResult, fields[i], '/');
+          // processAK(decodeResult, data.split(','));
+          break;
         case 'CG':
           processCenterOfGravity(decodeResult, data.split(','));
           break;
         case 'DC':
           processDateCode(decodeResult, data.split(','));
           break;
+        case 'DI':
+          ResultFormatter.unknown(decodeResult, fields[i], '/');
+          // processDI(decodeResult, data.split(','));
+          break;
         case 'DT': //processDestination?
           processDT(decodeResult, data.split(','));
+          break;
+        case 'DQ':
+          ResultFormatter.unknown(decodeResult, fields[i], '/');
+          // processDQ(decodeResult, data.split(','));
           break;
         case 'ET':
           processETA(data, decodeResult, fields, i);
@@ -53,6 +64,10 @@ export class H1Helper {
           break;
         case 'FX':
           ResultFormatter.freetext(decodeResult, data);
+          break;
+        case 'GA':
+          ResultFormatter.unknown(decodeResult, fields[i], '/');
+          // processGA(decodeResult, data.split(','));
           break;
         case 'ID':
           processIdentification(decodeResult, data.split(','));
@@ -77,6 +92,10 @@ export class H1Helper {
         case 'SN':
           decodeResult.raw.serial_number = data;
           break;
+        case 'SP':
+          ResultFormatter.unknown(decodeResult, fields[i], '/');
+          // processSP(decodeResult, data.split(','));
+          break;
         case 'TD':
           processTimeOfDeparture(decodeResult, data.split(','));
           break;
@@ -88,6 +107,10 @@ export class H1Helper {
           break;
         case 'WD':
           processWindData(decodeResult, data);
+          break;
+        case 'WQ':
+          ResultFormatter.unknown(decodeResult, fields[i], '/');
+          // processWindQuery(decodeResult, data);
           break;
         default:
           ResultFormatter.unknown(decodeResult, fields[i], '/');
@@ -151,7 +174,15 @@ export class H1Helper {
   }
 
   public static processTimeStamp(decodeResult: DecodeResult, data: string[]) {
-    let time = DateTimeUtils.convertDateTimeToEpoch(data[0], data[1]);
+    if (data.length > 2) {
+      const positionData = data.slice(1);
+      positionData[0] = positionData[0].substring(6); // strip time from position field
+      this.processPosition(decodeResult, positionData);
+    }
+    let time = DateTimeUtils.convertDateTimeToEpoch(
+      data[0],
+      data[1].substring(0, 6),
+    );
 
     if (Number.isNaN(time)) {
       // convert DDMMYY to MMDDYY - TODO figure out a better way to determine
@@ -294,19 +325,21 @@ function processCenterOfGravity(decodeResult: DecodeResult, data: string[]) {
 
 function parseMessageType(
   decodeResult: DecodeResult,
-  messageType: string,
+  messagePart: string,
 ): boolean {
+  const messageType = messagePart.split(',')[0];
   if (messageType.startsWith('POS')) {
-    H1Helper.processPosition(decodeResult, messageType.substring(3).split(','));
+    H1Helper.processPosition(decodeResult, messagePart.substring(3).split(','));
     return processMessageType(decodeResult, 'POS');
-  } else if (messageType.length === 13) {
-    if (processMessageType(decodeResult, messageType.substring(10))) {
-      ResultFormatter.unknown(decodeResult, messageType.substring(0, 4));
-      ResultFormatter.flightNumber(decodeResult, messageType.slice(4, 10));
-      return true;
-    }
+  } else if (messageType.length === 6) {
+    const part1 = processMessageType(decodeResult, messageType.substring(0, 3));
+    const description = decodeResult.formatted.description;
+    const part2 = processMessageType(decodeResult, messageType.substring(3, 6));
+    decodeResult.formatted.description =
+      description + ' for ' + decodeResult.formatted.description;
+    return part1 && part2;
   }
-  return processMessageType(decodeResult, messageType.substring(0, 3));
+  return processMessageType(decodeResult, messageType);
 }
 
 function processMessageType(decodeResult: DecodeResult, type: string): boolean {
@@ -324,6 +357,12 @@ function processMessageType(decodeResult: DecodeResult, type: string): boolean {
     decodeResult.formatted.description = 'Progress Report';
   } else if (type === 'PWI') {
     decodeResult.formatted.description = 'Pilot Weather Information';
+  } else if (type === 'REJ') {
+    decodeResult.formatted.description = 'Reject';
+  } else if (type === 'REQ') {
+    decodeResult.formatted.description = 'Request';
+  } else if (type === 'RES') {
+    decodeResult.formatted.description = 'Response';
   } else {
     decodeResult.formatted.description = 'Unknown H1 Message';
     return false;
