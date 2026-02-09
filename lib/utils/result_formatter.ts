@@ -543,6 +543,66 @@ export class ResultFormatter {
     });
   }
 
+  static requestedAltitudes(decodeResult: DecodeResult, values: number[]) {
+    decodeResult.raw.requested_alts = values;
+    decodeResult.formatted.items.push({
+      type: 'requested_altitudes',
+      code: 'REQ_ALTS',
+      label: 'Requested Altitudes',
+      value: `${decodeResult.raw.requested_alts.join(', ')}`,
+    });
+  }
+
+  static desiredAltitude(decodeResult: DecodeResult, value: number) {
+    decodeResult.raw.desired_alt = value;
+    decodeResult.formatted.items.push({
+      type: 'desired_altitude',
+      code: 'DES_ALT',
+      label: 'Desired Altitude',
+      value: `${decodeResult.raw.desired_alt}`,
+    });
+  }
+
+  static startPoint(decodeResult: DecodeResult, value: string) {
+    decodeResult.raw.start_point = value;
+    decodeResult.formatted.items.push({
+      type: 'start_point',
+      code: 'START',
+      label: 'Start Point',
+      value: `${decodeResult.raw.start_point}`,
+    });
+  }
+
+  static routeNumber(decodeResult: DecodeResult, value: string) {
+    decodeResult.raw.route_number = value;
+    decodeResult.formatted.items.push({
+      type: 'route_number',
+      code: 'RTE_NUM',
+      label: 'Route Number',
+      value: `${decodeResult.raw.route_number}`,
+    });
+  }
+
+  static flightPlan(decodeResult: DecodeResult, value: string) {
+    decodeResult.raw.flight_plan = value;
+    decodeResult.formatted.items.push({
+      type: 'flight_plan',
+      code: 'FPN',
+      label: 'Flight Plan',
+      value: `${decodeResult.raw.flight_plan}`,
+    });
+  }
+
+  static groundAddress(decodeResult: DecodeResult, value: string) {
+    decodeResult.raw.ground_address = value;
+    decodeResult.formatted.items.push({
+      type: 'ground_address',
+      code: 'GND_ADDR',
+      label: 'Ground Address',
+      value: `${decodeResult.raw.ground_address}`,
+    });
+  }
+
   static unknown(decodeResult: DecodeResult, value: string, sep: string = ',') {
     if (!decodeResult.remaining.text) decodeResult.remaining.text = value;
     else decodeResult.remaining.text += sep + value;

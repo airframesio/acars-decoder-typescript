@@ -19,7 +19,21 @@ export class Label_H1 extends DecoderPlugin {
     const msg = message.text.replace(/\n|\r/g, '');
     const parts = msg.split('#');
     let decoded = false;
-    if (parts.length === 1) {
+    if (msg.startsWith('/')) {
+      const headerData = msg.split('.');
+      const decoded = H1Helper.decodeH1Message(
+        decodeResult,
+        headerData.slice(1).join('.'),
+      ); // skip up to # and then a little more
+      if (decoded) {
+        decodeResult.remaining.text =
+          headerData[0] + '.' + decodeResult.remaining.text;
+        decodeResult.decoded = decoded;
+        decodeResult.decoder.decodeLevel = 'partial';
+      }
+
+      return decodeResult;
+    } else if (parts.length === 1) {
       decoded = H1Helper.decodeH1Message(decodeResult, msg);
     } else if (parts.length == 2) {
       const offset = isNaN(parseInt(parts[1][1])) ? 3 : 4;
