@@ -43,6 +43,9 @@ export class FlightPlanUtils {
         case 'F': // First Waypoint
           addRoute(decodeResult, value);
           break;
+        case 'FP':
+          ResultFormatter.flightPlan(decodeResult, value.trim());
+          break;
         case 'R':
           addRunway(decodeResult, value);
           break;
@@ -99,6 +102,14 @@ export class FlightPlanUtils {
         code: 'ROUTE_STATUS',
         label: 'Route Status',
         value: 'Route Mapped',
+      });
+    } else if (header.startsWith('RS')) {
+      decodeResult.raw.route_status = 'RS';
+      decodeResult.formatted.items.push({
+        type: 'status',
+        code: 'ROUTE_STATUS',
+        label: 'Route Status',
+        value: 'Route Saved',
       });
     } else {
       decodeResult.remaining.text += header;

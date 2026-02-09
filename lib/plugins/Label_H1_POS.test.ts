@@ -488,15 +488,23 @@ describe('Label_H1 POS', () => {
     );
   });
 
-  test('does not decode /.POS', () => {
+  test('decodes /.POS', () => {
     // https://app.airframes.io/messages/2500488708
     message.text =
       '/.POS/TS100316,210324/PSS35333W058220,,100316,250,S37131W059150,101916,S39387W060377,M23,27282,241,780,MANUAL,0,813E711';
     const decodeResult = plugin.decode(message);
 
-    expect(decodeResult.decoded).toBe(false);
-    expect(decodeResult.decoder.decodeLevel).toBe('none');
-    expect(decodeResult.formatted.description).toBe('Unknown');
+    expect(decodeResult.decoded).toBe(true);
+    expect(decodeResult.decoder.decodeLevel).toBe('partial');
+    expect(decodeResult.formatted.description).toBe('Position Report');
+    expect(decodeResult.raw.message_timestamp).toBe(1711015396);
+    expect(decodeResult.raw.position.latitude).toBeCloseTo(-35.555, 3);
+    expect(decodeResult.raw.position.longitude).toBeCloseTo(-58.367, 3);
+    expect(decodeResult.raw.altitude).toBe(25000);
+    expect(decodeResult.raw.route.waypoints.length).toBe(3);
+    expect(decodeResult.raw.checksum).toBe(0xe711);
+    expect(decodeResult.formatted.items.length).toBe(5);
+    expect(decodeResult.remaining.text).toBe('/.27282,241,780,MANUAL,0,813');
   });
 
   test('decodes duplicate data', () => {

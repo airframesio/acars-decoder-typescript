@@ -47,22 +47,15 @@ describe('Label H1 /', () => {
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.formatted.description).toBe('Position Report');
     expect(decodeResult.raw.message_timestamp).toBe(1731592673);
-    expect(decodeResult.formatted.items.length).toBe(5);
-    expect(decodeResult.formatted.items[0].label).toBe('Aircraft Position');
-    expect(decodeResult.formatted.items[0].value).toBe('38.553 N, 80.137 W');
-    expect(decodeResult.formatted.items[1].label).toBe('Altitude');
-    expect(decodeResult.formatted.items[1].value).toBe('32000 feet');
-    expect(decodeResult.formatted.items[2].label).toBe('Aircraft Route');
-    expect(decodeResult.formatted.items[2].value).toBe(
-      'RONZZ@13:57:53 > LEVII@14:04:54 > WISTA',
-    );
-    expect(decodeResult.formatted.items[3].label).toBe(
-      'Outside Air Temperature (C)',
-    );
-    expect(decodeResult.formatted.items[3].value).toBe('-45 degrees');
-    expect(decodeResult.formatted.items[4].label).toBe('Message Checksum');
-    expect(decodeResult.formatted.items[4].value).toBe('0x0721');
-    expect(decodeResult.remaining.text).toBe('/HDQDLUA.20967,194/GAHDQDLUA/CA');
+    expect(decodeResult.raw.position.latitude).toBeCloseTo(38.553, 3);
+    expect(decodeResult.raw.position.longitude).toBeCloseTo(-80.137, 3);
+    expect(decodeResult.raw.route.waypoints.length).toBe(3);
+    expect(decodeResult.raw.altitude).toBe(32000);
+    expect(decodeResult.raw.outside_air_temperature).toBe(-45);
+    expect(decodeResult.raw.ground_address).toBe('HDQDLUA');
+    expect(decodeResult.raw.checksum).toBe(0x0721);
+    expect(decodeResult.formatted.items.length).toBe(6);
+    expect(decodeResult.remaining.text).toBe('/HDQDLUA.20967,194/CA');
   });
 
   test('decodes variant 3', () => {
