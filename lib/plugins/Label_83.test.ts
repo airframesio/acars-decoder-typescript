@@ -1,6 +1,5 @@
 import { MessageDecoder } from '../MessageDecoder';
 import { Label_83 } from './Label_83';
-
 describe('Label 83', () => {
   let plugin: Label_83;
   const message = { label: '83', text: '' };
@@ -47,44 +46,6 @@ describe('Label 83', () => {
     expect(decodeResult.formatted.items[4].value).toBe('212 knots');
     expect(decodeResult.formatted.items[5].type).toBe('heading');
     expect(decodeResult.formatted.items[5].value).toBe('140');
-  });
-
-  test('decodes Label 83 variant 1 (C-band)', () => {
-    // https://app.airframes.io/messages/3413113024
-    message.text =
-      'M05AUA0007KIAH,RJAA,110012, 39.12,-175.10,39001,265,-107.6, 64900';
-    const decodeResult = plugin.decode(message);
-
-    expect(decodeResult.decoded).toBe(true);
-    expect(decodeResult.decoder.decodeLevel).toBe('partial');
-    expect(decodeResult.decoder.name).toBe('label-83');
-    expect(decodeResult.formatted.description).toBe('Airline Defined');
-    expect(decodeResult.message).toBe(message);
-    expect(decodeResult.raw.flight_number).toBe('UA7');
-    expect(decodeResult.raw.departure_icao).toBe('KIAH');
-    expect(decodeResult.raw.arrival_icao).toBe('RJAA');
-    expect(decodeResult.raw.day).toBe('11');
-    expect(decodeResult.raw.position.latitude).toBe(39.12);
-    expect(decodeResult.raw.position.longitude).toBe(-175.1);
-    expect(decodeResult.raw.altitude).toBe(39001);
-    expect(decodeResult.raw.groundspeed).toBe(265);
-    expect(decodeResult.raw.heading).toBe(-107.6);
-    expect(decodeResult.remaining.text).toBe('64900');
-    expect(decodeResult.formatted.items.length).toBe(7);
-    expect(decodeResult.formatted.items[0].type).toBe('flight_number');
-    expect(decodeResult.formatted.items[0].value).toBe('UA7');
-    expect(decodeResult.formatted.items[1].type).toBe('icao');
-    expect(decodeResult.formatted.items[1].value).toBe('KIAH');
-    expect(decodeResult.formatted.items[2].type).toBe('icao');
-    expect(decodeResult.formatted.items[2].value).toBe('RJAA');
-    expect(decodeResult.formatted.items[3].type).toBe('aircraft_position');
-    expect(decodeResult.formatted.items[3].value).toBe('39.120 N, 175.100 W');
-    expect(decodeResult.formatted.items[4].type).toBe('altitude');
-    expect(decodeResult.formatted.items[4].value).toBe('39001 feet');
-    expect(decodeResult.formatted.items[5].type).toBe('aircraft_groundspeed');
-    expect(decodeResult.formatted.items[5].value).toBe('265 knots');
-    expect(decodeResult.formatted.items[6].type).toBe('heading');
-    expect(decodeResult.formatted.items[6].value).toBe('-107.6');
   });
 
   test('decodes Label 83 variant 2', () => {
@@ -137,34 +98,6 @@ describe('Label 83', () => {
     expect(decodeResult.formatted.items[0].value).toBe('40.643 N, 74.463 W');
     expect(decodeResult.formatted.items[1].type).toBe('altitude');
     expect(decodeResult.formatted.items[1].value).toBe('2925 feet');
-  });
-
-  test('decodes Label 83 variant 3 (C-band)', () => {
-    const decoder = new MessageDecoder();
-    const decoderPlugin = new Label_83(decoder);
-
-    // https://app.airframes.io/messages/3413346742
-    message.text = 'M09AXA0001001PR11013423N0556.6E11603.0000000----';
-    const decodeResult = decoderPlugin.decode(message);
-
-    expect(decodeResult.decoded).toBe(true);
-    expect(decodeResult.decoder.decodeLevel).toBe('partial');
-    expect(decodeResult.decoder.name).toBe('label-83');
-    expect(decodeResult.formatted.description).toBe('Airline Defined');
-    expect(decodeResult.message).toBe(message);
-    expect(decodeResult.raw.flight_number).toBe('XA1');
-    expect(decodeResult.raw.day).toBe('11');
-    expect(decodeResult.raw.position.latitude).toBe(5.943333333333333);
-    expect(decodeResult.raw.position.longitude).toBe(116.05);
-    expect(decodeResult.raw.altitude).toBe(0);
-    expect(decodeResult.remaining.text).toBe('0----');
-    expect(decodeResult.formatted.items.length).toBe(3);
-    expect(decodeResult.formatted.items[0].type).toBe('flight_number');
-    expect(decodeResult.formatted.items[0].value).toBe('XA1');
-    expect(decodeResult.formatted.items[1].type).toBe('aircraft_position');
-    expect(decodeResult.formatted.items[1].value).toBe('5.943 N, 116.050 E');
-    expect(decodeResult.formatted.items[2].type).toBe('altitude');
-    expect(decodeResult.formatted.items[2].value).toBe('0 feet');
   });
 
   test('decodes Label 83 <invalid>', () => {

@@ -90,33 +90,6 @@ describe('Label 4A', () => {
     expect(decodeResult.formatted.items[3].value).toBe('4 degrees');
   });
 
-  test('decodes variant 2, C-Band', () => {
-    // https://app.airframes.io/messages/3461407615
-    message.text =
-      'M60ALH0752N22456E077014OSE35 ,192027370VEX36 ,192316,M46,275043309,85220111';
-    const decodeResult = plugin.decode(message);
-
-    expect(decodeResult.decoded).toBe(true);
-    expect(decodeResult.decoder.decodeLevel).toBe('partial');
-    expect(decodeResult.decoder.name).toBe('label-4a');
-    expect(decodeResult.formatted.description).toBe('Latest New Format');
-    expect(decodeResult.message).toBe(message);
-    expect(decodeResult.remaining.text).toBe('275043309,85220111');
-    expect(decodeResult.formatted.items.length).toBe(5);
-    expect(decodeResult.formatted.items[0].code).toBe('FLIGHT');
-    expect(decodeResult.formatted.items[0].value).toBe('LH752');
-    expect(decodeResult.formatted.items[1].code).toBe('POS');
-    expect(decodeResult.formatted.items[1].value).toBe('22.456 N, 77.014 E');
-    expect(decodeResult.formatted.items[2].code).toBe('ALT');
-    expect(decodeResult.formatted.items[2].value).toBe('37000 feet');
-    expect(decodeResult.formatted.items[3].code).toBe('ROUTE');
-    expect(decodeResult.formatted.items[3].value).toBe(
-      'OSE35@19:20:27 > VEX36@19:23:16',
-    );
-    expect(decodeResult.formatted.items[4].code).toBe('OATEMP');
-    expect(decodeResult.formatted.items[4].value).toBe('-46 degrees');
-  });
-
   test('decodes variant 3', () => {
     // https://globe.adsbexchange.com/?icao=A39AC6&showTrace=2024-09-22&timestamp=1727009085
     message.text = '124442,1320, 138,33467,N 41.093,W 72.677';

@@ -19,17 +19,8 @@ export class Label_83 extends DecoderPlugin {
     decodeResult.message = message;
     decodeResult.formatted.description = 'Airline Defined';
 
-    // Inmarsat C-band seems to prefix normal messages with a message number and flight number
-    let text = message.text;
-    if (text.match(/^M\d{2}A\w{6}/)) {
-      ResultFormatter.flightNumber(
-        decodeResult,
-        message.text.substring(4, 10).replace(/^([A-Z]+)0*/g, '$1'),
-      );
-      text = text.substring(10);
-    }
-
     decodeResult.decoded = true;
+    const text = message.text;
     if (text.substring(0, 10) === '4DH3 ETAT2') {
       // variant 2
       const fields = text.split(/\s+/);
@@ -74,7 +65,7 @@ export class Label_83 extends DecoderPlugin {
         ResultFormatter.unknown(decodeResult, fields[8]);
       } else {
         decodeResult.decoded = false;
-        ResultFormatter.unknown(decodeResult, message.text);
+        ResultFormatter.unknown(decodeResult, text);
       }
     }
 
