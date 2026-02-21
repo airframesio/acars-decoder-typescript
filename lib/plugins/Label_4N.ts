@@ -58,7 +58,7 @@ export class Label_4N extends DecoderPlugin {
       if (fields[12].length > 1) {
         ResultFormatter.alternateRunway(decodeResult, fields[12].split('/')[0]);
       }
-      ResultFormatter.checksum(decodeResult, fields[32]);
+      ResultFormatter.checksum(decodeResult, parseInt(fields[32], 16));
       ResultFormatter.unknownArr(
         decodeResult,
         [...fields.slice(1, 3), fields[7], ...fields.slice(13, 32)].filter(

@@ -55,6 +55,22 @@ describe('Label H1 preamble REQ', () => {
     expect(decodeResult.remaining.text).toBeUndefined();
   });
 
+  test('decodes REQ POS inmarsat', () => {
+    message.text = '#MDREQPOS/ID55150A,RCH892,LVZF1185C049/MR1,/AU39310';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoded).toBe(true);
+    expect(decodeResult.decoder.decodeLevel).toBe('partial');
+    expect(decodeResult.raw.tail).toBe('55150A');
+    expect(decodeResult.raw.flight_number).toBe('RCH892');
+    expect(decodeResult.raw.checksum).toBe(0x9310);
+    expect(decodeResult.formatted.description).toBe(
+      'Request for Position Report',
+    );
+    expect(decodeResult.formatted.items.length).toBe(3);
+    expect(decodeResult.remaining.text).toBe('MR1,/AU3');
+  });
+
   test('decodes FPN', () => {
     message.text = 'REQFPN/RN10001/RS:FP:Z5585     9736';
     const decodeResult = plugin.decode(message);

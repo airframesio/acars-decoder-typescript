@@ -131,8 +131,7 @@ describe('Label H1 Preamble PRG', () => {
     );
   });
 
-  // TODO Fix this test
-  test.skip('decodes named runway', () => {
+  test('decodes named runway inmarsat', () => {
     message.text = 'PRG/DT,KMDW,31R,62,031854,524,N38584W077333,171,732B3C';
     const decodeResult = plugin.decode(message);
 
@@ -142,9 +141,10 @@ describe('Label H1 Preamble PRG', () => {
     expect(decodeResult.raw.arrival_runway).toBe('31R');
     expect(decodeResult.raw.position.latitude).toBe(38.584);
     expect(decodeResult.raw.position.longitude).toBe(-77.333);
-
+    expect(decodeResult.raw.fuel_on_board).toBe(62);
+    expect(decodeResult.raw.checksum).toBe(0x2b3c);
     expect(decodeResult.formatted.description).toBe('Progress Report');
-    expect(decodeResult.formatted.items.length).toBe(0);
+    expect(decodeResult.formatted.items.length).toBe(6);
   });
 
   test('decodes Label H1 Preamble PRG <invalid>', () => {

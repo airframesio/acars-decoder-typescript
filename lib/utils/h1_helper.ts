@@ -9,12 +9,18 @@ import { RouteUtils } from './route_utils';
 
 export class H1Helper {
   public static decodeH1Message(decodeResult: DecodeResult, message: string) {
-    const checksum = message.slice(-4);
+    const checksum = parseInt(message.slice(-4), 16);
     const data = message.slice(0, message.length - 4);
-    if (calculateChecksum(data) !== checksum) {
+    let checksumAlgorithmUsed = '';
+    if (crc16IbmSdlcRev(data) === checksum) {
+      // ACARS/VDL2/HFDL/Iridium
+      checksumAlgorithmUsed = 'IBM-SDLC reversed';
+    } else if (crc16Genibus(data) === checksum) {
+      // inmarsat
+      checksumAlgorithmUsed = 'GENIBUS';
+    } else {
       decodeResult.decoded = false;
       decodeResult.decoder.decodeLevel = 'none';
-
       return false;
     }
     const fields = data.split('/');
@@ -24,7 +30,6 @@ export class H1Helper {
       decodeResult.decoder.decodeLevel = 'none';
       return false;
     }
-
     for (let i = 1; i < fields.length; ++i) {
       const key = fields[i].substring(0, 2);
       const data = fields[i].substring(2);
@@ -95,6 +100,9 @@ export class H1Helper {
         case 'RN':
           ResultFormatter.routeNumber(decodeResult, data);
           break;
+        case 'RW':
+          processRunway(decodeResult, data.split(':'));
+          break;
         case 'SN':
           decodeResult.raw.serial_number = data;
           break;
@@ -121,6 +129,7 @@ export class H1Helper {
       }
     }
 
+    ResultFormatter.checksumAlgorithm(decodeResult, checksumAlgorithmUsed);
     ResultFormatter.checksum(decodeResult, checksum);
 
     return true;
@@ -261,31 +270,42 @@ function processIdentification(decodeResult: DecodeResult, data: string[]) {
 }
 
 function processDT(decodeResult: DecodeResult, data: string[]) {
-  if (!decodeResult.raw.arrival_icao) {
-    ResultFormatter.arrivalAirport(decodeResult, data[0]);
-  } else if (decodeResult.raw.arrival_icao != data[0]) {
-    ResultFormatter.unknownArr(decodeResult, data);
-  } // else duplicate - don't do anything
-
-  if (data.length > 1) {
+  if (data.length === 9) {
+    ResultFormatter.unknown(decodeResult, data[0]);
+    if (!decodeResult.raw.arrival_icao) {
+      ResultFormatter.arrivalAirport(decodeResult, data[1]);
+    }
+    ResultFormatter.arrivalRunway(decodeResult, data[2]);
+    ResultFormatter.currentFuel(decodeResult, parseInt(data[3], 10));
+    ResultFormatter.eta(
+      decodeResult,
+      DateTimeUtils.convertHHMMSSToTod(data[4]),
+    );
+    ResultFormatter.unknown(decodeResult, data[5]);
+    ResultFormatter.position(
+      decodeResult,
+      CoordinateUtils.decodeStringCoordinates(data[6]),
+    );
+    ResultFormatter.unknown(decodeResult, data[7]);
+    ResultFormatter.unknown(decodeResult, data[8]);
+    return;
+  }
+  if (data.length === 4 || data.length === 5) {
+    if (!decodeResult.raw.arrival_icao) {
+      ResultFormatter.arrivalAirport(decodeResult, data[0]);
+    }
     ResultFormatter.arrivalRunway(decodeResult, data[1]);
-  }
-  if (data.length > 2) {
-    ResultFormatter.currentFuel(decodeResult, Number(data[2]));
-  }
-  if (data.length > 3) {
+    ResultFormatter.currentFuel(decodeResult, parseInt(data[2], 10));
     ResultFormatter.eta(
       decodeResult,
       DateTimeUtils.convertHHMMSSToTod(data[3]),
     );
+    if (data.length > 4) {
+      ResultFormatter.remainingFuel(decodeResult, Number(data[4]));
+    }
+    return;
   }
-  if (data.length > 4) {
-    ResultFormatter.remainingFuel(decodeResult, Number(data[4]));
-  }
-  if (data.length > 5) {
-    //TODO: figure out what this is
-    ResultFormatter.unknownArr(decodeResult, data);
-  }
+  ResultFormatter.unknownArr(decodeResult, data, ',');
 }
 
 function processLandingReport(decodeResult: DecodeResult, data: string[]) {
@@ -361,7 +381,9 @@ function processMessageType(decodeResult: DecodeResult, type: string): boolean {
   } else if (type === 'FTX') {
     decodeResult.formatted.description = 'Free Text';
   } else if (type === 'INI') {
-    decodeResult.formatted.description = 'Flight Plan Initial Report';
+    decodeResult.formatted.description = 'Initial Report';
+  } else if (type === 'LDI') {
+    decodeResult.formatted.description = 'Load Distribution Information';
   } else if (type === 'PER') {
     decodeResult.formatted.description = 'Performance Report';
   } else if (type === 'POS') {
@@ -457,11 +479,15 @@ function processWindData(decodeResult: DecodeResult, message: string) {
   const flightLevel = Number(message.slice(0, 3));
   const fields = message.slice(4).split('.'); // strip off altitude and comma
   fields.forEach((field) => {
+    if (field.length < 4) {
+      // probably need a more robust check to determine to skip
+      return;
+    }
     const data = field.split(',');
     const waypoint = { name: data[0] };
     const windData = data[1];
-    const windDirection = Number(windData.slice(0, 3));
-    const windSpeed = Number(windData.slice(3));
+    const windDirection = parseInt(windData.slice(0, 3), 10);
+    const windSpeed = parseInt(windData.slice(3), 10);
 
     if (data.length === 3) {
       const tempData = data[2];
@@ -493,8 +519,21 @@ function processWindData(decodeResult: DecodeResult, message: string) {
   ResultFormatter.windData(decodeResult, wind);
 }
 
+function processRunway(decodeResult: DecodeResult, data: string[]) {
+  //FIXME - figure out names
+  const parts = data[0].split('.');
+  const more = parts[0].split(',');
+
+  ResultFormatter.departureRunway(decodeResult, more[0]);
+  ResultFormatter.unknownArr(decodeResult, more.slice(1), ',');
+  ResultFormatter.unknownArr(decodeResult, parts.slice(1), '.');
+  ResultFormatter.departureAirport(decodeResult, data[1].split(',')[0]);
+  ResultFormatter.unknownArr(decodeResult, data[1].split(',').slice(1), ',');
+  //ResultFormatter.unknownArr(decodeResult, data.slice(2), ':');
+}
+
 // CRC-16/IBM-SDLC but nibbles are reversed
-function calculateChecksum(data: string): string {
+function crc16IbmSdlcRev(data: string): number {
   let crc = 0xffff;
   const bytes = Buffer.from(data, 'ascii');
 
@@ -515,5 +554,31 @@ function calculateChecksum(data: string): string {
   const nibble3 = (crc >> 4) & 0xf;
   const nibble4 = crc & 0xf;
 
-  return `${nibble4.toString(16)}${nibble3.toString(16)}${nibble2.toString(16)}${nibble1.toString(16)}`.toUpperCase();
+  return (nibble4 << 12) | (nibble3 << 8) | (nibble2 << 4) | nibble1;
+}
+
+/**
+ * Calculates the CRC-16/GENIBUS checksum for a given Uint8Array.
+ * @param data The input data as a byte array.
+ * @returns The 16-bit checksum as a number.
+ */
+function crc16Genibus(data: string): number {
+  let crc = 0xffff;
+  const polynomial = 0x1021;
+
+  const bytes = Buffer.from(data, 'ascii');
+
+  for (const byte of bytes) {
+    crc ^= byte << 8;
+
+    for (let i = 0; i < 8; i++) {
+      if ((crc & 0x8000) !== 0) {
+        crc = ((crc << 1) ^ polynomial) & 0xffff;
+      } else {
+        crc = (crc << 1) & 0xffff;
+      }
+    }
+  }
+
+  return (crc ^ 0xffff) & 0xffff;
 }
