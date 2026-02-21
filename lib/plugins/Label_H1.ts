@@ -36,7 +36,8 @@ export class Label_H1 extends DecoderPlugin {
     } else if (parts.length === 1) {
       decoded = H1Helper.decodeH1Message(decodeResult, msg);
     } else if (parts.length == 2) {
-      const offset = isNaN(parseInt(parts[1][1])) ? 3 : 4;
+      // need a better way to figure this out
+      const offset = parts[0] === '- ' || isNaN(parseInt(parts[1][1])) ? 3 : 4;
       decoded = H1Helper.decodeH1Message(
         decodeResult,
         msg.slice(parts[0].length + offset),

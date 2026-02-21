@@ -144,7 +144,7 @@ describe('Label_H1 FPN', () => {
     expect(decodeResult.formatted.items[8].label).toBe('Message Checksum');
     expect(decodeResult.formatted.items[8].value).toBe('0x156d');
     expect(decodeResult.remaining.text).toBe(
-      ':WS:N61000W030000,370..N61000W040000..N60000W050000..URTAK:WS:URTAK,380..LAKES:WS:LAKES,400..N57000W070000..N54300W080000..N49000W090000..DLH..COLDD/PR4356,344,360,1060,,,13,,,30,,,P50,M40,36090,,3296,292,KMSP,30L,172,215117',
+      ':WS:N61000W030000,370..N61000W040000..N60000W050000..URTAK:WS:URTAK,380..LAKES:WS:LAKES,400..N57000W070000..N54300W080000..N49000W090000..DLH..COLDD/PR4356,344,360,1060,,,13,,,30,,,P50,M40,36090,,3296,292',
     );
   });
 
@@ -338,5 +338,24 @@ describe('Label_H1 FPN', () => {
     expect(decodeResult.decoder.decodeLevel).toBe('full');
     expect(decodeResult.raw.checksum).toBe(0xeee6);
     expect(decodeResult.formatted.items.length).toBe(1);
+  });
+
+  test('decodes inmarsat', () => {
+    message.text =
+      'FPN/ID80094S,RCH411,8JZ41NG3S048/MR3,5/RP:DA:KMCF:AA:LBSF:F:PIE..BRUTS.Q109.CAMJO.Q109.YURCK.Q97.PAACK.Q97.BLENO.Q97.FRIAR..TOPPS..FROSS..RIKAL..N53000W050000..N55000W040000..N56000W030000..N56000W020000..PIKIL..SOVED..MIMKU..MAC..BELOX.L603.DOLAS..NAVPI..MAVAS..SOGPO..TIVUN..ESAMA..OSBIT..KOMIB..SULUS.Z650.VEMUT..PEPIK..BERVA..ERGOM..TEGRI..OSTOV..GOL:V:CAMJO,301,AT3100,,:V:PAACK,282,AT3300,,:V:BLENO,258,AT3700,,:V:N53000W050000,256,AT3700,,:V:N55000W040000,260,AT3700,,:V:SOVED,303,AT2700,,:V:MIMKU,302,AT2700,,:V:DOLAS,290,AT2900,,:V:PEPIK,242,AT3700,,:V:BERVA,260,AT3700,,7147/WD,,,,C850';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoded).toBe(true);
+    expect(decodeResult.decoder.decodeLevel).toBe('partial');
+    expect(decodeResult.raw.tail).toBe('80094S');
+    expect(decodeResult.raw.flight_number).toBe('RCH411');
+    expect(decodeResult.raw.mission_number).toBe('8JZ41NG3S048');
+    expect(decodeResult.raw.route_status).toBe('RP');
+    expect(decodeResult.raw.departure_icao).toBe('KMCF');
+    expect(decodeResult.raw.arrival_icao).toBe('LBSF');
+    expect(decodeResult.raw.route.waypoints.length).toBe(69); //nice
+    expect(decodeResult.raw.checksum).toBe(0xc850);
+    expect(decodeResult.formatted.description).toBe('Flight Plan');
+    expect(decodeResult.formatted.items.length).toBe(7);
   });
 });

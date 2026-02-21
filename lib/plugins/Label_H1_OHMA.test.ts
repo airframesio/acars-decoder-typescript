@@ -64,6 +64,7 @@ describe('Label H1 Preamble OHMA', () => {
     expect(decodeResult.formatted.items[0].value).toBe('undefined');
   });
 
+  // disabled because parser currently does not handle before OHMA, but here as an example.
   test.skip('decodes Label H1 Preamble OHMA partial', () => {
     // https://app.airframes.io/messages/3126673935
     message.text =

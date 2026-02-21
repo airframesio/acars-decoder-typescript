@@ -252,8 +252,18 @@ export class ResultFormatter {
     });
   }
 
-  static checksum(decodeResult: DecodeResult, value: string) {
-    decodeResult.raw.checksum = Number('0x' + value);
+  static checksumAlgorithm(decodeResult: DecodeResult, value: string) {
+    decodeResult.raw.checksum_algorithm = value;
+    // decodeResult.formatted.items.push({
+    //   type: 'message_checksum_algorithm',
+    //   code: 'CHECKSUM_ALGO',
+    //   label: 'Checksum Algorithm',
+    //   value: decodeResult.raw.checksum_algorithm,
+    // });
+  }
+
+  static checksum(decodeResult: DecodeResult, value: number) {
+    decodeResult.raw.checksum = value;
     decodeResult.formatted.items.push({
       type: 'message_checksum',
       code: 'CHECKSUM',
