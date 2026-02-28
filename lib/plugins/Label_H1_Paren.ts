@@ -9,7 +9,7 @@ export class Label_H1_Paren extends DecoderPlugin {
   qualifiers() {
     return {
       labels: ['H1'],
-      prefixes: ['('],
+      preambles: ['('],
     };
   }
 

@@ -16,7 +16,7 @@ describe('Label H1 (messages)', () => {
     expect(plugin.qualifiers).toBeDefined();
     expect(plugin.qualifiers()).toEqual({
       labels: ['H1'],
-      prefixes: ['('],
+      preambles: ['('],
     });
   });
 
