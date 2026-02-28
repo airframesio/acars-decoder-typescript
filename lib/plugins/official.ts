@@ -53,6 +53,7 @@ export * from './Label_H1';
 export * from './Label_H2_02E';
 export * from './Label_H1_FLR';
 export * from './Label_H1_OHMA';
+export * from './Label_H1_Paren';
 export * from './Label_H1_StarPOS';
 export * from './Label_H1_WRN';
 export * from './Label_HX';

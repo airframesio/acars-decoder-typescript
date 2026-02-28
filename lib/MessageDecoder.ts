@@ -65,6 +65,7 @@ export class MessageDecoder {
     this.registerPlugin(new Plugins.Label_H2_02E(this));
     this.registerPlugin(new Plugins.Label_H1_FLR(this));
     this.registerPlugin(new Plugins.Label_H1_OHMA(this));
+    this.registerPlugin(new Plugins.Label_H1_Paren(this));
     this.registerPlugin(new Plugins.Label_H1_WRN(this));
     this.registerPlugin(new Plugins.Label_H1(this));
     this.registerPlugin(new Plugins.Label_H1_StarPOS(this));
