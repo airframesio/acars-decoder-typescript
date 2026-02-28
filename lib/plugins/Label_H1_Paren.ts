@@ -27,7 +27,7 @@ export class Label_H1_Paren extends DecoderPlugin {
     // Regex to match the expected format
     // Example: (POS-KLM296  -3911N07600W/234212 F250\r\nRMK/FUEL  37.0 M0.69)
     const regex =
-      /^\(POS-(?<flight>KLM\d+)\s+(?<lat>-?\d{4,5}[NS])(?<lon>\d{5}[EW])\/(?<timestamp>\d{6})\s+F(?<alt>\d{3})\r?\nRMK\/FUEL\s+(?<fuel>\d{2,3}\.\d)\s+M(?<mach>\d\.\d{2})\)/;
+      /^\(POS-(?<flight>\w+)\s+(?<lat>-?\d{4,5}[NS])(?<lon>\d{5}[EW])\/(?<timestamp>\d{6})\s+F(?<alt>\d{3})\r?\nRMK\/FUEL\s+(?<fuel>\d{2,3}\.\d)\s+M(?<mach>\d\.\d{2})\)/;
 
     const match = message.text.match(regex);
     if (match && match.groups) {
