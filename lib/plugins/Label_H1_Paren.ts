@@ -18,14 +18,11 @@ export class Label_H1_Paren extends DecoderPlugin {
     decodeResult.decoder.name = this.name;
     decodeResult.message = message;
 
-    // Only match if text starts with '('
     if (!message.text || !message.text.startsWith('(')) {
       decodeResult.decoded = false;
       return decodeResult;
     }
 
-    // Regex to match the expected format
-    // Example: (POS-KLM296  -3911N07600W/234212 F250\r\nRMK/FUEL  37.0 M0.69)
     const regex =
       /^\(POS-(?<flight>\w+)\s+(?<lat>-?\d{4,5}[NS])(?<lon>\d{5}[EW])\/(?<timestamp>\d{6})\s+F(?<alt>\d{3})\r?\nRMK\/FUEL\s+(?<fuel>\d{2,3}\.\d)\s+M(?<mach>\d\.\d{2})\)/;
 
@@ -58,7 +55,6 @@ export class Label_H1_Paren extends DecoderPlugin {
 }
 
 function parseLat(latStr: string): number {
-  // Example: -3911N
   const match = latStr.match(/(-?)(\d{2})(\d{2})([NS])/);
   if (!match) return NaN;
   let deg = parseInt(match[2]);
@@ -68,7 +64,6 @@ function parseLat(latStr: string): number {
 }
 
 function parseLon(lonStr: string): number {
-  // Example: 07600W
   const match = lonStr.match(/(\d{3})(\d{2})([EW])/);
   if (!match) return NaN;
   let deg = parseInt(match[1]);
