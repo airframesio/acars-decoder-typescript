@@ -34,6 +34,7 @@ describe('Label H1 (messages)', () => {
     expect(decodeResult.raw.altitude).toBe(25000);
     expect(decodeResult.raw.fuel_on_board).toBe(37.0);
     expect(decodeResult.raw.mach).toBe(0.69);
+    expect(decodeResult.formatted.description).toBe('Position Report');
     expect(decodeResult.formatted.items.length).toBe(6);
     expect(decodeResult.remaining.text).toBe('RMK');
   });

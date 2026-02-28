@@ -33,6 +33,8 @@ export class Label_H1_Paren extends DecoderPlugin {
     if (match && match.groups) {
       decodeResult.decoded = true;
       decodeResult.decoder.decodeLevel = 'partial';
+      decodeResult.formatted.description = 'Position Report';
+
 
       ResultFormatter.flightNumber(decodeResult, match.groups.flight);
       ResultFormatter.position(decodeResult, {
