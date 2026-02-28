@@ -306,14 +306,32 @@ export class ResultFormatter {
     if (value.length === 0) {
       return;
     }
-    decodeResult.raw.outside_air_temperature = Number(
+    decodeResult.raw.outside_air_temperature = parseInt(
       value.replace('M', '-').replace('P', '+'),
+      10,
     );
     decodeResult.formatted.items.push({
-      type: 'outside_air_temperature',
+      type: 'temperature',
       code: 'OATEMP',
       label: 'Outside Air Temperature (C)',
       value: `${decodeResult.raw.outside_air_temperature} degrees`,
+    });
+  }
+
+  static totalAirTemp(decodeResult: DecodeResult, value: string) {
+    if (value.length === 0) {
+      return;
+    }
+    decodeResult.raw.total_air_temperature = parseInt(
+      value.replace('M', '-').replace('P', '+'),
+      10,
+    );
+
+    decodeResult.formatted.items.push({
+      type: 'temperature',
+      code: 'TATEMP',
+      label: 'Total Air Temperature (C)',
+      value: `${decodeResult.raw.total_air_temperature} degrees`,
     });
   }
 
@@ -610,6 +628,16 @@ export class ResultFormatter {
       code: 'GND_ADDR',
       label: 'Ground Address',
       value: `${decodeResult.raw.ground_address}`,
+    });
+  }
+
+  static timestamp(decodeResult: DecodeResult, value: number) {
+    decodeResult.raw.message_timestamp = value;
+    decodeResult.formatted.items.push({
+      type: 'epoch',
+      code: 'TIMESTAMP',
+      label: 'Message Timestamp',
+      value: DateTimeUtils.timestampToString(value, 'epoch'),
     });
   }
 
