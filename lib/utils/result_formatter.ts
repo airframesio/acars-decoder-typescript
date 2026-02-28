@@ -306,12 +306,11 @@ export class ResultFormatter {
     if (value.length === 0) {
       return;
     }
-    decodeResult.raw.outside_air_temperature = parseInt(
+    decodeResult.raw.outside_air_temperature = Number(
       value.replace('M', '-').replace('P', '+'),
-      10,
     );
     decodeResult.formatted.items.push({
-      type: 'temperature',
+      type: 'outside_air_temperature',
       code: 'OATEMP',
       label: 'Outside Air Temperature (C)',
       value: `${decodeResult.raw.outside_air_temperature} degrees`,
@@ -322,11 +321,9 @@ export class ResultFormatter {
     if (value.length === 0) {
       return;
     }
-    decodeResult.raw.total_air_temperature = parseInt(
+    decodeResult.raw.total_air_temperature = Number(
       value.replace('M', '-').replace('P', '+'),
-      10,
     );
-
     decodeResult.formatted.items.push({
       type: 'temperature',
       code: 'TATEMP',
