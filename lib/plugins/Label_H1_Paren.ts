@@ -2,7 +2,6 @@ import { DateTimeUtils } from '../DateTimeUtils';
 import { DecoderPlugin } from '../DecoderPlugin';
 import { DecodeResult, Message } from '../DecoderPluginInterface';
 import { ResultFormatter } from '../utils/result_formatter';
-// ...existing code...
 
 export class Label_H1_Paren extends DecoderPlugin {
   name = 'label-h1-paren';
