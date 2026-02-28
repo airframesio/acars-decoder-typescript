@@ -57,7 +57,6 @@ export class Label_16_AUTPOS extends DecoderPlugin {
 
     ResultFormatter.day(decodeResult, parseInt(flight.slice(0, 2), 10));
     ResultFormatter.flightNumber(decodeResult, flight.slice(2));
-    // Use hemisphere indicators for coordinates
     let latitude = CoordinateUtils.dmsToDecimalDegrees(
       parseInt(latDeg, 10),
       parseInt(latMin, 10),
@@ -109,8 +108,6 @@ export class Label_16_AUTPOS extends DecoderPlugin {
     }
 
     if (!dat.includes('*') && !tim.includes('*')) {
-      // DAT is DDMMYY, TIM is HHMMSS
-      // DateTimeUtils.convertDateTimeToEpoch expects MMDDYY
       const yy = dat.slice(0, 2);
       const mm = dat.slice(2, 4);
       const dd = dat.slice(4, 6);
