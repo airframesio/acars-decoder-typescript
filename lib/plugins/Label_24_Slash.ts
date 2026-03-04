@@ -24,14 +24,14 @@ export class Label_24_Slash extends DecoderPlugin {
 
     if (fields.length == 10 && fields[0] == '' && fields[9] == '') {
       // begin and ends with `/`
-      const mmddyy =
-        fields[1].substring(4, 6) +
+      const ddmmyy =
         fields[1].substring(2, 4) +
+        fields[1].substring(4, 6) +
         fields[1].substring(0, 2); // YYDDMM
       const hhmmss = fields[2] + '00';
       decodeResult.raw.message_timestamp = DateTimeUtils.convertDateTimeToEpoch(
         hhmmss,
-        mmddyy,
+        ddmmyy,
       );
       ResultFormatter.flightNumber(decodeResult, fields[3]);
       ResultFormatter.altitude(decodeResult, Number(fields[4]));

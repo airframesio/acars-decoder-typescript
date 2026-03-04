@@ -47,8 +47,8 @@ export class Label_1M_Slash extends DecoderPlugin {
         decodeResult,
         DateTimeUtils.convertDateTimeToEpoch(
           results[7] + '00',
-          yymmdd.substring(2, 4) +
-            yymmdd.substring(4, 6) +
+          yymmdd.substring(4, 6) +
+            yymmdd.substring(2, 4) +
             yymmdd.substring(0, 2),
         ),
         'epoch',

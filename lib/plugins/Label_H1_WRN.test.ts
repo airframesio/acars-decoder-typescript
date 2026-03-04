@@ -30,7 +30,7 @@ describe('Label H1 WRN', () => {
     expect(decodeResult.decoder.name).toBe('label-h1-wrn');
     expect(decodeResult.formatted.description).toBe('Warning Message');
     expect(decodeResult.message).toBe(message);
-    expect(decodeResult.raw.message_timestamp).toBe(1712105880);
+    expect(decodeResult.raw.message_timestamp).toBe(1709513880);
     expect(decodeResult.formatted.items.length).toBe(1);
     expect(decodeResult.formatted.items[0].type).toBe('warning');
     expect(decodeResult.formatted.items[0].code).toBe('WRN');

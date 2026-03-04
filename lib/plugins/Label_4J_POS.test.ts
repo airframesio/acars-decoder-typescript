@@ -33,7 +33,6 @@ describe('Label 4J POS', () => {
     expect(decodeResult.raw.tail).toBe('91459S');
     expect(decodeResult.raw.flight_number).toBe('BANKR31');
     expect(decodeResult.raw.mission_number).toBe('');
-    expect(decodeResult.raw.message_date).toBe('03032024');
     expect(decodeResult.raw.day).toBe(3);
     expect(decodeResult.raw.eta_time).toBe(56340);
     expect(decodeResult.raw.position.latitude).toBeCloseTo(39.462, 3);

@@ -45,13 +45,9 @@ export class Label_15 extends DecoderPlugin {
         const ddmmyy = between.substring(16, 22);
         const hhmm = between.substring(22, 26);
         if (ddmmyy != '------') {
-          const mmddyy =
-            ddmmyy.substring(2, 4) +
-            ddmmyy.substring(0, 2) +
-            ddmmyy.substring(4);
           ResultFormatter.off(
             decodeResult,
-            DateTimeUtils.convertDateTimeToEpoch(hhmm + '00', mmddyy),
+            DateTimeUtils.convertDateTimeToEpoch(hhmm + '00', ddmmyy),
             'epoch',
           );
         } else {
