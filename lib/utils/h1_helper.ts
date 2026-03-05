@@ -382,6 +382,8 @@ function processMessageType(decodeResult: DecodeResult, type: string): boolean {
     decodeResult.formatted.description = 'Free Text';
   } else if (type === 'INI') {
     decodeResult.formatted.description = 'Initial Report';
+  } else if (type === 'INR') {
+    decodeResult.formatted.description = 'In-Range Report';
   } else if (type === 'LDI') {
     decodeResult.formatted.description = 'Load Distribution Information';
   } else if (type === 'PER') {
@@ -392,6 +394,8 @@ function processMessageType(decodeResult: DecodeResult, type: string): boolean {
     decodeResult.formatted.description = 'Progress Report';
   } else if (type === 'PWI') {
     decodeResult.formatted.description = 'Pilot Weather Information';
+  } else if (type === 'WXR') {
+    decodeResult.formatted.description = 'Weather Report';
   } else if (type === 'REJ') {
     decodeResult.formatted.description = 'Reject';
   } else if (type === 'REQ') {
@@ -406,8 +410,6 @@ function processMessageType(decodeResult: DecodeResult, type: string): boolean {
 }
 
 function processDateCode(decodeResult: DecodeResult, data: string[]) {
-  decodeResult.raw.message_date = data[0]; // DDMMYYYY;
-
   if (data.length === 1) {
     // noop?
   } else if (data.length === 2) {

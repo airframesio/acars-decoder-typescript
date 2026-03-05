@@ -111,10 +111,10 @@ export class Label_16_AUTPOS extends DecoderPlugin {
       const yy = dat.slice(0, 2);
       const mm = dat.slice(2, 4);
       const dd = dat.slice(4, 6);
-      const mmddyy = `${mm}${dd}${yy}`;
+      const ddmmyy = `${dd}${mm}${yy}`;
       ResultFormatter.timestamp(
         decodeResult,
-        DateTimeUtils.convertDateTimeToEpoch(tim, mmddyy),
+        DateTimeUtils.convertDateTimeToEpoch(tim, ddmmyy),
       );
     }
     return decodeResult;

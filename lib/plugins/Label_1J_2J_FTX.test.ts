@@ -43,7 +43,7 @@ describe('Label 1J/2J FTX', () => {
     expect(decodeResult.raw.tail).toBe('50007B');
     expect(decodeResult.raw.flight_number).toBe('RCH4086');
     expect(decodeResult.raw.mission_number).toBe('ABB02R70E037');
-    expect(decodeResult.raw.message_timestamp).toBe(1759367848);
+    expect(decodeResult.raw.message_timestamp).toBe(1739150248);
     expect(decodeResult.raw.fuel_on_board).toBe(1791);
     expect(decodeResult.raw.freetext).toBe(
       'GOOD EVENING PLEASE PASS US THE SUPER BOWL SCORE WHEN ABLE. THANK YOU',

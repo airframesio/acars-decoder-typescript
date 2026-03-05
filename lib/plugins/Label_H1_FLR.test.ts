@@ -30,7 +30,7 @@ describe('Label H1 Preamble FLR', () => {
     expect(decodeResult.decoder.name).toBe('label-h1-flr');
     expect(decodeResult.formatted.description).toBe('Fault Log Report');
     expect(decodeResult.message).toBe(message);
-    expect(decodeResult.raw.message_timestamp).toBe(1712143380);
+    expect(decodeResult.raw.message_timestamp).toBe(1709551380);
     expect(decodeResult.formatted.items.length).toBe(1);
     expect(decodeResult.formatted.items[0].type).toBe('fault');
     expect(decodeResult.formatted.items[0].code).toBe('FR');
@@ -52,7 +52,7 @@ describe('Label H1 Preamble FLR', () => {
     expect(decodeResult.decoder.name).toBe('label-h1-flr');
     expect(decodeResult.formatted.description).toBe('Fault Log Report');
     expect(decodeResult.message).toBe(message);
-    expect(decodeResult.raw.message_timestamp).toBe(1712142240);
+    expect(decodeResult.raw.message_timestamp).toBe(1709550240);
     expect(decodeResult.formatted.items.length).toBe(1);
     expect(decodeResult.formatted.items[0].type).toBe('fault');
     expect(decodeResult.formatted.items[0].code).toBe('FR');
@@ -73,7 +73,7 @@ describe('Label H1 Preamble FLR', () => {
     expect(decodeResult.decoder.name).toBe('label-h1-flr');
     expect(decodeResult.formatted.description).toBe('Fault Log Report');
     expect(decodeResult.message).toBe(message);
-    expect(decodeResult.raw.message_timestamp).toBe(1712138160);
+    expect(decodeResult.raw.message_timestamp).toBe(1709546160);
     expect(decodeResult.formatted.items.length).toBe(1);
     expect(decodeResult.formatted.items[0].type).toBe('fault');
     expect(decodeResult.formatted.items[0].code).toBe('FR');
@@ -92,7 +92,7 @@ describe('Label H1 Preamble FLR', () => {
     expect(decodeResult.decoder.name).toBe('label-h1-flr');
     expect(decodeResult.formatted.description).toBe('Fault Log Report');
     expect(decodeResult.message).toBe(message);
-    expect(decodeResult.raw.message_timestamp).toBe(1712138580);
+    expect(decodeResult.raw.message_timestamp).toBe(1709546580);
     expect(decodeResult.formatted.items.length).toBe(1);
     expect(decodeResult.formatted.items[0].type).toBe('fault');
     expect(decodeResult.formatted.items[0].code).toBe('FR');
@@ -103,7 +103,7 @@ describe('Label H1 Preamble FLR', () => {
     expect(decodeResult.remaining.text).toBe('38316206');
   });
 
-  test('decodes Label H1 Preamble FLR LQD', () => {
+  test('decodes Label H1 Preamble #CFB', () => {
     // https://app.airframes.io/messages/2437260976
     message.text =
       '#CFBFLR/FR24030412400034723406ATC1(1SH1)/TCAS(1000SG) /IDTCAS ';
@@ -114,7 +114,7 @@ describe('Label H1 Preamble FLR', () => {
     expect(decodeResult.decoder.name).toBe('label-h1-flr');
     expect(decodeResult.formatted.description).toBe('Fault Log Report');
     expect(decodeResult.message).toBe(message);
-    expect(decodeResult.raw.message_timestamp).toBe(1712148000);
+    expect(decodeResult.raw.message_timestamp).toBe(1709556000);
     expect(decodeResult.formatted.items.length).toBe(1);
     expect(decodeResult.formatted.items[0].type).toBe('fault');
     expect(decodeResult.formatted.items[0].code).toBe('FR');

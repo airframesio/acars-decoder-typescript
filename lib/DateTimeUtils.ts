@@ -50,7 +50,7 @@ export class DateTimeUtils {
   /**
    *
    * @param time HHMMSS
-   * @param date MMDDYY or MMDDYYYY
+   * @param date DDMMYY or DDMMYYYY
    * @returns seconds since epoch
    */
   public static convertDateTimeToEpoch(time: string, date: string): number {
@@ -58,7 +58,7 @@ export class DateTimeUtils {
     if (date.length === 6) {
       date = date.substring(0, 4) + `20${date.substring(4, 6)}`;
     }
-    const timestamp = `${date.substring(4, 8)}-${date.substring(0, 2)}-${date.substring(2, 4)}T${time.substring(0, 2)}:${time.substring(2, 4)}:${time.substring(4, 6)}.000Z`;
+    const timestamp = `${date.substring(4, 8)}-${date.substring(2, 4)}-${date.substring(0, 2)}T${time.substring(0, 2)}:${time.substring(2, 4)}:${time.substring(4, 6)}.000Z`;
     const millis = Date.parse(timestamp);
     return millis / 1000;
   }
