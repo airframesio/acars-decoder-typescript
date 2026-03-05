@@ -317,6 +317,21 @@ export class ResultFormatter {
     });
   }
 
+  static totalAirTemp(decodeResult: DecodeResult, value: string) {
+    if (value.length === 0) {
+      return;
+    }
+    decodeResult.raw.total_air_temperature = Number(
+      value.replace('M', '-').replace('P', '+'),
+    );
+    decodeResult.formatted.items.push({
+      type: 'temperature',
+      code: 'TATEMP',
+      label: 'Total Air Temperature (C)',
+      value: `${decodeResult.raw.total_air_temperature} degrees`,
+    });
+  }
+
   static heading(decodeResult: DecodeResult, value: number) {
     decodeResult.raw.heading = value;
     decodeResult.formatted.items.push({
@@ -610,6 +625,16 @@ export class ResultFormatter {
       code: 'GND_ADDR',
       label: 'Ground Address',
       value: `${decodeResult.raw.ground_address}`,
+    });
+  }
+
+  static timestamp(decodeResult: DecodeResult, value: number) {
+    decodeResult.raw.message_timestamp = value;
+    decodeResult.formatted.items.push({
+      type: 'epoch',
+      code: 'TIMESTAMP',
+      label: 'Message Timestamp',
+      value: DateTimeUtils.timestampToString(value, 'epoch'),
     });
   }
 
