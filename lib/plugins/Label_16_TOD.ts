@@ -42,12 +42,28 @@ export class Label_16_TOD extends DecoderPlugin {
     ResultFormatter.unknown(decodeResult, fields[3]);
     const temp = fields[4].split('/');
     const posFields = temp[0].split(' ');
-    ResultFormatter.position(decodeResult, {
-      latitude:
-        CoordinateUtils.getDirection(posFields[0]) * Number(posFields[1]),
-      longitude:
-        CoordinateUtils.getDirection(posFields[2]) * Number(posFields[3]),
-    });
+    if (posFields.length === 4) {
+      ResultFormatter.position(decodeResult, {
+        latitude:
+          CoordinateUtils.getDirection(posFields[0]) * Number(posFields[1]),
+        longitude:
+          CoordinateUtils.getDirection(posFields[2]) * Number(posFields[3]),
+      });
+    } else if (posFields.length === 2) {
+      ResultFormatter.position(decodeResult, {
+        latitude:
+          (CoordinateUtils.getDirection(posFields[0][0]) *
+            Number(posFields[0].slice(1))) /
+          100,
+        longitude:
+          (CoordinateUtils.getDirection(posFields[1][0]) *
+            Number(posFields[1].slice(1))) /
+          100,
+      });
+    } else {
+      // Redacted
+      //ResultFormatter.unknown(decodeResult, fields[4]);
+    }
 
     if (temp.length > 1) {
       ResultFormatter.flightNumber(decodeResult, temp[1]);
