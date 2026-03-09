@@ -26,7 +26,7 @@ export class Label_H1 extends DecoderPlugin {
       return this.processDecodeResult(decodeResult, decoded, options, message);
     }
 
-    // try to handle messages like `/HDQDLUA.POSN<rest of message>`
+    // try to handle messages like `/HDQDLUA.POS<rest of message>`
     if (msg.startsWith('/')) {
       const headerData = msg.split('.');
       decoded = H1Helper.decodeH1Message(
