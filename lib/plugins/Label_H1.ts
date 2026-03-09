@@ -3,11 +3,12 @@ import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
 import { H1Helper } from '../utils/h1_helper';
 import { ResultFormatter } from '../utils/result_formatter';
 
+// TODO: come up with a better name as this decodes multiple labels
 export class Label_H1 extends DecoderPlugin {
   name = 'label-h1';
   qualifiers() {
     return {
-      labels: ['H1'],
+      labels: ['1J', '2J', '2P', '4J', '80', 'H1'],
     };
   }
 
@@ -17,46 +18,88 @@ export class Label_H1 extends DecoderPlugin {
     decodeResult.message = message;
 
     const msg = message.text.replace(/\n|\r/g, '');
-    const parts = msg.split('#');
+
+    // try to decode the entire message
     let decoded = false;
+    decoded = H1Helper.decodeH1Message(decodeResult, msg);
+    if (decoded) {
+      return this.processDecodeResult(decodeResult, decoded, options, message);
+    }
+
+    // try to handle messages like `/HDQDLUA.POS<rest of message>`
     if (msg.startsWith('/')) {
       const headerData = msg.split('.');
-      const decoded = H1Helper.decodeH1Message(
+      decoded = H1Helper.decodeH1Message(
         decodeResult,
         headerData.slice(1).join('.'),
-      ); // skip up to # and then a little more
+      );
+
       if (decoded) {
         decodeResult.remaining.text =
           headerData[0] + '.' + decodeResult.remaining.text;
-        decodeResult.decoded = decoded;
-        decodeResult.decoder.decodeLevel = 'partial';
+        return this.processDecodeResult(
+          decodeResult,
+          decoded,
+          options,
+          message,
+        );
       }
+    }
 
-      return decodeResult;
-    } else if (parts.length === 1) {
-      decoded = H1Helper.decodeH1Message(decodeResult, msg);
-    } else if (parts.length == 2) {
+    // try to handle messages like `F37AMCLL93#M1BPOS<rest of message>`
+    const hashParts = msg.split('#');
+    if (hashParts.length == 2) {
       // need a better way to figure this out
-      const offset = parts[0] === '- ' || isNaN(parseInt(parts[1][1])) ? 3 : 4;
+      const offset =
+        hashParts[0] === '- ' || isNaN(parseInt(hashParts[1][1])) ? 3 : 4;
       decoded = H1Helper.decodeH1Message(
         decodeResult,
-        msg.slice(parts[0].length + offset),
-      ); // skip up to # and then a little more
-      if (decoded && parts[0].length > 0) {
-        // ResultFormatter.unknown(decodeResult, parts[0].substring(0, 4));
-        ResultFormatter.flightNumber(decodeResult, parts[0].substring(4));
-        //ResultFormatter.unknown(decodeResult, parts[1].length == 5 ? parts[1].substring(0, 2) : parts[1].substring(0, 3), '#');
+        msg.slice(hashParts[0].length + offset),
+      );
+      if (decoded && hashParts[0].length > 0) {
+        // ResultFormatter.unknown(decodeResult, hashParts[0].substring(0, 4));
+        ResultFormatter.flightNumber(decodeResult, hashParts[0].substring(4));
+        //ResultFormatter.unknown(decodeResult, hashParts[1].length == 5 ? hashParts[1].substring(0, 2) : hashParts[1].substring(0, 3), '#');
         // hack of the highest degree as we've parsed the rest of the message already but we want the remaining text to be in order
         decodeResult.remaining.text =
-          parts[0].substring(0, 4) +
+          hashParts[0].substring(0, 4) +
           '#' +
-          parts[1].substring(0, offset - 1) +
+          hashParts[1].substring(0, offset - 1) +
           '/' +
           decodeResult.remaining.text;
       }
+      if (decoded) {
+        return this.processDecodeResult(
+          decodeResult,
+          decoded,
+          options,
+          message,
+        );
+      }
     }
-    decodeResult.decoded = decoded;
 
+    // try to handle messages like `M74AMC4086FTX<rest of message>`
+    const slashParts = msg.split('/');
+    if (slashParts[0].length > 3) {
+      decoded = H1Helper.decodeH1Message(
+        decodeResult,
+        msg.slice(slashParts[0].length - 3),
+      );
+      // flight number is already decoded in other fields
+      decodeResult.remaining.text =
+        slashParts[0].slice(0, 3) + '/' + decodeResult.remaining.text;
+    }
+
+    return this.processDecodeResult(decodeResult, decoded, options, message);
+  }
+
+  private processDecodeResult(
+    decodeResult: DecodeResult,
+    decoded: boolean,
+    options: Options,
+    message: Message,
+  ) {
+    decodeResult.decoded = decoded;
     decodeResult.decoder.decodeLevel = !decodeResult.remaining.text
       ? 'full'
       : 'partial';

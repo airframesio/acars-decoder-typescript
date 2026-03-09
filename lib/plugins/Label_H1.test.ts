@@ -1,7 +1,7 @@
 import { MessageDecoder } from '../MessageDecoder';
 import { Label_H1 } from './Label_H1';
 
-describe('Label_H1 INI', () => {
+describe('Label_H1', () => {
   let plugin: Label_H1;
 
   beforeEach(() => {
@@ -14,7 +14,7 @@ describe('Label_H1 INI', () => {
     expect(plugin.name).toBe('label-h1');
     expect(plugin.qualifiers).toBeDefined();
     expect(plugin.qualifiers()).toEqual({
-      labels: ['H1'],
+      labels: ['1J', '2J', '2P', '4J', '80', 'H1'],
     });
   });
 });

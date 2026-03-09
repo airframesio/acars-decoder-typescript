@@ -1,13 +1,13 @@
 import { MessageDecoder } from '../MessageDecoder';
-import { Label_2P_POS } from './Label_2P_POS';
+import { Label_H1 } from './Label_H1';
 
 describe('Label_2P Preamble POS', () => {
-  let plugin: Label_2P_POS;
+  let plugin: Label_H1;
   const message = { label: '2P', text: '' };
 
   beforeEach(() => {
     const decoder = new MessageDecoder();
-    plugin = new Label_2P_POS(decoder);
+    plugin = new Label_H1(decoder);
   });
 
   test('variant 1', () => {
