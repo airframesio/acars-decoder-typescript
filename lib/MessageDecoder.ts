@@ -31,7 +31,6 @@ export class MessageDecoder {
     this.registerPlugin(new Plugins.Label_16_N_Space(this));
     this.registerPlugin(new Plugins.Label_16_POSA1(this));
     this.registerPlugin(new Plugins.Label_16_TOD(this));
-    this.registerPlugin(new Plugins.Label_1J_2J_FTX(this));
     this.registerPlugin(new Plugins.Label_1L_3Line(this));
     this.registerPlugin(new Plugins.Label_1L_070(this));
     this.registerPlugin(new Plugins.Label_1L_660(this));
@@ -44,7 +43,6 @@ export class MessageDecoder {
     this.registerPlugin(new Plugins.Label_2P_FM3(this));
     this.registerPlugin(new Plugins.Label_2P_FM4(this));
     this.registerPlugin(new Plugins.Label_2P_FM5(this));
-    this.registerPlugin(new Plugins.Label_2P_POS(this));
     this.registerPlugin(new Plugins.Label_30_Slash_EA(this));
     this.registerPlugin(new Plugins.Label_44_ETA(this));
     this.registerPlugin(new Plugins.Label_44_IN(this));
@@ -57,7 +55,6 @@ export class MessageDecoder {
     this.registerPlugin(new Plugins.Label_4A_DIS(this));
     this.registerPlugin(new Plugins.Label_4A_DOOR(this));
     this.registerPlugin(new Plugins.Label_4A_Slash_01(this));
-    this.registerPlugin(new Plugins.Label_4J_POS(this));
     this.registerPlugin(new Plugins.Label_4N(this));
     this.registerPlugin(new Plugins.Label_4T_AGFSR(this));
     this.registerPlugin(new Plugins.Label_4T_ETA(this));

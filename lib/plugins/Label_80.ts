@@ -182,6 +182,9 @@ export class Label_80 extends DecoderPlugin {
   }
   private parseCsvFormat(text: string, results: DecodeResult) {
     const csvParts = text.split(',');
+    if(csvParts.length !== 9) {
+      return;
+    }
     const header = csvParts[0].trim().split(/\s+/);
     ResultFormatter.unknown(results, header[0], ' ');
     ResultFormatter.unknown(results, header[1], ' ');

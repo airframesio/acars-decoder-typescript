@@ -147,6 +147,16 @@ describe('Label 80', () => {
     expect(decodeResult.remaining.text).toBe('3701 INRANG//ERT');
   });
 
+  test('does not decode INR variant 1', () => {
+    // decoded by another parser
+    message.text =
+      'INR/ID91511S,,/DC04032026,143534/MR19,/NR,,,,,,,,950,0/ET041505/FB983/VR32BF4C';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoded).toBe(false);
+    expect(decodeResult.decoder.decodeLevel).toBe('none');
+  });
+
   test('does not decode invalid messages', () => {
     message.text = '3N01 POSRPT Bogus message';
     const decodeResult = plugin.decode(message);

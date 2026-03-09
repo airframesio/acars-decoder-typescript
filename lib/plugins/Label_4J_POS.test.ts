@@ -1,23 +1,13 @@
 import { MessageDecoder } from '../MessageDecoder';
-import { Label_4J_POS } from './Label_4J_POS';
+import { Label_H1 } from './Label_H1';
 
 describe('Label 4J POS', () => {
-  let plugin: Label_4J_POS;
+  let plugin: Label_H1;
   const message = { label: '4J', text: '' };
 
   beforeEach(() => {
     const decoder = new MessageDecoder();
-    plugin = new Label_4J_POS(decoder);
-  });
-
-  test('matches qualifiers', () => {
-    expect(plugin.decode).toBeDefined();
-    expect(plugin.name).toBe('label-4j-pos');
-    expect(plugin.qualifiers).toBeDefined();
-    expect(plugin.qualifiers()).toEqual({
-      labels: ['4J'],
-      preambles: ['POS/'],
-    });
+    plugin = new Label_H1(decoder);
   });
 
   test('decodes inmarsat', () => {
