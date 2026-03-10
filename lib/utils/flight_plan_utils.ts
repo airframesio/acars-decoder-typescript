@@ -86,7 +86,6 @@ export class FlightPlanUtils {
         label: 'Route Status',
         value: 'Route Planned',
       });
-      decodeResult.raw.route_status = header;
     } else if (header.startsWith('RI')) {
       decodeResult.raw.route_status = 'RI';
       decodeResult.formatted.items.push({
@@ -112,7 +111,7 @@ export class FlightPlanUtils {
         value: 'Route Saved',
       });
     } else {
-      decodeResult.remaining.text += header;
+      decodeResult.remaining.text = (decodeResult.remaining.text ?? '') + header;
       allKnownFields = false;
     }
     return allKnownFields;

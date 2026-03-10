@@ -246,7 +246,7 @@ function processTimeOfDeparture(decodeResult: DecodeResult, data: string[]) {
       value: `YYYY-MM-${data[0].substring(0, 2)}T${data[0].substring(2, 4)}:${data[0].substring(4)}:00Z`,
     });
 
-    decodeResult.raw.plannedDepartureTime = data[1]; //HHMM
+    decodeResult.raw.estimatedDepartureTime = data[1]; //HHMM
     decodeResult.formatted.items.push({
       type: 'etd',
       code: 'etd',
@@ -413,12 +413,7 @@ function processDateCode(decodeResult: DecodeResult, data: string[]) {
   if (data.length === 1) {
     // noop?
   } else if (data.length === 2) {
-    // convert DDMMYY to MMDDYY - TODO figure out a better way to determine
-    const date =
-      data[0].substring(2, 4) +
-      data[0].substring(0, 2) +
-      data[0].substring(4, 6);
-    const time = DateTimeUtils.convertDateTimeToEpoch(data[1], data[0]); // HHMMSS
+    const time = DateTimeUtils.convertDateTimeToEpoch(data[1], data[0]); // HHMMSS, DDMMYY
 
     decodeResult.raw.message_timestamp = time;
   }

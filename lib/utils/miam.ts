@@ -66,6 +66,7 @@ interface Pdu {
   encoding: number;
   msgNum: number;
   ackOptions: number;
+  errors?: string[];
   acars?: PduACARSData;
   non_acars?: PduNonACARSData;
 }
@@ -525,6 +526,7 @@ export class MIAMCoreUtils {
       encoding: pduEncoding,
       msgNum,
       ackOptions,
+      ...(pduErrors.length > 0 ? { errors: pduErrors } : {}),
     };
 
     if (pduIsACARS) {

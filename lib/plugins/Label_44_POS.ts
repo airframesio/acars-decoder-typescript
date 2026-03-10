@@ -76,10 +76,17 @@ export class Label_44_POS extends DecoderPlugin {
       );
       ResultFormatter.arrivalAirport(decodeResult, results.groups.arrival_icao);
       ResultFormatter.altitude(decodeResult, flight_level * 100);
-    }
 
-    decodeResult.decoded = true;
-    decodeResult.decoder.decodeLevel = 'full';
+      decodeResult.decoded = true;
+      decodeResult.decoder.decodeLevel = 'full';
+    } else {
+      if (options.debug) {
+        console.log(`Decoder: Unknown 44 POS message: ${message.text}`);
+      }
+      ResultFormatter.unknown(decodeResult, message.text);
+      decodeResult.decoded = false;
+      decodeResult.decoder.decodeLevel = 'none';
+    }
 
     return decodeResult;
   }

@@ -1,33 +1,34 @@
 export class DateTimeUtils {
   // Expects a four digit UTC time string (HHMM)
   public static UTCToString(UTCString: string) {
-    let utcDate = new Date();
-    utcDate.setUTCHours(+UTCString.substr(0, 2), +UTCString.substr(2, 2), 0);
+    const utcDate = new Date();
+    utcDate.setUTCHours(
+      +UTCString.substring(0, 2),
+      +UTCString.substring(2, 4),
+      0,
+    );
     return utcDate.toTimeString();
   }
 
   // Expects a six digit date string and a four digit UTC time string
   // (DDMMYY) (HHMM)
   public static UTCDateTimeToString(dateString: string, timeString: string) {
-    let utcDate = new Date();
-    utcDate.setUTCDate(+dateString.substr(0, 2));
-    utcDate.setUTCMonth(+dateString.substr(2, 2));
-    if (dateString.length === 6) {
-      utcDate.setUTCFullYear(2000 + +dateString.substr(4, 2));
-    }
-    if (timeString.length === 6) {
-      utcDate.setUTCHours(
-        +timeString.substr(0, 2),
-        +timeString.substr(2, 2),
-        +timeString.substr(4, 2),
-      );
+    const day = +dateString.substring(0, 2);
+    const month = +dateString.substring(2, 4) - 1; // zero-indexed
+    const year =
+      dateString.length === 6 ? 2000 + +dateString.substring(4, 6) : undefined;
+    const hours = +timeString.substring(0, 2);
+    const minutes = +timeString.substring(2, 4);
+    const seconds =
+      timeString.length === 6 ? +timeString.substring(4, 6) : 0;
+
+    const utcDate = new Date();
+    if (year !== undefined) {
+      utcDate.setUTCFullYear(year, month, day);
     } else {
-      utcDate.setUTCHours(
-        +timeString.substr(0, 2),
-        +timeString.substr(2, 2),
-        0,
-      );
+      utcDate.setUTCMonth(month, day);
     }
+    utcDate.setUTCHours(hours, minutes, seconds);
     return utcDate.toUTCString();
   }
 
@@ -77,7 +78,7 @@ export class DateTimeUtils {
     format: 'tod' | 'epoch',
   ): string {
     const date = new Date(time * 1000);
-    if (format == 'tod') {
+    if (format === 'tod') {
       return date.toISOString().slice(11, 19);
     }
     //strip off millis
