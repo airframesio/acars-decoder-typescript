@@ -46,7 +46,7 @@ export class RouteUtils {
 
   public static waypointToString(waypoint: Waypoint): string {
     let s = waypoint.name;
-    if (waypoint.latitude && waypoint.longitude) {
+    if (waypoint.latitude != null && waypoint.longitude != null) {
       s += `(${CoordinateUtils.coordinateString({ latitude: waypoint.latitude, longitude: waypoint.longitude })})`;
     }
     if (waypoint.offset) {
@@ -60,7 +60,7 @@ export class RouteUtils {
 
   public static getWaypoint(leg: string): Waypoint {
     const regex = leg.match(/^([A-Z]+)(\d{3})-(\d{4})$/); // {name}{bearing}-{distance}
-    if (regex?.length == 4) {
+    if (regex?.length === 4) {
       return {
         name: regex[1],
         offset: {
@@ -71,7 +71,7 @@ export class RouteUtils {
     }
 
     const waypoint = leg.split(',');
-    if (waypoint.length == 2) {
+    if (waypoint.length === 2) {
       const position = CoordinateUtils.decodeStringCoordinatesDecimalMinutes(
         waypoint[1],
       );
@@ -83,11 +83,11 @@ export class RouteUtils {
         };
       }
     }
-    if (leg.length == 13 || leg.length == 14) {
+    if (leg.length === 13 || leg.length === 14) {
       //looks like coordinates
       const position =
         CoordinateUtils.decodeStringCoordinatesDecimalMinutes(leg);
-      const name = waypoint.length == 2 ? waypoint[0] : '';
+      const name = waypoint.length === 2 ? waypoint[0] : '';
       if (position) {
         return {
           name: name,
