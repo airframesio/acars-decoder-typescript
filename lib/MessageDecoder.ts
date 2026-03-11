@@ -60,7 +60,10 @@ export class MessageDecoder {
     this.registerPlugin(new Plugins.Label_4T_ETA(this));
     this.registerPlugin(new Plugins.Label_B6_Forwardslash(this));
     this.registerPlugin(new Plugins.Label_H2_02E(this));
+    this.registerPlugin(new Plugins.Label_H1_ATIS(this));
+    this.registerPlugin(new Plugins.Label_H1_EZF(this));
     this.registerPlugin(new Plugins.Label_H1_FLR(this));
+    this.registerPlugin(new Plugins.Label_H1_M_POS(this));
     this.registerPlugin(new Plugins.Label_H1_OHMA(this));
     this.registerPlugin(new Plugins.Label_H1_Paren(this));
     this.registerPlugin(new Plugins.Label_H1_WRN(this));
