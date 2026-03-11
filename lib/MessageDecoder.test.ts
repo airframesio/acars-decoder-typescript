@@ -16,13 +16,10 @@ describe('MessageDecoder', () => {
     const decodeResult = decoder.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
-    if (!decodeResult.message) {
-      expect(decodeResult.message).toBeDefined();
-      return;
-    }
-    expect(decodeResult.message.label).toBe('MA');
-    expect(decodeResult.message.sublabel).toBeUndefined();
-    expect(decodeResult.message.text).toContain('T02!<<,');
+    expect(decodeResult.message).toBeDefined();
+    expect(decodeResult.message!.label).toBe('MA');
+    expect(decodeResult.message!.sublabel).toBeUndefined();
+    expect(decodeResult.message!.text).toContain('T02!<<,');
     expect(decodeResult.raw.text).toContain('A350,000354');
   });
 
@@ -35,17 +32,14 @@ describe('MessageDecoder', () => {
     const decodeResult = decoder.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
-    if (!decodeResult.message) {
-      expect(decodeResult.message).toBeDefined();
-      return;
-    }
-    expect(decodeResult.message.label).toBe('4N');
-    expect(decodeResult.message.sublabel).toBeUndefined();
-    expect(decodeResult.message.text).toContain('M85AUP0109285');
+    expect(decodeResult.message).toBeDefined();
+    expect(decodeResult.message!.label).toBe('4N');
+    expect(decodeResult.message!.sublabel).toBeUndefined();
+    expect(decodeResult.message!.text).toContain('M85AUP0109285');
     expect(decodeResult.formatted.items.length).toBe(7);
   });
 
-  test('Handles Multiple decodes', () => {
+  test('handles multiple decodes', () => {
     const message = {
       label: 'H1',
       text: 'POSN43312W123174,EASON,215754,370,EBINY,220601,ELENN,M48,02216,185/TS215754,0921227A40',
@@ -54,11 +48,52 @@ describe('MessageDecoder', () => {
     decoder.decode(message);
 
     const decodeResult = decoder.decode(message);
-    if (!decodeResult.message) {
-      expect(decodeResult.message).toBeDefined();
-      return;
-    }
-    expect(decodeResult.message.label).toBe('H1');
+    expect(decodeResult.message).toBeDefined();
+    expect(decodeResult.message!.label).toBe('H1');
     expect(decodeResult.formatted.items.length).toBe(5);
+  });
+
+  test('returns none for unknown label', () => {
+    const message = {
+      label: 'ZZ',
+      text: 'some random text',
+    };
+
+    const decodeResult = decoder.decode(message);
+
+    expect(decodeResult.decoded).toBe(false);
+    expect(decodeResult.decoder.decodeLevel).toBe('none');
+  });
+
+  test('handles empty text', () => {
+    const message = {
+      label: 'H1',
+      text: '',
+    };
+
+    const decodeResult = decoder.decode(message);
+
+    expect(decodeResult.decoded).toBe(false);
+    expect(decodeResult.decoder.decodeLevel).toBe('none');
+  });
+
+  test('returns result with correct structure', () => {
+    const message = {
+      label: '44',
+      text: 'POS02,N38171W077507,319,KJFK,KUZA,0926,0245,0327,004.6',
+    };
+
+    const decodeResult = decoder.decode(message);
+
+    expect(decodeResult).toHaveProperty('decoded');
+    expect(decodeResult).toHaveProperty('decoder');
+    expect(decodeResult).toHaveProperty('formatted');
+    expect(decodeResult).toHaveProperty('raw');
+    expect(decodeResult).toHaveProperty('remaining');
+    expect(decodeResult.decoder).toHaveProperty('name');
+    expect(decodeResult.decoder).toHaveProperty('type');
+    expect(decodeResult.decoder).toHaveProperty('decodeLevel');
+    expect(decodeResult.formatted).toHaveProperty('description');
+    expect(decodeResult.formatted).toHaveProperty('items');
   });
 });

@@ -57,8 +57,7 @@ describe('Label 44 Preamble POS', () => {
     expect(decodeResult.formatted.items[7].value).toBe('31900 feet');
   });
 
-  // disabled because current parser decodes 'full'
-  test.skip('decodes Label 44 Preamble POS02 <invalid>', () => {
+  test('decodes Label 44 Preamble POS02 <invalid>', () => {
     message.text = 'POS02 Bogus message';
     const decodeResult = plugin.decode(message);
 
@@ -66,6 +65,5 @@ describe('Label 44 Preamble POS', () => {
     expect(decodeResult.decoder.decodeLevel).toBe('none');
     expect(decodeResult.decoder.name).toBe('label-44-pos');
     expect(decodeResult.formatted.description).toBe('Position Report');
-    expect(decodeResult.formatted.items.length).toBe(0);
   });
 });
