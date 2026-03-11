@@ -83,8 +83,7 @@ export class H1Helper {
           processLandingReport(decodeResult, data.split(','));
           break;
         case 'PR':
-          // TODO: decode /PR fields
-          ResultFormatter.unknown(decodeResult, fields[i], '/');
+          processPerformanceData(decodeResult, data.split(','));
           break;
         case 'PS': // Position
           H1Helper.processPS(decodeResult, data.split(','));
@@ -407,6 +406,54 @@ function processMessageType(decodeResult: DecodeResult, type: string): boolean {
     return false;
   }
   return true;
+}
+
+function processPerformanceData(decodeResult: DecodeResult, data: string[]) {
+  // /PR fields contain performance data
+  // Known field positions (12-field short variant and 18-field long variant):
+  // [0]: ground speed (knots * 10 or similar)
+  // [1]: indicated airspeed or mach-related
+  // [2]: altitude in hundreds of feet
+  // [3]: fuel-related value
+  // [4]: unknown (often empty)
+  // [5]: fuel flow or consumption
+  // [6]: fuel-related
+  // [7]: wind data (DDDSSSS format) or empty
+  // [8]: temperature (M=minus, P=plus)
+  // [9]: heading or unknown
+
+  if (data.length < 3) {
+    ResultFormatter.unknownArr(decodeResult, data, ',');
+    return;
+  }
+
+  // Field 2: altitude in hundreds
+  if (data[2] !== undefined && data[2] !== '') {
+    const alt = Number(data[2]) * 100;
+    if (!isNaN(alt) && alt > 0) {
+      ResultFormatter.altitude(decodeResult, alt);
+    }
+  }
+
+  // Field 8: temperature (if present)
+  if (data.length > 8 && data[8] !== undefined && data[8] !== '') {
+    ResultFormatter.temperature(decodeResult, data[8]);
+  }
+
+  // Collect remaining undecoded fields
+  const remaining: string[] = [];
+  for (let i = 0; i < data.length; i++) {
+    if (i === 2 && data[i] !== '' && !isNaN(Number(data[i])) && Number(data[i]) * 100 > 0) {
+      continue; // altitude - already decoded
+    }
+    if (i === 8 && data[i] !== '' && (data[i].startsWith('M') || data[i].startsWith('P') || !isNaN(Number(data[i])))) {
+      continue; // temperature - already decoded
+    }
+    remaining.push(data[i]);
+  }
+  if (remaining.length > 0 && remaining.some(r => r !== '')) {
+    ResultFormatter.unknown(decodeResult, remaining.join(','), '/PR');
+  }
 }
 
 function processDateCode(decodeResult: DecodeResult, data: string[]) {
