@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - main
+      - master
   pull_request:
 
 permissions:
@@ -17,7 +17,7 @@ jobs:
     strategy:
       matrix:
         # build against all active LTS and current stable node; include "latest" for early signal as a required job
-        node-version: [18.x, 20.x, 22.x, 24.x, latest]
+        node-version: [20.x, 22.x, 24.x, latest]
 
     steps:
       - uses: actions/checkout@v6
@@ -28,5 +28,9 @@ jobs:
           cache: npm
       - name: Install dependencies
         run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Build
+        run: npm run build
       - name: Run tests
         run: npm test
