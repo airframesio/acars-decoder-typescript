@@ -2,7 +2,7 @@ import { MessageDecoder } from '../MessageDecoder';
 import { Arinc702 } from './ARINC_702';
 
 describe('Label H1 Preamble PRG', () => {
-  let plugin: Label_H1;
+  let plugin: Arinc702;
   const message = { label: 'H1', text: '' };
 
   beforeEach(() => {

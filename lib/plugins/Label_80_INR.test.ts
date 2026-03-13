@@ -3,7 +3,7 @@ import { MessageDecoder } from '../MessageDecoder';
 import { Arinc702 } from './ARINC_702';
 
 describe('Label 80 Preamble INR', () => {
-  let plugin: Label_H1;
+  let plugin: Arinc702;
   const message = { label: '80', text: '' };
 
   beforeEach(() => {

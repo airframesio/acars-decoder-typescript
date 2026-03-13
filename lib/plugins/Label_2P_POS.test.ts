@@ -2,7 +2,7 @@ import { MessageDecoder } from '../MessageDecoder';
 import { Arinc702 } from './ARINC_702';
 
 describe('Label_2P Preamble POS', () => {
-  let plugin: Label_H1;
+  let plugin: Arinc702;
   const message = { label: '2P', text: '' };
 
   beforeEach(() => {
