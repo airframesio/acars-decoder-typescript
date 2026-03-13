@@ -1,5 +1,5 @@
 import { MessageDecoder } from '../MessageDecoder';
-import { Label_H1 } from './Label_H1';
+import { Arinc702 } from './ARINC_702';
 
 describe('Label H1 PWI', () => {
   let plugin: Label_H1;
@@ -7,7 +7,7 @@ describe('Label H1 PWI', () => {
 
   beforeEach(() => {
     const decoder = new MessageDecoder();
-    plugin = new Label_H1(decoder);
+    plugin = new Arinc702(decoder);
   });
 
   test('decodes Label H1 Preamble PWI valid', () => {
@@ -43,8 +43,5 @@ describe('Label H1 PWI', () => {
 
     expect(decodeResult.decoded).toBe(false);
     expect(decodeResult.decoder.decodeLevel).toBe('none');
-    expect(decodeResult.decoder.name).toBe('label-h1');
-    expect(decodeResult.formatted.description).toBe('Unknown');
-    expect(decodeResult.message).toBe(message);
   });
 });

@@ -1,5 +1,5 @@
 import { MessageDecoder } from '../MessageDecoder';
-import { Label_H1 } from './Label_H1';
+import { Arinc702 } from './ARINC_702';
 
 describe('Label H1 Preamble REJ', () => {
   let plugin: Label_H1;
@@ -7,7 +7,7 @@ describe('Label H1 Preamble REJ', () => {
 
   beforeEach(() => {
     const decoder = new MessageDecoder();
-    plugin = new Label_H1(decoder);
+    plugin = new Arinc702(decoder);
   });
 
   test('decodes PWI variant 1', () => {

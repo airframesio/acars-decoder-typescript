@@ -7,7 +7,7 @@ import { FlightPlanUtils } from './flight_plan_utils';
 import { ResultFormatter } from './result_formatter';
 import { RouteUtils } from './route_utils';
 
-export class H1Helper {
+export class Arinc702Helper {
   public static decodeH1Message(decodeResult: DecodeResult, message: string) {
     const checksum = parseInt(message.slice(-4), 16);
     const data = message.slice(0, message.length - 4);
@@ -87,7 +87,7 @@ export class H1Helper {
           ResultFormatter.unknown(decodeResult, fields[i], '/');
           break;
         case 'PS': // Position
-          H1Helper.processPS(decodeResult, data.split(','));
+          Arinc702Helper.processPS(decodeResult, data.split(','));
           break;
         case 'RF':
         case 'RI':
@@ -113,7 +113,7 @@ export class H1Helper {
           processTimeOfDeparture(decodeResult, data.split(','));
           break;
         case 'TS':
-          H1Helper.processTimeStamp(decodeResult, data.split(','));
+          Arinc702Helper.processTimeStamp(decodeResult, data.split(','));
           break;
         case 'VR':
           ResultFormatter.version(decodeResult, parseInt(data, 10) / 10);
@@ -348,7 +348,10 @@ function parseMessageType(
   const messageParts = messagePart.split(',');
   const messageType = messageParts[0];
   if (messageType.startsWith('POS')) {
-    H1Helper.processPosition(decodeResult, messagePart.substring(3).split(','));
+    Arinc702Helper.processPosition(
+      decodeResult,
+      messagePart.substring(3).split(','),
+    );
     return processMessageType(decodeResult, 'POS');
   } else if (messageType.length === 6) {
     const part1 = processMessageType(decodeResult, messageType.substring(0, 3));

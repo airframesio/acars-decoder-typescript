@@ -1,14 +1,14 @@
 import { DecoderPlugin } from '../DecoderPlugin';
 import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
-import { H1Helper } from '../utils/h1_helper';
+import { Arinc702Helper } from '../utils/arinc_702_helper';
 import { ResultFormatter } from '../utils/result_formatter';
 
 // TODO: come up with a better name as this decodes multiple labels
-export class Label_H1 extends DecoderPlugin {
-  name = 'label-h1';
+export class Arinc702 extends DecoderPlugin {
+  name = 'arinc-702';
   qualifiers() {
     return {
-      labels: ['1J', '2J', '2P', '4J', '80', 'H1'],
+      labels: ['*'],
     };
   }
 
@@ -21,7 +21,7 @@ export class Label_H1 extends DecoderPlugin {
 
     // try to decode the entire message
     let decoded = false;
-    decoded = H1Helper.decodeH1Message(decodeResult, msg);
+    decoded = Arinc702Helper.decodeH1Message(decodeResult, msg);
     if (decoded) {
       return this.processDecodeResult(decodeResult, decoded, options, message);
     }
@@ -29,7 +29,7 @@ export class Label_H1 extends DecoderPlugin {
     // try to handle messages like `/HDQDLUA.POS<rest of message>`
     if (msg.startsWith('/')) {
       const headerData = msg.split('.');
-      decoded = H1Helper.decodeH1Message(
+      decoded = Arinc702Helper.decodeH1Message(
         decodeResult,
         headerData.slice(1).join('.'),
       );
@@ -52,7 +52,7 @@ export class Label_H1 extends DecoderPlugin {
       // need a better way to figure this out
       const offset =
         hashParts[0] === '- ' || isNaN(parseInt(hashParts[1][1])) ? 3 : 4;
-      decoded = H1Helper.decodeH1Message(
+      decoded = Arinc702Helper.decodeH1Message(
         decodeResult,
         msg.slice(hashParts[0].length + offset),
       );
@@ -81,7 +81,7 @@ export class Label_H1 extends DecoderPlugin {
     // try to handle messages like `M74AMC4086FTX<rest of message>`
     const slashParts = msg.split('/');
     if (slashParts[0].length > 3) {
-      decoded = H1Helper.decodeH1Message(
+      decoded = Arinc702Helper.decodeH1Message(
         decodeResult,
         msg.slice(slashParts[0].length - 3),
       );
