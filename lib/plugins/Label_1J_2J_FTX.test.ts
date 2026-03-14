@@ -49,7 +49,7 @@ describe('Label 1J/2J FTX', () => {
     expect(decodeResult.raw.version).toBe(3.2);
     expect(decodeResult.raw.checksum).toBe(0x8d70);
     expect(decodeResult.formatted.items.length).toBe(7);
-    expect(decodeResult.remaining.text).toContain('M74');
+    expect(decodeResult.remaining.text).toBe('M74/');
   });
 
   test('decodes <invalid>', () => {

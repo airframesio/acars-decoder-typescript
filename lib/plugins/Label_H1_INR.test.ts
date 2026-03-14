@@ -26,6 +26,6 @@ describe('Label_H1 INR', () => {
     expect(decodeResult.raw.fuel_on_board).toBe(983);
     expect(decodeResult.raw.checksum).toBe(0xbf4c);
     expect(decodeResult.formatted.items.length).toBe(7);
-    expect(decodeResult.remaining.text).toContain('NR,,,,,,,,950,0');
+    expect(decodeResult.remaining.text).toBe('NR,,,,,,,,950,0');
   });
 });
