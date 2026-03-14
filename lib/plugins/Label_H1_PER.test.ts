@@ -22,7 +22,9 @@ describe('Label_H1 PER', () => {
     expect(decodeResult.formatted.items.length).toBe(3);
     expect(decodeResult.formatted.items[0].label).toBe('Altitude');
     expect(decodeResult.formatted.items[0].value).toBe('32000 feet');
-    expect(decodeResult.formatted.items[1].label).toBe('Outside Air Temperature (C)');
+    expect(decodeResult.formatted.items[1].label).toBe(
+      'Outside Air Temperature (C)',
+    );
     expect(decodeResult.formatted.items[1].value).toBe('-53 degrees');
     expect(decodeResult.formatted.items[2].label).toBe('Message Checksum');
   });
@@ -40,7 +42,9 @@ describe('Label_H1 PER', () => {
     expect(decodeResult.formatted.items.length).toBe(3);
     expect(decodeResult.formatted.items[0].label).toBe('Altitude');
     expect(decodeResult.formatted.items[0].value).toBe('34000 feet');
-    expect(decodeResult.formatted.items[1].label).toBe('Outside Air Temperature (C)');
+    expect(decodeResult.formatted.items[1].label).toBe(
+      'Outside Air Temperature (C)',
+    );
     expect(decodeResult.formatted.items[1].value).toBe('-56 degrees');
     expect(decodeResult.formatted.items[2].label).toBe('Message Checksum');
   });

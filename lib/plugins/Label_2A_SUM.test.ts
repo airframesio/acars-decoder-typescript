@@ -26,7 +26,9 @@ describe('Label 2A preamble SUM', () => {
     expect(decodeResult.formatted.items.length).toBe(5);
     // Only check formatted.items.length and description, rest are raw fields
     // Remaining text may be set by ResultFormatter. Check actual value.
-    expect(decodeResult.remaining.text).toBe('SM031612,420,032139,031623,416,031631,413,032130,212,032139,209');
+    expect(decodeResult.remaining.text).toBe(
+      'SM031612,420,032139,031623,416,031631,413,032130,212,032139,209',
+    );
   });
 
   test('decodes Inmarsat variant', () => {

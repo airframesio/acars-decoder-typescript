@@ -206,7 +206,9 @@ describe('Label_H1 POS', () => {
     expect(decodeResult.formatted.items[3].value).toBe('10:33:16');
     expect(decodeResult.formatted.items[4].label).toBe('Altitude');
     expect(decodeResult.formatted.items[4].value).toBe('35000 feet');
-    expect(decodeResult.formatted.items[5].label).toBe('Outside Air Temperature (C)');
+    expect(decodeResult.formatted.items[5].label).toBe(
+      'Outside Air Temperature (C)',
+    );
     expect(decodeResult.formatted.items[5].value).toBe('-45 degrees');
     expect(decodeResult.formatted.items[6].label).toBe('Route Status');
     expect(decodeResult.formatted.items[6].value).toBe('Route Planned');
@@ -316,7 +318,9 @@ describe('Label_H1 POS', () => {
     );
     expect(decodeResult.formatted.items[7].label).toBe('Altitude');
     expect(decodeResult.formatted.items[7].value).toBe('37000 feet');
-    expect(decodeResult.formatted.items[8].label).toBe('Outside Air Temperature (C)');
+    expect(decodeResult.formatted.items[8].label).toBe(
+      'Outside Air Temperature (C)',
+    );
     expect(decodeResult.formatted.items[8].value).toBe('-47 degrees');
     expect(decodeResult.formatted.items[9].label).toBe('Arrival Runway'); // FIXME should remove
     expect(decodeResult.formatted.items[9].value).toBe(''); // FIXME should remove

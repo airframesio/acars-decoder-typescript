@@ -42,7 +42,9 @@ describe('Label H1 preamble REQ', () => {
     ]);
     expect(decodeResult.raw.checksum).toBe(0x77ce);
     expect(decodeResult.formatted.items.length).toBe(5);
-    expect(decodeResult.formatted.description).toBe('Request for Pilot Weather Information');
+    expect(decodeResult.formatted.description).toBe(
+      'Request for Pilot Weather Information',
+    );
   });
 
   test('decodes POS', () => {
@@ -53,7 +55,9 @@ describe('Label H1 preamble REQ', () => {
     expect(decodeResult.decoder.decodeLevel).toBe('full');
     expect(decodeResult.raw.checksum).toBe(0x037b);
     expect(decodeResult.formatted.items.length).toBe(1);
-    expect(decodeResult.formatted.description).toBe('Request for Position Report');
+    expect(decodeResult.formatted.description).toBe(
+      'Request for Position Report',
+    );
   });
 
   test('decodes REQ POS inmarsat', () => {

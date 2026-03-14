@@ -485,15 +485,26 @@ function processPerformanceData(decodeResult: DecodeResult, data: string[]) {
   // Collect remaining undecoded fields
   const remaining: string[] = [];
   for (let i = 0; i < data.length; i++) {
-    if (i === 2 && data[i] !== '' && !isNaN(Number(data[i])) && Number(data[i]) * 100 > 0) {
+    if (
+      i === 2 &&
+      data[i] !== '' &&
+      !isNaN(Number(data[i])) &&
+      Number(data[i]) * 100 > 0
+    ) {
       continue; // altitude - already decoded
     }
-    if (i === 8 && data[i] !== '' && (data[i].startsWith('M') || data[i].startsWith('P') || !isNaN(Number(data[i])))) {
+    if (
+      i === 8 &&
+      data[i] !== '' &&
+      (data[i].startsWith('M') ||
+        data[i].startsWith('P') ||
+        !isNaN(Number(data[i])))
+    ) {
       continue; // temperature - already decoded
     }
     remaining.push(data[i]);
   }
-  if (remaining.length > 0 && remaining.some(r => r !== '')) {
+  if (remaining.length > 0 && remaining.some((r) => r !== '')) {
     ResultFormatter.unknown(decodeResult, remaining.join(','), '/PR');
   }
 }
