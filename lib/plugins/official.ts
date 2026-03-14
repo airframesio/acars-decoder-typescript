@@ -46,7 +46,7 @@ export * from './Label_83';
 export * from './Label_8E';
 export * from './Label_B6';
 export * from './Label_ColonComma';
-export * from './Label_H1';
+export * from './ARINC_702';
 export * from './Label_H2_02E';
 export * from './Label_H1_FLR';
 export * from './Label_H1_OHMA';
