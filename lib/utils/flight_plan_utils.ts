@@ -57,7 +57,7 @@ export class FlightPlanUtils {
             decodeResult.remaining.text = '';
             allKnownFields = false;
           }
-          decodeResult.remaining.text += `:${key}:${value}`;
+          decodeResult.remaining.text += `:${fpei}:${value}`;
           decodeResult.decoder.decodeLevel = 'partial';
       }
     }

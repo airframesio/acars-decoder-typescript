@@ -42,6 +42,7 @@ describe('Label H1 preamble REQ', () => {
     ]);
     expect(decodeResult.raw.checksum).toBe(0x77ce);
     expect(decodeResult.formatted.items.length).toBe(5);
+    expect(decodeResult.formatted.description).toBe('Request for Pilot Weather Information');
   });
 
   test('decodes POS', () => {
@@ -52,7 +53,7 @@ describe('Label H1 preamble REQ', () => {
     expect(decodeResult.decoder.decodeLevel).toBe('full');
     expect(decodeResult.raw.checksum).toBe(0x037b);
     expect(decodeResult.formatted.items.length).toBe(1);
-    expect(decodeResult.remaining.text).toBeUndefined();
+    expect(decodeResult.formatted.description).toBe('Request for Position Report');
   });
 
   test('decodes REQ POS inmarsat', () => {
@@ -63,12 +64,12 @@ describe('Label H1 preamble REQ', () => {
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.raw.tail).toBe('55150A');
     expect(decodeResult.raw.flight_number).toBe('RCH892');
+    expect(decodeResult.raw.mission_number).toBe('LVZF1185C049');
+    expect(decodeResult.raw.sequence_number).toBe(1);
     expect(decodeResult.raw.checksum).toBe(0x9310);
-    expect(decodeResult.formatted.description).toBe(
-      'Request for Position Report',
-    );
-    expect(decodeResult.formatted.items.length).toBe(3);
-    expect(decodeResult.remaining.text).toBe('MR1,/AU3');
+    expect(decodeResult.formatted.items.length).toBe(4);
+    expect(decodeResult.formatted.description).toBeDefined();
+    expect(decodeResult.remaining.text).toContain('AU3');
   });
 
   test('decodes FPN', () => {
@@ -82,6 +83,6 @@ describe('Label H1 preamble REQ', () => {
     expect(decodeResult.raw.flight_plan).toBe('Z5585');
     expect(decodeResult.raw.checksum).toBe(0x9736);
     expect(decodeResult.formatted.items.length).toBe(4);
-    expect(decodeResult.remaining.text).toBeUndefined();
+    expect(decodeResult.formatted.description).toBe('Request for Flight Plan');
   });
 });

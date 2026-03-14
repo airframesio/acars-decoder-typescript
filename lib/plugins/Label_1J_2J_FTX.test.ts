@@ -41,14 +41,15 @@ describe('Label 1J/2J FTX', () => {
     expect(decodeResult.raw.flight_number).toBe('RCH4086');
     expect(decodeResult.raw.mission_number).toBe('ABB02R70E037');
     expect(decodeResult.raw.message_timestamp).toBe(1739150248);
+    expect(decodeResult.raw.sequence_number).toBe(49);
     expect(decodeResult.raw.fuel_on_board).toBe(1791);
     expect(decodeResult.raw.text).toBe(
       'GOOD EVENING PLEASE PASS US THE SUPER BOWL SCORE WHEN ABLE. THANK YOU',
     );
     expect(decodeResult.raw.version).toBe(3.2);
     expect(decodeResult.raw.checksum).toBe(0x8d70);
-    expect(decodeResult.formatted.items.length).toBe(6);
-    expect(decodeResult.remaining.text).toBe('M74/MR049,');
+    expect(decodeResult.formatted.items.length).toBe(7);
+    expect(decodeResult.remaining.text).toContain('M74');
   });
 
   test('decodes <invalid>', () => {

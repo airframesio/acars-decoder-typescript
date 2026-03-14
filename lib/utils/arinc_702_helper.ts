@@ -29,6 +29,7 @@ export class Arinc702Helper {
    * @returns boolean indicating if the message was successfully decoded
    */
   public static decodeH1Message(decodeResult: DecodeResult, message: string) {
+    decodeResult.remaining.text = '';
     const checksum = parseInt(message.slice(-4), 16);
     const data = message.slice(0, message.length - 4);
     let checksumAlgorithmUsed = '';
@@ -105,10 +106,10 @@ export class Arinc702Helper {
         case 'MR':
           processMessageReference(decodeResult, data.split(','));
           break;
-        case 'PR':
-          // TODO: decode /PR fields
-          ResultFormatter.unknown(decodeResult, fields[i], '/');
-          break;
+        //case 'PR':
+        // TODO: decode /PR fields
+        // ResultFormatter.unknown(decodeResult, fields[i], '/');
+        // break;
         case 'PS': // Position
           Arinc702Helper.processPS(decodeResult, data.split(','));
           break;
@@ -148,6 +149,8 @@ export class Arinc702Helper {
           processWeatherQuery(decodeResult, data.split(':'));
           break;
         default:
+          console.log(`Unknown IEI ${iei} in H1 message, data: ${data}`);
+          console.log(`Remaing text: ${decodeResult.remaining.text}`);
           ResultFormatter.unknown(decodeResult, fields[i], '/');
       }
     }
@@ -261,7 +264,7 @@ function processAirField(decodeResult: DecodeResult, data: string[]) {
 }
 function processTimeOfDeparture(decodeResult: DecodeResult, data: string[]) {
   if (data.length === 2) {
-    decodeResult.raw.plannedDepartureTime = data[0]; //DDHHMM
+    decodeResult.raw.planned_departure_time = data[0]; //DDHHMM - TODO: make int
     decodeResult.formatted.items.push({
       type: 'ptd',
       code: 'ptd',
@@ -269,7 +272,7 @@ function processTimeOfDeparture(decodeResult: DecodeResult, data: string[]) {
       value: `YYYY-MM-${data[0].substring(0, 2)}T${data[0].substring(2, 4)}:${data[0].substring(4)}:00Z`,
     });
 
-    decodeResult.raw.plannedDepartureTime = data[1]; //HHMM
+    decodeResult.raw.estimated_departure_time = data[1]; //HHMM - TODO: make int
     decodeResult.formatted.items.push({
       type: 'etd',
       code: 'etd',
