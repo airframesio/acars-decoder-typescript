@@ -1,13 +1,13 @@
 import { MessageDecoder } from '../MessageDecoder';
-import { Label_H1 } from './Label_H1';
+import { Arinc702 } from './ARINC_702';
 
 describe('Label_H1 INI', () => {
-  let plugin: Label_H1;
+  let plugin: Arinc702;
   const message = { label: 'H1', text: '' };
 
   beforeEach(() => {
     const decoder = new MessageDecoder();
-    plugin = new Label_H1(decoder);
+    plugin = new Arinc702(decoder);
   });
 
   test('decodes valid', () => {
@@ -17,28 +17,20 @@ describe('Label_H1 INI', () => {
     const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
-    expect(decodeResult.decoder.decodeLevel).toBe('partial');
+    expect(decodeResult.decoder.decodeLevel).toBe('full');
+    expect(decodeResult.raw.tail).toBe('70045B');
+    expect(decodeResult.raw.flight_number).toBe('RCH2050');
     expect(decodeResult.raw.mission_number).toBe('AJM363201271');
-    expect(decodeResult.formatted.items.length).toBe(7);
-    expect(decodeResult.formatted.items[0].label).toBe('Tail');
-    expect(decodeResult.formatted.items[0].value).toBe('70045B');
-    expect(decodeResult.formatted.items[1].label).toBe('Flight Number');
-    expect(decodeResult.formatted.items[1].value).toBe('RCH2050');
-    expect(decodeResult.formatted.items[2].label).toBe('Origin');
-    expect(decodeResult.formatted.items[2].value).toBe('KDOV');
-    expect(decodeResult.formatted.items[3].label).toBe('Destination');
-    expect(decodeResult.formatted.items[3].value).toBe('KBHM');
-    expect(decodeResult.formatted.items[4].label).toBe(
-      'Planned Departure Time',
-    );
-    expect(decodeResult.formatted.items[4].value).toBe('YYYY-MM-27T11:15:00Z');
-    expect(decodeResult.formatted.items[5].label).toBe(
-      'Estimated Departure Time',
-    );
-    expect(decodeResult.formatted.items[5].value).toBe('13:15');
-    expect(decodeResult.formatted.items[6].label).toBe('Message Checksum');
-    expect(decodeResult.formatted.items[6].value).toBe('0x45ee');
-    expect(decodeResult.remaining.text).toBe('MR2,000');
+    expect(decodeResult.raw.sequence_number).toBe(2);
+    expect(decodeResult.raw.sequence_response).toBe(0);
+    expect(decodeResult.raw.departure_icao).toBe('KDOV');
+    expect(decodeResult.raw.arrival_icao).toBe('KBHM');
+    expect(decodeResult.raw.planned_departure_time).toBe('271115');
+    expect(decodeResult.raw.estimated_departure_time).toBe('1315');
+    expect(decodeResult.raw.checksum).toBe(0x45ee);
+    expect(decodeResult.remaining.text).toBe('');
+    expect(decodeResult.formatted.items.length).toBe(9);
+    expect(decodeResult.formatted.description).toBe('Initial Report');
   });
 
   test('#MD valid', () => {
@@ -49,27 +41,19 @@ describe('Label_H1 INI', () => {
 
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
+    expect(decodeResult.raw.tail).toBe('99206A');
+    expect(decodeResult.raw.flight_number).toBe('RCH206');
     expect(decodeResult.raw.mission_number).toBe('AAM7029H1275');
-    expect(decodeResult.formatted.items.length).toBe(7);
-    expect(decodeResult.formatted.items[0].label).toBe('Tail');
-    expect(decodeResult.formatted.items[0].value).toBe('99206A');
-    expect(decodeResult.formatted.items[1].label).toBe('Flight Number');
-    expect(decodeResult.formatted.items[1].value).toBe('RCH206');
-    expect(decodeResult.formatted.items[2].label).toBe('Origin');
-    expect(decodeResult.formatted.items[2].value).toBe('KSUU');
-    expect(decodeResult.formatted.items[3].label).toBe('Destination');
-    expect(decodeResult.formatted.items[3].value).toBe('KBUR');
-    expect(decodeResult.formatted.items[4].label).toBe(
-      'Planned Departure Time',
-    );
-    expect(decodeResult.formatted.items[4].value).toBe('YYYY-MM-01T15:35:00Z');
-    expect(decodeResult.formatted.items[5].label).toBe(
-      'Estimated Departure Time',
-    );
-    expect(decodeResult.formatted.items[5].value).toBe('15:35');
-    expect(decodeResult.formatted.items[6].label).toBe('Message Checksum');
-    expect(decodeResult.formatted.items[6].value).toBe('0xee66');
-    expect(decodeResult.remaining.text).toBe('- #MD/MR0,0');
+    expect(decodeResult.raw.sequence_number).toBe(0);
+    expect(decodeResult.raw.sequence_response).toBe(0);
+    expect(decodeResult.raw.departure_icao).toBe('KSUU');
+    expect(decodeResult.raw.arrival_icao).toBe('KBUR');
+    expect(decodeResult.raw.planned_departure_time).toBe('011535');
+    expect(decodeResult.raw.estimated_departure_time).toBe('1535');
+    expect(decodeResult.raw.checksum).toBe(0xee66);
+    expect(decodeResult.remaining.text).toBe('- #MD/');
+    expect(decodeResult.formatted.items.length).toBe(9);
+    expect(decodeResult.formatted.description).toBe('Initial Report');
   });
 
   test('INI <invalid>', () => {

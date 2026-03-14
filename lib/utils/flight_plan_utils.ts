@@ -6,8 +6,9 @@ export class FlightPlanUtils {
   /**
    * Processes flight plan data
    *
-   * Expected format is [header, key1, val1, ... keyN, valN]
+   * Expected format is [header, fpei, val1, ... fpeiN, valN]
    *
+   * @see https://atlaske-content.garmin.com/filestorage//email/outbound/attachments/GTN_Flight_Plan_and_User_Waypoint_transfer_Time1712844670119.pdf
    * @param decodeResult - results
    * @param data - original message split by ':'
    * @returns whether all fields were processed or not
@@ -18,10 +19,10 @@ export class FlightPlanUtils {
   ): boolean {
     let allKnownFields = FlightPlanUtils.parseHeader(decodeResult, data[0]);
     for (let i = 1; i < data.length; i += 2) {
-      const key = data[i];
+      const fpei = data[i];
       const value = data[i + 1];
       // TODO: discuss how store commented out bits as both raw and formatted
-      switch (key) {
+      switch (fpei) {
         case 'A': // Arrival Procedure (?)
           FlightPlanUtils.addProcedure(decodeResult, value, 'arrival');
           break;
@@ -56,7 +57,7 @@ export class FlightPlanUtils {
             decodeResult.remaining.text = '';
             allKnownFields = false;
           }
-          decodeResult.remaining.text += `:${key}:${value}`;
+          decodeResult.remaining.text += `:${fpei}:${value}`;
           decodeResult.decoder.decodeLevel = 'partial';
       }
     }

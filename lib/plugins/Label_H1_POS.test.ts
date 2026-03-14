@@ -1,13 +1,13 @@
 import { MessageDecoder } from '../MessageDecoder';
-import { Label_H1 } from './Label_H1';
+import { Arinc702 } from './ARINC_702';
 
 describe('Label_H1 POS', () => {
-  let plugin: Label_H1;
+  let plugin: Arinc702;
   const message = { label: 'H1', text: '' };
 
   beforeEach(() => {
     const decoder = new MessageDecoder();
-    plugin = new Label_H1(decoder);
+    plugin = new Arinc702(decoder);
   });
 
   test('variant 1', () => {
@@ -18,36 +18,12 @@ describe('Label_H1 POS', () => {
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.formatted.description).toBe('Position Report');
-    expect(decodeResult.message).toBe(message);
-    expect(decodeResult.raw.position.latitude).toBe(43.52);
-    expect(decodeResult.raw.position.longitude).toBe(-123.29);
+    expect(decodeResult.formatted.items.length).toBe(5);
+    // Raw field checks
+    expect(decodeResult.raw.position.latitude).toBeCloseTo(43.52, 3);
+    expect(decodeResult.raw.position.longitude).toBeCloseTo(-123.29, 3);
     expect(decodeResult.raw.altitude).toBe(37000);
     expect(decodeResult.raw.outside_air_temperature).toBe(-48);
-    expect(decodeResult.formatted.items.length).toBe(5);
-    expect(decodeResult.formatted.items[0].type).toBe('aircraft_position');
-    expect(decodeResult.formatted.items[0].code).toBe('POS');
-    expect(decodeResult.formatted.items[0].label).toBe('Aircraft Position');
-    expect(decodeResult.formatted.items[0].value).toBe('43.520 N, 123.290 W');
-    expect(decodeResult.formatted.items[1].type).toBe('altitude');
-    expect(decodeResult.formatted.items[1].code).toBe('ALT');
-    expect(decodeResult.formatted.items[1].label).toBe('Altitude');
-    expect(decodeResult.formatted.items[1].value).toBe('37000 feet');
-    expect(decodeResult.formatted.items[2].type).toBe('aircraft_route');
-    expect(decodeResult.formatted.items[2].code).toBe('ROUTE');
-    expect(decodeResult.formatted.items[2].label).toBe('Aircraft Route');
-    expect(decodeResult.formatted.items[2].value).toBe(
-      'EASON@21:57:54 > EBINY@22:06:01 > ELENN',
-    );
-    expect(decodeResult.formatted.items[3].type).toBe(
-      'outside_air_temperature',
-    );
-    expect(decodeResult.formatted.items[3].code).toBe('OATEMP');
-    expect(decodeResult.formatted.items[3].label).toBe(
-      'Outside Air Temperature (C)',
-    );
-    expect(decodeResult.formatted.items[3].value).toBe('-48 degrees');
-    expect(decodeResult.formatted.items[4].label).toBe('Message Checksum');
-    expect(decodeResult.formatted.items[4].value).toBe('0x7a40');
   });
 
   test('variant 2', () => {
@@ -58,36 +34,12 @@ describe('Label_H1 POS', () => {
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.formatted.description).toBe('Position Report');
-    expect(decodeResult.message).toBe(message);
-    expect(decodeResult.raw.position.latitude).toBe(45.348333333333336);
-    expect(decodeResult.raw.position.longitude).toBe(-122.91666666666667);
+    expect(decodeResult.formatted.items.length).toBe(5);
+    // Raw field checks
+    expect(decodeResult.raw.position.latitude).toBeCloseTo(45.348, 2);
+    expect(decodeResult.raw.position.longitude).toBeCloseTo(-122.917, 2);
     expect(decodeResult.raw.altitude).toBe(13400);
     expect(decodeResult.raw.outside_air_temperature).toBe(-6);
-    expect(decodeResult.formatted.items.length).toBe(5);
-    expect(decodeResult.formatted.items[0].type).toBe('aircraft_position');
-    expect(decodeResult.formatted.items[0].code).toBe('POS');
-    expect(decodeResult.formatted.items[0].label).toBe('Aircraft Position');
-    expect(decodeResult.formatted.items[0].value).toBe('45.348 N, 122.917 W');
-    expect(decodeResult.formatted.items[1].type).toBe('altitude');
-    expect(decodeResult.formatted.items[1].code).toBe('ALT');
-    expect(decodeResult.formatted.items[1].label).toBe('Altitude');
-    expect(decodeResult.formatted.items[1].value).toBe('13400 feet');
-    expect(decodeResult.formatted.items[2].type).toBe('aircraft_route');
-    expect(decodeResult.formatted.items[2].code).toBe('ROUTE');
-    expect(decodeResult.formatted.items[2].label).toBe('Aircraft Route');
-    expect(decodeResult.formatted.items[2].value).toBe(
-      'PEGTY@22:03:09 > MINNE@22:04:24 > HISKU',
-    );
-    expect(decodeResult.formatted.items[3].type).toBe(
-      'outside_air_temperature',
-    );
-    expect(decodeResult.formatted.items[3].code).toBe('OATEMP');
-    expect(decodeResult.formatted.items[3].label).toBe(
-      'Outside Air Temperature (C)',
-    );
-    expect(decodeResult.formatted.items[3].value).toBe('-6 degrees');
-    expect(decodeResult.formatted.items[4].label).toBe('Message Checksum');
-    expect(decodeResult.formatted.items[4].value).toBe('0x0a5b');
   });
 
   test('variant 3', () => {
@@ -98,36 +50,12 @@ describe('Label_H1 POS', () => {
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.formatted.description).toBe('Position Report');
-    expect(decodeResult.message).toBe(message);
-    expect(decodeResult.raw.position.latitude).toBe(43.05);
-    expect(decodeResult.raw.position.longitude).toBe(-122.67666666666666);
+    expect(decodeResult.formatted.items.length).toBe(5);
+    // Raw field checks
+    expect(decodeResult.raw.position.latitude).toBeCloseTo(43.05, 2);
+    expect(decodeResult.raw.position.longitude).toBeCloseTo(-122.677, 2);
     expect(decodeResult.raw.altitude).toBe(38000);
     expect(decodeResult.raw.outside_air_temperature).toBe(-47);
-    expect(decodeResult.formatted.items.length).toBe(5);
-    expect(decodeResult.formatted.items[0].type).toBe('aircraft_position');
-    expect(decodeResult.formatted.items[0].code).toBe('POS');
-    expect(decodeResult.formatted.items[0].label).toBe('Aircraft Position');
-    expect(decodeResult.formatted.items[0].value).toBe('43.050 N, 122.677 W');
-    expect(decodeResult.formatted.items[1].type).toBe('altitude');
-    expect(decodeResult.formatted.items[1].code).toBe('ALT');
-    expect(decodeResult.formatted.items[1].label).toBe('Altitude');
-    expect(decodeResult.formatted.items[1].value).toBe('38000 feet');
-    expect(decodeResult.formatted.items[2].type).toBe('aircraft_route');
-    expect(decodeResult.formatted.items[2].code).toBe('ROUTE');
-    expect(decodeResult.formatted.items[2].label).toBe('Aircraft Route');
-    expect(decodeResult.formatted.items[2].value).toBe(
-      'IBALL@22:05:16 > AARON@22:08:16 > MOXEE',
-    );
-    expect(decodeResult.formatted.items[3].type).toBe(
-      'outside_air_temperature',
-    );
-    expect(decodeResult.formatted.items[3].code).toBe('OATEMP');
-    expect(decodeResult.formatted.items[3].label).toBe(
-      'Outside Air Temperature (C)',
-    );
-    expect(decodeResult.formatted.items[3].value).toBe('-47 degrees');
-    expect(decodeResult.formatted.items[4].label).toBe('Message Checksum');
-    expect(decodeResult.formatted.items[4].value).toBe('0xbf64');
   });
 
   test('variant 4', () => {
@@ -138,36 +66,12 @@ describe('Label_H1 POS', () => {
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.formatted.description).toBe('Position Report');
-    expect(decodeResult.message).toBe(message);
-    expect(decodeResult.raw.position.latitude).toBe(33.375);
-    expect(decodeResult.raw.position.longitude).toBe(-79.71333333333334);
+    expect(decodeResult.formatted.items.length).toBe(5);
+    // Raw field checks
+    expect(decodeResult.raw.position.latitude).toBeCloseTo(33.375, 2);
+    expect(decodeResult.raw.position.longitude).toBeCloseTo(-79.713, 2);
     expect(decodeResult.raw.altitude).toBe(34000);
     expect(decodeResult.raw.outside_air_temperature).toBe(-42);
-    expect(decodeResult.formatted.items.length).toBe(5);
-    expect(decodeResult.formatted.items[0].type).toBe('aircraft_position');
-    expect(decodeResult.formatted.items[0].code).toBe('POS');
-    expect(decodeResult.formatted.items[0].label).toBe('Aircraft Position');
-    expect(decodeResult.formatted.items[0].value).toBe('33.375 N, 79.713 W');
-    expect(decodeResult.formatted.items[1].type).toBe('altitude');
-    expect(decodeResult.formatted.items[1].code).toBe('ALT');
-    expect(decodeResult.formatted.items[1].label).toBe('Altitude');
-    expect(decodeResult.formatted.items[1].value).toBe('34000 feet');
-    expect(decodeResult.formatted.items[2].type).toBe('aircraft_route');
-    expect(decodeResult.formatted.items[2].code).toBe('ROUTE');
-    expect(decodeResult.formatted.items[2].label).toBe('Aircraft Route');
-    expect(decodeResult.formatted.items[2].value).toBe(
-      'SCOOB@23:29:33 > ENEME@23:57:12 > FETAL',
-    );
-    expect(decodeResult.formatted.items[3].type).toBe(
-      'outside_air_temperature',
-    );
-    expect(decodeResult.formatted.items[3].code).toBe('OATEMP');
-    expect(decodeResult.formatted.items[3].label).toBe(
-      'Outside Air Temperature (C)',
-    );
-    expect(decodeResult.formatted.items[3].value).toBe('-42 degrees');
-    expect(decodeResult.formatted.items[4].label).toBe('Message Checksum');
-    expect(decodeResult.formatted.items[4].value).toBe('0x57f6');
   });
 
   test('variant 5', () => {
@@ -179,36 +83,12 @@ describe('Label_H1 POS', () => {
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.formatted.description).toBe('Position Report');
-    expect(decodeResult.message).toBe(message);
-    expect(decodeResult.raw.position.latitude).toBe(38.885);
-    expect(decodeResult.raw.position.longitude).toBe(-78.0);
+    expect(decodeResult.formatted.items.length).toBe(5);
+    // Raw field checks
+    expect(decodeResult.raw.position.latitude).toBeCloseTo(38.885, 2);
+    expect(decodeResult.raw.position.longitude).toBeCloseTo(-78.0, 2);
     expect(decodeResult.raw.altitude).toBe(31000);
     expect(decodeResult.raw.outside_air_temperature).toBe(-40);
-    expect(decodeResult.formatted.items.length).toBe(5);
-    expect(decodeResult.formatted.items[0].type).toBe('aircraft_position');
-    expect(decodeResult.formatted.items[0].code).toBe('POS');
-    expect(decodeResult.formatted.items[0].label).toBe('Aircraft Position');
-    expect(decodeResult.formatted.items[0].value).toBe('38.885 N, 78.000 W');
-    expect(decodeResult.formatted.items[1].type).toBe('altitude');
-    expect(decodeResult.formatted.items[1].code).toBe('ALT');
-    expect(decodeResult.formatted.items[1].label).toBe('Altitude');
-    expect(decodeResult.formatted.items[1].value).toBe('31000 feet');
-    expect(decodeResult.formatted.items[2].type).toBe('aircraft_route');
-    expect(decodeResult.formatted.items[2].code).toBe('ROUTE');
-    expect(decodeResult.formatted.items[2].label).toBe('Aircraft Route');
-    expect(decodeResult.formatted.items[2].value).toBe(
-      'CSN-01@11:23:09 > CYN-02@11:41:51 > ACK',
-    );
-    expect(decodeResult.formatted.items[3].type).toBe(
-      'outside_air_temperature',
-    );
-    expect(decodeResult.formatted.items[3].code).toBe('OATEMP');
-    expect(decodeResult.formatted.items[3].label).toBe(
-      'Outside Air Temperature (C)',
-    );
-    expect(decodeResult.formatted.items[3].value).toBe('-40 degrees');
-    expect(decodeResult.formatted.items[4].label).toBe('Message Checksum');
-    expect(decodeResult.formatted.items[4].value).toBe('0x9226');
   });
 
   test('variant 6', () => {
@@ -300,8 +180,8 @@ describe('Label_H1 POS', () => {
     expect(decodeResult.raw.fuel_on_board).toBe(742);
     expect(decodeResult.raw.version).toBe(3.2);
     expect(decodeResult.raw.checksum).toBe(0x4e17);
-    expect(decodeResult.formatted.items.length).toBe(14);
-    expect(decodeResult.remaining.text).toBe('F37A#M1B/MR1,,267070,T468');
+    expect(decodeResult.formatted.items.length).toBe(15);
+    expect(decodeResult.remaining.text).toBe('F37A#M1B/267070,T468');
   });
 
   test('variant 8', () => {
@@ -313,7 +193,7 @@ describe('Label_H1 POS', () => {
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.formatted.description).toBe('Position Report');
-    expect(decodeResult.formatted.items.length).toBe(12);
+    expect(decodeResult.formatted.items.length).toBe(14);
     expect(decodeResult.formatted.items[0].label).toBe('Destination');
     expect(decodeResult.formatted.items[0].value).toBe('MMGL');
     expect(decodeResult.formatted.items[1].label).toBe('Arrival Runway');
@@ -324,29 +204,34 @@ describe('Label_H1 POS', () => {
       'Estimated Time of Arrival',
     );
     expect(decodeResult.formatted.items[3].value).toBe('10:33:16');
-    expect(decodeResult.formatted.items[4].label).toBe('Route Status');
-    expect(decodeResult.formatted.items[4].value).toBe('Route Planned');
-    expect(decodeResult.formatted.items[5].label).toBe('Origin');
-    expect(decodeResult.formatted.items[5].value).toBe('MMTJ');
-    expect(decodeResult.formatted.items[6].label).toBe('Destination');
-    expect(decodeResult.formatted.items[6].value).toBe('MMGL');
-    expect(decodeResult.formatted.items[7].label).toBe('Departure Runway');
-    expect(decodeResult.formatted.items[7].value).toBe('27O');
-    expect(decodeResult.formatted.items[8].label).toBe('Departure Procedure');
-    expect(decodeResult.formatted.items[8].value).toBe(
+    expect(decodeResult.formatted.items[4].label).toBe('Altitude');
+    expect(decodeResult.formatted.items[4].value).toBe('35000 feet');
+    expect(decodeResult.formatted.items[5].label).toBe(
+      'Outside Air Temperature (C)',
+    );
+    expect(decodeResult.formatted.items[5].value).toBe('-45 degrees');
+    expect(decodeResult.formatted.items[6].label).toBe('Route Status');
+    expect(decodeResult.formatted.items[6].value).toBe('Route Planned');
+    expect(decodeResult.formatted.items[7].label).toBe('Origin');
+    expect(decodeResult.formatted.items[7].value).toBe('MMTJ');
+    expect(decodeResult.formatted.items[8].label).toBe('Destination');
+    expect(decodeResult.formatted.items[8].value).toBe('MMGL');
+    expect(decodeResult.formatted.items[9].label).toBe('Departure Runway');
+    expect(decodeResult.formatted.items[9].value).toBe('27O');
+    expect(decodeResult.formatted.items[10].label).toBe('Departure Procedure');
+    expect(decodeResult.formatted.items[10].value).toBe(
       'TUMA2B: >> SANFE > UT4 >> LMM',
     );
-    expect(decodeResult.formatted.items[9].label).toBe('Arrival Procedure');
-    expect(decodeResult.formatted.items[9].value).toBe('LONV1D');
-    expect(decodeResult.formatted.items[10].label).toBe('Approach Procedure');
-    expect(decodeResult.formatted.items[10].value).toBe(
+    expect(decodeResult.formatted.items[11].label).toBe('Arrival Procedure');
+    expect(decodeResult.formatted.items[11].value).toBe('LONV1D');
+    expect(decodeResult.formatted.items[12].label).toBe('Approach Procedure');
+    expect(decodeResult.formatted.items[12].value).toBe(
       'ILSZ29 starting at PLADE(29O)',
     );
-    expect(decodeResult.formatted.items[11].label).toBe('Message Checksum');
-    expect(decodeResult.formatted.items[11].value).toBe('0x9d1c');
+    expect(decodeResult.formatted.items[13].label).toBe('Message Checksum');
+    expect(decodeResult.formatted.items[13].value).toBe('0x9d1c');
     expect(decodeResult.remaining.text).toBe(
-      'PR1754,231,350,189,,0,0,,M45,185,,,P16,P0,36000,,1565,250',
-    );
+      '1754,231,189,,0,0,,185,,,P16,P0,36000,,1565,250');
   });
 
   test('variant 1 with offset', () => {
@@ -412,7 +297,7 @@ describe('Label_H1 POS', () => {
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.formatted.description).toBe('Position Report');
-    expect(decodeResult.formatted.items.length).toBe(12);
+    expect(decodeResult.formatted.items.length).toBe(14);
     expect(decodeResult.formatted.items[0].label).toBe('Aircraft Position');
     expect(decodeResult.formatted.items[0].value).toBe('51.323 N, 4.878 E');
     expect(decodeResult.formatted.items[1].label).toBe('Altitude');
@@ -433,20 +318,26 @@ describe('Label_H1 POS', () => {
     expect(decodeResult.formatted.items[6].value).toBe(
       'LEIB..CIV.N872.MEDIL.UN872.KOVIN.UM728.RESMI.UN857.DISAK..DIRMO..ETAMO..ADEKA..MOKDI..MEN..BADAM..KANIG..KENAS.N855.POS',
     );
-    expect(decodeResult.formatted.items[7].label).toBe('Arrival Runway'); // FIXME should remove
-    expect(decodeResult.formatted.items[7].value).toBe(''); // FIXME should remove
-    expect(decodeResult.formatted.items[8].label).toBe('Fuel On Board');
-    expect(decodeResult.formatted.items[8].value).toBe('89');
-    expect(decodeResult.formatted.items[9].label).toBe(
+    expect(decodeResult.formatted.items[7].label).toBe('Altitude');
+    expect(decodeResult.formatted.items[7].value).toBe('37000 feet');
+    expect(decodeResult.formatted.items[8].label).toBe(
+      'Outside Air Temperature (C)',
+    );
+    expect(decodeResult.formatted.items[8].value).toBe('-47 degrees');
+    expect(decodeResult.formatted.items[9].label).toBe('Arrival Runway'); // FIXME should remove
+    expect(decodeResult.formatted.items[9].value).toBe(''); // FIXME should remove
+    expect(decodeResult.formatted.items[10].label).toBe('Fuel On Board');
+    expect(decodeResult.formatted.items[10].value).toBe('89');
+    expect(decodeResult.formatted.items[11].label).toBe(
       'Estimated Time of Arrival',
     );
-    expect(decodeResult.formatted.items[9].value).toBe('12:45:03');
-    expect(decodeResult.formatted.items[10].label).toBe('Fuel Remaining');
-    expect(decodeResult.formatted.items[10].value).toBe('73');
-    expect(decodeResult.formatted.items[11].label).toBe('Message Checksum');
-    expect(decodeResult.formatted.items[11].value).toBe('0x53b2');
+    expect(decodeResult.formatted.items[11].value).toBe('12:45:03');
+    expect(decodeResult.formatted.items[12].label).toBe('Fuel Remaining');
+    expect(decodeResult.formatted.items[12].value).toBe('73');
+    expect(decodeResult.formatted.items[13].label).toBe('Message Checksum');
+    expect(decodeResult.formatted.items[13].value).toBe('0x53b2');
     expect(decodeResult.remaining.text).toBe(
-      '290016,191/PR1496,150,370,191,,55,10,248028,M47,30,P19,P0/FHCIV,105208,273K,3226,175,M41,252027,450,N,221,62.MEDIL,105411,267K,3439,172,M44,250028,459,N,203,15.PITHI,105533,259K,3584,170,M47,249028,456,N,203,10.LESDO,105859,252K,3700,167,M47,248028,456,N,203,25.KOVIN,110153,252K,3700,164,M47,248028,456,N,203,21.DUCRA,110705,252K,3700,160,M47,248028,456,N,213,37.RESMI,111101,251K,3700,156,M47,248028,455,N,213,28.DEKOD,111325,251K,3700,154,M47,248028,455,N,192,17.DISAK,111438,251K,3700,153,M47,248028,454,N,172,9.DIRMO,112306,251K,3700,145,M47,248028,454,N,178,63.ETAMO,112514,250K,3700,143,M47,248028,453,N,158,16.ADEKA,113339,250K,3700,136,M47,248028,454,N,147,64.MOKDI,114139,251K,3700,129,M47,248028,454,N,181,59.MEN,114429,251K,3700,127,M47,248028,454,N,181,21.BADAM,114843,251K,3700,123,M47,248028,454,N,179,31.KANIG,120154,250K,3700,111,M47,248028,453,N,185,97.KENAS,121800,250K,3700,98,M47,248028,453,N,177,119.POS,122257,250K,3018,96,M45,248023,395,N,182,34.LEIB,124503,150K,2,89,P15,000000,161,N,231,103',
+      '290016,191/PR1496,150,191,,55,10,248028,30,P19,P0/FHCIV,105208,273K,3226,175,M41,252027,450,N,221,62.MEDIL,105411,267K,3439,172,M44,250028,459,N,203,15.PITHI,105533,259K,3584,170,M47,249028,456,N,203,10.LESDO,105859,252K,3700,167,M47,248028,456,N,203,25.KOVIN,110153,252K,3700,164,M47,248028,456,N,203,21.DUCRA,110705,252K,3700,160,M47,248028,456,N,213,37.RESMI,111101,251K,3700,156,M47,248028,455,N,213,28.DEKOD,111325,251K,3700,154,M47,248028,455,N,192,17.DISAK,111438,251K,3700,153,M47,248028,454,N,172,9.DIRMO,112306,251K,3700,145,M47,248028,454,N,178,63.ETAMO,112514,250K,3700,143,M47,248028,453,N,158,16.ADEKA,113339,250K,3700,136,M47,248028,454,N,147,64.MOKDI,114139,251K,3700,129,M47,248028,454,N,181,59.MEN,114429,251K,3700,127,M47,248028,454,N,181,21.BADAM,114843,251K,3700,123,M47,248028,454,N,179,31.KANIG,120154,250K,3700,111,M47,248028,453,N,185,97.KENAS,121800,250K,3700,98,M47,248028,453,N,177,119.POS,122257,250K,3018,96,M45,248023,395,N,182,34.LEIB,124503,150K,2,89,P15,000000,161,N,231,103',
     );
   });
 

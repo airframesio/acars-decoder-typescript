@@ -1,13 +1,13 @@
 import { MessageDecoder } from '../MessageDecoder';
-import { Label_H1 } from './Label_H1';
+import { Arinc702 } from './ARINC_702';
 
 describe('Label 1J/2J FTX', () => {
-  let plugin: Label_H1;
+  let plugin: Arinc702;
   let message = { label: '1J', text: '' };
 
   beforeEach(() => {
     const decoder = new MessageDecoder();
-    plugin = new Label_H1(decoder);
+    plugin = new Arinc702(decoder);
   });
 
   test('decodes Label 1J', () => {
@@ -17,18 +17,15 @@ describe('Label 1J/2J FTX', () => {
     const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
-    expect(decodeResult.decoder.decodeLevel).toBe('partial');
+    expect(decodeResult.decoder.decodeLevel).toBe('full');
+    expect(decodeResult.raw.tail).toBe('50007B');
+    expect(decodeResult.raw.flight_number).toBe('RCH4086');
     expect(decodeResult.raw.mission_number).toBe('ABB02R70E037');
-    expect(decodeResult.formatted.items.length).toBe(4);
-    expect(decodeResult.formatted.items[0].label).toBe('Tail');
-    expect(decodeResult.formatted.items[0].value).toBe('50007B');
-    expect(decodeResult.formatted.items[1].label).toBe('Flight Number');
-    expect(decodeResult.formatted.items[1].value).toBe('RCH4086');
-    expect(decodeResult.formatted.items[2].label).toBe('Free Text');
-    expect(decodeResult.formatted.items[2].value).toBe('4 QTR PHILLY UP 37-6');
-    expect(decodeResult.formatted.items[3].label).toBe('Message Checksum');
-    expect(decodeResult.formatted.items[3].value).toBe('0x307a');
-    expect(decodeResult.remaining.text).toBe('MR6,');
+    expect(decodeResult.raw.sequence_number).toBe(6);
+    expect(decodeResult.raw.text).toBe('4 QTR PHILLY UP 37-6');
+    expect(decodeResult.raw.checksum).toBe(0x307a);
+    expect(decodeResult.formatted.description).toBe('Free Text');
+    expect(decodeResult.formatted.items.length).toBe(5);
   });
 
   // Disabled due to checksum mismatch. Possibly copy-paste issue due to non-ascii characters in message?
@@ -44,14 +41,15 @@ describe('Label 1J/2J FTX', () => {
     expect(decodeResult.raw.flight_number).toBe('RCH4086');
     expect(decodeResult.raw.mission_number).toBe('ABB02R70E037');
     expect(decodeResult.raw.message_timestamp).toBe(1739150248);
+    expect(decodeResult.raw.sequence_number).toBe(49);
     expect(decodeResult.raw.fuel_on_board).toBe(1791);
-    expect(decodeResult.raw.freetext).toBe(
+    expect(decodeResult.raw.text).toBe(
       'GOOD EVENING PLEASE PASS US THE SUPER BOWL SCORE WHEN ABLE. THANK YOU',
     );
     expect(decodeResult.raw.version).toBe(3.2);
     expect(decodeResult.raw.checksum).toBe(0x8d70);
-    expect(decodeResult.formatted.items.length).toBe(6);
-    expect(decodeResult.remaining.text).toBe('M74/MR049,');
+    expect(decodeResult.formatted.items.length).toBe(7);
+    expect(decodeResult.remaining.text).toBe('M74/');
   });
 
   test('decodes <invalid>', () => {

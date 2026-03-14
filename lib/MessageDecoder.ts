@@ -17,6 +17,7 @@ export class MessageDecoder {
     this.debug = false;
 
     this.registerPlugin(new Plugins.CBand(this)); // first, for now, so it can wrap other plugins
+    this.registerPlugin(new Plugins.Arinc702(this));
     this.registerPlugin(new Plugins.Label_ColonComma(this));
     this.registerPlugin(new Plugins.Label_5Z_Slash(this));
     this.registerPlugin(new Plugins.Label_10_LDR(this));
@@ -65,10 +66,9 @@ export class MessageDecoder {
     this.registerPlugin(new Plugins.Label_H1_FLR(this));
     this.registerPlugin(new Plugins.Label_H1_M_POS(this));
     this.registerPlugin(new Plugins.Label_H1_OHMA(this));
+    this.registerPlugin(new Plugins.Label_H1_OFP(this));
     this.registerPlugin(new Plugins.Label_H1_Paren(this));
     this.registerPlugin(new Plugins.Label_H1_WRN(this));
-    this.registerPlugin(new Plugins.Label_H1_OFP(this));
-    this.registerPlugin(new Plugins.Label_H1(this));
     this.registerPlugin(new Plugins.Label_H1_StarPOS(this));
     this.registerPlugin(new Plugins.Label_HX(this));
     this.registerPlugin(new Plugins.Label_58(this));

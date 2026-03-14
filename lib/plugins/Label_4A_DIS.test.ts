@@ -35,7 +35,7 @@ describe('Label 4A preamble DIS', () => {
     expect(decodeResult.formatted.items[0].value).toBe('00:09:00');
     expect(decodeResult.formatted.items[1].code).toBe('CALLSIGN');
     expect(decodeResult.formatted.items[1].value).toBe('WEN3140');
-    expect(decodeResult.formatted.items[2].code).toBe('FREE_TEXT');
+    expect(decodeResult.formatted.items[2].code).toBe('TEXT');
     expect(decodeResult.formatted.items[2].value).toBe('@HOLD CNX');
   });
 

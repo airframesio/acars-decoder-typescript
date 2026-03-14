@@ -7,8 +7,29 @@ import { FlightPlanUtils } from './flight_plan_utils';
 import { ResultFormatter } from './result_formatter';
 import { RouteUtils } from './route_utils';
 
-export class H1Helper {
+/**
+ * Helper class for decoding ARINC 702 messages
+ * contains core logic for decoding different types of ARINC 702 messages,
+ * as well as utility functions for processing common fields
+ *
+ * Core format:
+ *  IMI/IEIdata/IEIdata/...checksum
+ */
+export class Arinc702Helper {
+  /**
+   * Decodes an  ARINC 702 message
+   *
+   * Steps:
+   * 1. Check against known checksum algorithms to determine if message is valid
+   * 2. Parse the Imbedded Message Identifier (IMI) to determine the type of message
+   * 3. Iterate through the Information Elements (IEI) and decode known fields, while storing unknown fields for further analysis
+   *
+   * @param decodeResult - object to store decoded results in
+   * @param message - message to decode
+   * @returns boolean indicating if the message was successfully decoded
+   */
   public static decodeH1Message(decodeResult: DecodeResult, message: string) {
+    decodeResult.remaining.text = '';
     const checksum = parseInt(message.slice(-4), 16);
     const data = message.slice(0, message.length - 4);
     let checksumAlgorithmUsed = '';
@@ -31,9 +52,9 @@ export class H1Helper {
       return false;
     }
     for (let i = 1; i < fields.length; ++i) {
-      const key = fields[i].substring(0, 2);
+      const iei = fields[i].substring(0, 2);
       const data = fields[i].substring(2);
-      switch (key) {
+      switch (iei) {
         case 'AF':
           processAirField(decodeResult, data.split(','));
           break;
@@ -71,7 +92,7 @@ export class H1Helper {
           decodeResult.raw.flight_number = data;
           break;
         case 'FX':
-          ResultFormatter.freetext(decodeResult, data);
+          ResultFormatter.text(decodeResult, data);
           break;
         case 'GA':
           ResultFormatter.groundAddress(decodeResult, data);
@@ -82,12 +103,18 @@ export class H1Helper {
         case 'LR':
           processLandingReport(decodeResult, data.split(','));
           break;
-        case 'PR':
-          // TODO: decode /PR fields
-          ResultFormatter.unknown(decodeResult, fields[i], '/');
+        case 'MR':
+          processMessageReference(decodeResult, data.split(','));
           break;
+        case 'PR':
+          processPerformanceData(decodeResult, data.split(','));
+          break;
+        //case 'PR':
+        // TODO: decode /PR fields
+        // ResultFormatter.unknown(decodeResult, fields[i], '/');
+        // break;
         case 'PS': // Position
-          H1Helper.processPS(decodeResult, data.split(','));
+          Arinc702Helper.processPS(decodeResult, data.split(','));
           break;
         case 'RF':
         case 'RI':
@@ -113,7 +140,7 @@ export class H1Helper {
           processTimeOfDeparture(decodeResult, data.split(','));
           break;
         case 'TS':
-          H1Helper.processTimeStamp(decodeResult, data.split(','));
+          Arinc702Helper.processTimeStamp(decodeResult, data.split(','));
           break;
         case 'VR':
           ResultFormatter.version(decodeResult, parseInt(data, 10) / 10);
@@ -125,6 +152,8 @@ export class H1Helper {
           processWeatherQuery(decodeResult, data.split(':'));
           break;
         default:
+          console.log(`Unknown IEI ${iei} in H1 message, data: ${data}`);
+          console.log(`Remaing text: ${decodeResult.remaining.text}`);
           ResultFormatter.unknown(decodeResult, fields[i], '/');
       }
     }
@@ -238,7 +267,7 @@ function processAirField(decodeResult: DecodeResult, data: string[]) {
 }
 function processTimeOfDeparture(decodeResult: DecodeResult, data: string[]) {
   if (data.length === 2) {
-    decodeResult.raw.plannedDepartureTime = data[0]; //DDHHMM
+    decodeResult.raw.planned_departure_time = data[0]; //DDHHMM - TODO: make int
     decodeResult.formatted.items.push({
       type: 'ptd',
       code: 'ptd',
@@ -246,7 +275,7 @@ function processTimeOfDeparture(decodeResult: DecodeResult, data: string[]) {
       value: `YYYY-MM-${data[0].substring(0, 2)}T${data[0].substring(2, 4)}:${data[0].substring(4)}:00Z`,
     });
 
-    decodeResult.raw.plannedDepartureTime = data[1]; //HHMM
+    decodeResult.raw.estimated_departure_time = data[1]; //HHMM - TODO: make int
     decodeResult.formatted.items.push({
       type: 'etd',
       code: 'etd',
@@ -348,12 +377,15 @@ function parseMessageType(
   const messageParts = messagePart.split(',');
   const messageType = messageParts[0];
   if (messageType.startsWith('POS')) {
-    H1Helper.processPosition(decodeResult, messagePart.substring(3).split(','));
-    return processMessageType(decodeResult, 'POS');
+    Arinc702Helper.processPosition(
+      decodeResult,
+      messagePart.substring(3).split(','),
+    );
+    return processIMI(decodeResult, 'POS');
   } else if (messageType.length === 6) {
-    const part1 = processMessageType(decodeResult, messageType.substring(0, 3));
+    const part1 = processIMI(decodeResult, messageType.substring(0, 3));
     const description = decodeResult.formatted.description;
-    const part2 = processMessageType(decodeResult, messageType.substring(3, 6));
+    const part2 = processIMI(decodeResult, messageType.substring(3, 6));
     decodeResult.formatted.description =
       description + ' for ' + decodeResult.formatted.description;
     if (messageParts.length > 1) {
@@ -372,10 +404,17 @@ function parseMessageType(
     ResultFormatter.unknown(decodeResult, messageParts.slice(1).join(','), '/');
   }
 
-  return processMessageType(decodeResult, messageType);
+  return processIMI(decodeResult, messageType);
 }
 
-function processMessageType(decodeResult: DecodeResult, type: string): boolean {
+/**
+ * Processes the Imbedded Message Identifier (IMI)
+ * which indicates the type of message and is used to determine what the message type is
+ * @param decodeResult
+ * @param type
+ * @returns
+ */
+function processIMI(decodeResult: DecodeResult, type: string): boolean {
   if (type === 'FPN') {
     decodeResult.formatted.description = 'Flight Plan';
   } else if (type === 'FTX') {
@@ -402,11 +441,72 @@ function processMessageType(decodeResult: DecodeResult, type: string): boolean {
     decodeResult.formatted.description = 'Request';
   } else if (type === 'RES') {
     decodeResult.formatted.description = 'Response';
+  } else if (type === 'SUM') {
+    decodeResult.formatted.description = 'Summary Report';
   } else {
     decodeResult.formatted.description = 'Unknown H1 Message';
     return false;
   }
   return true;
+}
+
+function processPerformanceData(decodeResult: DecodeResult, data: string[]) {
+  // /PR fields contain performance data
+  // Known field positions (12-field short variant and 18-field long variant):
+  // [0]: ground speed (knots * 10 or similar)
+  // [1]: indicated airspeed or mach-related
+  // [2]: altitude in hundreds of feet
+  // [3]: fuel-related value
+  // [4]: unknown (often empty)
+  // [5]: fuel flow or consumption
+  // [6]: fuel-related
+  // [7]: wind data (DDDSSSS format) or empty
+  // [8]: temperature (M=minus, P=plus)
+  // [9]: heading or unknown
+
+  if (data.length < 3) {
+    ResultFormatter.unknownArr(decodeResult, data, ',');
+    return;
+  }
+
+  // Field 2: altitude in hundreds
+  if (data[2] !== undefined && data[2] !== '') {
+    const alt = Number(data[2]) * 100;
+    if (!isNaN(alt) && alt > 0) {
+      ResultFormatter.altitude(decodeResult, alt);
+    }
+  }
+
+  // Field 8: temperature (if present)
+  if (data.length > 8 && data[8] !== undefined && data[8] !== '') {
+    ResultFormatter.temperature(decodeResult, data[8]);
+  }
+
+  // Collect remaining undecoded fields
+  const remaining: string[] = [];
+  for (let i = 0; i < data.length; i++) {
+    if (
+      i === 2 &&
+      data[i] !== '' &&
+      !isNaN(Number(data[i])) &&
+      Number(data[i]) * 100 > 0
+    ) {
+      continue; // altitude - already decoded
+    }
+    if (
+      i === 8 &&
+      data[i] !== '' &&
+      (data[i].startsWith('M') ||
+        data[i].startsWith('P') ||
+        !isNaN(Number(data[i])))
+    ) {
+      continue; // temperature - already decoded
+    }
+    remaining.push(data[i]);
+  }
+  if (remaining.length > 0 && remaining.some((r) => r !== '')) {
+    ResultFormatter.unknown(decodeResult, remaining.join(','), '/PR');
+  }
 }
 
 function processDateCode(decodeResult: DecodeResult, data: string[]) {
@@ -583,4 +683,15 @@ function crc16Genibus(data: string): number {
   }
 
   return (crc ^ 0xffff) & 0xffff;
+}
+function processMessageReference(decodeResult: DecodeResult, data: string[]) {
+  if (data.length !== 2) {
+    ResultFormatter.unknown(decodeResult, data.join(','), '/MR');
+    return;
+  }
+
+  ResultFormatter.sequenceNumber(decodeResult, parseInt(data[0], 10));
+  if (data[1] !== '') {
+    ResultFormatter.sequenceResponse(decodeResult, parseInt(data[1], 10));
+  }
 }

@@ -1,13 +1,13 @@
 import { MessageDecoder } from '../MessageDecoder';
-import { Label_H1 } from './Label_H1';
+import { Arinc702 } from './ARINC_702';
 
 describe('Label_H1 INR', () => {
-  let plugin: Label_H1;
+  let plugin: Arinc702;
   const message = { label: 'H1', text: '' };
 
   beforeEach(() => {
     const decoder = new MessageDecoder();
-    plugin = new Label_H1(decoder);
+    plugin = new Arinc702(decoder);
   });
 
   test('decodes valid', () => {
@@ -20,11 +20,12 @@ describe('Label_H1 INR', () => {
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.raw.tail).toBe('91511S');
     expect(decodeResult.raw.message_timestamp).toBe(1772634934);
+    expect(decodeResult.raw.sequence_number).toBe(19);
     expect(decodeResult.raw.day).toBe(4);
     expect(decodeResult.raw.eta_time).toBe(54300);
     expect(decodeResult.raw.fuel_on_board).toBe(983);
     expect(decodeResult.raw.checksum).toBe(0xbf4c);
-    expect(decodeResult.formatted.items.length).toBe(6);
-    expect(decodeResult.remaining.text).toBe('MR19,/NR,,,,,,,,950,0');
+    expect(decodeResult.formatted.items.length).toBe(7);
+    expect(decodeResult.remaining.text).toBe('NR,,,,,,,,950,0');
   });
 });
