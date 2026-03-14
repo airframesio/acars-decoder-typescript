@@ -1,9 +1,8 @@
-import { decode } from 'node:punycode';
 import { MessageDecoder } from '../MessageDecoder';
 import { Arinc702 } from './ARINC_702';
 
 describe('Label 80 Preamble INR', () => {
-  let plugin: Label_H1;
+  let plugin: Arinc702;
   const message = { label: '80', text: '' };
 
   beforeEach(() => {
@@ -20,13 +19,14 @@ describe('Label 80 Preamble INR', () => {
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.raw.tail).toBe('91511S');
     expect(decodeResult.raw.message_timestamp).toBe(1772634934);
+    expect(decodeResult.raw.sequence_number).toBe(19);
     expect(decodeResult.raw.day).toBe(4);
     expect(decodeResult.raw.eta_time).toBe(54300);
     expect(decodeResult.raw.fuel_on_board).toBe(983);
     expect(decodeResult.raw.version).toBe(3.2);
     expect(decodeResult.raw.checksum).toBe(0xbf4c);
     expect(decodeResult.formatted.description).toBe('In-Range Report');
-    expect(decodeResult.formatted.items.length).toBe(6);
-    expect(decodeResult.remaining.text).toBe('MR19,/NR,,,,,,,,950,0');
+    expect(decodeResult.formatted.items.length).toBe(7);
+    expect(decodeResult.remaining.text).toBe('NR,,,,,,,,950,0');
   });
 });

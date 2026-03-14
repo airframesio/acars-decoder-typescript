@@ -2,7 +2,7 @@ import { MessageDecoder } from '../MessageDecoder';
 import { Arinc702 } from './ARINC_702';
 
 describe('Label_2P Preamble POS', () => {
-  let plugin: Label_H1;
+  let plugin: Arinc702;
   const message = { label: '2P', text: '' };
 
   beforeEach(() => {
@@ -23,6 +23,8 @@ describe('Label_2P Preamble POS', () => {
     expect(decodeResult.raw.flight_number).toBe('RCH4086');
     expect(decodeResult.raw.tail).toBe('50007B');
     expect(decodeResult.raw.mission_number).toBe('ABB02R70E037');
+    expect(decodeResult.raw.message_timestamp).toBe(1739164684);
+    expect(decodeResult.raw.sequence_number).toBe(103);
     expect(decodeResult.raw.day).toBe(9);
     expect(decodeResult.raw.eta_time).toBe(27480);
     expect(decodeResult.raw.position.latitude).toBe(56.02);
@@ -34,8 +36,9 @@ describe('Label_2P Preamble POS', () => {
     expect(decodeResult.raw.fuel_on_board).toBe(857);
     expect(decodeResult.raw.version).toBe(3.2);
     expect(decodeResult.raw.checksum).toBe(0x2b89);
-    expect(decodeResult.formatted.items.length).toBe(10);
-    expect(decodeResult.remaining.text).toBe('M80/MR103,,084081,');
+    expect(decodeResult.formatted.items.length).toBe(11);
+    expect(decodeResult.formatted.description).toBe('Position Report');
+    expect(decodeResult.remaining.text).toBe('M80/084081,');
   });
 
   test('<invalid>', () => {

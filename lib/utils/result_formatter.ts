@@ -34,16 +34,6 @@ export class ResultFormatter {
     });
   }
 
-  static freetext(decodeResult: DecodeResult, value: string) {
-    decodeResult.raw.freetext = value;
-    decodeResult.formatted.items.push({
-      type: 'freetext',
-      code: 'FREE_TEXT',
-      label: 'Free Text',
-      value: value,
-    });
-  }
-
   static door_event(decodeResult: DecodeResult, name: string, state: string) {
     decodeResult.raw.door_event = {
       door: name,
@@ -635,6 +625,26 @@ export class ResultFormatter {
       code: 'TIMESTAMP',
       label: 'Message Timestamp',
       value: DateTimeUtils.timestampToString(value, 'epoch'),
+    });
+  }
+
+  static sequenceNumber(decodeResult: DecodeResult, value: number) {
+    decodeResult.raw.sequence_number = value;
+    decodeResult.formatted.items.push({
+      type: 'sequence',
+      code: 'SEQ',
+      label: 'Sequence Number',
+      value: decodeResult.raw.sequence_number,
+    });
+  }
+
+  static sequenceResponse(decodeResult: DecodeResult, value: number) {
+    decodeResult.raw.sequence_response = value;
+    decodeResult.formatted.items.push({
+      type: 'sequence',
+      code: 'SEQ_RESP',
+      label: 'Sequence Response',
+      value: decodeResult.raw.sequence_response,
     });
   }
 

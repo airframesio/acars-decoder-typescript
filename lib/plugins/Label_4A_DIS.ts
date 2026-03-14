@@ -26,7 +26,7 @@ export class Label_4A_DIS extends DecoderPlugin {
       DateTimeUtils.convertHHMMSSToTod(fields[1].substring(2) + '00'),
     );
     ResultFormatter.callsign(decodeResult, fields[2]);
-    ResultFormatter.freetext(decodeResult, fields.slice(3).join(''));
+    ResultFormatter.text(decodeResult, fields.slice(3).join(''));
 
     if (decodeResult.decoded) {
       if (!decodeResult.remaining.text)

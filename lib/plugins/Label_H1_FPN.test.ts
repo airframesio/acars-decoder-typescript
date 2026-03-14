@@ -2,7 +2,7 @@ import { MessageDecoder } from '../MessageDecoder';
 import { Arinc702 } from './ARINC_702';
 
 describe('Label_H1 FPN', () => {
-  let plugin: Label_H1;
+  let plugin: Arinc702;
   const message = { label: 'H1', text: '' };
 
   beforeEach(() => {
@@ -319,6 +319,7 @@ describe('Label_H1 FPN', () => {
     expect(decodeResult.raw.tail).toBe('88194A');
     expect(decodeResult.raw.flight_number).toBe('RCH857');
     expect(decodeResult.raw.mission_number).toBe('PMZM107QP021');
+    expect(decodeResult.raw.sequence_number).toBe(2);
     expect(decodeResult.raw.route_status).toBe('RM');
     expect(decodeResult.raw.arrival_icao).toBe('FJDG');
     expect(decodeResult.raw.route.waypoints.length).toBe(20);
@@ -326,7 +327,7 @@ describe('Label_H1 FPN', () => {
     expect(decodeResult.raw.route.waypoints[19].name).toBe('BUMMR');
     expect(decodeResult.raw.checksum).toBe(0xe3e9);
     expect(decodeResult.formatted.description).toBe('Flight Plan');
-    expect(decodeResult.formatted.items.length).toBe(6);
+    expect(decodeResult.formatted.items.length).toBe(7);
     expect(decodeResult.message).toBe(message);
   });
 
@@ -350,12 +351,14 @@ describe('Label_H1 FPN', () => {
     expect(decodeResult.raw.tail).toBe('80094S');
     expect(decodeResult.raw.flight_number).toBe('RCH411');
     expect(decodeResult.raw.mission_number).toBe('8JZ41NG3S048');
+    expect(decodeResult.raw.sequence_number).toBe(3);
+    expect(decodeResult.raw.sequence_response).toBe(5);
     expect(decodeResult.raw.route_status).toBe('RP');
     expect(decodeResult.raw.departure_icao).toBe('KMCF');
     expect(decodeResult.raw.arrival_icao).toBe('LBSF');
     expect(decodeResult.raw.route.waypoints.length).toBe(69); //nice
     expect(decodeResult.raw.checksum).toBe(0xc850);
     expect(decodeResult.formatted.description).toBe('Flight Plan');
-    expect(decodeResult.formatted.items.length).toBe(7);
+    expect(decodeResult.formatted.items.length).toBe(9);
   });
 });
