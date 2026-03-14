@@ -87,7 +87,7 @@ describe('Label H1 Preamble PRG', () => {
     );
     expect(decodeResult.formatted.items[10].label).toBe('Message Checksum');
     expect(decodeResult.formatted.items[10].value).toBe('0x226d');
-    expect(decodeResult.remaining.text).toContain(
+    expect(decodeResult.remaining.text).toBe(
       ':WS:FUJTI,360..BAKUP..BATAX..TAKAV..VEDOD',
     );
   });

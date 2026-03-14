@@ -73,7 +73,7 @@ describe('Label H1 preamble REQ', () => {
     expect(decodeResult.raw.checksum).toBe(0x9310);
     expect(decodeResult.formatted.items.length).toBe(4);
     expect(decodeResult.formatted.description).toBeDefined();
-    expect(decodeResult.remaining.text).toContain('AU3');
+    expect(decodeResult.remaining.text).toBe('AU3');
   });
 
   test('decodes FPN', () => {

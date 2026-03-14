@@ -230,6 +230,8 @@ describe('Label_H1 POS', () => {
     );
     expect(decodeResult.formatted.items[13].label).toBe('Message Checksum');
     expect(decodeResult.formatted.items[13].value).toBe('0x9d1c');
+    expect(decodeResult.remaining.text).toBe(
+      '1754,231,189,,0,0,,185,,,P16,P0,36000,,1565,250');
   });
 
   test('variant 1 with offset', () => {

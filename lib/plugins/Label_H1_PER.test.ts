@@ -47,6 +47,9 @@ describe('Label_H1 PER', () => {
     );
     expect(decodeResult.formatted.items[1].value).toBe('-56 degrees');
     expect(decodeResult.formatted.items[2].label).toBe('Message Checksum');
+    expect(decodeResult.remaining.text).toBe(
+      '1218,276,134,,0,68,,180,,,P30,P0,33936,,1084,284',
+    );
   });
 
   test('does not decode invalid message', () => {
