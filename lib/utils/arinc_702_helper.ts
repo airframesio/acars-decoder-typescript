@@ -641,7 +641,7 @@ function processSummary(decodeResult: DecodeResult, data: string[]) {
   ResultFormatter.engineStart(
     decodeResult,
     DateTimeUtils.convertDayTimeToTod(data[0]),
-  ); // strip off day if present
+  );
   ResultFormatter.startFuel(decodeResult, 100 * parseInt(data[1], 10));
   ResultFormatter.engineStop(
     decodeResult,
