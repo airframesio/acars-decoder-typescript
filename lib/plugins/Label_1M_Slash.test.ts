@@ -51,7 +51,7 @@ describe('Label 1M Slash', () => {
     expect(decodeResult.formatted.items[3].code).toBe('ARWY');
     expect(decodeResult.formatted.items[3].label).toBe('Arrival Runway');
     expect(decodeResult.formatted.items[3].value).toBe('27L');
-    expect(decodeResult.formatted.items[4].type).toBe('epoch');
+    expect(decodeResult.formatted.items[4].type).toBe('time');
     expect(decodeResult.formatted.items[4].code).toBe('ETA');
     expect(decodeResult.formatted.items[4].label).toBe(
       'Estimated Time of Arrival',

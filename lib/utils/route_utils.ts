@@ -52,8 +52,8 @@ export class RouteUtils {
     if (waypoint.offset) {
       s += `[${waypoint.offset.bearing}° ${waypoint.offset.distance}nm]`;
     }
-    if (waypoint.time && waypoint.timeFormat) {
-      s += `@${DateTimeUtils.timestampToString(waypoint.time, waypoint.timeFormat)}`;
+    if (waypoint.time) {
+      s += `@${DateTimeUtils.timestampToString(waypoint.time)}`;
     }
     return s;
   }

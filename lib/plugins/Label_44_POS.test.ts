@@ -33,7 +33,7 @@ describe('Label 44 Preamble POS', () => {
     expect(decodeResult.raw.altitude).toBe(31900);
     expect(decodeResult.raw.departure_icao).toBe('KJFK');
     expect(decodeResult.raw.arrival_icao).toBe('KUZA');
-    expect(decodeResult.raw.time_of_day).toBe(9900);
+    expect(decodeResult.raw.message_timestamp).toBe(9900);
     expect(decodeResult.raw.eta_time).toBe(12420);
     expect(decodeResult.raw.fuel_in_tons).toBe(4.6);
     expect(decodeResult.formatted.items.length).toBe(8);

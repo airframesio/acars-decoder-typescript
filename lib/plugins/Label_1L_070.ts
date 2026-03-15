@@ -44,7 +44,7 @@ export class Label_1L_070 extends DecoderPlugin {
 
     ResultFormatter.departureAirport(decodeResult, parts[0]);
     ResultFormatter.arrivalAirport(decodeResult, parts[1]);
-    ResultFormatter.time_of_day(
+    ResultFormatter.timestamp(
       decodeResult,
       DateTimeUtils.convertHHMMSSToTod(parts[2]),
     );

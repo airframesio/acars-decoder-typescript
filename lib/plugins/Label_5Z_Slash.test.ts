@@ -96,7 +96,7 @@ describe('Label 5Z', () => {
     expect(decodeResult.raw.airline).toBe('United Airlines');
     expect(decodeResult.raw.message_type).toBe('B3');
     expect(decodeResult.raw.day).toBe(14);
-    expect(decodeResult.raw.time_of_day).toBe(55532);
+    expect(decodeResult.raw.message_timestamp).toBe(55532);
     expect(decodeResult.raw.departure_icao).toBe('KIAH');
     expect(decodeResult.raw.arrival_icao).toBe('KBOS');
     expect(decodeResult.raw.arrival_runway).toBe('4R');
@@ -128,7 +128,7 @@ describe('Label 5Z', () => {
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.raw.airline).toBe('United Airlines');
-    expect(decodeResult.raw.time_of_day).toBe(44759);
+    expect(decodeResult.raw.message_timestamp).toBe(44759);
     expect(decodeResult.raw.day).toBe(20);
     expect(decodeResult.raw.departure_icao).toBe('KEWR');
     expect(decodeResult.raw.arrival_icao).toBe('KBNA');
@@ -176,7 +176,7 @@ describe('Label 5Z', () => {
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.raw.airline).toBe('United Airlines');
-    expect(decodeResult.raw.time_of_day).toBe(42840);
+    expect(decodeResult.raw.message_timestamp).toBe(42840);
     expect(decodeResult.raw.day).toBe(22);
     expect(decodeResult.raw.departure_icao).toBe('KBNA');
     expect(decodeResult.raw.arrival_icao).toBe('KEWR');

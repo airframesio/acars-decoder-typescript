@@ -33,7 +33,7 @@ export class Label_2P_FM5 extends DecoderPlugin {
 
       ResultFormatter.departureAirport(decodeResult, header[1]);
       ResultFormatter.arrivalAirport(decodeResult, parts[1]);
-      ResultFormatter.time_of_day(
+      ResultFormatter.timestamp(
         decodeResult,
         DateTimeUtils.convertHHMMSSToTod(parts[2]),
       );

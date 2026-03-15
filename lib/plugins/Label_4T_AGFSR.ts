@@ -42,7 +42,7 @@ export class Label_4T_AGFSR extends DecoderPlugin {
       'IATA',
     );
     ResultFormatter.arrivalAirport(decodeResult, data[3].substring(3), 'IATA');
-    ResultFormatter.time_of_day(
+    ResultFormatter.timestamp(
       decodeResult,
       DateTimeUtils.convertHHMMSSToTod(data[4].substring(0, 4)),
     ); // HHMMZ

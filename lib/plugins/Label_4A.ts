@@ -24,7 +24,7 @@ export class Label_4A extends DecoderPlugin {
     const fields = message.text.split(',');
     if (fields.length === 11) {
       // variant 1
-      ResultFormatter.time_of_day(
+      ResultFormatter.timestamp(
         decodeResult,
         DateTimeUtils.convertHHMMSSToTod(fields[0]),
       );
@@ -44,7 +44,6 @@ export class Label_4A extends DecoderPlugin {
         let wp1: Waypoint = {
           name: fields[0].substring(13).trim(),
           time: DateTimeUtils.convertHHMMSSToTod(fields[1].substring(0, 6)),
-          timeFormat: 'tod',
         };
         ResultFormatter.altitude(
           decodeResult,
@@ -53,14 +52,13 @@ export class Label_4A extends DecoderPlugin {
         let wp2: Waypoint = {
           name: fields[1].substring(9).trim(),
           time: DateTimeUtils.convertHHMMSSToTod(fields[2]),
-          timeFormat: 'tod',
         };
         ResultFormatter.route(decodeResult, { waypoints: [wp1, wp2] });
         ResultFormatter.temperature(decodeResult, fields[3]);
         ResultFormatter.unknownArr(decodeResult, fields.slice(4));
       } else {
         // variant 3
-        ResultFormatter.time_of_day(
+        ResultFormatter.timestamp(
           decodeResult,
           DateTimeUtils.convertHHMMSSToTod(fields[0]),
         );

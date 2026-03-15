@@ -29,7 +29,7 @@ describe('Label_1L 660', () => {
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.raw.position.latitude).toBe(50.736666666666665);
     expect(decodeResult.raw.position.longitude).toBe(5.943333333333333);
-    expect(decodeResult.raw.time_of_day).toBe(36284);
+    expect(decodeResult.raw.message_timestamp).toBe(36284);
     expect(decodeResult.raw.altitude).toBe(35900);
     expect(decodeResult.formatted.items.length).toBe(4);
     expect(decodeResult.formatted.items[0].label).toBe('Aircraft Position');

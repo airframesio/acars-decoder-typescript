@@ -87,7 +87,7 @@ describe('Label 80', () => {
     expect(decodeResult.raw.arrival_icao).toBe('KCHS');
     expect(decodeResult.raw.departure_icao).toBe('KBOS');
     expect(decodeResult.raw.tail).toBe('N3275J');
-    expect(decodeResult.raw.time_of_day).toBe(52565);
+    expect(decodeResult.raw.message_timestamp).toBe(52565);
     expect(decodeResult.raw.position.latitude).toBe(39.501);
     expect(decodeResult.raw.position.longitude).toBe(-75.483);
     expect(decodeResult.raw.altitude).toBe(38007);
@@ -108,7 +108,7 @@ describe('Label 80', () => {
     expect(decodeResult.raw.position.latitude).toBe(39.328);
     expect(decodeResult.raw.position.longitude).toBe(-77.307);
     expect(decodeResult.raw.outside_air_temperature).toBe(47);
-    expect(decodeResult.raw.time_of_day).toBe(52620);
+    expect(decodeResult.raw.message_timestamp).toBe(52620);
     expect(decodeResult.raw.airspeed).toBe(124);
     expect(decodeResult.raw.fuel_on_board).toBe(69);
     expect(decodeResult.formatted.items.length).toBe(5);

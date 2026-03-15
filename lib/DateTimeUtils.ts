@@ -47,6 +47,16 @@ export class DateTimeUtils {
     return tod;
   }
 
+
+  public static convertDayTimeToTod(time: string): number {
+    const d = Number(time.substring(0, 2));
+    const h = Number(time.substring(2, 4));
+    const m = Number(time.substring(4, 6));
+    const s = Number(time.substring(6, 8));
+    const tod = d * 86400 + h * 3600 + m * 60 + s;
+    return tod;
+  }
+
   /**
    *
    * @param time HHMMSS
@@ -72,13 +82,16 @@ export class DateTimeUtils {
    * @param format
    * @returns
    */
-  public static timestampToString(
-    time: number,
-    format: 'tod' | 'epoch',
-  ): string {
+  public static timestampToString(time: number): string {
     const date = new Date(time * 1000);
-    if (format == 'tod') {
+
+    if (time < 86400) {
+      // only time, no date
       return date.toISOString().slice(11, 19);
+    }
+    if (time < 2678400) {
+      // unknown month and date
+      return `YYYY-MM-${date.toISOString().slice(8, 19)}`;
     }
     //strip off millis
     return date.toISOString().slice(0, -5) + 'Z';
