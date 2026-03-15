@@ -1,3 +1,4 @@
+import { decode } from 'node:punycode';
 import { MessageDecoder } from '../MessageDecoder';
 import { Arinc702 } from './ARINC_702';
 
@@ -17,18 +18,25 @@ describe('Label 2A preamble SUM', () => {
     const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
-    expect(decodeResult.decoder.decodeLevel).toBe('partial');
+    expect(decodeResult.decoder.decodeLevel).toBe('full');
     expect(decodeResult.raw.tail).toBe('53147T');
     expect(decodeResult.raw.flight_number).toBe('RCH140');
     expect(decodeResult.raw.message_timestamp).toBe(1772573956);
+    expect(decodeResult.raw.sequence_number).toBe(7);
+    expect(decodeResult.raw.engine_start_time).toBe(317520); //16:12 on day 3
+    expect(decodeResult.raw.start_fuel).toBe(42000);
+    expect(decodeResult.raw.engine_stop_time).toBe(337140); //21:39 on day 3
+    expect(decodeResult.raw.out_time).toBe(318180); //16:23 on day 3
+    expect(decodeResult.raw.out_fuel).toBe(41600);
+    expect(decodeResult.raw.off_time).toBe(318660); // 16:31 on day 3
+    expect(decodeResult.raw.off_fuel).toBe(41300);
+    expect(decodeResult.raw.on_time).toBe(336600); // 21:30 on day 3
+    expect(decodeResult.raw.on_fuel).toBe(21200);
+    expect(decodeResult.raw.in_time).toBe(337140); // 21:39 on day 3
+    expect(decodeResult.raw.in_fuel).toBe(20900);
     expect(decodeResult.raw.version).toBe(3.2);
     expect(decodeResult.raw.checksum).toBe(0x9519);
-    expect(decodeResult.formatted.items.length).toBe(5);
-    // Only check formatted.items.length and description, rest are raw fields
-    // Remaining text may be set by ResultFormatter. Check actual value.
-    expect(decodeResult.remaining.text).toBe(
-      'SM031612,420,032139,031623,416,031631,413,032130,212,032139,209',
-    );
+    expect(decodeResult.formatted.items.length).toBe(16);
   });
 
   test('decodes Inmarsat variant', () => {
@@ -44,10 +52,21 @@ describe('Label 2A preamble SUM', () => {
     expect(decodeResult.raw.mission_number).toBe('PVZF504QP059');
     expect(decodeResult.raw.message_timestamp).toBe(1772664650);
     expect(decodeResult.raw.sequence_number).toBe(196);
+    expect(decodeResult.raw.engine_start_time).toBe(383880); //10:38 on day 4
+    expect(decodeResult.raw.start_fuel).toBe(300400);
+    expect(decodeResult.raw.engine_stop_time).toBe(427800); //21:39 on day 4
+    expect(decodeResult.raw.out_time).toBe(384420); //10:47 on day 4
+    expect(decodeResult.raw.out_fuel).toBe(300000);
+    expect(decodeResult.raw.off_time).toBe(384900); // 10:55 on day 4
+    expect(decodeResult.raw.off_fuel).toBe(298500);
+    expect(decodeResult.raw.on_time).toBe(427500); // 22:45 on day 4
+    expect(decodeResult.raw.on_fuel).toBe(52600);
+    expect(decodeResult.raw.in_time).toBe(427800); // 22:50 on day 4
+    expect(decodeResult.raw.in_fuel).toBe(52100);
     expect(decodeResult.raw.version).toBe(3.2);
     expect(decodeResult.raw.checksum).toBe(0x0e8b);
-    expect(decodeResult.formatted.items.length).toBe(5);
-    expect(decodeResult.remaining.text).toContain('M90');
+    expect(decodeResult.formatted.items.length).toBe(16);
+    expect(decodeResult.remaining.text).toBe('M90/');
   });
 
   test('does not decode invalid message', () => {

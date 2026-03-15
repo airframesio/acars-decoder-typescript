@@ -31,7 +31,7 @@ export class Label_16_TOD extends DecoderPlugin {
       return decodeResult;
     }
 
-    ResultFormatter.time_of_day(decodeResult, time);
+    ResultFormatter.timestamp(decodeResult, time);
     if (fields[1] !== '') {
       ResultFormatter.altitude(decodeResult, Number(fields[1]));
     }

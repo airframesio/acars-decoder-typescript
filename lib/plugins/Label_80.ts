@@ -150,7 +150,7 @@ export class Label_80 extends DecoderPlugin {
         );
         break;
       case 'UTC':
-        ResultFormatter.time_of_day(
+        ResultFormatter.timestamp(
           results,
           DateTimeUtils.convertHHMMSSToTod(val),
         );
@@ -193,7 +193,7 @@ export class Label_80 extends DecoderPlugin {
       CoordinateUtils.decodeStringCoordinates(header[2]),
     );
     ResultFormatter.unknown(results, csvParts[1]);
-    ResultFormatter.time_of_day(
+    ResultFormatter.timestamp(
       results,
       DateTimeUtils.convertHHMMSSToTod(csvParts[2]),
     );

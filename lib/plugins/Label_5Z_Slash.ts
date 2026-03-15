@@ -82,7 +82,7 @@ export class Label_5Z_Slash extends DecoderPlugin {
         ResultFormatter.departureAirport(decodeResult, info[1]);
         ResultFormatter.arrivalAirport(decodeResult, info[2]);
         decodeResult.raw.day = Number(info[3]);
-        ResultFormatter.time_of_day(
+        ResultFormatter.timestamp(
           decodeResult,
           DateTimeUtils.convertHHMMSSToTod(info[4]),
         );
@@ -110,7 +110,7 @@ export class Label_5Z_Slash extends DecoderPlugin {
         ResultFormatter.departureAirport(decodeResult, info[1]);
         ResultFormatter.arrivalAirport(decodeResult, info[2]);
         decodeResult.raw.day = Number(info[3]);
-        ResultFormatter.time_of_day(
+        ResultFormatter.timestamp(
           decodeResult,
           DateTimeUtils.convertHHMMSSToTod(info[4]),
         );
@@ -132,7 +132,7 @@ export class Label_5Z_Slash extends DecoderPlugin {
         ResultFormatter.departureAirport(decodeResult, airports[1]);
         ResultFormatter.arrivalAirport(decodeResult, airports[2]);
         decodeResult.raw.day = Number(airports[3]);
-        ResultFormatter.time_of_day(
+        ResultFormatter.timestamp(
           decodeResult,
           DateTimeUtils.convertHHMMSSToTod(airports[4]),
         );

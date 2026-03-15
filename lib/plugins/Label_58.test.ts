@@ -27,7 +27,7 @@ describe('Label_58', () => {
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.raw.flight_number).toBe('OG0704');
     expect(decodeResult.raw.day).toBe(6);
-    expect(decodeResult.raw.time_of_day).toBe(83382);
+    expect(decodeResult.raw.message_timestamp).toBe(83382);
     expect(decodeResult.raw.position.latitude).toBe(39.214);
     expect(decodeResult.raw.position.longitude).toBe(-76.106);
     expect(decodeResult.raw.altitude).toBe(22683);

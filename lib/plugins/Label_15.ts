@@ -48,13 +48,11 @@ export class Label_15 extends DecoderPlugin {
           ResultFormatter.off(
             decodeResult,
             DateTimeUtils.convertDateTimeToEpoch(hhmm + '00', ddmmyy),
-            'epoch',
           );
         } else {
           ResultFormatter.off(
             decodeResult,
             DateTimeUtils.convertHHMMSSToTod(hhmm),
-            'tod',
           );
         }
         ResultFormatter.unknown(decodeResult, between.substring(26));

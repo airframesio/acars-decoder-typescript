@@ -36,7 +36,7 @@ describe('Label 4A preamble 01', () => {
     expect(decodeResult.formatted.items[0].value).toBe('Descent -> Approach');
     expect(decodeResult.formatted.items[1].code).toBe('CALLSIGN');
     expect(decodeResult.formatted.items[1].value).toBe('VIR41R');
-    expect(decodeResult.formatted.items[2].code).toBe('MSG_TOD');
+    expect(decodeResult.formatted.items[2].code).toBe('TIMESTAMP');
     expect(decodeResult.formatted.items[2].value).toBe('19:02:03');
     expect(decodeResult.formatted.items[3].code).toBe('ORG');
     expect(decodeResult.formatted.items[3].value).toBe('EGLL');

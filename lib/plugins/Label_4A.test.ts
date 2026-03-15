@@ -31,7 +31,7 @@ describe('Label 4A', () => {
     expect(decodeResult.message).toBe(message);
     expect(decodeResult.remaining.text).toBe('RT0,LT0,');
     expect(decodeResult.formatted.items.length).toBe(5);
-    expect(decodeResult.formatted.items[0].code).toBe('MSG_TOD');
+    expect(decodeResult.formatted.items[0].code).toBe('TIMESTAMP');
     expect(decodeResult.formatted.items[0].value).toBe('06:32:00');
     expect(decodeResult.formatted.items[1].code).toBe('TAIL');
     expect(decodeResult.formatted.items[1].value).toBe('N343FR');
@@ -55,7 +55,7 @@ describe('Label 4A', () => {
     expect(decodeResult.message).toBe(message);
     expect(decodeResult.remaining.text).toBe('RT0,LT1,');
     expect(decodeResult.formatted.items.length).toBe(4);
-    expect(decodeResult.formatted.items[0].code).toBe('MSG_TOD');
+    expect(decodeResult.formatted.items[0].code).toBe('TIMESTAMP');
     expect(decodeResult.formatted.items[0].value).toBe('10:16:06');
     expect(decodeResult.formatted.items[1].code).toBe('TAIL');
     expect(decodeResult.formatted.items[1].value).toBe('N317FR');
@@ -102,7 +102,7 @@ describe('Label 4A', () => {
     expect(decodeResult.message).toBe(message);
     expect(decodeResult.remaining.text).toBe(' 138');
     expect(decodeResult.formatted.items.length).toBe(4);
-    expect(decodeResult.formatted.items[0].code).toBe('MSG_TOD');
+    expect(decodeResult.formatted.items[0].code).toBe('TIMESTAMP');
     expect(decodeResult.formatted.items[0].value).toBe('12:44:42');
     expect(decodeResult.formatted.items[1].code).toBe('ETA');
     expect(decodeResult.formatted.items[1].value).toBe('13:20:00');

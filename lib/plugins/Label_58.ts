@@ -24,7 +24,7 @@ export class Label_58 extends DecoderPlugin {
     if (data.length === 8) {
       ResultFormatter.flightNumber(decodeResult, data[0]);
       ResultFormatter.day(decodeResult, Number(data[1]));
-      ResultFormatter.time_of_day(
+      ResultFormatter.timestamp(
         decodeResult,
         DateTimeUtils.convertHHMMSSToTod(data[2]),
       );

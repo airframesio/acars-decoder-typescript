@@ -36,7 +36,7 @@ export class Label_H1_Paren extends DecoderPlugin {
         latitude: parseLat(match.groups.lat),
         longitude: parseLon(match.groups.lon),
       });
-      ResultFormatter.time_of_day(
+      ResultFormatter.timestamp(
         decodeResult,
         DateTimeUtils.convertHHMMSSToTod(match.groups.timestamp),
       );

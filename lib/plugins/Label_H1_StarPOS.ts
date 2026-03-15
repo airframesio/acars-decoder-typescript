@@ -33,7 +33,7 @@ export class Label_H1_StarPOS extends DecoderPlugin {
 
     ResultFormatter.month(decodeResult, Number(msg.substring(4, 6)));
     ResultFormatter.day(decodeResult, Number(msg.substring(6, 8)));
-    ResultFormatter.time_of_day(
+    ResultFormatter.timestamp(
       decodeResult,
       DateTimeUtils.convertHHMMSSToTod(msg.substring(8, 12)),
     );

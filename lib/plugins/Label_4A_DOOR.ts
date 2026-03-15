@@ -27,7 +27,7 @@ export class Label_4A_DOOR extends DecoderPlugin {
         fields[0].split('/')[1],
         fields[1],
       );
-      ResultFormatter.time_of_day(
+      ResultFormatter.timestamp(
         decodeResult,
         DateTimeUtils.convertHHMMSSToTod(fields[2] + '00'),
       );

@@ -29,7 +29,7 @@ describe('Label_1L 070', () => {
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.raw.departure_icao).toBe('LOWW');
     expect(decodeResult.raw.arrival_icao).toBe('KEWR');
-    expect(decodeResult.raw.time_of_day).toBe(34320);
+    expect(decodeResult.raw.message_timestamp).toBe(34320);
     expect(decodeResult.raw.eta_time).toBe(63840);
     expect(decodeResult.raw.position.latitude).toBe(49.223);
     expect(decodeResult.raw.position.longitude).toBe(12.038);

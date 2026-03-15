@@ -97,7 +97,7 @@ describe('Label 16 Time of Day', () => {
     expect(decodeResult.decoder.name).toBe('label-16-tod');
     expect(decodeResult.formatted.description).toBe('Position Report');
     expect(decodeResult.message).toBe(message);
-    expect(decodeResult.raw.time_of_day).toBe(855);
+    expect(decodeResult.raw.message_timestamp).toBe(855);
     expect(decodeResult.raw.position.latitude).toBeCloseTo(38.3595, 3);
     expect(decodeResult.raw.position.longitude).toBeCloseTo(-78.5888, 3);
     expect(decodeResult.raw.altitude).toBe(20274);

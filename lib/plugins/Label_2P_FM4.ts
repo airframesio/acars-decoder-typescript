@@ -37,7 +37,7 @@ export class Label_2P_FM4 extends DecoderPlugin {
       ResultFormatter.departureAirport(decodeResult, header[1]);
       ResultFormatter.arrivalAirport(decodeResult, parts[1]);
       ResultFormatter.day(decodeResult, Number(parts[2].substring(0, 2)));
-      ResultFormatter.time_of_day(
+      ResultFormatter.timestamp(
         decodeResult,
         DateTimeUtils.convertHHMMSSToTod(parts[2].substring(2)),
       );

@@ -23,16 +23,8 @@ export interface Waypoint {
   longitude?: number;
   /**
    * time of arrival. If in future, it is an ETA.
-   *
-   * if set, timeFormat must be provided
    */
   time?: number;
-  /**
-   * tod = 'Time of Day. seoconds since midnight', epoch = 'unix time. seconds since Jan 1, 1970 UTC'
-   *
-   * if set, time must be provided
-   */
-  timeFormat?: 'tod' | 'epoch';
 
   /**
    * offset from the actual waypoint

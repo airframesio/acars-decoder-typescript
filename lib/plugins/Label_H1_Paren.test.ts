@@ -30,7 +30,7 @@ describe('Label H1 (messages)', () => {
     expect(decodeResult.raw.flight_number).toBe('KLM296');
     expect(decodeResult.raw.position.latitude).toBeCloseTo(39.183, 3);
     expect(decodeResult.raw.position.longitude).toBeCloseTo(-76.0, 3);
-    expect(decodeResult.raw.time_of_day).toBe(85332);
+    expect(decodeResult.raw.message_timestamp).toBe(85332);
     expect(decodeResult.raw.altitude).toBe(25000);
     expect(decodeResult.raw.fuel_on_board).toBe(37.0);
     expect(decodeResult.raw.mach).toBe(0.69);

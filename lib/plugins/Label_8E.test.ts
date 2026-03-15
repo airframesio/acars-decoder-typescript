@@ -31,7 +31,7 @@ describe('Label 8E', () => {
     expect(decodeResult.message).toBe(message);
     expect(decodeResult.raw.arrival_icao).toBe('EGSS');
     expect(decodeResult.formatted.items.length).toBe(2);
-    expect(decodeResult.formatted.items[0].type).toBe('time_of_day');
+    expect(decodeResult.formatted.items[0].type).toBe('time');
     expect(decodeResult.formatted.items[0].code).toBe('ETA');
     expect(decodeResult.formatted.items[0].label).toBe(
       'Estimated Time of Arrival',

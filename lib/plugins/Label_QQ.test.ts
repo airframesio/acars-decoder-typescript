@@ -40,7 +40,7 @@ describe('Label QQ', () => {
     expect(decodeResult.formatted.items[1].code).toBe('DST');
     expect(decodeResult.formatted.items[1].label).toBe('Destination');
     expect(decodeResult.formatted.items[1].value).toBe('KLAS');
-    expect(decodeResult.formatted.items[2].type).toBe('time_of_day');
+    expect(decodeResult.formatted.items[2].type).toBe('time');
     expect(decodeResult.formatted.items[2].code).toBe('OFF');
     expect(decodeResult.formatted.items[2].label).toBe('Takeoff Time');
     expect(decodeResult.formatted.items[2].value).toBe('00:25:43');
@@ -79,7 +79,7 @@ describe('Label QQ', () => {
     expect(decodeResult.formatted.items[1].code).toBe('DST');
     expect(decodeResult.formatted.items[1].label).toBe('Destination');
     expect(decodeResult.formatted.items[1].value).toBe('KLAX');
-    expect(decodeResult.formatted.items[2].type).toBe('time_of_day');
+    expect(decodeResult.formatted.items[2].type).toBe('time');
     expect(decodeResult.formatted.items[2].code).toBe('OFF');
     expect(decodeResult.formatted.items[2].label).toBe('Takeoff Time');
     expect(decodeResult.formatted.items[2].value).toBe('00:04:44');
@@ -111,7 +111,7 @@ describe('Label QQ', () => {
     expect(decodeResult.formatted.items[1].code).toBe('DST');
     expect(decodeResult.formatted.items[1].label).toBe('Destination');
     expect(decodeResult.formatted.items[1].value).toBe('KMEM');
-    expect(decodeResult.formatted.items[2].type).toBe('time_of_day');
+    expect(decodeResult.formatted.items[2].type).toBe('time');
     expect(decodeResult.formatted.items[2].code).toBe('OFF');
     expect(decodeResult.formatted.items[2].label).toBe('Takeoff Time');
     expect(decodeResult.formatted.items[2].value).toBe('00:58:00');

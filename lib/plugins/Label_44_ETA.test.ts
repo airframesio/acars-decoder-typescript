@@ -33,7 +33,7 @@ describe('Label 44 Preamble ETA', () => {
     expect(decodeResult.raw.arrival_icao).toBe('KBWI');
     expect(decodeResult.raw.month).toBe(11);
     expect(decodeResult.raw.day).toBe(7);
-    expect(decodeResult.raw.time_of_day).toBe(4980);
+    expect(decodeResult.raw.message_timestamp).toBe(4980);
     expect(decodeResult.raw.eta_time).toBe(7680);
     expect(decodeResult.formatted.items.length).toBe(9);
     expect(decodeResult.formatted.items[0].label).toBe('Aircraft Position');

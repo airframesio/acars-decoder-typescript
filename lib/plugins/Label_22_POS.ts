@@ -43,7 +43,7 @@ export class Label_22_POS extends DecoderPlugin {
       longitude: CoordinateUtils.getDirection(fields[0][8]) * lon,
     });
 
-    ResultFormatter.time_of_day(
+    ResultFormatter.timestamp(
       decodeResult,
       DateTimeUtils.convertHHMMSSToTod(fields[2]),
     );
