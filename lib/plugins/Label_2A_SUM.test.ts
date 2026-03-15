@@ -54,7 +54,7 @@ describe('Label 2A preamble SUM', () => {
     expect(decodeResult.raw.sequence_number).toBe(196);
     expect(decodeResult.raw.engine_start_time).toBe(383880); //10:38 on day 4
     expect(decodeResult.raw.start_fuel).toBe(300400);
-    expect(decodeResult.raw.engine_stop_time).toBe(427800); //21:39 on day 4
+    expect(decodeResult.raw.engine_stop_time).toBe(427800); //22:50 on day 4
     expect(decodeResult.raw.out_time).toBe(384420); //10:47 on day 4
     expect(decodeResult.raw.out_fuel).toBe(300000);
     expect(decodeResult.raw.off_time).toBe(384900); // 10:55 on day 4
