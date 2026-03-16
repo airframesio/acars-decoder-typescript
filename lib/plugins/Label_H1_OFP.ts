@@ -59,7 +59,7 @@ export class Label_H1_OFP extends DecoderPlugin {
     }
 
     if (fpl.route) {
-      ResultFormatter.flightPlan(decodeResult, fpl.route);
+      ResultFormatter.route(decodeResult, fpl.route);
     }
 
     if (fpl.otherInfo.REG) {

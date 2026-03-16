@@ -38,6 +38,10 @@ describe('Label H1 M-Series Position Report', () => {
     expect(decodeResult.raw.position.longitude).toBeCloseTo(-169.982, 4);
     expect(decodeResult.raw.altitude).toBe(35003);
     expect(decodeResult.raw.heading).toBe(290);
+    expect(decodeResult.formatted.items.length).toBe(8);
+    expect(decodeResult.remaining.text).toBe(
+      '  35.1, 44100,S05W169,S02W167,1645',
+    );
   });
 
   test('decodes M87 position report', () => {
@@ -54,6 +58,10 @@ describe('Label H1 M-Series Position Report', () => {
     expect(decodeResult.raw.position.longitude).toBeCloseTo(-166.0643, 4);
     expect(decodeResult.raw.altitude).toBe(36000);
     expect(decodeResult.raw.heading).toBe(282);
+    expect(decodeResult.formatted.items.length).toBe(8);
+    expect(decodeResult.remaining.text).toBe(
+      '  34.1, 40200,S00W166,N03W162,1739',
+    );
   });
 
   test('decodes M89 position report', () => {
@@ -68,6 +76,10 @@ describe('Label H1 M-Series Position Report', () => {
     expect(decodeResult.raw.position.longitude).toBeCloseTo(-158.1146, 4);
     expect(decodeResult.raw.altitude).toBe(37001);
     expect(decodeResult.raw.heading).toBe(275);
+    expect(decodeResult.formatted.items.length).toBe(8);
+    expect(decodeResult.remaining.text).toBe(
+      '  33.5, 32700,N07W158,N11W153,1900',
+    );
   });
 
   test('rejects invalid message', () => {

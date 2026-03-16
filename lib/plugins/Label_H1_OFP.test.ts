@@ -46,7 +46,15 @@ describe('Label H1 OFP (ICAO Flight Plan)', () => {
     expect(decodeResult.raw.arrival_icao).toBe('KLAX');
     expect(decodeResult.raw.alternate_icao).toBe('KSFO');
     expect(decodeResult.raw.tail).toBe('B2036');
-    expect(decodeResult.raw.flight_plan).toBe('DCT ENI DCT OAK DCT BURGL IRNMN2');
+    expect(decodeResult.raw.route.waypoints).toStrictEqual([
+      { name: 'DCT' },
+      { name: 'ENI' },
+      { name: 'DCT' },
+      { name: 'OAK' },
+      { name: 'DCT' },
+      { name: 'BURGL' },
+      { name: 'IRNMN2' },
+    ]);
 
     // Check formatted items
     const items = decodeResult.formatted.items;
@@ -55,8 +63,8 @@ describe('Label H1 OFP (ICAO Flight Plan)', () => {
     expect(items.find((i) => i.code === 'ORG')!.value).toBe('VESPA');
     expect(items.find((i) => i.code === 'DST')!.value).toBe('KLAX');
     expect(items.find((i) => i.code === 'ALT_DST')!.value).toBe('KSFO');
-    expect(items.find((i) => i.code === 'FPN')!.value).toBe(
-      'DCT ENI DCT OAK DCT BURGL IRNMN2',
+    expect(items.find((i) => i.code === 'ROUTE')!.value).toBe(
+      'DCT > ENI > DCT > OAK > DCT > BURGL > IRNMN2',
     );
     expect(items.find((i) => i.code === 'TAIL')!.value).toBe('B2036');
     expect(items.find((i) => i.code === 'RULES')!.value).toBe('IFR');
@@ -78,7 +86,13 @@ describe('Label H1 OFP (ICAO Flight Plan)', () => {
     expect(decodeResult.raw.arrival_icao).toBe('KLAX');
     expect(decodeResult.raw.alternate_icao).toBe('KONT');
     expect(decodeResult.raw.tail).toBe('N22992');
-    expect(decodeResult.raw.flight_plan).toBe('DCT PORTE J584 ENI DCT');
+    expect(decodeResult.raw.route.waypoints).toStrictEqual([
+      { name: 'DCT' },
+      { name: 'PORTE' },
+      { name: 'J584' },
+      { name: 'ENI' },
+      { name: 'DCT' },
+    ]);
   });
 
   test('does not decode message without FPL block', () => {

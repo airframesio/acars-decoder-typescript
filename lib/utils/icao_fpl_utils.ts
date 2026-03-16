@@ -10,6 +10,8 @@
  *   -otherInfo)
  */
 
+import { Route } from '../types/route';
+
 export interface IcaoFlightPlan {
   callsign: string;
   flightRules: string;
@@ -22,7 +24,7 @@ export interface IcaoFlightPlan {
   departureTime: string;
   cruiseSpeed: string;
   cruiseLevel: string;
-  route: string;
+  route: Route;
   destination: string;
   eet: string;
   alternates: string[];
@@ -117,13 +119,19 @@ export function parseIcaoFpl(text: string): IcaoFlightPlan | null {
   // Section 6: cruise speed/level + route (e.g., "N0482F350 DCT ENI DCT OAK DCT BURGL IRNMN2")
   const speedRouteField = parts[5].trim();
   // Speed is first token like N0482 or M084, level follows like F350 or S1190
-  const speedMatch = speedRouteField.match(/^([NKM]\d{3,4})([FAVMS]\d{3,4})\s*(.*)/);
+  const speedMatch = speedRouteField.match(
+    /^([NKM]\d{3,4})([FAVMS]\d{3,4})\s*(.*)/,
+  );
   if (!speedMatch) {
     return null;
   }
   const cruiseSpeed = speedMatch[1];
   const cruiseLevel = speedMatch[2];
-  const route = speedMatch[3] || '';
+  const route = {
+    waypoints: speedMatch[3].split(' ').map((s) => ({
+      name: s,
+    })),
+  };
 
   // Section 7: destination + EET + alternates (e.g., "KLAX0117 KSFO")
   const destField = parts[6].trim();
