@@ -27,7 +27,17 @@ describe('ICAO FPL Parser', () => {
     expect(result!.departureTime).toBe('2354');
     expect(result!.cruiseSpeed).toBe('N0482');
     expect(result!.cruiseLevel).toBe('F350');
-    expect(result!.route).toBe('DCT ENI DCT OAK DCT BURGL IRNMN2');
+    expect(result!.route).toStrictEqual({
+      waypoints: [
+        { name: 'DCT' },
+        { name: 'ENI' },
+        { name: 'DCT' },
+        { name: 'OAK' },
+        { name: 'DCT' },
+        { name: 'BURGL' },
+        { name: 'IRNMN2' },
+      ],
+    });
     expect(result!.destination).toBe('KLAX');
     expect(result!.eet).toBe('0117');
     expect(result!.alternates).toEqual(['KSFO']);
@@ -61,7 +71,15 @@ describe('ICAO FPL Parser', () => {
     expect(result!.departureTime).toBe('0100');
     expect(result!.cruiseSpeed).toBe('N0487');
     expect(result!.cruiseLevel).toBe('F370');
-    expect(result!.route).toBe('DCT PORTE J584 ENI DCT');
+    expect(result!.route).toStrictEqual({
+      waypoints: [
+        { name: 'DCT' },
+        { name: 'PORTE' },
+        { name: 'J584' },
+        { name: 'ENI' },
+        { name: 'DCT' },
+      ],
+    });
     expect(result!.destination).toBe('KLAX');
     expect(result!.eet).toBe('0055');
     expect(result!.alternates).toEqual(['KONT']);
