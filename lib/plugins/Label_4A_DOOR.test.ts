@@ -33,7 +33,7 @@ describe('Label 4A preamble DOOR', () => {
     expect(decodeResult.formatted.items.length).toBe(2);
     expect(decodeResult.formatted.items[0].code).toBe('DOOR');
     expect(decodeResult.formatted.items[0].value).toBe('FWDENTRY CLSD');
-    expect(decodeResult.formatted.items[1].code).toBe('MSG_TOD');
+    expect(decodeResult.formatted.items[1].code).toBe('TIMESTAMP');
     expect(decodeResult.formatted.items[1].value).toBe('14:40:00');
   });
 

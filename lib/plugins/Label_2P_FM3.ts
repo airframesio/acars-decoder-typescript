@@ -38,12 +38,12 @@ export class Label_2P_FM3 extends DecoderPlugin {
       }
 
       if (header[1].length === 4) {
-        ResultFormatter.time_of_day(
+        ResultFormatter.timestamp(
           decodeResult,
           DateTimeUtils.convertHHMMSSToTod(header[1]),
         );
       } else {
-        ResultFormatter.time_of_day(
+        ResultFormatter.timestamp(
           decodeResult,
           DateTimeUtils.convertHHMMSSToTod(header[1]),
         );

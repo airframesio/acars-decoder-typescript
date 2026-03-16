@@ -28,7 +28,7 @@ export class Label_21_POS extends DecoderPlugin {
     if (fields.length == 9) {
       // POSN 37.550W 76.436,  98,110800,23961,25820,  65,-23,114212,KRDU
       processPosition(decodeResult, fields[0].trim());
-      ResultFormatter.time_of_day(
+      ResultFormatter.timestamp(
         decodeResult,
         DateTimeUtils.convertHHMMSSToTod(fields[2]),
       );

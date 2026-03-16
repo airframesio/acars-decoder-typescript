@@ -168,28 +168,14 @@ export class ResultFormatter {
     });
   }
 
-  static eta(
-    decodeResult: DecodeResult,
-    time: number,
-    type: 'tod' | 'epoch' = 'tod',
-  ) {
-    if (type === 'tod') {
-      decodeResult.raw.eta_time = time;
-      decodeResult.formatted.items.push({
-        type: 'time_of_day',
-        code: 'ETA',
-        label: 'Estimated Time of Arrival',
-        value: DateTimeUtils.timestampToString(time, 'tod'),
-      });
-    } else {
-      decodeResult.raw.eta_date = time;
-      decodeResult.formatted.items.push({
-        type: 'epoch',
-        code: 'ETA',
-        label: 'Estimated Time of Arrival',
-        value: DateTimeUtils.timestampToString(time, 'epoch'),
-      });
-    }
+  static eta(decodeResult: DecodeResult, time: number) {
+    decodeResult.raw.eta_time = time;
+    decodeResult.formatted.items.push({
+      type: 'time',
+      code: 'ETA',
+      label: 'Estimated Time of Arrival',
+      value: DateTimeUtils.timestampToString(time),
+    });
   }
 
   static arrivalRunway(decodeResult: DecodeResult, value: string) {
@@ -236,9 +222,59 @@ export class ResultFormatter {
     decodeResult.raw.fuel_remaining = value;
     decodeResult.formatted.items.push({
       type: 'fuel_remaining',
-      code: 'FUEL',
+      code: ' FUEL_REM',
       label: 'Fuel Remaining',
       value: decodeResult.raw.fuel_remaining.toString(),
+    });
+  }
+
+  static outFuel(decodeResult: DecodeResult, value: number) {
+    decodeResult.raw.out_fuel = value;
+    decodeResult.formatted.items.push({
+      type: 'lbs',
+      code: 'FUEL_OUT',
+      label: 'Out of Gate Fuel',
+      value: decodeResult.raw.out_fuel.toString() + ' lbs',
+    });
+  }
+
+  static offFuel(decodeResult: DecodeResult, value: number) {
+    decodeResult.raw.off_fuel = value;
+    decodeResult.formatted.items.push({
+      type: 'lbs',
+      code: 'FUEL_OFF',
+      label: 'Takeoff Fuel',
+      value: decodeResult.raw.off_fuel.toString() + ' lbs',
+    });
+  }
+
+  static onFuel(decodeResult: DecodeResult, value: number) {
+    decodeResult.raw.on_fuel = value;
+    decodeResult.formatted.items.push({
+      type: 'lbs',
+      code: 'FUEL_ON',
+      label: 'Landing Fuel',
+      value: decodeResult.raw.on_fuel.toString() + ' lbs',
+    });
+  }
+
+  static inFuel(decodeResult: DecodeResult, value: number) {
+    decodeResult.raw.in_fuel = value;
+    decodeResult.formatted.items.push({
+      type: 'lbs',
+      code: 'FUEL_IN',
+      label: 'In Gate Fuel',
+      value: decodeResult.raw.in_fuel.toString() + ' lbs',
+    });
+  }
+
+  static startFuel(decodeResult: DecodeResult, value: number) {
+    decodeResult.raw.start_fuel = value;
+    decodeResult.formatted.items.push({
+      type: 'lbs',
+      code: 'FUEL_START',
+      label: 'Start Fuel',
+      value: decodeResult.raw.start_fuel.toString() + ' lbs',
     });
   }
 
@@ -345,64 +381,59 @@ export class ResultFormatter {
   static out(decodeResult: DecodeResult, time: number) {
     decodeResult.raw.out_time = time;
     decodeResult.formatted.items.push({
-      type: 'time_of_day',
+      type: 'time',
       code: 'OUT',
       label: 'Out of Gate Time',
-      value: DateTimeUtils.timestampToString(time, 'tod'),
+      value: DateTimeUtils.timestampToString(time),
     });
   }
 
-  static off(
-    decodeResult: DecodeResult,
-    time: number,
-    type: 'tod' | 'epoch' = 'tod',
-  ) {
-    if (type === 'tod') {
-      decodeResult.raw.off_time = time;
-      decodeResult.formatted.items.push({
-        type: 'time_of_day',
-        code: 'OFF',
-        label: 'Takeoff Time',
-        value: DateTimeUtils.timestampToString(time, 'tod'),
-      });
-    } else {
-      decodeResult.raw.off_date = time;
-      decodeResult.formatted.items.push({
-        type: 'epoch',
-        code: 'OFF',
-        label: 'Takeoff Time',
-        value: DateTimeUtils.timestampToString(time, 'epoch'),
-      });
-    }
+  static off(decodeResult: DecodeResult, time: number) {
+    decodeResult.raw.off_time = time;
+    decodeResult.formatted.items.push({
+      type: 'time',
+      code: 'OFF',
+      label: 'Takeoff Time',
+      value: DateTimeUtils.timestampToString(time),
+    });
   }
 
   static on(decodeResult: DecodeResult, time: number) {
     decodeResult.raw.on_time = time;
     decodeResult.formatted.items.push({
-      type: 'time_of_day',
+      type: 'time',
       code: 'ON',
       label: 'Landing Time',
-      value: DateTimeUtils.timestampToString(time, 'tod'),
+      value: DateTimeUtils.timestampToString(time),
     });
   }
 
   static in(decodeResult: DecodeResult, time: number) {
     decodeResult.raw.in_time = time;
     decodeResult.formatted.items.push({
-      type: 'time_of_day',
+      type: 'time',
       code: 'IN',
       label: 'In Gate Time',
-      value: DateTimeUtils.timestampToString(time, 'tod'),
+      value: DateTimeUtils.timestampToString(time),
     });
   }
 
-  static time_of_day(decodeResult: DecodeResult, time: number) {
-    decodeResult.raw.time_of_day = time;
+  static engineStart(decodeResult: DecodeResult, time: number) {
+    decodeResult.raw.engine_start_time = time;
     decodeResult.formatted.items.push({
-      type: 'time_of_day',
-      code: 'MSG_TOD',
-      label: 'Message Timestamp',
-      value: DateTimeUtils.timestampToString(time, 'tod'),
+      type: 'time',
+      code: 'ENG_START',
+      label: 'Engine Start Time',
+      value: DateTimeUtils.timestampToString(time),
+    });
+  }
+  static engineStop(decodeResult: DecodeResult, time: number) {
+    decodeResult.raw.engine_stop_time = time;
+    decodeResult.formatted.items.push({
+      type: 'time',
+      code: 'ENG_STOP',
+      label: 'Engine Stop Time',
+      value: DateTimeUtils.timestampToString(time),
     });
   }
 
@@ -621,10 +652,10 @@ export class ResultFormatter {
   static timestamp(decodeResult: DecodeResult, value: number) {
     decodeResult.raw.message_timestamp = value;
     decodeResult.formatted.items.push({
-      type: 'epoch',
+      type: 'time',
       code: 'TIMESTAMP',
       label: 'Message Timestamp',
-      value: DateTimeUtils.timestampToString(value, 'epoch'),
+      value: DateTimeUtils.timestampToString(value),
     });
   }
 

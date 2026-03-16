@@ -26,7 +26,7 @@ export class Label_4A_01 extends DecoderPlugin {
     if (rgx) {
       ResultFormatter.state_change(decodeResult, rgx[1], rgx[2]);
       ResultFormatter.callsign(decodeResult, rgx[3]);
-      ResultFormatter.time_of_day(
+      ResultFormatter.timestamp(
         decodeResult,
         DateTimeUtils.convertHHMMSSToTod(rgx[4] + '00'),
       );

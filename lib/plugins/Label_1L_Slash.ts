@@ -49,7 +49,7 @@ export class Label_1L_Slash extends DecoderPlugin {
     ResultFormatter.position(decodeResult, position);
     const utc = data.get('UTC');
     if (utc) {
-      ResultFormatter.time_of_day(
+      ResultFormatter.timestamp(
         decodeResult,
         DateTimeUtils.convertHHMMSSToTod(utc),
       );

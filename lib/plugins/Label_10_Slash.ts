@@ -52,12 +52,10 @@ export class Label_10_Slash extends DecoderPlugin {
       {
         name: parts[12],
         time: DateTimeUtils.convertHHMMSSToTod(parts[13]),
-        timeFormat: 'tod',
       },
       {
         name: parts[14],
         time: DateTimeUtils.convertHHMMSSToTod(parts[15]),
-        timeFormat: 'tod',
       },
     ];
     ResultFormatter.route(decodeResult, { waypoints: waypoints });

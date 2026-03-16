@@ -30,7 +30,7 @@ describe('Label_1L Slash', () => {
     expect(decodeResult.message).toBe(message);
     expect(decodeResult.raw.position.latitude).toBe(39.126);
     expect(decodeResult.raw.position.longitude).toBe(-77.358);
-    expect(decodeResult.raw.time_of_day).toBe(31928);
+    expect(decodeResult.raw.message_timestamp).toBe(31928);
     expect(decodeResult.raw.fuel_on_board).toBe(8.2);
     expect(decodeResult.raw.altitude).toBe(3997);
     expect(decodeResult.raw.eta_time).toBe(32580);

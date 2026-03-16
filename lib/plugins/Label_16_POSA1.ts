@@ -43,8 +43,8 @@ export class Label_16_POSA1 extends DecoderPlugin {
     ResultFormatter.unknownArr(decodeResult, fields.slice(6), ',');
     ResultFormatter.route(decodeResult, {
       waypoints: [
-        { name: waypoint, time: time, timeFormat: 'tod' },
-        { name: nextWaypoint, time: nextTime, timeFormat: 'tod' },
+        { name: waypoint, time: time },
+        { name: nextWaypoint, time: nextTime },
       ],
     });
     decodeResult.decoded = true;

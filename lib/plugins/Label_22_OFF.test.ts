@@ -28,7 +28,7 @@ describe('Label 22 OFF', () => {
     expect(decodeResult.raw.flight_number).toBe('YX3661');
     expect(decodeResult.raw.departure_day).toBe(25);
     expect(decodeResult.raw.arrival_day).toBe(25);
-    expect(decodeResult.raw.time_of_day).toBe(61920);
+    expect(decodeResult.raw.message_timestamp).toBe(61920);
     expect(decodeResult.raw.off_time).toBe(61927);
     expect(decodeResult.raw.departure_icao).toBe('KIAD');
     expect(decodeResult.raw.arrival_icao).toBe('KPWM');
@@ -58,7 +58,7 @@ describe('Label 22 OFF', () => {
     expect(decodeResult.raw.position.latitude).toBe(38.946666666666665);
     expect(decodeResult.raw.position.longitude).toBe(-77.435);
     expect(decodeResult.raw.day).toBe(25);
-    expect(decodeResult.raw.time_of_day).toBe(42720);
+    expect(decodeResult.raw.message_timestamp).toBe(42720);
     expect(decodeResult.raw.off_time).toBe(42720);
     expect(decodeResult.raw.departure_icao).toBe('KIAD');
     expect(decodeResult.raw.arrival_icao).toBe('EPRZ');

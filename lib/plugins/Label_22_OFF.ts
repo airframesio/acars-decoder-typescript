@@ -40,7 +40,7 @@ export class Label_22_OFF extends DecoderPlugin {
         decodeResult,
         Number(fields[1].substring(2, 4)),
       ); // arrival day
-      ResultFormatter.time_of_day(
+      ResultFormatter.timestamp(
         decodeResult,
         DateTimeUtils.convertHHMMSSToTod(fields[1].substring(4, 8)),
       );
@@ -93,7 +93,7 @@ export class Label_22_OFF extends DecoderPlugin {
         ResultFormatter.position(decodeResult, position);
       }
       ResultFormatter.day(decodeResult, Number(fields[1].substring(14, 16)));
-      ResultFormatter.time_of_day(
+      ResultFormatter.timestamp(
         decodeResult,
         DateTimeUtils.convertHHMMSSToTod(fields[1].substring(16, 20)),
       );

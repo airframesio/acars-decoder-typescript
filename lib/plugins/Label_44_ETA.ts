@@ -38,7 +38,7 @@ export class Label_44_ETA extends DecoderPlugin {
 
       ResultFormatter.month(decodeResult, Number(data[5].substring(0, 2)));
       ResultFormatter.day(decodeResult, Number(data[5].substring(2, 4)));
-      ResultFormatter.time_of_day(
+      ResultFormatter.timestamp(
         decodeResult,
         DateTimeUtils.convertHHMMSSToTod(data[6]),
       );

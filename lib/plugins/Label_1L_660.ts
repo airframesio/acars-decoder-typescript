@@ -49,7 +49,7 @@ export class Label_1L_660 extends DecoderPlugin {
       ResultFormatter.position(decodeResult, position);
     }
     const hhmmss = parts[1].substring(0, 6);
-    ResultFormatter.time_of_day(
+    ResultFormatter.timestamp(
       decodeResult,
       DateTimeUtils.convertHHMMSSToTod(hhmmss),
     );

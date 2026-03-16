@@ -51,7 +51,6 @@ export class Label_1M_Slash extends DecoderPlugin {
             yymmdd.substring(2, 4) +
             yymmdd.substring(0, 2),
         ),
-        'epoch',
       );
     }
 

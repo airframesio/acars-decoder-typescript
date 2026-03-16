@@ -21,7 +21,7 @@ export class Label_4A_DIS extends DecoderPlugin {
 
     decodeResult.decoded = true;
     const fields = message.text.split(',');
-    ResultFormatter.time_of_day(
+    ResultFormatter.timestamp(
       decodeResult,
       DateTimeUtils.convertHHMMSSToTod(fields[1].substring(2) + '00'),
     );

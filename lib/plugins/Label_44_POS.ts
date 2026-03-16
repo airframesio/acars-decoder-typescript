@@ -52,7 +52,7 @@ export class Label_44_POS extends DecoderPlugin {
         decodeResult,
         Number(results.groups.current_date.substring(2, 4)),
       );
-      ResultFormatter.time_of_day(
+      ResultFormatter.timestamp(
         decodeResult,
         DateTimeUtils.convertHHMMSSToTod(results.groups.current_time + '00'),
       );

@@ -51,7 +51,7 @@ export class Label_12_POS extends DecoderPlugin {
         ),
     });
     ResultFormatter.unknown(decodeResult, data[1]);
-    ResultFormatter.time_of_day(
+    ResultFormatter.timestamp(
       decodeResult,
       DateTimeUtils.convertHHMMSSToTod(data[2]),
     );

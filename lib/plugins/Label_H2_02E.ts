@@ -97,7 +97,6 @@ export class Label_H2_02E extends DecoderPlugin {
         latitude: pos.latitude,
         longitude: pos.longitude,
         time: tod,
-        timeFormat: 'tod',
       },
       flightLevel: flightLevel,
       windDirection: windDirection,

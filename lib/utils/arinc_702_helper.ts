@@ -130,6 +130,9 @@ export class Arinc702Helper {
         case 'RW':
           processRunway(decodeResult, data.split(':'));
           break;
+        case 'SM':
+          processSummary(decodeResult, data.split(','));
+          break;
         case 'SN':
           decodeResult.raw.serial_number = data;
           break;
@@ -152,8 +155,6 @@ export class Arinc702Helper {
           processWeatherQuery(decodeResult, data.split(':'));
           break;
         default:
-          console.log(`Unknown IEI ${iei} in H1 message, data: ${data}`);
-          console.log(`Remaing text: ${decodeResult.remaining.text}`);
           ResultFormatter.unknown(decodeResult, fields[i], '/');
       }
     }
@@ -559,15 +560,12 @@ function processRoute(
   const nextTime = date
     ? DateTimeUtils.convertDateTimeToEpoch(eta, date)
     : DateTimeUtils.convertHHMMSSToTod(eta);
-  const timeFormat = date ? 'epoch' : 'tod';
 
   const lastWaypoint = RouteUtils.getWaypoint(last);
   lastWaypoint.time = lastTime;
-  lastWaypoint.timeFormat = timeFormat;
 
   const nextWaypoint = RouteUtils.getWaypoint(next);
   nextWaypoint.time = nextTime;
-  nextWaypoint.timeFormat = timeFormat;
 
   const thenWaypoint = RouteUtils.getWaypoint(then || '?');
 
@@ -632,6 +630,29 @@ function processRunway(decodeResult: DecodeResult, data: string[]) {
   ResultFormatter.departureAirport(decodeResult, data[1].split(',')[0]);
   ResultFormatter.unknownArr(decodeResult, data[1].split(',').slice(1), ',');
   //ResultFormatter.unknownArr(decodeResult, data.slice(2), ':');
+}
+function processSummary(decodeResult: DecodeResult, data: string[]) {
+  if (data.length !== 11) {
+    return ResultFormatter.unknown(decodeResult, data.join(','), 'SM/');
+  }
+
+  ResultFormatter.engineStart(
+    decodeResult,
+    DateTimeUtils.convertDayTimeToTod(data[0]),
+  );
+  ResultFormatter.startFuel(decodeResult, 100 * parseInt(data[1], 10));
+  ResultFormatter.engineStop(
+    decodeResult,
+    DateTimeUtils.convertDayTimeToTod(data[2]),
+  );
+  ResultFormatter.out(decodeResult, DateTimeUtils.convertDayTimeToTod(data[3]));
+  ResultFormatter.outFuel(decodeResult, 100 * parseInt(data[4], 10));
+  ResultFormatter.off(decodeResult, DateTimeUtils.convertDayTimeToTod(data[5]));
+  ResultFormatter.offFuel(decodeResult, 100 * parseInt(data[6], 10));
+  ResultFormatter.on(decodeResult, DateTimeUtils.convertDayTimeToTod(data[7]));
+  ResultFormatter.onFuel(decodeResult, 100 * parseInt(data[8], 10));
+  ResultFormatter.in(decodeResult, DateTimeUtils.convertDayTimeToTod(data[9]));
+  ResultFormatter.inFuel(decodeResult, 100 * parseInt(data[10], 10));
 }
 
 // CRC-16/IBM-SDLC but nibbles are reversed

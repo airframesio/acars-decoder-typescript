@@ -31,8 +31,8 @@ describe('Label_21_POS', () => {
     expect(decodeResult.formatted.items[0].code).toBe('POS');
     expect(decodeResult.formatted.items[0].label).toBe('Aircraft Position');
     expect(decodeResult.formatted.items[0].value).toBe('39.840 N, 75.790 W');
-    expect(decodeResult.formatted.items[1].type).toBe('time_of_day');
-    expect(decodeResult.formatted.items[1].code).toBe('MSG_TOD');
+    expect(decodeResult.formatted.items[1].type).toBe('time');
+    expect(decodeResult.formatted.items[1].code).toBe('TIMESTAMP');
     expect(decodeResult.formatted.items[1].label).toBe('Message Timestamp');
     expect(decodeResult.formatted.items[1].value).toBe('18:42:18');
     expect(decodeResult.formatted.items[2].type).toBe('altitude');
@@ -47,7 +47,7 @@ describe('Label_21_POS', () => {
       'Outside Air Temperature (C)',
     );
     expect(decodeResult.formatted.items[3].value).toBe('-4 degrees');
-    expect(decodeResult.formatted.items[4].type).toBe('time_of_day');
+    expect(decodeResult.formatted.items[4].type).toBe('time');
     expect(decodeResult.formatted.items[4].code).toBe('ETA');
     expect(decodeResult.formatted.items[4].label).toBe(
       'Estimated Time of Arrival',
