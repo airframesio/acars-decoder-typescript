@@ -171,7 +171,7 @@ describe('Label_H1 FPN', () => {
     ); //TODO - pull out route
     expect(decodeResult.formatted.items[4].label).toBe('Message Checksum');
     expect(decodeResult.formatted.items[4].value).toBe('0x0560');
-        expect(decodeResult.remaining.text).toBe('');
+    expect(decodeResult.remaining.text).toBe('');
   });
 
   test('decodes Label H1 Preamble FPN with SN and TS', () => {
@@ -295,7 +295,9 @@ describe('Label_H1 FPN', () => {
     expect(decodeResult.formatted.items.length).toBe(13);
     expect(decodeResult.raw.altitude).toBe(11000);
     expect(decodeResult.raw.outside_air_temperature).toBe(-7);
-    expect(decodeResult.remaining.text).toBe('F37A#M1B/,,,183,7,13,,25,,,P30,M40,36090,13,3455,300');
+    expect(decodeResult.remaining.text).toBe(
+      'F37A#M1B/,,,183,7,13,,25,,,P30,M40,36090,13,3455,300',
+    );
   });
 
   test('decodes Label H1 Preamble FPN <invalid>', () => {
