@@ -155,8 +155,6 @@ export class Arinc702Helper {
           processWeatherQuery(decodeResult, data.split(':'));
           break;
         default:
-          console.log(`Unknown IEI ${iei} in H1 message, data: ${data}`);
-          console.log(`Remaing text: ${decodeResult.remaining.text}`);
           ResultFormatter.unknown(decodeResult, fields[i], '/');
       }
     }
