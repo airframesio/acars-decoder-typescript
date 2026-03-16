@@ -57,7 +57,7 @@ export class Label_H1_M_POS extends DecoderPlugin {
         timestamp.substring(2) + '00',
       );
       ResultFormatter.day(decodeResult, day);
-      ResultFormatter.time_of_day(decodeResult, tod);
+      ResultFormatter.timestamp(decodeResult, tod);
     }
 
     // Latitude and longitude (trim spaces, e.g. "- 4.9985")
