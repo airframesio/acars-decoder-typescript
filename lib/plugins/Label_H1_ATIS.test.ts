@@ -31,7 +31,7 @@ describe('Label H1 ATIS Subscription', () => {
     expect(decodeResult.raw.flight_number).toBe('QF0073');
     expect(decodeResult.raw.arrival_icao).toBe('KSFO');
     expect(decodeResult.raw.atis_code).toBe('030');
-    expect(decodeResult.raw.checksum).toBe(0xAFF5C);
+    expect(decodeResult.raw.checksum).toBe(0xaff5c);
   });
 
   test('decodes OERK ATIS subscription', () => {
@@ -43,7 +43,7 @@ describe('Label H1 ATIS Subscription', () => {
     expect(decodeResult.raw.flight_number).toBe('MC5477');
     expect(decodeResult.raw.arrival_icao).toBe('OERK');
     expect(decodeResult.raw.atis_code).toBe('024');
-    expect(decodeResult.raw.checksum).toBe(0xC8781);
+    expect(decodeResult.raw.checksum).toBe(0xc8781);
   });
 
   test('decodes LICC ATIS subscription', () => {
@@ -55,7 +55,7 @@ describe('Label H1 ATIS Subscription', () => {
     expect(decodeResult.raw.flight_number).toBe('MC5477');
     expect(decodeResult.raw.arrival_icao).toBe('LICC');
     expect(decodeResult.raw.atis_code).toBe('024');
-    expect(decodeResult.raw.checksum).toBe(0xAFBD9);
+    expect(decodeResult.raw.checksum).toBe(0xafbd9);
   });
 
   test('decodes with label 5Z', () => {

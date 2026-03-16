@@ -81,7 +81,9 @@ describe('ICAO FPL Parser', () => {
   });
 
   test('returns null for missing closing paren', () => {
-    const result = parseIcaoFpl('(FPL-CCA769-IS-B77W/H-EQUIP/SURV-KSFO0100-N0482F350 DCT');
+    const result = parseIcaoFpl(
+      '(FPL-CCA769-IS-B77W/H-EQUIP/SURV-KSFO0100-N0482F350 DCT',
+    );
     expect(result).toBeNull();
   });
 });

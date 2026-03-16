@@ -20,7 +20,8 @@ export class Label_H1_ATIS extends DecoderPlugin {
     decodeResult.message = message;
 
     // Pattern: L[2-digit seq]A[flight]/[facility].TI2/[code][airport][checksum]
-    const regex = /^L(\d{2})A([A-Z0-9]+)\/([A-Z]{4})\.TI2\/(\d{3})([A-Z]{4})([A-F0-9]+)$/;
+    const regex =
+      /^L(\d{2})A([A-Z0-9]+)\/([A-Z]{4})\.TI2\/(\d{3})([A-Z]{4})([A-F0-9]+)$/;
     const match = message.text.match(regex);
 
     if (!match) {

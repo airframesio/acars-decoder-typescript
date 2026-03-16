@@ -55,7 +55,10 @@ describe('Label H1 Preamble EZF Load Sheet', () => {
   });
 
   test('decodes with label 1M', () => {
-    const msg1M = { label: '1M', text: 'EZF\nXY5678/12/G-TEST\n-SCT/LHR-CDG\n-PAX/90' };
+    const msg1M = {
+      label: '1M',
+      text: 'EZF\nXY5678/12/G-TEST\n-SCT/LHR-CDG\n-PAX/90',
+    };
     const decodeResult = plugin.decode(msg1M);
 
     expect(decodeResult.decoded).toBe(true);

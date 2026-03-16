@@ -18,7 +18,10 @@ export class Label_H1_EZF extends DecoderPlugin {
     decodeResult.formatted.description = 'Load Sheet';
     decodeResult.message = message;
 
-    const lines = message.text.split('\n').map((l) => l.trim()).filter((l) => l.length > 0);
+    const lines = message.text
+      .split('\n')
+      .map((l) => l.trim())
+      .filter((l) => l.length > 0);
 
     if (lines.length < 2 || lines[0] !== 'EZF') {
       if (options.debug) {

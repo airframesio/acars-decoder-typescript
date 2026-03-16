@@ -53,7 +53,9 @@ export class Label_H1_M_POS extends DecoderPlugin {
     const timestamp = fields[2].trim();
     if (timestamp.length === 6) {
       const day = Number(timestamp.substring(0, 2));
-      const tod = DateTimeUtils.convertHHMMSSToTod(timestamp.substring(2) + '00');
+      const tod = DateTimeUtils.convertHHMMSSToTod(
+        timestamp.substring(2) + '00',
+      );
       ResultFormatter.day(decodeResult, day);
       ResultFormatter.time_of_day(decodeResult, tod);
     }
