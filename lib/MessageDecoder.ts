@@ -123,8 +123,16 @@ export class MessageDecoder {
   decode(message: Message, options: Options = {}): DecodeResult {
     // Build candidate list: wildcard plugins first (e.g. CBand wrapper),
     // then label-specific plugins, preserving registration order.
+    // Use a Set to prevent duplicate execution if a plugin registers both '*' and a specific label.
     const labelPlugins = this.labelIndex.get(message.label) ?? [];
-    const candidates = [...this.wildcardPlugins, ...labelPlugins];
+    const seen = new Set<DecoderPluginInterface>();
+    const candidates: DecoderPluginInterface[] = [];
+    for (const plugin of [...this.wildcardPlugins, ...labelPlugins]) {
+      if (!seen.has(plugin)) {
+        seen.add(plugin);
+        candidates.push(plugin);
+      }
+    }
 
     const usablePlugins = candidates.filter((plugin) => {
       const preambles = plugin.qualifiers().preambles;

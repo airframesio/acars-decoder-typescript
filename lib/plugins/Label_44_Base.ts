@@ -4,7 +4,7 @@ import { CoordinateUtils } from '../utils/coordinate_utils';
 import { ResultFormatter } from '../utils/result_formatter';
 
 /**
- * Base class for Label 44 event-style decoders (ON, OFF, IN, ETA).
+ * Base class for Label 44 event-style decoders (ON, OFF, IN).
  *
  * These all share the same CSV structure:
  *   preamble, coordinates, [field(s)...], departure, arrival, date, time(s), fuel

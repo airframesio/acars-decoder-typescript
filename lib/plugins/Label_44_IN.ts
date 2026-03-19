@@ -7,7 +7,7 @@ import { Label_44_Base } from './Label_44_Base';
 export class Label_44_IN extends Label_44_Base {
   name = 'label-44-in';
   get description() {
-    return 'In Air Report';
+    return 'In Gate Report';
   }
   get minFields() {
     return 7;

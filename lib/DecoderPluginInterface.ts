@@ -99,7 +99,7 @@ export interface RawFields {
   label?: string;
   sublabel?: string;
   preamble?: string;
-  version?: number;
+  version?: number | string;
   checksum_algorithm?: string;
   checksum?: number;
   sequence_number?: number;
