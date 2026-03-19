@@ -17,10 +17,10 @@ export class Label_80 extends DecoderPlugin {
   }
 
   decode(message: Message, options: Options = {}): DecodeResult {
-    const decodeResult = this.defaultResult();
-    decodeResult.decoder.name = this.name;
-
-    decodeResult.formatted.description = 'Airline Defined Position Report';
+    const decodeResult = this.initResult(
+      message,
+      'Airline Defined Position Report',
+    );
 
     const lines = message.text.split(/\r?\n/);
     if (lines.length === 1 && lines[0].includes(',')) {
@@ -50,9 +50,7 @@ export class Label_80 extends DecoderPlugin {
     }
 
     if (decodeResult.formatted.items.length > 0) {
-      decodeResult.decoded = true;
-      decodeResult.decoder.decodeLevel =
-        decodeResult.remaining.text === undefined ? 'full' : 'partial';
+      this.setDecodeLevel(decodeResult, true);
     }
 
     return decodeResult;

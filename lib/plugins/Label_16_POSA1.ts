@@ -15,20 +15,11 @@ export class Label_16_POSA1 extends DecoderPlugin {
   }
 
   decode(message: Message, options: Options = {}): DecodeResult {
-    const decodeResult = this.defaultResult();
-    decodeResult.decoder.name = this.name;
-    decodeResult.formatted.description = 'Position Report';
-    decodeResult.message = message;
+    const decodeResult = this.initResult(message, 'Position Report');
 
     const fields = message.text.split(',');
     if (fields.length !== 11 || !fields[0].startsWith('POSA1')) {
-      if (options.debug) {
-        console.log(`Decoder: Unknown 16 message: ${message.text}`);
-      }
-      decodeResult.remaining.text = message.text;
-      decodeResult.decoded = false;
-      decodeResult.decoder.decodeLevel = 'none';
-      return decodeResult;
+      return this.failUnknown(decodeResult, message.text, options);
     }
 
     ResultFormatter.position(
@@ -47,8 +38,7 @@ export class Label_16_POSA1 extends DecoderPlugin {
         { name: nextWaypoint, time: nextTime },
       ],
     });
-    decodeResult.decoded = true;
-    decodeResult.decoder.decodeLevel = 'partial';
+    this.setDecodeLevel(decodeResult, true, 'partial');
 
     return decodeResult;
   }

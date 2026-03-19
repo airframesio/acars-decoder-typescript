@@ -14,10 +14,7 @@ export class Label_H1_WRN extends DecoderPlugin {
   }
 
   decode(message: Message, options: Options = {}): DecodeResult {
-    let decodeResult = this.defaultResult();
-    decodeResult.decoder.name = this.name;
-    decodeResult.formatted.description = 'Warning Message';
-    decodeResult.message = message;
+    const decodeResult = this.initResult(message, 'Warning Message');
 
     const parts = message.text.split('/WN');
 
@@ -49,16 +46,10 @@ export class Label_H1_WRN extends DecoderPlugin {
         label: 'Warning Message',
         value: decodeResult.raw.warning_message,
       });
-      decodeResult.decoded = true;
-      decodeResult.decoder.decodeLevel = 'partial';
+      this.setDecodeLevel(decodeResult, true, 'partial');
     } else {
       // Unknown
-      if (options.debug) {
-        console.log(`Decoder: Unknown H1 message: ${message.text}`);
-      }
-      ResultFormatter.unknown(decodeResult, message.text);
-      decodeResult.decoded = false;
-      decodeResult.decoder.decodeLevel = 'none';
+      return this.failUnknown(decodeResult, message.text, options);
     }
 
     return decodeResult;

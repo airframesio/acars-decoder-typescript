@@ -14,10 +14,7 @@ export class Label_4A_DOOR extends DecoderPlugin {
   }
 
   decode(message: Message, options: Options = {}): DecodeResult {
-    const decodeResult = this.defaultResult();
-    decodeResult.decoder.name = this.name;
-    decodeResult.message = message;
-    decodeResult.formatted.description = 'Latest New Format';
+    const decodeResult = this.initResult(message, 'Latest New Format');
 
     decodeResult.decoded = true;
     const fields = message.text.split(' ');
@@ -35,13 +32,7 @@ export class Label_4A_DOOR extends DecoderPlugin {
       decodeResult.decoded = false;
       ResultFormatter.unknown(decodeResult, message.text);
     }
-    if (decodeResult.decoded) {
-      if (!decodeResult.remaining.text)
-        decodeResult.decoder.decodeLevel = 'full';
-      else decodeResult.decoder.decodeLevel = 'partial';
-    } else {
-      decodeResult.decoder.decodeLevel = 'none';
-    }
+    this.setDecodeLevel(decodeResult, decodeResult.decoded);
 
     return decodeResult;
   }

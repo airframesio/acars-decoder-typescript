@@ -13,20 +13,11 @@ export class Label_10_POS extends DecoderPlugin {
   }
 
   decode(message: Message, options: Options = {}): DecodeResult {
-    const decodeResult = this.defaultResult();
-    decodeResult.decoder.name = this.name;
-    decodeResult.formatted.description = 'Position Report';
-    decodeResult.message = message;
+    const decodeResult = this.initResult(message, 'Position Report');
 
     const parts = message.text.split(',');
     if (parts.length !== 12) {
-      if (options.debug) {
-        console.log(`Decoder: Unknown 10 message: ${message.text}`);
-      }
-      ResultFormatter.unknown(decodeResult, message.text);
-      decodeResult.decoded = false;
-      decodeResult.decoder.decodeLevel = 'none';
-      return decodeResult;
+      return this.failUnknown(decodeResult, message.text, options);
     }
 
     //const time = parts[0].substring(3); //DDHHMM
@@ -46,8 +37,7 @@ export class Label_10_POS extends DecoderPlugin {
       ...parts.slice(8),
     ]);
 
-    decodeResult.decoded = true;
-    decodeResult.decoder.decodeLevel = 'partial';
+    this.setDecodeLevel(decodeResult, true, 'partial');
     return decodeResult;
   }
 }

@@ -16,21 +16,15 @@ export class Label_44_POS extends DecoderPlugin {
   }
 
   decode(message: Message, options: Options = {}): DecodeResult {
-    const decodeResult = this.defaultResult();
-    decodeResult.decoder.name = this.name;
-    decodeResult.formatted.description = 'Position Report';
-    decodeResult.message = message;
+    const decodeResult = this.initResult(message, 'Position Report');
 
     // Style: POS02,N38338W121179,GRD,KMHR,KPDX,0807,0003,0112,005.1
-    // Match: POS02,coords,flight_level_or_ground,departure_icao,arrival_icao,current_date,current_time,eta_time,unknown
+    // Match: POS02,coords,flight_level_or_ground,departure_icao,arrival_icao,current_date,current_time,eta_time,fuel_in_tons
     const regex =
       /^.*,(?<unsplit_coords>.*),(?<flight_level_or_ground>.*),(?<departure_icao>.*),(?<arrival_icao>.*),(?<current_date>.*),(?<current_time>.*),(?<eta_time>.*),(?<fuel_in_tons>.*)$/;
     const results = message.text.match(regex);
     if (results?.groups) {
-      if (options.debug) {
-        console.log('Label 44 Position Report: groups');
-        console.log(results.groups);
-      }
+      this.debug(options, 'Position Report: groups', results.groups);
 
       ResultFormatter.position(
         decodeResult,
@@ -76,11 +70,11 @@ export class Label_44_POS extends DecoderPlugin {
       );
       ResultFormatter.arrivalAirport(decodeResult, results.groups.arrival_icao);
       ResultFormatter.altitude(decodeResult, flight_level * 100);
+
+      this.setDecodeLevel(decodeResult, true, 'full');
+      return decodeResult;
     }
 
-    decodeResult.decoded = true;
-    decodeResult.decoder.decodeLevel = 'full';
-
-    return decodeResult;
+    return this.failUnknown(decodeResult, message.text, options);
   }
 }

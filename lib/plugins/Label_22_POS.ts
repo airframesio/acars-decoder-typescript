@@ -16,21 +16,16 @@ export class Label_22_POS extends DecoderPlugin {
   }
 
   decode(message: Message, options: Options = {}): DecodeResult {
-    const decodeResult = this.defaultResult();
-    decodeResult.decoder.name = this.name;
-    decodeResult.formatted.description = 'Position Report';
-    decodeResult.message = message;
+    const decodeResult = this.initResult(message, 'Position Report');
 
     const fields = message.text.split(',');
 
     if (fields.length !== 11) {
-      if (options.debug) {
-        console.log(
-          `DEBUG: ${this.name}: Unknown variation. Field count: ${fields.length}, content: ${fields.join(',')}`,
-        );
-      }
-      decodeResult.decoded = false;
-      decodeResult.decoder.decodeLevel = 'none';
+      this.debug(
+        options,
+        `Unknown variation. Field count: ${fields.length}, content: ${fields.join(',')}`,
+      );
+      this.setDecodeLevel(decodeResult, false);
       return decodeResult;
     }
 
@@ -51,8 +46,7 @@ export class Label_22_POS extends DecoderPlugin {
 
     ResultFormatter.unknownArr(decodeResult, [fields[1], ...fields.slice(4)]);
 
-    decodeResult.decoded = true;
-    decodeResult.decoder.decodeLevel = 'partial';
+    this.setDecodeLevel(decodeResult, true, 'partial');
     return decodeResult;
   }
 }

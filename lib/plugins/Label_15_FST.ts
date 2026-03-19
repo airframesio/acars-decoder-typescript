@@ -14,10 +14,7 @@ export class Label_15_FST extends DecoderPlugin {
   }
 
   decode(message: Message, options: Options = {}): DecodeResult {
-    const decodeResult = this.defaultResult();
-    decodeResult.decoder.name = this.name;
-    decodeResult.formatted.description = 'Position Report';
-    decodeResult.message = message;
+    const decodeResult = this.initResult(message, 'Position Report');
 
     const parts = message.text.split(' ');
     // FST01KMCOEGKKN505552W00118021
@@ -46,9 +43,7 @@ export class Label_15_FST extends DecoderPlugin {
         Number(stringCoords.substring(15)) * 100,
       );
     } else {
-      decodeResult.decoded = false;
-      decodeResult.decoder.decodeLevel = 'none';
-      return decodeResult;
+      return this.failUnknown(decodeResult, message.text, options);
     }
 
     ResultFormatter.departureAirport(decodeResult, header.substring(5, 9));
@@ -56,8 +51,7 @@ export class Label_15_FST extends DecoderPlugin {
 
     ResultFormatter.unknownArr(decodeResult, parts.slice(1), ' ');
 
-    decodeResult.decoded = true;
-    decodeResult.decoder.decodeLevel = 'partial';
+    this.setDecodeLevel(decodeResult, true, 'partial');
     return decodeResult;
   }
 }
