@@ -14,10 +14,10 @@ export class Label_SQ extends DecoderPlugin {
     const decodeResult = this.initResult(message, 'Ground Station Squitter');
 
     decodeResult.raw.preamble = message.text.substring(0, 4);
-    decodeResult.raw.version = message.text.substring(1, 2);
+    decodeResult.raw.version = Number(message.text.substring(1, 2));
     decodeResult.raw.network = message.text.substring(3, 4);
 
-    if (decodeResult.raw.version === '2') {
+    if (decodeResult.raw.version === 2) {
       const regex =
         /0(\d)X(?<org>\w)(?<iata>\w\w\w)(?<icao>\w\w\w\w)(?<station>\d)(?<lat>\d+)(?<latd>[NS])(?<lng>\d+)(?<lngd>[EW])V(?<vfreq>\d+)\/.*/;
       const result = message.text.match(regex);
@@ -57,7 +57,7 @@ export class Label_SQ extends DecoderPlugin {
         type: 'version',
         code: 'VER',
         label: 'Version',
-        value: decodeResult.raw.version,
+        value: String(decodeResult.raw.version),
       },
     ];
 

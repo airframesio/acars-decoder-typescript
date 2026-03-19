@@ -41,7 +41,7 @@ describe('Label_SQ', () => {
     expect(res.decoder.decodeLevel).toBe('full');
 
     expect(res.raw.preamble).toBe(message.text.substring(0, 4));
-    expect(res.raw.version).toBe('2');
+    expect(res.raw.version).toBe(2);
     expect(res.raw.network).toBe('A');
 
     expect(res.raw.groundStation).toBeDefined();
@@ -68,7 +68,7 @@ describe('Label_SQ', () => {
     const res = plugin.decode(message);
 
     expect(res.decoded).toBe(true);
-    expect(res.raw.version).toBe('2');
+    expect(res.raw.version).toBe(2);
     expect(res.raw.network).toBe('S');
 
     const items = res.formatted.items;
@@ -84,7 +84,7 @@ describe('Label_SQ', () => {
     const res = plugin.decode(message);
 
     expect(res.decoded).toBe(true);
-    expect(res.raw.version).toBe('1');
+    expect(res.raw.version).toBe(1);
     expect(res.raw.network).toBe('A');
 
     const items = res.formatted.items;

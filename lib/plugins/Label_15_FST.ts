@@ -43,8 +43,7 @@ export class Label_15_FST extends DecoderPlugin {
         Number(stringCoords.substring(15)) * 100,
       );
     } else {
-      this.setDecodeLevel(decodeResult, false);
-      return decodeResult;
+      return this.failUnknown(decodeResult, message.text, options);
     }
 
     ResultFormatter.departureAirport(decodeResult, header.substring(5, 9));
