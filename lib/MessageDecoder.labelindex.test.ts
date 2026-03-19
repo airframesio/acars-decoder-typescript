@@ -130,23 +130,34 @@ describe('MessageDecoder label index', () => {
   });
 });
 
+/**
+ * A probe plugin that records the options it receives.
+ */
+class ProbePlugin extends DecoderPlugin {
+  name = 'probe';
+  receivedOptions: Options | undefined;
+
+  qualifiers() {
+    return { labels: ['ZP'] };
+  }
+
+  decode(message: Message, options: Options = {}): DecodeResult {
+    this.receivedOptions = options;
+    const result = this.initResult(message, 'Probe');
+    this.setDecodeLevel(result, true, 'full');
+    return result;
+  }
+}
+
 describe('MessageDecoder options pass-through', () => {
   test('passes options to plugins', () => {
     const decoder = new MessageDecoder();
-    const spy = jest.spyOn(console, 'log').mockImplementation();
+    const probe = new ProbePlugin(decoder);
+    decoder.registerPlugin(probe);
 
-    // Decoding with debug: true should produce debug output from plugins
-    decoder.decode(
-      {
-        label: '44',
-        text: 'ON01,N33522W084181,KCLT,KPDK,1106,004023,---.-,',
-      },
-      { debug: true },
-    );
+    const opts: Options = { debug: true };
+    decoder.decode({ label: 'ZP', text: 'test' }, opts);
 
-    // Should have logged something (the "Usable plugins" log from MessageDecoder
-    // and potentially plugin debug output)
-    expect(spy).toHaveBeenCalled();
-    spy.mockRestore();
+    expect(probe.receivedOptions).toBe(opts);
   });
 });

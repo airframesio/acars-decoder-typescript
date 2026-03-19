@@ -70,9 +70,11 @@ export class Label_44_POS extends DecoderPlugin {
       );
       ResultFormatter.arrivalAirport(decodeResult, results.groups.arrival_icao);
       ResultFormatter.altitude(decodeResult, flight_level * 100);
+
+      this.setDecodeLevel(decodeResult, true, 'full');
+      return decodeResult;
     }
 
-    this.setDecodeLevel(decodeResult, true, 'full');
-    return decodeResult;
+    return this.failUnknown(decodeResult, message.text, options);
   }
 }
