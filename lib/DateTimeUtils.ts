@@ -47,7 +47,6 @@ export class DateTimeUtils {
     return tod;
   }
 
-
   public static convertDayTimeToTod(time: string): number {
     const d = Number(time.substring(0, 2));
     const h = Number(time.substring(2, 4));

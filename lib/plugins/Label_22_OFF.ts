@@ -16,18 +16,14 @@ export class Label_22_OFF extends DecoderPlugin {
   }
 
   decode(message: Message, options: Options = {}): DecodeResult {
-    const decodeResult = this.defaultResult();
-    decodeResult.decoder.name = this.name;
-    decodeResult.formatted.description = 'Takeoff Report';
-    decodeResult.message = message;
+    const decodeResult = this.initResult(message, 'Takeoff Report');
 
     if (message.text.startsWith('OFF01')) {
       // variant 1
       const fields = message.text.substring(5).split('/');
 
       if (fields.length != 2) {
-        decodeResult.decoded = false;
-        decodeResult.decoder.decodeLevel = 'none';
+        this.setDecodeLevel(decodeResult, false);
         return decodeResult;
       }
 
@@ -55,14 +51,12 @@ export class Label_22_OFF extends DecoderPlugin {
       );
       ResultFormatter.unknown(decodeResult, fields[1].substring(22));
 
-      decodeResult.decoded = true;
-      decodeResult.decoder.decodeLevel = 'partial';
+      this.setDecodeLevel(decodeResult, true, 'partial');
     } else if (message.text.startsWith('OFF02\r\n')) {
       // varaint 3
       const fields = message.text.substring(7).split(',');
       if (fields.length != 4) {
-        decodeResult.decoded = false;
-        decodeResult.decoder.decodeLevel = 'none';
+        this.setDecodeLevel(decodeResult, false);
         return decodeResult;
       }
 
@@ -74,14 +68,12 @@ export class Label_22_OFF extends DecoderPlugin {
       );
       ResultFormatter.unknown(decodeResult, fields[3]);
 
-      decodeResult.decoded = true;
-      decodeResult.decoder.decodeLevel = 'partial';
+      this.setDecodeLevel(decodeResult, true, 'partial');
     } else if (message.text.startsWith('OFF02')) {
       // varaint 2
       const fields = message.text.substring(5).split('/');
       if (fields.length != 2) {
-        decodeResult.decoded = false;
-        decodeResult.decoder.decodeLevel = 'none';
+        this.setDecodeLevel(decodeResult, false);
         return decodeResult;
       }
 
@@ -111,14 +103,10 @@ export class Label_22_OFF extends DecoderPlugin {
         decodeResult,
         DateTimeUtils.convertHHMMSSToTod(fields[1].substring(36, 40)),
       );
-      decodeResult.decoded = true;
-      decodeResult.decoder.decodeLevel = 'partial';
+      this.setDecodeLevel(decodeResult, true, 'partial');
     } else {
-      if (options.debug) {
-        console.log(`DEBUG: ${this.name}: Unknown variation.`);
-      }
-      decodeResult.decoded = false;
-      decodeResult.decoder.decodeLevel = 'none';
+      this.debug(options, 'Unknown variation.');
+      this.setDecodeLevel(decodeResult, false);
     }
     return decodeResult;
   }

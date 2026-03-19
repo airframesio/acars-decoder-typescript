@@ -16,10 +16,7 @@ export class Label_15 extends DecoderPlugin {
   }
 
   decode(message: Message, options: Options = {}): DecodeResult {
-    const decodeResult = this.defaultResult();
-    decodeResult.decoder.name = this.name;
-    decodeResult.formatted.description = 'Position Report';
-    decodeResult.message = message;
+    const decodeResult = this.initResult(message, 'Position Report');
 
     if (message.text.startsWith('(2') && message.text.endsWith('(Z')) {
       const between = message.text.substring(2, message.text.length - 2);
@@ -60,17 +57,10 @@ export class Label_15 extends DecoderPlugin {
         ResultFormatter.unknown(decodeResult, between.substring(26));
       }
     } else {
-      if (options.debug) {
-        console.log(`Decoder: Unknown 15 message: ${message.text}`);
-      }
-      ResultFormatter.unknown(decodeResult, message.text);
-      decodeResult.decoded = false;
-      decodeResult.decoder.decodeLevel = 'none';
-      return decodeResult;
+      return this.failUnknown(decodeResult, message.text, options);
     }
 
-    decodeResult.decoded = true;
-    decodeResult.decoder.decodeLevel = 'partial';
+    this.setDecodeLevel(decodeResult, true, 'partial');
     return decodeResult;
   }
 }

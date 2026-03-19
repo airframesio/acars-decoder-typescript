@@ -13,23 +13,17 @@ export class Label_H1_M_POS extends DecoderPlugin {
   }
 
   decode(message: Message, options: Options = {}): DecodeResult {
-    let decodeResult = this.defaultResult();
-    decodeResult.decoder.name = this.name;
-    decodeResult.formatted.description = 'M-Series Periodic Position Report';
-    decodeResult.message = message;
+    const decodeResult = this.initResult(
+      message,
+      'M-Series Periodic Position Report',
+    );
 
     // Match M[2-digit seq]A[airline 2-char][flight 4-digit][origin],[dest],[DDHHMM],[lat],[lon],[alt],[hdg],...
     const headerRegex = /^M(\d{2})A([A-Z]{2})(\d{4})/;
     const headerMatch = message.text.match(headerRegex);
 
     if (!headerMatch) {
-      if (options.debug) {
-        console.log(`Decoder: Unknown H1 M-POS message: ${message.text}`);
-      }
-      ResultFormatter.unknown(decodeResult, message.text);
-      decodeResult.decoded = false;
-      decodeResult.decoder.decodeLevel = 'none';
-      return decodeResult;
+      return this.failUnknown(decodeResult, message.text, options);
     }
 
     const airline = headerMatch[2];
@@ -39,10 +33,7 @@ export class Label_H1_M_POS extends DecoderPlugin {
 
     // We expect at least: origin, dest, DDHHMM, lat, lon, alt, hdg
     if (fields.length < 7) {
-      ResultFormatter.unknown(decodeResult, message.text);
-      decodeResult.decoded = false;
-      decodeResult.decoder.decodeLevel = 'none';
-      return decodeResult;
+      return this.failUnknown(decodeResult, message.text, options);
     }
 
     ResultFormatter.flightNumber(decodeResult, `${airline}${flightNum}`);
@@ -78,8 +69,11 @@ export class Label_H1_M_POS extends DecoderPlugin {
       ResultFormatter.unknownArr(decodeResult, fields.slice(7));
     }
 
-    decodeResult.decoded = true;
-    decodeResult.decoder.decodeLevel = fields.length > 7 ? 'partial' : 'full';
+    this.setDecodeLevel(
+      decodeResult,
+      true,
+      fields.length > 7 ? 'partial' : 'full',
+    );
 
     return decodeResult;
   }

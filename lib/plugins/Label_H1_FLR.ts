@@ -14,10 +14,7 @@ export class Label_H1_FLR extends DecoderPlugin {
   }
 
   decode(message: Message, options: Options = {}): DecodeResult {
-    let decodeResult = this.defaultResult();
-    decodeResult.decoder.name = this.name;
-    decodeResult.formatted.description = 'Fault Log Report';
-    decodeResult.message = message;
+    const decodeResult = this.initResult(message, 'Fault Log Report');
 
     const parts = message.text.split('/FR');
 
@@ -52,16 +49,10 @@ export class Label_H1_FLR extends DecoderPlugin {
         label: 'Fault Report',
         value: decodeResult.raw.fault_message,
       });
-      decodeResult.decoded = true;
-      decodeResult.decoder.decodeLevel = 'partial';
+      this.setDecodeLevel(decodeResult, true, 'partial');
     } else {
       // Unknown
-      if (options.debug) {
-        console.log(`Decoder: Unknown H1 message: ${message.text}`);
-      }
-      ResultFormatter.unknown(decodeResult, message.text);
-      decodeResult.decoded = false;
-      decodeResult.decoder.decodeLevel = 'none';
+      return this.failUnknown(decodeResult, message.text, options);
     }
 
     return decodeResult;

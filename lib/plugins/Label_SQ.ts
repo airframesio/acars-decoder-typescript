@@ -11,8 +11,7 @@ export class Label_SQ extends DecoderPlugin {
   }
 
   decode(message: Message, options: Options = {}): DecodeResult {
-    const decodeResult = this.defaultResult();
-    decodeResult.decoder.name = this.name;
+    const decodeResult = this.initResult(message, 'Ground Station Squitter');
 
     decodeResult.raw.preamble = message.text.substring(0, 4);
     decodeResult.raw.version = message.text.substring(1, 2);
@@ -40,8 +39,6 @@ export class Label_SQ extends DecoderPlugin {
         decodeResult.raw.vdlFrequency = Number(result.groups.vfreq) / 1000.0;
       }
     }
-
-    decodeResult.formatted.description = 'Ground Station Squitter';
 
     var formattedNetwork = 'Unknown';
     if (decodeResult.raw.network == 'A') {
@@ -118,8 +115,7 @@ export class Label_SQ extends DecoderPlugin {
         value: `${decodeResult.raw.vdlFrequency} MHz`,
       });
     }
-    decodeResult.decoded = true;
-    decodeResult.decoder.decodeLevel = 'full';
+    this.setDecodeLevel(decodeResult, true, 'full');
 
     return decodeResult;
   }

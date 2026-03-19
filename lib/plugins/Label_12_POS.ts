@@ -16,20 +16,11 @@ export class Label_12_POS extends DecoderPlugin {
   }
 
   decode(message: Message, options: Options = {}): DecodeResult {
-    const decodeResult = this.defaultResult();
-    decodeResult.decoder.name = this.name;
-    decodeResult.formatted.description = 'Position Report';
-    decodeResult.message = message;
+    const decodeResult = this.initResult(message, 'Position Report');
 
     const data = message.text.substring(3).split(',');
     if (!message.text.startsWith('POS') || data.length !== 12) {
-      if (options.debug) {
-        console.log(`Decoder: Unknown 12 message: ${message.text}`);
-      }
-      ResultFormatter.unknown(decodeResult, message.text);
-      decodeResult.decoded = false;
-      decodeResult.decoder.decodeLevel = 'none';
-      return decodeResult;
+      return this.failUnknown(decodeResult, message.text, options);
     }
 
     const lat = data[0].substring(0, 8);
@@ -69,9 +60,7 @@ export class Label_12_POS extends DecoderPlugin {
     ResultFormatter.arrivalAirport(decodeResult, data[10]);
     ResultFormatter.unknown(decodeResult, data[11]);
 
-    decodeResult.decoded = true;
-    decodeResult.decoder.decodeLevel = 'partial';
-
+    this.setDecodeLevel(decodeResult, true, 'partial');
     return decodeResult;
   }
 }

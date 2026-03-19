@@ -4,7 +4,9 @@ import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
 import { CoordinateUtils } from '../utils/coordinate_utils';
 import { ResultFormatter } from '../utils/result_formatter';
 
-// In Air Report
+// ETA Report — has a different field layout from the other Label 44 events
+// (altitude between coords and airports), so it uses DecoderPlugin directly
+// rather than Label_44_Base.
 export class Label_44_ETA extends DecoderPlugin {
   name = 'label-44-eta';
 
@@ -16,57 +18,40 @@ export class Label_44_ETA extends DecoderPlugin {
   }
 
   decode(message: Message, options: Options = {}): DecodeResult {
-    const decodeResult = this.defaultResult();
-    decodeResult.decoder.name = this.name;
-    decodeResult.formatted.description = 'ETA Report';
-    decodeResult.message = message;
+    const result = this.initResult(message, 'ETA Report');
 
     const data = message.text.split(',');
-    if (data.length >= 9) {
-      if (options.debug) {
-        console.log('Label 44 ETA Report: groups');
-        console.log(data);
-      }
-
-      ResultFormatter.position(
-        decodeResult,
-        CoordinateUtils.decodeStringCoordinatesDecimalMinutes(data[1]),
-      );
-      ResultFormatter.altitude(decodeResult, 100 * Number(data[2]));
-      ResultFormatter.departureAirport(decodeResult, data[3]);
-      ResultFormatter.arrivalAirport(decodeResult, data[4]);
-
-      ResultFormatter.month(decodeResult, Number(data[5].substring(0, 2)));
-      ResultFormatter.day(decodeResult, Number(data[5].substring(2, 4)));
-      ResultFormatter.timestamp(
-        decodeResult,
-        DateTimeUtils.convertHHMMSSToTod(data[6]),
-      );
-      ResultFormatter.eta(
-        decodeResult,
-        DateTimeUtils.convertHHMMSSToTod(data[7]),
-      );
-      const fuel = Number(data[8]);
-      if (!isNaN(fuel)) {
-        ResultFormatter.remainingFuel(decodeResult, Number(fuel));
-      }
-
-      if (data.length > 9) {
-        ResultFormatter.unknownArr(decodeResult, data.slice(9));
-      }
-    } else {
-      if (options.debug) {
-        console.log(`Decoder: Unknown 44 message: ${message.text}`);
-      }
-      ResultFormatter.unknown(decodeResult, message.text);
-      decodeResult.decoded = false;
-      decodeResult.decoder.decodeLevel = 'none';
-      return decodeResult;
+    if (data.length < 9) {
+      return this.failUnknown(result, message.text, options);
     }
 
-    decodeResult.decoded = true;
-    decodeResult.decoder.decodeLevel = 'full';
+    this.debug(options, 'ETA Report: fields', data);
 
-    return decodeResult;
+    ResultFormatter.position(
+      result,
+      CoordinateUtils.decodeStringCoordinatesDecimalMinutes(data[1]),
+    );
+    ResultFormatter.altitude(result, 100 * Number(data[2]));
+    ResultFormatter.departureAirport(result, data[3]);
+    ResultFormatter.arrivalAirport(result, data[4]);
+    ResultFormatter.month(result, Number(data[5].substring(0, 2)));
+    ResultFormatter.day(result, Number(data[5].substring(2, 4)));
+    ResultFormatter.timestamp(
+      result,
+      DateTimeUtils.convertHHMMSSToTod(data[6]),
+    );
+    ResultFormatter.eta(result, DateTimeUtils.convertHHMMSSToTod(data[7]));
+
+    const fuel = Number(data[8]);
+    if (!isNaN(fuel)) {
+      ResultFormatter.remainingFuel(result, fuel);
+    }
+
+    if (data.length > 9) {
+      ResultFormatter.unknownArr(result, data.slice(9));
+    }
+
+    this.setDecodeLevel(result, true, 'full');
+    return result;
   }
 }
