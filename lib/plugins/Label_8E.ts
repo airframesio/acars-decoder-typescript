@@ -7,6 +7,8 @@ import { ResultFormatter } from '../utils/result_formatter';
 export class Label_8E extends DecoderPlugin {
   name = 'label-8e';
 
+  private static readonly ETA_RE = /^(?<arrival_icao>\w{4}),(?<arrival_eta>\d{4})$/;
+
   qualifiers() {
     return {
       labels: ['8E'],
@@ -20,9 +22,7 @@ export class Label_8E extends DecoderPlugin {
     decodeResult.message = message;
 
     // Style: EGSS,1618
-    // Match: arrival_icao,arrival_eta
-    const regex = /^(?<arrival_icao>\w{4}),(?<arrival_eta>\d{4})$/;
-    const results = message.text.match(regex);
+    const results = message.text.match(Label_8E.ETA_RE);
     if (results?.groups) {
       if (options.debug) {
         console.log('Label 8E ETA: groups');

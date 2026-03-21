@@ -4,6 +4,9 @@ import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
 export class Label_SQ extends DecoderPlugin {
   name = 'label-sq';
 
+  private static readonly SQUITTER_RE =
+    /0(\d)X(?<org>\w)(?<iata>\w\w\w)(?<icao>\w\w\w\w)(?<station>\d)(?<lat>\d+)(?<latd>[NS])(?<lng>\d+)(?<lngd>[EW])V(?<vfreq>\d+)\/.*/;
+
   qualifiers() {
     return {
       labels: ['SQ'],
@@ -18,9 +21,7 @@ export class Label_SQ extends DecoderPlugin {
     decodeResult.raw.network = message.text.substring(3, 4);
 
     if (decodeResult.raw.version === 2) {
-      const regex =
-        /0(\d)X(?<org>\w)(?<iata>\w\w\w)(?<icao>\w\w\w\w)(?<station>\d)(?<lat>\d+)(?<latd>[NS])(?<lng>\d+)(?<lngd>[EW])V(?<vfreq>\d+)\/.*/;
-      const result = message.text.match(regex);
+      const result = message.text.match(Label_SQ.SQUITTER_RE);
 
       if (result?.groups && result.length >= 8) {
         decodeResult.raw.groundStation = {

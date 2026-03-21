@@ -89,6 +89,10 @@ export class MessageDecoder {
   private labelIndex: Map<string, DecoderPluginInterface[]> = new Map();
   /** Plugins that match all labels (qualifier label '*'). */
   private wildcardPlugins: DecoderPluginInterface[] = [];
+  /** Cached preambles per plugin (avoids calling qualifiers() on every decode). */
+  private pluginPreambles: Map<DecoderPluginInterface, string[]> = new Map();
+  /** Set of plugins registered as wildcards, for fast dedup in decode(). */
+  private wildcardSet: Set<DecoderPluginInterface> = new Set();
 
   constructor() {
     this.name = 'acars-decoder-typescript';
@@ -104,9 +108,16 @@ export class MessageDecoder {
     this.plugins.push(plugin);
 
     const qualifiers = plugin.qualifiers();
+
+    // Cache preambles at registration time so decode() never calls qualifiers()
+    if (qualifiers.preambles && qualifiers.preambles.length > 0) {
+      this.pluginPreambles.set(plugin, qualifiers.preambles);
+    }
+
     for (const label of qualifiers.labels) {
       if (label === '*') {
         this.wildcardPlugins.push(plugin);
+        this.wildcardSet.add(plugin);
       } else {
         let bucket = this.labelIndex.get(label);
         if (!bucket) {
@@ -122,25 +133,37 @@ export class MessageDecoder {
 
   decode(message: Message, options: Options = {}): DecodeResult {
     // Build candidate list: wildcard plugins first (e.g. CBand wrapper),
-    // then label-specific plugins, preserving registration order.
-    // Use a Set to prevent duplicate execution if a plugin registers both '*' and a specific label.
-    const labelPlugins = this.labelIndex.get(message.label) ?? [];
-    const seen = new Set<DecoderPluginInterface>();
-    const candidates: DecoderPluginInterface[] = [];
-    for (const plugin of [...this.wildcardPlugins, ...labelPlugins]) {
-      if (!seen.has(plugin)) {
-        seen.add(plugin);
-        candidates.push(plugin);
+    // then label-specific plugins. Dedup without allocating a Set each time
+    // by checking the wildcardSet for label-specific plugins.
+    const labelPlugins = this.labelIndex.get(message.label);
+    let candidates: DecoderPluginInterface[];
+    if (!labelPlugins || labelPlugins.length === 0) {
+      candidates = this.wildcardPlugins;
+    } else {
+      candidates = this.wildcardPlugins.slice();
+      for (const plugin of labelPlugins) {
+        if (!this.wildcardSet.has(plugin)) {
+          candidates.push(plugin);
+        }
       }
     }
 
-    const usablePlugins = candidates.filter((plugin) => {
-      const preambles = plugin.qualifiers().preambles;
-      if (!preambles || preambles.length === 0) {
-        return true;
+    // Filter by preamble using cached preambles
+    const text = message.text;
+    const usablePlugins: DecoderPluginInterface[] = [];
+    for (const plugin of candidates) {
+      const preambles = this.pluginPreambles.get(plugin);
+      if (!preambles) {
+        usablePlugins.push(plugin);
+      } else {
+        for (const p of preambles) {
+          if (text.startsWith(p)) {
+            usablePlugins.push(plugin);
+            break;
+          }
+        }
       }
-      return preambles.some((p: string) => message.text.startsWith(p));
-    });
+    }
 
     if (options.debug) {
       console.log('Usable plugins');
@@ -166,8 +189,7 @@ export class MessageDecoder {
       },
     };
 
-    for (let i = 0; i < usablePlugins.length; i++) {
-      const plugin = usablePlugins[i];
+    for (const plugin of usablePlugins) {
       result = plugin.decode(message, options);
       if (result.decoded) {
         break;

@@ -6,6 +6,8 @@ import { DateTimeUtils } from '../DateTimeUtils';
 export class Label_H1_M_POS extends DecoderPlugin {
   name = 'label-h1-m-pos';
 
+  private static readonly HEADER_RE = /^M(\d{2})A([A-Z]{2})(\d{4})/;
+
   qualifiers() {
     return {
       labels: ['H1'],
@@ -19,8 +21,7 @@ export class Label_H1_M_POS extends DecoderPlugin {
     );
 
     // Match M[2-digit seq]A[airline 2-char][flight 4-digit][origin],[dest],[DDHHMM],[lat],[lon],[alt],[hdg],...
-    const headerRegex = /^M(\d{2})A([A-Z]{2})(\d{4})/;
-    const headerMatch = message.text.match(headerRegex);
+    const headerMatch = message.text.match(Label_H1_M_POS.HEADER_RE);
 
     if (!headerMatch) {
       return this.failUnknown(decodeResult, message.text, options);

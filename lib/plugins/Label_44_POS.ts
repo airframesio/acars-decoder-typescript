@@ -8,6 +8,10 @@ import { ResultFormatter } from '../utils/result_formatter';
 export class Label_44_POS extends DecoderPlugin {
   name = 'label-44-pos';
 
+  // Style: POS02,coords,flight_level_or_ground,departure_icao,arrival_icao,current_date,current_time,eta_time,fuel_in_tons
+  private static readonly POS_RE =
+    /^.*,(?<unsplit_coords>.*),(?<flight_level_or_ground>.*),(?<departure_icao>.*),(?<arrival_icao>.*),(?<current_date>.*),(?<current_time>.*),(?<eta_time>.*),(?<fuel_in_tons>.*)$/;
+
   qualifiers() {
     return {
       labels: ['44'],
@@ -18,11 +22,7 @@ export class Label_44_POS extends DecoderPlugin {
   decode(message: Message, options: Options = {}): DecodeResult {
     const decodeResult = this.initResult(message, 'Position Report');
 
-    // Style: POS02,N38338W121179,GRD,KMHR,KPDX,0807,0003,0112,005.1
-    // Match: POS02,coords,flight_level_or_ground,departure_icao,arrival_icao,current_date,current_time,eta_time,fuel_in_tons
-    const regex =
-      /^.*,(?<unsplit_coords>.*),(?<flight_level_or_ground>.*),(?<departure_icao>.*),(?<arrival_icao>.*),(?<current_date>.*),(?<current_time>.*),(?<eta_time>.*),(?<fuel_in_tons>.*)$/;
-    const results = message.text.match(regex);
+    const results = message.text.match(Label_44_POS.POS_RE);
     if (results?.groups) {
       this.debug(options, 'Position Report: groups', results.groups);
 

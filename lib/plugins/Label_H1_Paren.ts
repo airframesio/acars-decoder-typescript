@@ -5,6 +5,10 @@ import { ResultFormatter } from '../utils/result_formatter';
 
 export class Label_H1_Paren extends DecoderPlugin {
   name = 'label-h1-paren';
+
+  private static readonly POS_RE =
+    /^\(POS-(?<flight>\w+)\s+(?<lat>-?\d{4,5}[NS])(?<lon>\d{5}[EW])\/(?<timestamp>\d{6})\s+F(?<alt>\d{3})\r?\nRMK\/FUEL\s+(?<fuel>\d{2,3}\.\d)\s+M(?<mach>\d\.\d{2})\)/;
+
   qualifiers() {
     return {
       labels: ['H1'],
@@ -22,10 +26,7 @@ export class Label_H1_Paren extends DecoderPlugin {
       return decodeResult;
     }
 
-    const regex =
-      /^\(POS-(?<flight>\w+)\s+(?<lat>-?\d{4,5}[NS])(?<lon>\d{5}[EW])\/(?<timestamp>\d{6})\s+F(?<alt>\d{3})\r?\nRMK\/FUEL\s+(?<fuel>\d{2,3}\.\d)\s+M(?<mach>\d\.\d{2})\)/;
-
-    const match = message.text.match(regex);
+    const match = message.text.match(Label_H1_Paren.POS_RE);
     if (match && match.groups) {
       decodeResult.decoded = true;
       decodeResult.decoder.decodeLevel = 'partial';

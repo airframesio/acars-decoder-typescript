@@ -5,6 +5,13 @@ import { ResultFormatter } from '../utils/result_formatter';
 export class Label_16_N_Space extends DecoderPlugin {
   name = 'label-16-n-space';
 
+  // Style: N 44.203,W 86.546,31965,6, 290
+  private static readonly VARIANT1_RE =
+    /^(?<lat>[NS])\s(?<lat_coord>.*),(?<long>[EW])\s*(?<long_coord>.*),(?<alt>.*),(?<unkwn1>.*),\s*(?<unkwn2>.*)$/;
+  // Style: N 28.177/W 96.055
+  private static readonly VARIANT2_RE =
+    /^(?<lat>[NS])\s(?<lat_coord>.*)\/(?<long>[EW])\s*(?<long_coord>.*)$/;
+
   qualifiers() {
     return {
       labels: ['16'],
@@ -18,15 +25,7 @@ export class Label_16_N_Space extends DecoderPlugin {
     decodeResult.formatted.description = 'Position Report';
     decodeResult.message = message;
 
-    // Style: N 44.203,W 86.546,31965,6, 290
-    let variant1Regex =
-      /^(?<lat>[NS])\s(?<lat_coord>.*),(?<long>[EW])\s*(?<long_coord>.*),(?<alt>.*),(?<unkwn1>.*),\s*(?<unkwn2>.*)$/;
-
-    // Style: N 28.177/W 96.055
-    let variant2Regex =
-      /^(?<lat>[NS])\s(?<lat_coord>.*)\/(?<long>[EW])\s*(?<long_coord>.*)$/;
-
-    let results = message.text.match(variant1Regex);
+    let results = message.text.match(Label_16_N_Space.VARIANT1_RE);
     if (results?.groups) {
       if (options.debug) {
         console.log('Label 16 N : results');
@@ -59,7 +58,7 @@ export class Label_16_N_Space extends DecoderPlugin {
       return decodeResult;
     }
 
-    results = message.text.match(variant2Regex);
+    results = message.text.match(Label_16_N_Space.VARIANT2_RE);
     if (results?.groups) {
       if (options.debug) {
         console.log('Label 16 N : results');

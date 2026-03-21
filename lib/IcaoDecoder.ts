@@ -44,12 +44,23 @@ export class IcaoDecoder {
   }
 
   isMilitary(): boolean {
-    const i = this.icao;
-    const n = parseInt(i, 16);
-    for (const [start, end] of IcaoDecoder.MILITARY_RANGES) {
-      if (start <= n && n <= end) {
-        return true;
+    const n = parseInt(this.icao, 16);
+    // Binary search: ranges are sorted by start address.
+    // Find the last range whose start <= n, then check if n <= end.
+    const ranges = IcaoDecoder.MILITARY_RANGES;
+    let lo = 0;
+    let hi = ranges.length - 1;
+    while (lo <= hi) {
+      const mid = (lo + hi) >>> 1;
+      if (ranges[mid][0] <= n) {
+        lo = mid + 1;
+      } else {
+        hi = mid - 1;
       }
+    }
+    // hi is now the index of the last range where start <= n (or -1 if none)
+    if (hi >= 0 && n <= ranges[hi][1]) {
+      return true;
     }
     return false;
   }

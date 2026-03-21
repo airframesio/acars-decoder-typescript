@@ -5,6 +5,10 @@ import { ResultFormatter } from '../utils/result_formatter';
 
 export class CBand extends DecoderPlugin {
   name = 'c-band';
+
+  private static readonly HEADER_RE =
+    /^(?<msgno>[A-Z]\d{2}[A-Z])(?<airline>[A-Z0-9]{2})(?<number>[0-9]{4})/;
+
   qualifiers() {
     return {
       labels: ['*'],
@@ -19,9 +23,7 @@ export class CBand extends DecoderPlugin {
     // C-Band puts a 10 char header in front of some message types
     // First 4 chars are some kind of message number
     // Last 6 chars are the flight number
-    let cband = message.text.match(
-      /^(?<msgno>[A-Z]\d{2}[A-Z])(?<airline>[A-Z0-9]{2})(?<number>[0-9]{4})/,
-    );
+    let cband = message.text.match(CBand.HEADER_RE);
     if (cband?.groups) {
       const messageText = message.text.substring(10);
       const decoded = this.decoder.decode(
