@@ -1,6 +1,33 @@
-import * as Base85 from 'base85';
-import * as zlib from 'minizlib';
-import { Buffer } from 'node:buffer';
+import { ascii85Decode } from './ascii85';
+import * as pako from 'pako';
+
+const textDecoder = new TextDecoder();
+const textEncoder = new TextEncoder();
+
+/**
+ * Inflate compressed data with support for partial/truncated streams.
+ * Captures output chunks via onData to handle Z_SYNC_FLUSH correctly.
+ */
+function inflateData(data: Uint8Array, raw: boolean): Uint8Array | undefined {
+  const chunks: Uint8Array[] = [];
+  const inflator = new pako.Inflate({ windowBits: raw ? -15 : 15 });
+  inflator.onData = (chunk: Uint8Array) => {
+    chunks.push(chunk);
+  };
+  inflator.push(data, 2); // Z_SYNC_FLUSH
+
+  if (chunks.length === 0) return undefined;
+  if (chunks.length === 1) return chunks[0];
+
+  const totalLen = chunks.reduce((sum, c) => sum + c.length, 0);
+  const result = new Uint8Array(totalLen);
+  let offset = 0;
+  for (const chunk of chunks) {
+    result.set(chunk, offset);
+    offset += chunk.length;
+  }
+  return result;
+}
 
 enum MIAMVersion {
   V1 = 1,
@@ -155,7 +182,7 @@ export class MIAMCoreUtils {
           };
         }
 
-        let hdr = Base85.decode('<~' + rawHdr + '~>', 'ascii85');
+        let hdr = ascii85Decode('<~' + rawHdr + '~>');
         if (!hdr || hdr.length < hpad) {
           return {
             decoded: false,
@@ -163,26 +190,26 @@ export class MIAMCoreUtils {
           };
         }
 
-        let body: Buffer | undefined = undefined;
+        let body: Uint8Array | undefined = undefined;
 
         const rawBody = txt.substring(delimIdx + 1);
         if (rawBody.length > 0) {
           if ('0123'.indexOf(bpad) >= 0) {
             const bpadValue = parseInt(bpad);
 
-            body = Base85.decode('<~' + rawBody + '~>', 'ascii85') || undefined;
+            body = ascii85Decode('<~' + rawBody + '~>') || undefined;
             if (body && body.length >= bpadValue) {
               body = body.subarray(0, body.length - bpadValue);
             }
           } else if (bpad === '-') {
-            body = Buffer.from(rawBody);
+            body = textEncoder.encode(rawBody);
           }
         }
 
         hdr = hdr.subarray(0, hdr.length - hpad);
 
-        const version = hdr.readUInt8(0) & 0xf;
-        const pduType = (hdr.readUInt8(0) >> 4) & 0xf;
+        const version = hdr[0] & 0xf;
+        const pduType = (hdr[0] >> 4) & 0xf;
 
         if (isMIAMVersion(version) && isMIAMCorePdu(pduType)) {
           const versionPduHandler =
@@ -225,7 +252,7 @@ export class MIAMCoreUtils {
       },
     };
 
-  private static arincCrc16(buf: Buffer, seed?: number) {
+  private static arincCrc16(buf: Uint8Array, seed?: number) {
     const crctable = [
       0x0000, 0x1021, 0x2042, 0x3063, 0x4084, 0x50a5, 0x60c6, 0x70e7, 0x8108,
       0x9129, 0xa14a, 0xb16b, 0xc18c, 0xd1ad, 0xe1ce, 0xf1ef, 0x1231, 0x0210,
@@ -263,14 +290,14 @@ export class MIAMCoreUtils {
     for (let i = 0; i < buf.length; i++) {
       crc =
         (((crc << 8) >>> 0) ^
-          crctable[(((crc >>> 8) ^ buf.readUInt8(i)) >>> 0) & 0xff]) >>>
+          crctable[(((crc >>> 8) ^ buf[i]) >>> 0) & 0xff]) >>>
         0;
     }
 
     return crc & 0xffff;
   }
 
-  private static arinc665Crc32(buf: Buffer, seed?: number) {
+  private static arinc665Crc32(buf: Uint8Array, seed?: number) {
     const crctable = [
       0x00000000, 0x04c11db7, 0x09823b6e, 0x0d4326d9, 0x130476dc, 0x17c56b6b,
       0x1a864db2, 0x1e475005, 0x2608edb8, 0x22c9f00f, 0x2f8ad6d6, 0x2b4bcb61,
@@ -321,9 +348,7 @@ export class MIAMCoreUtils {
 
     for (let i = 0; i < buf.length; i++) {
       crc =
-        (((crc << 8) >>> 0) ^
-          crctable[((crc >>> 24) ^ buf.readUInt8(i)) >>> 0]) >>>
-        0;
+        (((crc << 8) >>> 0) ^ crctable[((crc >>> 24) ^ buf[i]) >>> 0]) >>> 0;
     }
 
     return crc;
@@ -347,8 +372,8 @@ export class MIAMCoreUtils {
     version: MIAMVersion,
     minHdrSize: number,
     crcLen: number,
-    hdr: Buffer,
-    body?: Buffer,
+    hdr: Uint8Array,
+    body?: Uint8Array,
   ): PduDecodingResult {
     if (hdr.length < minHdrSize) {
       return {
@@ -369,7 +394,7 @@ export class MIAMCoreUtils {
     let pduAppType: number = 0;
     let pduAppId: string = '';
     let pduCrc: number = 0;
-    let pduData: Buffer | null = null;
+    let pduData: Uint8Array | null = null;
     let pduCrcIsOk: boolean = false;
     let pduIsComplete: boolean = true;
 
@@ -380,8 +405,7 @@ export class MIAMCoreUtils {
     let ackOptions: number = 0;
 
     if (version === MIAMVersion.V1) {
-      pduSize =
-        (hdr.readUInt8(1) << 16) | (hdr.readUInt8(2) << 8) | hdr.readUInt8(3);
+      pduSize = (hdr[1] << 16) | (hdr[2] << 8) | hdr[3];
 
       const msgSize = hdr.length + (body === undefined ? 0 : body.length);
       if (pduSize > msgSize) {
@@ -392,20 +416,19 @@ export class MIAMCoreUtils {
       }
       hdr = hdr.subarray(4);
 
-      tail = hdr.subarray(0, 7).toString('ascii');
+      tail = textDecoder.decode(hdr.subarray(0, 7));
       hdr = hdr.subarray(7);
     } else if (version === MIAMVersion.V2) {
       hdr = hdr.subarray(1);
     }
 
-    msgNum = (hdr.readUInt8(0) >> 1) & 0x7f;
-    ackOptions = hdr.readUInt8(0) & 1;
+    msgNum = (hdr[0] >> 1) & 0x7f;
+    ackOptions = hdr[0] & 1;
     hdr = hdr.subarray(1);
 
-    pduCompression =
-      ((hdr.readUInt8(0) << 2) | ((hdr.readUInt8(1) >> 6) & 0x3)) & 0x7;
-    pduEncoding = (hdr.readUInt8(1) >> 4) & 0x3;
-    pduAppType = hdr.readUInt8(1) & 0xf;
+    pduCompression = ((hdr[0] << 2) | ((hdr[1] >> 6) & 0x3)) & 0x7;
+    pduEncoding = (hdr[1] >> 4) & 0x3;
+    pduAppType = hdr[1] & 0xf;
     hdr = hdr.subarray(2);
 
     let appIdLen;
@@ -440,17 +463,13 @@ export class MIAMCoreUtils {
       };
     }
 
-    pduAppId = hdr.subarray(0, appIdLen).toString('ascii');
+    pduAppId = textDecoder.decode(hdr.subarray(0, appIdLen));
     hdr = hdr.subarray(appIdLen);
 
     if (crcLen === 4) {
-      pduCrc =
-        (hdr.readUInt8(0) << 24) |
-        (hdr.readUInt8(1) << 16) |
-        (hdr.readUInt8(2) << 8) |
-        hdr.readUInt8(3); // crc
+      pduCrc = (hdr[0] << 24) | (hdr[1] << 16) | (hdr[2] << 8) | hdr[3]; // crc
     } else if (crcLen === 2) {
-      pduCrc = (hdr.readUInt8(0) << 8) | hdr.readUInt8(1); // crc
+      pduCrc = (hdr[0] << 8) | hdr[1]; // crc
     }
     hdr = hdr.subarray(crcLen);
 
@@ -461,10 +480,7 @@ export class MIAMCoreUtils {
         ) >= 0
       ) {
         try {
-          const decompress = new zlib.InflateRaw({});
-          decompress.write(body);
-          decompress.flush(zlib.constants.Z_SYNC_FLUSH);
-          pduData = decompress.read();
+          pduData = inflateData(body, true) || null;
         } catch (e) {
           pduErrors.push('Inflation failed for body: ' + e);
         }
@@ -483,9 +499,9 @@ export class MIAMCoreUtils {
       if (pduData !== null) {
         const crcAlgoHandlerByVersion: Record<
           MIAMVersion,
-          (buf: Buffer, seed?: number) => number
+          (buf: Uint8Array, seed?: number) => number
         > = {
-          [MIAMVersion.V1]: (buf: Buffer, seed?: number) => {
+          [MIAMVersion.V1]: (buf: Uint8Array, seed?: number) => {
             return ~this.arinc665Crc32(buf, seed);
           },
           [MIAMVersion.V2]: this.arincCrc16,
@@ -537,12 +553,12 @@ export class MIAMCoreUtils {
         label,
         ...(sublabel ? { sublabel } : {}),
         ...(mfi ? { mfi } : {}),
-        ...(pduData ? { text: pduData.toString('ascii') } : {}),
+        ...(pduData ? { text: textDecoder.decode(pduData) } : {}),
       };
     } else {
       pdu.non_acars = {
         appId: pduAppId,
-        ...(pduData ? { text: pduData.toString('ascii') } : {}),
+        ...(pduData ? { text: textDecoder.decode(pduData) } : {}),
       };
     }
 
@@ -556,10 +572,13 @@ export class MIAMCoreUtils {
 
   static VersionPduHandlerTable: Record<
     MIAMVersion,
-    Record<MIAMCorePdu, (hdr: Buffer, body?: Buffer) => PduDecodingResult>
+    Record<
+      MIAMCorePdu,
+      (hdr: Uint8Array, body?: Uint8Array) => PduDecodingResult
+    >
   > = {
     [MIAMVersion.V1]: {
-      [MIAMCorePdu.Data]: (hdr: Buffer, body?: Buffer) => {
+      [MIAMCorePdu.Data]: (hdr: Uint8Array, body?: Uint8Array) => {
         return this.corePduDataHandler(
           MIAMVersion.V1,
           20,
@@ -579,7 +598,7 @@ export class MIAMCoreUtils {
       },
     },
     [MIAMVersion.V2]: {
-      [MIAMCorePdu.Data]: (hdr: Buffer, body?: Buffer) => {
+      [MIAMCorePdu.Data]: (hdr: Uint8Array, body?: Uint8Array) => {
         return this.corePduDataHandler(
           MIAMVersion.V2,
           7,
