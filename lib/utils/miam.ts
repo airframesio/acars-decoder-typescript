@@ -1,33 +1,8 @@
 import { ascii85Decode } from './ascii85';
-import * as pako from 'pako';
+import { inflateData } from './compression';
 
 const textDecoder = new TextDecoder();
 const textEncoder = new TextEncoder();
-
-/**
- * Inflate compressed data with support for partial/truncated streams.
- * Captures output chunks via onData to handle Z_SYNC_FLUSH correctly.
- */
-function inflateData(data: Uint8Array, raw: boolean): Uint8Array | undefined {
-  const chunks: Uint8Array[] = [];
-  const inflator = new pako.Inflate({ windowBits: raw ? -15 : 15 });
-  inflator.onData = (chunk: Uint8Array) => {
-    chunks.push(chunk);
-  };
-  inflator.push(data, 2); // Z_SYNC_FLUSH
-
-  if (chunks.length === 0) return undefined;
-  if (chunks.length === 1) return chunks[0];
-
-  const totalLen = chunks.reduce((sum, c) => sum + c.length, 0);
-  const result = new Uint8Array(totalLen);
-  let offset = 0;
-  for (const chunk of chunks) {
-    result.set(chunk, offset);
-    offset += chunk.length;
-  }
-  return result;
-}
 
 enum MIAMVersion {
   V1 = 1,
@@ -480,7 +455,12 @@ export class MIAMCoreUtils {
         ) >= 0
       ) {
         try {
-          pduData = inflateData(body, true) || null;
+          const inflated = inflateData(body, true);
+          if (inflated === undefined) {
+            pduErrors.push('Inflation produced no output for body');
+          } else {
+            pduData = inflated;
+          }
         } catch (e) {
           pduErrors.push('Inflation failed for body: ' + e);
         }
