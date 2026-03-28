@@ -172,8 +172,15 @@ export class MIAMCoreUtils {
           if ('0123'.indexOf(bpad) >= 0) {
             const bpadValue = parseInt(bpad);
 
-            body = ascii85Decode('<~' + rawBody + '~>') || undefined;
-            if (body && body.length >= bpadValue) {
+            const decoded = ascii85Decode('<~' + rawBody + '~>');
+            if (decoded === null) {
+              return {
+                decoded: false,
+                error: 'Ascii85 decode failed for MIAM message body',
+              };
+            }
+            body = decoded;
+            if (body.length >= bpadValue) {
               body = body.subarray(0, body.length - bpadValue);
             }
           } else if (bpad === '-') {
