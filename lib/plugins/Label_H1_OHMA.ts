@@ -1,9 +1,9 @@
 import { DecoderPlugin } from '../DecoderPlugin';
 import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
 import { ResultFormatter } from '../utils/result_formatter';
+import { base64ToUint8Array, inflateData } from '../utils/compression';
 
-import * as zlib from 'minizlib';
-import { Buffer } from 'node:buffer';
+const textDecoder = new TextDecoder();
 
 export class Label_H1_OHMA extends DecoderPlugin {
   name = 'label-h1-ohma';
@@ -23,12 +23,12 @@ export class Label_H1_OHMA extends DecoderPlugin {
 
     const data = message.text.split('OHMA')[1]; // throw out '/RTNOCR.' - even though it means something
     try {
-      const compressedBuffer = Buffer.from(data, 'base64');
-      const decompress = new zlib.Inflate({});
-      decompress.write(compressedBuffer);
-      decompress.flush(zlib.constants.Z_SYNC_FLUSH);
-      const result = decompress.read();
-      const jsonText = result?.toString() || '';
+      const compressedBuffer = base64ToUint8Array(data);
+      const result = inflateData(compressedBuffer, false);
+      if (!result || result.length === 0) {
+        throw new Error('Decompression produced no output');
+      }
+      const jsonText = textDecoder.decode(result);
 
       let formattedMsg;
       let jsonMessage;
