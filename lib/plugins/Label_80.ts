@@ -4,6 +4,10 @@ import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
 import { CoordinateUtils } from '../utils/coordinate_utils';
 import { ResultFormatter } from '../utils/result_formatter';
 
+const POS_REGEX = /^(?<latd>[NS])(?<lat>.+)(?<lngd>[EW])(?<lng>.+)/;
+const WS_REGEX = /\s+/;
+const NEWLINE_REGEX = /\r?\n/;
+
 // Airline Defined
 // 3N01 POSRPT
 export class Label_80 extends DecoderPlugin {
@@ -22,7 +26,7 @@ export class Label_80 extends DecoderPlugin {
       'Airline Defined Position Report',
     );
 
-    const lines = message.text.split(/\r?\n/);
+    const lines = message.text.split(NEWLINE_REGEX);
     if (lines.length === 1 && lines[0].includes(',')) {
       this.parseCsvFormat(lines[0], decodeResult);
     } else {
@@ -63,7 +67,7 @@ export class Label_80 extends DecoderPlugin {
       ResultFormatter.unknown(results, header, '/');
       return;
     }
-    const msgInfo = fields[0].split(/\s+/);
+    const msgInfo = fields[0].split(WS_REGEX);
     if (msgInfo.length === 3) {
       ResultFormatter.unknownArr(results, msgInfo.slice(0, 2), ' ');
       ResultFormatter.flightNumber(results, msgInfo[2]);
@@ -72,7 +76,7 @@ export class Label_80 extends DecoderPlugin {
       return;
     }
 
-    const otherInfo1 = fields[1].split(/\s+/);
+    const otherInfo1 = fields[1].split(WS_REGEX);
     if (otherInfo1.length === 2) {
       ResultFormatter.day(results, parseInt(otherInfo1[0], 10));
       ResultFormatter.departureAirport(results, otherInfo1[1]);
@@ -80,7 +84,7 @@ export class Label_80 extends DecoderPlugin {
       ResultFormatter.unknownArr(results, otherInfo1, ' ');
     }
 
-    const otherInfo2 = fields[2].split(/\s+/);
+    const otherInfo2 = fields[2].split(WS_REGEX);
     if (otherInfo2.length === 2) {
       ResultFormatter.arrivalAirport(results, otherInfo2[0]);
       ResultFormatter.tail(results, otherInfo2[1].replace('.', ''));
@@ -94,7 +98,7 @@ export class Label_80 extends DecoderPlugin {
   }
 
   private parseTags(part: string, results: DecodeResult) {
-    const kvPair = part.split(/\s+/);
+    const kvPair = part.split(WS_REGEX);
     if (kvPair.length < 2) {
       ResultFormatter.unknown(results, part, '/');
       return;
@@ -105,8 +109,7 @@ export class Label_80 extends DecoderPlugin {
     switch (tag) {
       case 'POS':
         // don't use decodeStringCoordinates because of different position format
-        const posRegex = /^(?<latd>[NS])(?<lat>.+)(?<lngd>[EW])(?<lng>.+)/;
-        const posResult = val.match(posRegex);
+        const posResult = POS_REGEX.exec(val);
         const lat =
           Number(posResult?.groups?.lat) *
           (posResult?.groups?.latd === 'S' ? -1 : 1);
@@ -183,7 +186,7 @@ export class Label_80 extends DecoderPlugin {
     if (csvParts.length !== 9) {
       return;
     }
-    const header = csvParts[0].trim().split(/\s+/);
+    const header = csvParts[0].trim().split(WS_REGEX);
     ResultFormatter.unknown(results, header[0], ' ');
     ResultFormatter.unknown(results, header[1], ' ');
     ResultFormatter.position(
