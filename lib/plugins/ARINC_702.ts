@@ -3,6 +3,10 @@ import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
 import { Arinc702Helper } from '../utils/arinc_702_helper';
 import { ResultFormatter } from '../utils/result_formatter';
 
+// Hoisted to module scope so the wildcard decode() doesn't recompile the
+// pattern for every incoming message.
+const NEWLINE_REGEX = /[\n\r]/g;
+
 // TODO: come up with a better name as this decodes multiple labels
 export class Arinc702 extends DecoderPlugin {
   name = 'arinc-702';
@@ -17,7 +21,7 @@ export class Arinc702 extends DecoderPlugin {
     decodeResult.decoder.name = this.name;
     decodeResult.message = message;
 
-    const msg = message.text.replace(/\n|\r/g, '');
+    const msg = message.text.replace(NEWLINE_REGEX, '');
 
     // try to decode the entire message
     let decoded = false;

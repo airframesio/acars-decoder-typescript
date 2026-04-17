@@ -9,11 +9,11 @@ export class CoordinateUtils {
     stringCoords: string,
   ): { latitude: number; longitude: number } | undefined {
     // format: N12345W123456 or N12345 W123456
-    const firstChar = stringCoords.substring(0, 1);
-    let middleChar = stringCoords.substring(6, 7);
+    const firstChar = stringCoords.charAt(0);
+    let middleChar = stringCoords.charAt(6);
     let longitudeChars = stringCoords.substring(7, 13);
-    if (middleChar == ' ') {
-      middleChar = stringCoords.substring(7, 8);
+    if (middleChar === ' ') {
+      middleChar = stringCoords.charAt(7);
       longitudeChars = stringCoords.substring(8, 14);
     }
     if (
@@ -43,30 +43,34 @@ export class CoordinateUtils {
     stringCoords: string,
   ): { latitude: number; longitude: number } | undefined {
     // format: N12345W123456 or N12345 W123456
-    const firstChar = stringCoords.substring(0, 1);
-    let middleChar = stringCoords.substring(6, 7);
+    const firstChar = stringCoords.charAt(0);
+    let middleChar = stringCoords.charAt(6);
     let longitudeChars = stringCoords.substring(7, 13);
-    if (middleChar == ' ') {
-      middleChar = stringCoords.substring(7, 8);
+    if (middleChar === ' ') {
+      middleChar = stringCoords.charAt(7);
       longitudeChars = stringCoords.substring(8, 14);
     }
-    const latDeg = Math.trunc(Number(stringCoords.substring(1, 6)) / 1000);
-    const latMin = (Number(stringCoords.substring(1, 6)) % 1000) / 10;
-    const lonDeg = Math.trunc(Number(longitudeChars) / 1000);
-    const lonMin = (Number(longitudeChars) % 1000) / 10;
 
     if (
-      (firstChar === 'N' || firstChar === 'S') &&
-      (middleChar === 'W' || middleChar === 'E')
+      (firstChar !== 'N' && firstChar !== 'S') ||
+      (middleChar !== 'W' && middleChar !== 'E')
     ) {
-      return {
-        latitude:
-          (latDeg + latMin / 60) * CoordinateUtils.getDirection(firstChar),
-        longitude:
-          (lonDeg + lonMin / 60) * CoordinateUtils.getDirection(middleChar),
-      };
+      return undefined;
     }
-    return undefined;
+
+    const latRaw = Number(stringCoords.substring(1, 6));
+    const lonRaw = Number(longitudeChars);
+    const latDeg = Math.trunc(latRaw / 1000);
+    const latMin = (latRaw % 1000) / 10;
+    const lonDeg = Math.trunc(lonRaw / 1000);
+    const lonMin = (lonRaw % 1000) / 10;
+
+    return {
+      latitude:
+        (latDeg + latMin / 60) * CoordinateUtils.getDirection(firstChar),
+      longitude:
+        (lonDeg + lonMin / 60) * CoordinateUtils.getDirection(middleChar),
+    };
   }
   public static coordinateString(coords: {
     latitude: number;
