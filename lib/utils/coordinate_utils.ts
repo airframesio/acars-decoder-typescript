@@ -17,19 +17,20 @@ export class CoordinateUtils {
       longitudeChars = stringCoords.substring(8, 14);
     }
     if (
-      (firstChar !== 'N' && firstChar !== 'S') ||
-      (middleChar !== 'W' && middleChar !== 'E')
+      (firstChar === 'N' || firstChar === 'S') &&
+      (middleChar === 'W' || middleChar === 'E')
     ) {
-      return undefined;
+      return {
+        latitude:
+          (Number(stringCoords.substring(1, 6)) / 1000) *
+          CoordinateUtils.getDirection(firstChar),
+        longitude:
+          (Number(longitudeChars) / 1000) *
+          CoordinateUtils.getDirection(middleChar),
+      };
     }
-    return {
-      latitude:
-        (Number(stringCoords.substring(1, 6)) / 1000) *
-        CoordinateUtils.getDirection(firstChar),
-      longitude:
-        (Number(longitudeChars) / 1000) *
-        CoordinateUtils.getDirection(middleChar),
-    };
+
+    return undefined;
   }
 
   /**
