@@ -33,7 +33,12 @@ describe('ARINC_702 wildcard wrapper', () => {
     const result = plugin.decode(message);
 
     expect(result.decoded).toBe(true);
-    // Header that wasn't decoded ends up in remaining text.
+    // The delegated H1 body must actually be decoded — assert the
+    // REQ POS fields landed in the result, proving the '/HDQDLUA.'
+    // prefix was peeled before delegation.
+    expect(result.formatted.description).toBe('Request for Position Report');
+    expect(result.raw.checksum).toBe(0x037b);
+    // The unparsed header also ends up in remaining text.
     expect(result.remaining.text).toContain('/HDQDLUA');
   });
 

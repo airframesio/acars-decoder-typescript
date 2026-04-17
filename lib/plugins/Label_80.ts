@@ -107,7 +107,7 @@ export class Label_80 extends DecoderPlugin {
     const val = kvPair.slice(1).join(' ');
 
     switch (tag) {
-      case 'POS':
+      case 'POS': {
         // don't use decodeStringCoordinates because of different position format
         const posResult = POS_REGEX.exec(val);
         const lat =
@@ -122,6 +122,7 @@ export class Label_80 extends DecoderPlugin {
         };
         ResultFormatter.position(results, position);
         break;
+      }
       case 'ALT':
         ResultFormatter.altitude(results, parseInt(val.replace('+', ''), 10));
         break;
@@ -156,10 +157,11 @@ export class Label_80 extends DecoderPlugin {
           DateTimeUtils.convertHHMMSSToTod(val),
         );
         break;
-      case 'ETA':
+      case 'ETA': {
         const hhmm = val.split('.')[0].replace(':', '');
         ResultFormatter.eta(results, DateTimeUtils.convertHHMMSSToTod(hhmm));
         break;
+      }
       case 'HDG':
         ResultFormatter.heading(results, parseInt(val, 10));
         break;

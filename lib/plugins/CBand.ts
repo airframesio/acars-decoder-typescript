@@ -4,9 +4,9 @@ import { MIAMCoreUtils } from '../utils/miam';
 import { ResultFormatter } from '../utils/result_formatter';
 
 // C-Band puts a 10 char header in front of some message types:
-//   chars 0-4:  message number ([A-Z][0-9]{2}[A-Z])
-//   chars 5-6:  airline code ([A-Z0-9]{2})
-//   chars 7-10: flight number ([0-9]{4})
+//   chars 0-3: message number ([A-Z]\d{2}[A-Z])
+//   chars 4-5: airline code ([A-Z0-9]{2})
+//   chars 6-9: flight number ([0-9]{4})
 // Hoisted to module scope so the pattern is allocated once instead of on
 // every wildcard decode invocation.
 const CBAND_HEADER =
