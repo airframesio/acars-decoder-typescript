@@ -109,6 +109,41 @@ describe('MessageDecoder label index', () => {
     expect(result.decoder.name).toBe('catch-all');
   });
 
+  test('wildcard registration order is preserved across existing label buckets', () => {
+    // Regression test: when a wildcard plugin is registered AFTER a label
+    // bucket has already been created, it must be inserted at the end of
+    // the wildcard section, not at the front. Otherwise later-registered
+    // wildcards would incorrectly take precedence over earlier ones for
+    // labels that already had buckets, and wildcard order would diverge
+    // from buckets created later (which seed from wildcardEntries.slice()).
+    const decoder = new MessageDecoder();
+
+    // 1. Register a label-specific plugin for '99' — this creates a
+    //    bucket with no wildcards yet (existing wildcards from the
+    //    constructor are in, but that's fine; we only care about the
+    //    relative order of stubs registered here).
+    const labelSpecific = new StubPlugin(decoder, 'label-99-specific', ['99']);
+    decoder.registerPlugin(labelSpecific);
+
+    // 2. Register two new wildcard stubs in order.
+    const firstWildcard = new StubPlugin(decoder, 'wild-first', ['*']);
+    decoder.registerPlugin(firstWildcard);
+    const secondWildcard = new StubPlugin(decoder, 'wild-second', ['*']);
+    decoder.registerPlugin(secondWildcard);
+
+    // 3. For a label-99 message, the first-registered wildcard must run
+    //    before the second-registered wildcard. Since both succeed, the
+    //    decoder.name tells us which one won the race.
+    const result = decoder.decode({ label: '99', text: 'anything' });
+    expect(result.decoded).toBe(true);
+    expect(result.decoder.name).toBe('wild-first');
+
+    // 4. The same ordering must hold for a brand-new label that didn't
+    //    have a bucket yet (it gets seeded from wildcardEntries.slice()).
+    const newLabel = decoder.decode({ label: 'ZZ', text: 'anything' });
+    expect(newLabel.decoder.name).toBe('wild-first');
+  });
+
   test('preamble-based plugins only match correct preambles', () => {
     const decoder = new MessageDecoder();
     const stub = new StubPlugin(

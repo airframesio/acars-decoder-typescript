@@ -129,10 +129,14 @@ export class MessageDecoder {
         if (!this.wildcardSet.has(plugin)) {
           this.wildcardEntries.push(entry);
           this.wildcardSet.add(plugin);
-          // Prepend the new wildcard to every existing label bucket so that
-          // wildcard plugins continue to be tried before label-specific ones.
+          // Insert the new wildcard at the end of the wildcard section
+          // in every existing label bucket so that wildcard plugins are
+          // still tried before label-specific ones while preserving
+          // registration order among wildcard plugins (matching how new
+          // buckets are seeded via wildcardEntries.slice() below).
+          const wildcardInsertIndex = this.wildcardEntries.length - 1;
           for (const bucket of this.candidatesByLabel.values()) {
-            bucket.unshift(entry);
+            bucket.splice(wildcardInsertIndex, 0, entry);
           }
         }
       } else {
