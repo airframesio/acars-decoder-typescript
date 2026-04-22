@@ -78,6 +78,7 @@ const pluginClasses = [
   Plugins.Label_QQ,
   Plugins.Label_QR,
   Plugins.Label_QS,
+  Plugins.Label_52_AGM,
 ];
 
 export class MessageDecoder {
