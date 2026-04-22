@@ -128,21 +128,104 @@ export class Label_5Z_Slash extends DecoderPlugin {
         );
       } else if (type === 'ET') {
         const airports = data[2].split(' ');
-        // aiports[0] is blank
+        // airports[0] is blank
         ResultFormatter.departureAirport(decodeResult, airports[1]);
         ResultFormatter.arrivalAirport(decodeResult, airports[2]);
         decodeResult.raw.day = Number(airports[3]);
+        decodeResult.formatted.items.push({
+          type: 'day',
+          code: 'DAY',
+          label: 'Day of Month',
+          value: airports[3],
+        });
         ResultFormatter.timestamp(
           decodeResult,
           DateTimeUtils.convertHHMMSSToTod(airports[4]),
         );
 
         const estimates = data[3].split(' ');
+        // estimates[0] is the EON tag (or other estimate marker)
+        const eonTag = estimates[0];
+        decodeResult.raw.estimate_tag = eonTag;
+        decodeResult.formatted.items.push({
+          type: 'estimate_tag',
+          code: 'ESTTAG',
+          label: 'Estimate Tag',
+          value:
+            eonTag === 'EON'
+              ? 'EON (Estimated On — wheels-on touchdown)'
+              : eonTag,
+        });
         ResultFormatter.eta(
           decodeResult,
           DateTimeUtils.convertHHMMSSToTod(estimates[1]),
         );
-        ResultFormatter.unknown(decodeResult, estimates[2]);
+        // estimates[2] is the qualifier (typ. AUTO = FMS-generated)
+        if (estimates[2]) {
+          const qual = estimates[2];
+          decodeResult.raw.estimate_qualifier = qual;
+          decodeResult.formatted.items.push({
+            type: 'estimate_qualifier',
+            code: 'ESTQUAL',
+            label: 'Estimate Qualifier',
+            value:
+              qual === 'AUTO'
+                ? 'AUTO (FMS-generated, not crew-entered)'
+                : qual,
+          });
+        }
+        if (estimates.length > 3) {
+          ResultFormatter.unknownArr(
+            decodeResult,
+            estimates.slice(3),
+            ' ',
+          );
+        }
+      } else if (type === 'R3') {
+        // Request HOWGOZIT Message
+        // Documented format:
+        //   /R3 HOWGOZIT REQ   / <DEP> <ARR> <DAY> <HHMMSS> <FLIGHT> <DAY-echo> <DEP-echo>
+        // Example: /R3 HOWGOZIT REQ   / KRSW KIAH 19 213658 2388 19 KRSW
+        const parts = data[2].split(' ').filter((s) => s !== '');
+        // parts now holds: [DEP, ARR, DAY, HHMMSS, FLIGHT, DAY-echo, DEP-echo]
+        if (parts[0]) ResultFormatter.departureAirport(decodeResult, parts[0]);
+        if (parts[1]) ResultFormatter.arrivalAirport(decodeResult, parts[1]);
+        if (parts[2]) {
+          decodeResult.raw.day = Number(parts[2]);
+          decodeResult.formatted.items.push({
+            type: 'day',
+            code: 'DAY',
+            label: 'Day of Month',
+            value: parts[2],
+          });
+        }
+        if (parts[3]) {
+          ResultFormatter.timestamp(
+            decodeResult,
+            DateTimeUtils.convertHHMMSSToTod(parts[3]),
+          );
+        }
+        if (parts[4]) {
+          ResultFormatter.flightNumber(decodeResult, parts[4]);
+        }
+        // Trailing DAY + DEP echo — document but don't duplicate the main fields
+        if (parts[5]) {
+          decodeResult.raw.day_echo = parts[5];
+        }
+        if (parts[6]) {
+          decodeResult.raw.departure_echo = parts[6];
+        }
+        if (parts[5] || parts[6]) {
+          decodeResult.formatted.items.push({
+            type: 'trailing_echo',
+            code: 'ECHO',
+            label: 'Trailing Echo (DAY / DEP)',
+            value: [parts[5], parts[6]].filter(Boolean).join(' / '),
+          });
+        }
+        if (parts.length > 7) {
+          ResultFormatter.unknownArr(decodeResult, parts.slice(7), ' ');
+        }
       } else {
         if (options.debug) {
           console.log(`Decoder: Unkown 5Z RDC format: ${message.text}`);
