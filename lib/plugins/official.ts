@@ -64,3 +64,4 @@ export * from './Label_QR';
 export * from './Label_QP';
 export * from './Label_QS';
 export * from './Label_QQ';
+export * from './Label_36_PosReport';
