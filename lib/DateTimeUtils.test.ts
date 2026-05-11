@@ -10,7 +10,7 @@ describe('DateTimeUtils.UTCDateTimeToString', () => {
   });
 
   it('does not roll the month forward when the system date is later than the target month-end', () => {
-    // Pin "now" to 31 March 2026 — a 31-day month. Encoding DDMMYY = 280226
+    // Pin "now" to 31 March 2026, a 31-day month. Encoding DDMMYY = 280226
     // (28 Feb 2026) used to roll forward to March because the order of
     // setUTC* calls applied "set day=28" to a Date already at the 31st.
     jest.useFakeTimers();
