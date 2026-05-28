@@ -168,8 +168,9 @@ export class MessageDecoder {
 
     for (let i = 0; i < usablePlugins.length; i++) {
       const plugin = usablePlugins[i];
-      result = plugin.decode(message, options);
-      if (result.decoded) {
+      const pluginResult = plugin.decode(message, options);
+      if (pluginResult.decoded) {
+        result = pluginResult;
         break;
       }
     }

@@ -61,4 +61,30 @@ describe('MessageDecoder', () => {
     expect(decodeResult.message.label).toBe('H1');
     expect(decodeResult.formatted.items.length).toBe(5);
   });
+
+  test('preserves default fallback result when no plugin decodes', () => {
+    const message = {
+      label: '44',
+      text: 'GARBAGE TEXT THAT SHOULD NOT MATCH',
+    };
+
+    const decodeResult = decoder.decode(message);
+
+    expect(decodeResult.decoded).toBe(false);
+    expect(decodeResult.error).toBe('No known decoder plugin for this message');
+    expect(decodeResult.decoder).toEqual({
+      name: 'none',
+      type: 'none',
+      decodeLevel: 'none',
+    });
+    expect(decodeResult.message).toBe(message);
+    expect(decodeResult.remaining).toEqual({
+      text: message.text,
+    });
+    expect(decodeResult.raw).toEqual({});
+    expect(decodeResult.formatted).toEqual({
+      description: 'Not Decoded',
+      items: [],
+    });
+  });
 });
