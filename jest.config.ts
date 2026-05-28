@@ -88,7 +88,14 @@ export default {
   // ],
 
   // A map from regular expressions to module names or to arrays of module names that allow to stub out resources with a single module
-  // moduleNameMapper: {},
+  moduleNameMapper: {
+    "^@airframes/ads-runtime-ts$":
+      "<rootDir>/vendor/airframes-decoder/runtimes/typescript/index.ts",
+    "^@airframes/ads-runtime-ts/helpers$":
+      "<rootDir>/vendor/airframes-decoder/runtimes/typescript/helpers.ts",
+    "^@airframes/ads-runtime-ts/escape_hatches$":
+      "<rootDir>/vendor/airframes-decoder/runtimes/typescript/escape_hatches/index.ts",
+  },
 
   // An array of regexp pattern strings, matched against all module paths before considered 'visible' to the module loader
   // modulePathIgnorePatterns: [],
@@ -159,9 +166,10 @@ export default {
   // ],
 
   // An array of regexp pattern strings that are matched against all test paths, matched tests are skipped
-  // testPathIgnorePatterns: [
-  //   "/node_modules/"
-  // ],
+  testPathIgnorePatterns: [
+    "/node_modules/",
+    "/vendor/", // skip vendored airframes-decoder submodule's tests
+  ],
 
   // The regexp pattern or array of patterns that Jest uses to detect test files
   // testRegex: [],
