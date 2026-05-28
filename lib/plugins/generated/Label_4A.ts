@@ -26,8 +26,9 @@ export class Label_4A extends DecoderPlugin {
       result.raw.timestamp = timestamp;
       const tail = helpers.tailNumber(fields[2], {"strip_chars":"."});
       result.raw.tail = tail;
+      let callsign;
       if (fields[3] !== "") {
-        const callsign = helpers.callsign(fields[3]);
+        callsign = helpers.callsign(fields[3]);
         result.raw.callsign = callsign;
       }
       const departure_icao = helpers.airport(fields[4]);

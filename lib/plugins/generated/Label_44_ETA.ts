@@ -32,8 +32,9 @@ export class Label_44_ETA extends DecoderPlugin {
     const day = helpers.integer(data[5], {"substring_start":2,"substring_length":2});
     const timestamp = helpers.timestampHhmmss(data[6]);
     const eta_time = helpers.timestampHhmmss(data[7]);
+    let fuel_remaining;
     if (!(["---.-"].includes(data[8]))) {
-      const fuel_remaining = helpers.float(data[8]);
+      fuel_remaining = helpers.float(data[8]);
     }
     ResultFormatter.position(result, position);
     ResultFormatter.altitude(result, altitude);
@@ -43,7 +44,7 @@ export class Label_44_ETA extends DecoderPlugin {
     ResultFormatter.timestamp(result, day);
     ResultFormatter.timestamp(result, timestamp);
     ResultFormatter.timestamp(result, eta_time);
-    ResultFormatter.fuel(result, fuel_remaining);
+    ResultFormatter.currentFuel(result, fuel_remaining);
     this.setDecodeLevel(result, true, 'full');
     return result;
   }

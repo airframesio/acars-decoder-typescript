@@ -34,8 +34,9 @@ export class Label_44_POS extends DecoderPlugin {
     const day = helpers.integer(m.current_date, {"substring_start":2,"substring_length":2});
     const timestamp = helpers.timestampHhmmss(m.current_time, {"append":"00"});
     const eta = helpers.timestampHhmmss(m.eta_time, {"append":"00"});
+    let fuel_in_tons;
     if (!(["***","****"].includes(m.fuel_in_tons))) {
-      const fuel_in_tons = helpers.float(m.fuel_in_tons);
+      fuel_in_tons = helpers.float(m.fuel_in_tons);
     }
     const departure_icao = helpers.airport(m.departure_icao);
     const arrival_icao = helpers.airport(m.arrival_icao);
@@ -44,7 +45,7 @@ export class Label_44_POS extends DecoderPlugin {
     ResultFormatter.timestamp(result, day);
     ResultFormatter.timestamp(result, timestamp);
     ResultFormatter.timestamp(result, eta);
-    ResultFormatter.fuel(result, fuel_in_tons);
+    ResultFormatter.currentFuel(result, fuel_in_tons);
     ResultFormatter.departureAirport(result, departure_icao);
     ResultFormatter.arrivalAirport(result, arrival_icao);
     ResultFormatter.altitude(result, altitude);

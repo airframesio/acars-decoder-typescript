@@ -30,8 +30,9 @@ export class Label_44_IN extends DecoderPlugin {
     const month = helpers.integer(data[4], {"substring_start":0,"substring_length":2});
     const day = helpers.integer(data[4], {"substring_start":2,"substring_length":2});
     const in_time = helpers.timestampHhmmss(data[5]);
+    let fuel_remaining;
     if (!(["---.-"].includes(data[6]))) {
-      const fuel_remaining = helpers.float(data[6]);
+      fuel_remaining = helpers.float(data[6]);
     }
     ResultFormatter.position(result, position);
     ResultFormatter.departureAirport(result, departure_icao);
@@ -39,7 +40,7 @@ export class Label_44_IN extends DecoderPlugin {
     ResultFormatter.timestamp(result, month);
     ResultFormatter.timestamp(result, day);
     ResultFormatter.timestamp(result, in_time);
-    ResultFormatter.fuel(result, fuel_remaining);
+    ResultFormatter.currentFuel(result, fuel_remaining);
     this.setDecodeLevel(result, true, 'full');
     return result;
   }

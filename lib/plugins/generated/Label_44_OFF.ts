@@ -31,8 +31,9 @@ export class Label_44_OFF extends DecoderPlugin {
     const day = helpers.integer(data[4], {"substring_start":2,"substring_length":2});
     const off_time = helpers.timestampHhmmss(data[5]);
     const eta_time = helpers.timestampHhmmss(data[6]);
+    let fuel_remaining;
     if (!(["---.-"].includes(data[7]))) {
-      const fuel_remaining = helpers.float(data[7]);
+      fuel_remaining = helpers.float(data[7]);
     }
     ResultFormatter.position(result, position);
     ResultFormatter.departureAirport(result, departure_icao);
@@ -41,7 +42,7 @@ export class Label_44_OFF extends DecoderPlugin {
     ResultFormatter.timestamp(result, day);
     ResultFormatter.timestamp(result, off_time);
     ResultFormatter.timestamp(result, eta_time);
-    ResultFormatter.fuel(result, fuel_remaining);
+    ResultFormatter.currentFuel(result, fuel_remaining);
     this.setDecodeLevel(result, true, 'full');
     return result;
   }
