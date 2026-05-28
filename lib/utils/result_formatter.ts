@@ -222,7 +222,7 @@ export class ResultFormatter {
     decodeResult.raw.fuel_remaining = value;
     decodeResult.formatted.items.push({
       type: 'fuel_remaining',
-      code: ' FUEL_REM',
+      code: 'FUEL_REM',
       label: 'Fuel Remaining',
       value: decodeResult.raw.fuel_remaining.toString(),
     });
@@ -665,7 +665,7 @@ export class ResultFormatter {
       type: 'sequence',
       code: 'SEQ',
       label: 'Sequence Number',
-      value: decodeResult.raw.sequence_number,
+      value: decodeResult.raw.sequence_number.toString(),
     });
   }
 
@@ -675,7 +675,7 @@ export class ResultFormatter {
       type: 'sequence',
       code: 'SEQ_RESP',
       label: 'Sequence Response',
-      value: decodeResult.raw.sequence_response,
+      value: decodeResult.raw.sequence_response.toString(),
     });
   }
 
