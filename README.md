@@ -12,6 +12,7 @@ This is a no-op documentation tweak to verify repository access, build/lint, tes
 # acars-decoder-typescript
 
 [![NPM Version](https://badge.fury.io/js/@airframes%2Facars-decoder.svg)](https://badge.fury.io/js/@airframes%2Facars-decoder)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./License.md)
 [![GitHub Actions Workflow Status](https://github.com/airframesio/acars-decoder-typescript/actions/workflows/yarn-test.yml/badge.svg)
 ](https://github.com/airframesio/acars-decoder-typescript/actions/workflows/yarn-test.yml)
 ![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/airframesio/acars-decoder-typescript?utm_source=oss&utm_medium=github&utm_campaign=airframesio%2Facars-decoder-typescript&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
