@@ -7,6 +7,11 @@ import {
 
 import * as Plugins from './plugins/official';
 
+// Stage 2.5 pilot: use the ADS-generated Label_10_POS plugin instead of the
+// hand-written one. Proves the spec → codegen → runtime path end-to-end
+// against the existing test suite. Behavior is byte-for-byte identical.
+import { Label_10_POS as Label_10_POS_Generated } from './plugins/generated/Label_10_POS';
+
 /**
  * Ordered list of plugin constructors. Order matters — plugins are tried
  * sequentially until one returns decoded: true.
@@ -17,7 +22,7 @@ const pluginClasses = [
   Plugins.Label_ColonComma,
   Plugins.Label_5Z_Slash,
   Plugins.Label_10_LDR,
-  Plugins.Label_10_POS,
+  Label_10_POS_Generated,
   Plugins.Label_10_Slash,
   Plugins.Label_12_N_Space,
   Plugins.Label_12_POS,

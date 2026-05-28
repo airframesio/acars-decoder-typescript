@@ -25,24 +25,15 @@ export class Label_44_ETA extends DecoderPlugin {
       return this.failUnknown(result, message.text, options);
     }
     const position = helpers.coordinateDecimalMinutes(data[1], {"style":"combined","format":"NSDDMM_M_EWDDMM_M"});
-    result.raw.position = position;
     const altitude = helpers.integer(data[2], {"multiplier":100});
-    result.raw.altitude = altitude;
     const departure_icao = helpers.airport(data[3]);
-    result.raw.departure_icao = departure_icao;
     const arrival_icao = helpers.airport(data[4]);
-    result.raw.arrival_icao = arrival_icao;
     const month = helpers.integer(data[5], {"substring_start":0,"substring_length":2});
-    result.raw.month = month;
     const day = helpers.integer(data[5], {"substring_start":2,"substring_length":2});
-    result.raw.day = day;
     const timestamp = helpers.timestampHhmmss(data[6]);
-    result.raw.timestamp = timestamp;
     const eta_time = helpers.timestampHhmmss(data[7]);
-    result.raw.eta_time = eta_time;
     if (!(["---.-"].includes(data[8]))) {
       const fuel_remaining = helpers.float(data[8]);
-      result.raw.fuel_remaining = fuel_remaining;
     }
     ResultFormatter.position(result, position);
     ResultFormatter.altitude(result, altitude);

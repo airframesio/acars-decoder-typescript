@@ -27,27 +27,18 @@ export class Label_44_POS extends DecoderPlugin {
     }
     const m = m_match.groups;
     const position = helpers.coordinateDecimalMinutes(m.unsplit_coords, {"style":"combined","format":"NSDDMM_M_EWDDMM_M"});
-    result.raw.position = position;
     const flight_level_raw = hatches.parse_flight_level_or_ground(m.flight_level_or_ground, {});
     result.raw.flight_level_raw = flight_level_raw;
     const altitude = hatches.flight_level_to_altitude_feet(flight_level_raw, {});
-    result.raw.altitude = altitude;
     const month = helpers.integer(m.current_date, {"substring_start":0,"substring_length":2});
-    result.raw.month = month;
     const day = helpers.integer(m.current_date, {"substring_start":2,"substring_length":2});
-    result.raw.day = day;
     const timestamp = helpers.timestampHhmmss(m.current_time, {"append":"00"});
-    result.raw.timestamp = timestamp;
     const eta = helpers.timestampHhmmss(m.eta_time, {"append":"00"});
-    result.raw.eta = eta;
     if (!(["***","****"].includes(m.fuel_in_tons))) {
       const fuel_in_tons = helpers.float(m.fuel_in_tons);
-      result.raw.fuel_in_tons = fuel_in_tons;
     }
     const departure_icao = helpers.airport(m.departure_icao);
-    result.raw.departure_icao = departure_icao;
     const arrival_icao = helpers.airport(m.arrival_icao);
-    result.raw.arrival_icao = arrival_icao;
     ResultFormatter.position(result, position);
     ResultFormatter.timestamp(result, month);
     ResultFormatter.timestamp(result, day);

@@ -25,22 +25,14 @@ export class Label_44_OFF extends DecoderPlugin {
       return this.failUnknown(result, message.text, options);
     }
     const position = helpers.coordinateDecimalMinutes(data[1], {"style":"combined","format":"NSDDMM_M_EWDDMM_M"});
-    result.raw.position = position;
     const departure_icao = helpers.airport(data[2]);
-    result.raw.departure_icao = departure_icao;
     const arrival_icao = helpers.airport(data[3]);
-    result.raw.arrival_icao = arrival_icao;
     const month = helpers.integer(data[4], {"substring_start":0,"substring_length":2});
-    result.raw.month = month;
     const day = helpers.integer(data[4], {"substring_start":2,"substring_length":2});
-    result.raw.day = day;
     const off_time = helpers.timestampHhmmss(data[5]);
-    result.raw.off_time = off_time;
     const eta_time = helpers.timestampHhmmss(data[6]);
-    result.raw.eta_time = eta_time;
     if (!(["---.-"].includes(data[7]))) {
       const fuel_remaining = helpers.float(data[7]);
-      result.raw.fuel_remaining = fuel_remaining;
     }
     ResultFormatter.position(result, position);
     ResultFormatter.departureAirport(result, departure_icao);
