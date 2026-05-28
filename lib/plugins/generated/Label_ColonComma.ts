@@ -9,7 +9,7 @@ import * as helpers from "@airframes/ads-runtime-ts/helpers";
 import * as hatches from "../escape_hatches";
 
 export class Label_ColonComma extends DecoderPlugin {
-  name = "label-coloncomma";
+  name = "label-colon-comma";
 
   qualifiers() {
     return {

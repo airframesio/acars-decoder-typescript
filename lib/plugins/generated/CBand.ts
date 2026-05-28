@@ -8,7 +8,7 @@ import * as helpers from "@airframes/ads-runtime-ts/helpers";
 import * as hatches from "../escape_hatches";
 
 export class CBand extends DecoderPlugin {
-  name = "cband";
+  name = "c-band";
 
   qualifiers() {
     return {

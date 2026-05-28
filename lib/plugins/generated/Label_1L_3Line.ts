@@ -8,7 +8,7 @@ import * as helpers from "@airframes/ads-runtime-ts/helpers";
 import * as hatches from "../escape_hatches";
 
 export class Label_1L_3Line extends DecoderPlugin {
-  name = "label-1l-3line";
+  name = "label-1l-3-line";
 
   qualifiers() {
     return {

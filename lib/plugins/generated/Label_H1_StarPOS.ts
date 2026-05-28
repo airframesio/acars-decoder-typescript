@@ -8,7 +8,7 @@ import * as helpers from "@airframes/ads-runtime-ts/helpers";
 import * as hatches from "../escape_hatches";
 
 export class Label_H1_StarPOS extends DecoderPlugin {
-  name = "label-h1-starpos";
+  name = "label-h1-star-pos";
 
   qualifiers() {
     return {

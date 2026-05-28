@@ -8,7 +8,7 @@ import * as helpers from "@airframes/ads-runtime-ts/helpers";
 import * as hatches from "../escape_hatches";
 
 export class Label_13Through18_Slash extends DecoderPlugin {
-  name = "label-13through18-slash";
+  name = "label-13-through18-slash";
 
   qualifiers() {
     return {
