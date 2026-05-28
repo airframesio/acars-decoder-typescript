@@ -7,20 +7,18 @@ import {
 
 import * as Plugins from './plugins/official';
 
-// Stage 2.5 bulk swap: most plugins now run through the ADS-generated tree
-// (lib/plugins/generated/*) backed by the escape-hatch implementations in
+// Stage 2.5 bulk swap: ALL 67 plugins now run through the ADS-generated tree
+// (lib/plugins/generated/*) backed by escape-hatch implementations in
 // lib/plugins/escape_hatches/*. Behavior is byte-for-byte identical against
 // the existing test suite.
 //
-// Two plugins are intentionally kept hand-written:
-//   - Plugins.Label_4A          — agent stubbed; field-level hatches need
-//                                 design work (variant_2_decode / variant_3_position
-//                                 + format hatch contract).
-//   - Plugins.Label_44_POS      — spec uses field-level customs
-//                                 (parse_flight_level_or_ground +
-//                                 flight_level_to_altitude_feet) that no agent
-//                                 implemented in this bulk pass.
-// Both are scheduled for follow-up.
+// Label_4A: switched to whole-plugin parse-custom in the spec (matches the
+// shape of other complex plugins like CBand and ARINC_702); hatch
+// implements all three variants inline.
+//
+// Label_44_POS: keeps its declarative spec with two field-level customs
+// (parse_flight_level_or_ground + flight_level_to_altitude_feet) backed
+// by direct ports in lib/plugins/escape_hatches/Label_44_POS.ts.
 import { Label_10_LDR as Gen_Label_10_LDR } from './plugins/generated/Label_10_LDR';
 import { Label_10_POS as Gen_Label_10_POS } from './plugins/generated/Label_10_POS';
 import { Label_10_Slash as Gen_Label_10_Slash } from './plugins/generated/Label_10_Slash';
@@ -53,7 +51,9 @@ import { Label_44_ETA as Gen_Label_44_ETA } from './plugins/generated/Label_44_E
 import { Label_44_IN as Gen_Label_44_IN } from './plugins/generated/Label_44_IN';
 import { Label_44_OFF as Gen_Label_44_OFF } from './plugins/generated/Label_44_OFF';
 import { Label_44_ON as Gen_Label_44_ON } from './plugins/generated/Label_44_ON';
+import { Label_44_POS as Gen_Label_44_POS } from './plugins/generated/Label_44_POS';
 import { Label_44_Slash as Gen_Label_44_Slash } from './plugins/generated/Label_44_Slash';
+import { Label_4A as Gen_Label_4A } from './plugins/generated/Label_4A';
 import { Label_4A_01 as Gen_Label_4A_01 } from './plugins/generated/Label_4A_01';
 import { Label_4A_DIS as Gen_Label_4A_DIS } from './plugins/generated/Label_4A_DIS';
 import { Label_4A_DOOR as Gen_Label_4A_DOOR } from './plugins/generated/Label_4A_DOOR';
@@ -128,9 +128,9 @@ const pluginClasses = [
   Gen_Label_44_IN,
   Gen_Label_44_OFF,
   Gen_Label_44_ON,
-  Plugins.Label_44_POS, // KEPT: field-level hatches not yet implemented
+  Gen_Label_44_POS,
   Gen_Label_44_Slash,
-  Plugins.Label_4A, // KEPT: variant_2_decode + variant_3_position + format hatches stubbed
+  Gen_Label_4A,
   Gen_Label_4A_01,
   Gen_Label_4A_DIS,
   Gen_Label_4A_DOOR,

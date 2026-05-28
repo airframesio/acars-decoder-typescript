@@ -27,6 +27,7 @@ export * from "./Label_2P_FM3";
 export * from "./Label_2P_FM4";
 export * from "./Label_2P_FM5";
 export * from "./Label_30_Slash_EA";
+export * from "./Label_44_POS";
 export * from "./Label_44_Slash";
 export * from "./Label_4A_01";
 export * from "./Label_4A_DIS";
