@@ -1,0 +1,3 @@
+[submodule "vendor/airframes-decoder"]
+	path = vendor/airframes-decoder
+	url = https://github.com/airframesio/acars-decoder.git

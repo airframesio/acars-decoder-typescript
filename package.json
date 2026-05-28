@@ -15,7 +15,10 @@
   "scripts": {
     "build": "tsup",
     "lint": "eslint .",
-    "test": "jest"
+    "test": "jest",
+    "ads:codegen-build": "cd vendor/airframes-decoder/codegen && npm install && npm run build",
+    "ads:generate": "node vendor/airframes-decoder/codegen/dist/cli.js generate --target ts --spec vendor/airframes-decoder/spec --out lib/plugins/generated",
+    "ads:check": "git diff --exit-code -- lib/plugins/generated || (echo 'lib/plugins/generated is out of date. Run npm run ads:generate and commit.' && exit 1)"
   },
   "engines": {
     "node": ">=18"
