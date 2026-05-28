@@ -52,6 +52,7 @@ describe('Label 44 OFF', () => {
     );
     expect(decodeResult.formatted.items[6].value).toBe('02:48:00');
     expect(decodeResult.formatted.items[7].label).toBe('Fuel Remaining');
+    expect(decodeResult.formatted.items[7].code).toBe('FUEL_REM');
     expect(decodeResult.formatted.items[7].value).toBe('11.1');
   });
 
