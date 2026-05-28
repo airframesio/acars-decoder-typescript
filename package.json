@@ -29,7 +29,7 @@
   },
   "homepage": "https://github.com/airframesio/acars-decoder-typescript#readme",
   "author": "Kevin Elliott <kevin@welikeinc.com>",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "dependencies": {
     "pako": "^1.0.11"
   },
