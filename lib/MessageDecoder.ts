@@ -7,10 +7,15 @@ import {
 
 import * as Plugins from './plugins/official';
 
-// Stage 2.5 pilot: use the ADS-generated Label_10_POS plugin instead of the
-// hand-written one. Proves the spec → codegen → runtime path end-to-end
-// against the existing test suite. Behavior is byte-for-byte identical.
+// Stage 2.5: declarative ports replaced by ADS-generated equivalents.
+// Behavior is byte-for-byte identical against the existing test suite.
+// Plugins with escape hatches remain hand-written until hatches land
+// in lib/plugins/escape_hatches/.
 import { Label_10_POS as Label_10_POS_Generated } from './plugins/generated/Label_10_POS';
+import { Label_44_ETA as Label_44_ETA_Generated } from './plugins/generated/Label_44_ETA';
+import { Label_44_IN as Label_44_IN_Generated } from './plugins/generated/Label_44_IN';
+import { Label_44_OFF as Label_44_OFF_Generated } from './plugins/generated/Label_44_OFF';
+import { Label_44_ON as Label_44_ON_Generated } from './plugins/generated/Label_44_ON';
 
 /**
  * Ordered list of plugin constructors. Order matters — plugins are tried
@@ -46,10 +51,10 @@ const pluginClasses = [
   Plugins.Label_2P_FM4,
   Plugins.Label_2P_FM5,
   Plugins.Label_30_Slash_EA,
-  Plugins.Label_44_ETA,
-  Plugins.Label_44_IN,
-  Plugins.Label_44_OFF,
-  Plugins.Label_44_ON,
+  Label_44_ETA_Generated,
+  Label_44_IN_Generated,
+  Label_44_OFF_Generated,
+  Label_44_ON_Generated,
   Plugins.Label_44_POS,
   Plugins.Label_44_Slash,
   Plugins.Label_4A,
