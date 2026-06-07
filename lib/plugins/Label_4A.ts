@@ -32,7 +32,8 @@ export class Label_4A extends DecoderPlugin {
       // ResultFormatter.altitude(decodeResult, Number(alt) * 100);
       ResultFormatter.unknownArr(decodeResult, fields.slice(8));
     } else if (fields.length === 6) {
-      if (fields[0].match(/^[NS]/)) {
+      const f0 = fields[0];
+      if (f0.length > 0 && (f0[0] === 'N' || f0[0] === 'S')) {
         // variant 2
         ResultFormatter.position(
           decodeResult,

@@ -87,7 +87,9 @@ export class FlightPlanUtils {
         label: 'Route Status',
         value: 'Route Planned',
       });
-      decodeResult.raw.route_status = header;
+      if (header.length > 2) {
+        addRoute(decodeResult, header.substring(2));
+      }
     } else if (header.startsWith('RI')) {
       decodeResult.raw.route_status = 'RI';
       decodeResult.formatted.items.push({
