@@ -1,14 +1,3 @@
-# Node.js Support Policy
-
-- Runtime support: Node.js >= 18
-- Development and CI: validated on Node 18.x, 20.x, 22.x, and 24.x
-- TypeScript development uses the latest stable Node types (currently v24) without forcing consumers to use a specific Node types version, since `@types/node` is a devDependency.
-- The published builds are compiled targeting Node 18 runtime via `tsup` so they remain compatible across supported Node versions.
-
-# @airframes/acars-decoder
-
-This is a no-op documentation tweak to verify repository access, build/lint, tests, and PR workflow. No functional code changes are included.
-
 # acars-decoder-typescript
 
 [![NPM Version](https://badge.fury.io/js/@airframes%2Facars-decoder.svg)](https://badge.fury.io/js/@airframes%2Facars-decoder)
@@ -27,6 +16,13 @@ The library is built around research and discoveries from the [ACARS Message Doc
 It has been written in TypeScript (which compiles to Javascript) and is published as an NPM package.
 
 You are welcome to contribute (please see https://github.com/airframesio/acars-message-documentation where we collaborate to research and document the various types of messages), and while it was primarily developed to power [Airframes](https://app.airframes.io) and [AcarsHub](https://sdr-e.com/docker-acarshub), you may use this library in your own applications freely.
+
+# Node.js Support Policy
+
+- Runtime support: Node.js >= 18
+- Development and CI: validated on Node 18.x, 20.x, 22.x, and 24.x
+- TypeScript development uses the latest stable Node types (currently v24) without forcing consumers to use a specific Node types version, since `@types/node` is a devDependency.
+- The published builds are compiled targeting Node 18 runtime via `tsup` so they remain compatible across supported Node versions.
 
 # Installation
 
