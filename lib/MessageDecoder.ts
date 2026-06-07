@@ -196,7 +196,7 @@ export class MessageDecoder {
         continue;
       }
       const pluginResult = entry.plugin.decode(message, options);
-      if (result.decoded) {
+      if (pluginResult.decoded) {
         result = pluginResult;
         break;
       }
