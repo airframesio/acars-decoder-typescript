@@ -31,6 +31,16 @@ describe('Label_H1 INI', () => {
     expect(decodeResult.remaining.text).toBe('');
     expect(decodeResult.formatted.items.length).toBe(9);
     expect(decodeResult.formatted.description).toBe('Initial Report');
+    const sequenceNumberItem = decodeResult.formatted.items.find(
+      (item) => item.code === 'SEQ',
+    );
+    const sequenceResponseItem = decodeResult.formatted.items.find(
+      (item) => item.code === 'SEQ_RESP',
+    );
+    expect(sequenceNumberItem).toBeDefined();
+    expect(sequenceNumberItem?.value).toBe('2');
+    expect(sequenceResponseItem).toBeDefined();
+    expect(sequenceResponseItem?.value).toBe('0');
   });
 
   test('#MD valid', () => {

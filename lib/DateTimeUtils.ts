@@ -9,25 +9,20 @@ export class DateTimeUtils {
   // Expects a six digit date string and a four digit UTC time string
   // (DDMMYY) (HHMM)
   public static UTCDateTimeToString(dateString: string, timeString: string) {
-    let utcDate = new Date();
-    utcDate.setUTCDate(+dateString.substr(0, 2));
-    utcDate.setUTCMonth(+dateString.substr(2, 2));
-    if (dateString.length === 6) {
-      utcDate.setUTCFullYear(2000 + +dateString.substr(4, 2));
-    }
-    if (timeString.length === 6) {
-      utcDate.setUTCHours(
-        +timeString.substr(0, 2),
-        +timeString.substr(2, 2),
-        +timeString.substr(4, 2),
-      );
-    } else {
-      utcDate.setUTCHours(
-        +timeString.substr(0, 2),
-        +timeString.substr(2, 2),
-        0,
-      );
-    }
+    const day = +dateString.substr(0, 2);
+    // ACARS month is 1-12; JS Date months are 0-11, so subtract one.
+    const month = +dateString.substr(2, 2) - 1;
+    const year =
+      dateString.length === 6
+        ? 2000 + +dateString.substr(4, 2)
+        : new Date().getUTCFullYear();
+    const hours = +timeString.substr(0, 2);
+    const minutes = +timeString.substr(2, 2);
+    const seconds = timeString.length === 6 ? +timeString.substr(4, 2) : 0;
+    // Build the date in one call so an incremental setUTC* on a Date that
+    // was initialised to "now" can't roll the month forward when the
+    // current real-world day is later than the last day of the target.
+    const utcDate = new Date(Date.UTC(year, month, day, hours, minutes, seconds));
     return utcDate.toUTCString();
   }
 

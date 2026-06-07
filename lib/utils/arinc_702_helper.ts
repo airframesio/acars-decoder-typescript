@@ -7,6 +7,15 @@ import { FlightPlanUtils } from './flight_plan_utils';
 import { ResultFormatter } from './result_formatter';
 import { RouteUtils } from './route_utils';
 
+// One byte per ASCII char — replaces the Buffer.from(data, 'ascii') idiom so
+// the CRC helpers run in browser / Deno / Bun / edge runtimes without Node
+// polyfills. Matches the broader Web APIs migration in c78b720.
+function asciiStringToBytes(data: string): Uint8Array {
+  const bytes = new Uint8Array(data.length);
+  for (let i = 0; i < data.length; i++) bytes[i] = data.charCodeAt(i) & 0xff;
+  return bytes;
+}
+
 /**
  * Helper class for decoding ARINC 702 messages
  * contains core logic for decoding different types of ARINC 702 messages,
@@ -658,7 +667,7 @@ function processSummary(decodeResult: DecodeResult, data: string[]) {
 // CRC-16/IBM-SDLC but nibbles are reversed
 function crc16IbmSdlcRev(data: string): number {
   let crc = 0xffff;
-  const bytes = Buffer.from(data, 'ascii');
+  const bytes = asciiStringToBytes(data);
 
   for (const byte of bytes) {
     crc ^= byte;
@@ -689,7 +698,7 @@ function crc16Genibus(data: string): number {
   let crc = 0xffff;
   const polynomial = 0x1021;
 
-  const bytes = Buffer.from(data, 'ascii');
+  const bytes = asciiStringToBytes(data);
 
   for (const byte of bytes) {
     crc ^= byte << 8;
