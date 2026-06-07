@@ -195,8 +195,9 @@ export class MessageDecoder {
       if (!this.matchesPreambles(text, entry.preambles)) {
         continue;
       }
-      result = entry.plugin.decode(message, options);
-      if (result.decoded) {
+      const pluginResult = entry.plugin.decode(message, options);
+      if (pluginResult.decoded) {
+        result = pluginResult;
         break;
       }
     }
