@@ -7,6 +7,10 @@ import stylistic from '@stylistic/eslint-plugin';
 
 export default [
   {
+    // Skip the vendored submodule and the auto-generated plugins from linting.
+    ignores: ['vendor/**', 'lib/plugins/generated/**'],
+  },
+  {
     files: ['**/*.ts'],
 
     languageOptions: {
