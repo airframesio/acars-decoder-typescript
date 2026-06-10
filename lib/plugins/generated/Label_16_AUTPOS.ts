@@ -18,7 +18,7 @@ export class Label_16_AUTPOS extends DecoderPlugin {
   }
 
   decode(message: Message, options: Options = {}): DecodeResult {
-    const result = this.initResult(message, "Position Report");
+    const result = this.initResult(message, "Unknown");
 
     return hatches.label_16_autpos_decode(this, message, result, options);
   }

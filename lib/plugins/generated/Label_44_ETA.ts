@@ -40,11 +40,14 @@ export class Label_44_ETA extends DecoderPlugin {
     ResultFormatter.altitude(result, altitude);
     ResultFormatter.departureAirport(result, departure_icao);
     ResultFormatter.arrivalAirport(result, arrival_icao);
-    ResultFormatter.timestamp(result, month);
-    ResultFormatter.timestamp(result, day);
+    ResultFormatter.month(result, month);
+    ResultFormatter.day(result, day);
     ResultFormatter.timestamp(result, timestamp);
-    ResultFormatter.timestamp(result, eta_time);
-    ResultFormatter.currentFuel(result, fuel_remaining);
+    ResultFormatter.eta(result, eta_time);
+    ResultFormatter.remainingFuel(result, fuel_remaining);
+    if (data.length > 9) {
+      ResultFormatter.unknownArr(result, data.slice(9));
+    }
     this.setDecodeLevel(result, true, 'full');
     return result;
   }

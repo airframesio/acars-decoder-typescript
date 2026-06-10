@@ -38,11 +38,14 @@ export class Label_44_OFF extends DecoderPlugin {
     ResultFormatter.position(result, position);
     ResultFormatter.departureAirport(result, departure_icao);
     ResultFormatter.arrivalAirport(result, arrival_icao);
-    ResultFormatter.timestamp(result, month);
-    ResultFormatter.timestamp(result, day);
-    ResultFormatter.timestamp(result, off_time);
-    ResultFormatter.timestamp(result, eta_time);
-    ResultFormatter.currentFuel(result, fuel_remaining);
+    ResultFormatter.month(result, month);
+    ResultFormatter.day(result, day);
+    ResultFormatter.off(result, off_time);
+    ResultFormatter.eta(result, eta_time);
+    ResultFormatter.remainingFuel(result, fuel_remaining);
+    if (data.length > 8) {
+      ResultFormatter.unknownArr(result, data.slice(8));
+    }
     this.setDecodeLevel(result, true, 'full');
     return result;
   }

@@ -37,10 +37,13 @@ export class Label_44_IN extends DecoderPlugin {
     ResultFormatter.position(result, position);
     ResultFormatter.departureAirport(result, departure_icao);
     ResultFormatter.arrivalAirport(result, arrival_icao);
-    ResultFormatter.timestamp(result, month);
-    ResultFormatter.timestamp(result, day);
-    ResultFormatter.timestamp(result, in_time);
-    ResultFormatter.currentFuel(result, fuel_remaining);
+    ResultFormatter.month(result, month);
+    ResultFormatter.day(result, day);
+    ResultFormatter.in(result, in_time);
+    ResultFormatter.remainingFuel(result, fuel_remaining);
+    if (data.length > 7) {
+      ResultFormatter.unknownArr(result, data.slice(7));
+    }
     this.setDecodeLevel(result, true, 'full');
     return result;
   }

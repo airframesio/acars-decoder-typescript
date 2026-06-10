@@ -18,7 +18,7 @@ export class ARINC_702 extends DecoderPlugin {
   }
 
   decode(message: Message, options: Options = {}): DecodeResult {
-    const result = this.initResult(message, "ARINC 702 Message");
+    const result = this.initResult(message, "Unknown");
 
     return hatches.arinc_702_dispatch(this, message, result, options);
   }
