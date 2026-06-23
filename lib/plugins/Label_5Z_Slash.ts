@@ -49,15 +49,15 @@ export class Label_5Z_Slash extends DecoderPlugin {
 
     const lines = message.text.split('\r\n');
     if (lines[0] === '/TXT') {
-    // not UA, but starts with `/`
-    ResultFormatter.text(
-    decodeResult,
-    formatAcarsFreeText(lines.slice(1).join('\r\n')),
-    );
-    decodeResult.decoded = true;
-    decodeResult.decoder.decodeLevel = 'full';
-    return decodeResult;
-}
+      // not UA, but starts with `/`
+      ResultFormatter.text(
+        decodeResult,
+        formatAcarsFreeText(lines.slice(1).join('\r\n')),
+      );
+      decodeResult.decoded = true;
+      decodeResult.decoder.decodeLevel = 'full';
+      return decodeResult;
+    }
 
     const data = lines[0].split('/');
     const header = data[1].split(' '); //data[0] is blank
