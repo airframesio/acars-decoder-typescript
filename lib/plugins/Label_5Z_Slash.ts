@@ -1,8 +1,8 @@
 import { DateTimeUtils } from '../DateTimeUtils';
 import { DecoderPlugin } from '../DecoderPlugin';
 import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
-import { ResultFormatter } from '../utils/result_formatter';
 import { formatAcarsFreeText } from '../utils/acars_free_text';
+import { ResultFormatter } from '../utils/result_formatter';
 
 export class Label_5Z_Slash extends DecoderPlugin {
   name = 'label-5z-slash';
