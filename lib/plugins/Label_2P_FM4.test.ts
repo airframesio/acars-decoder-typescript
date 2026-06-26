@@ -85,4 +85,14 @@ describe('Label_2P Preamble FM4', () => {
     expect(decodeResult.formatted.description).toBe('Flight Report');
     expect(decodeResult.formatted.items.length).toBe(0);
   });
+
+  test('missing FM4 preamble', () => {
+    // 10 comma-parts but no `FM4` token in parts[0]
+    message.text =
+      'KIAD,OMAA,140256,1448, 39.43,- 75.62,23228,328,  43.5, 72500';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoded).toBe(false);
+    expect(decodeResult.decoder.decodeLevel).toBe('none');
+  });
 });

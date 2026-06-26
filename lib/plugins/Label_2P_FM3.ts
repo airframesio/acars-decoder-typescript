@@ -23,7 +23,7 @@ export class Label_2P_FM3 extends DecoderPlugin {
 
     if (parts.length === 7) {
       const header = parts[0].split('FM3 ');
-      if (header.length == 0) {
+      if (header.length < 2) {
         // can't use preambles, as there can be info before `FM4`
         // so let's check if we want to decode it here
         ResultFormatter.unknown(decodeResult, message.text);

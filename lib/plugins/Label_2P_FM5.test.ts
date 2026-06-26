@@ -49,4 +49,14 @@ describe('Label_2P Preamble FM5', () => {
     expect(decodeResult.formatted.description).toBe('Flight Report');
     expect(decodeResult.formatted.items.length).toBe(0);
   });
+
+  test('missing FM5 preamble', () => {
+    // 12 comma-parts but no `FM5 ` token in parts[0]
+    message.text =
+      'EIDW,OMAA,113522,1540,+45.147, +23.384,35002,116.24,502 ,36900,ETD23N ,';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoded).toBe(false);
+    expect(decodeResult.decoder.decodeLevel).toBe('none');
+  });
 });

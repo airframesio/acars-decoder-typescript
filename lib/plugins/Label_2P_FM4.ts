@@ -22,7 +22,7 @@ export class Label_2P_FM4 extends DecoderPlugin {
 
     if (parts.length === 10) {
       const header = parts[0].split('FM4');
-      if (header.length == 0) {
+      if (header.length < 2) {
         // can't use preambles, as there can be info before `FM4`
         // so let's check if we want to decode it here
         ResultFormatter.unknown(decodeResult, message.text);
