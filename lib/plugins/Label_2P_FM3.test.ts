@@ -88,4 +88,13 @@ describe('Label 2P Preamble FM3', () => {
     expect(decodeResult.formatted.description).toBe('Flight Report');
     expect(decodeResult.formatted.items.length).toBe(0);
   });
+
+  test('missing FM3 preamble', () => {
+    // 7 comma-parts but no `FM3 ` token in parts[0]
+    message.text = '1217,1312,+ 43.77,- 70.18, 39981, 426, 25';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoded).toBe(false);
+    expect(decodeResult.decoder.decodeLevel).toBe('none');
+  });
 });
