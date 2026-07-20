@@ -1,6 +1,7 @@
 import { DateTimeUtils } from '../DateTimeUtils';
 import { DecoderPlugin } from '../DecoderPlugin';
 import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
+import { formatAcarsFreeText } from '../utils/acars_free_text';
 import { ResultFormatter } from '../utils/result_formatter';
 
 export class Label_5Z_Slash extends DecoderPlugin {
@@ -49,7 +50,10 @@ export class Label_5Z_Slash extends DecoderPlugin {
     const lines = message.text.split('\r\n');
     if (lines[0] === '/TXT') {
       // not UA, but starts with `/`
-      ResultFormatter.text(decodeResult, lines.slice(1).join('\r\n'));
+      ResultFormatter.text(
+        decodeResult,
+        formatAcarsFreeText(lines.slice(1).join('\r\n')),
+      );
       decodeResult.decoded = true;
       decodeResult.decoder.decodeLevel = 'full';
       return decodeResult;
