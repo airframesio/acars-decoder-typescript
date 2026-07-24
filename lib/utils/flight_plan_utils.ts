@@ -179,7 +179,14 @@ function addCompanyRoute(decodeResult: DecodeResult, value: string) {
     name = segments[0];
   } else {
     name = segments[0].slice(0, parens_idx);
-    runway = segments[0].slice(parens_idx + 1, segments[0].indexOf(')'));
+    const close_paren_idx = segments[0].indexOf(')');
+    // When ')' is missing, indexOf returns -1, which slice() would
+    // interpret as "count from the end", silently dropping the final
+    // character. Fall back to the end of the segment to preserve data.
+    runway = segments[0].slice(
+      parens_idx + 1,
+      close_paren_idx === -1 ? undefined : close_paren_idx,
+    );
   }
   let waypoints;
   if (segments.length > 1) {
