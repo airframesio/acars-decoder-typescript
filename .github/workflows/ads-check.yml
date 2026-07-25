@@ -1,0 +1,16 @@
+name: ADS check
+
+on:
+  push:
+    branches: [master, dsl/adopt-v1]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  ads-generated-up-to-date:
+    uses: airframesio/acars-decoder/.github/workflows/codegen-check.yml@init/ads-v1
+    with:
+      language: ts
+      generated-path: lib/plugins/generated
+      spec-path: vendor/airframes-decoder/spec
+      codegen-path: vendor/airframes-decoder/codegen

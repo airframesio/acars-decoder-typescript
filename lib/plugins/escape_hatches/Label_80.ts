@@ -1,0 +1,200 @@
+// Escape-hatch port of lib/plugins/Label_80.ts decode().
+// Airline-defined position report — CSV one-liner OR tag-prefixed multi-line.
+
+import type { DecodeResult, Message, Options } from '@airframes/ads-runtime-ts';
+import { DecoderPlugin } from '@airframes/ads-runtime-ts';
+import {
+  CoordinateUtils,
+  DateTimeUtils,
+  ResultFormatter,
+} from '@airframes/ads-runtime-ts';
+
+export function label_80_parse(
+  _plugin: DecoderPlugin,
+  message: Message,
+  result: DecodeResult,
+  _options: Options,
+): DecodeResult {
+  const lines = message.text.split(/\r?\n/);
+  if (lines.length === 1 && lines[0].includes(',')) {
+    parseCsvFormat(lines[0], result);
+  } else {
+    const header = lines[0].trim();
+    const headerParts = header.split(',');
+    for (let i = 0; i < headerParts.length - 1; i++) {
+      const moreFields = headerParts[i].split('/');
+      for (const more of moreFields) {
+        parseTags(more.trim(), result);
+      }
+    }
+
+    parseHeader(headerParts[headerParts.length - 1].trim(), result);
+
+    for (let i = 1; i < lines.length; i++) {
+      const line = lines[i];
+      const parts = line.split('/');
+      for (const part of parts) {
+        parseTags(part.trim(), result);
+      }
+    }
+  }
+
+  if (result.formatted.items.length > 0) {
+    // Equivalent to plugin.setDecodeLevel(result, true)
+    result.decoded = true;
+    result.decoder.decodeLevel = result.remaining.text ? 'partial' : 'full';
+  }
+
+  return result;
+}
+
+function parseHeader(header: string, results: DecodeResult) {
+  //3N01 POSRPT 0581/27 KIAD/MSLP .N962AV/04H 11:02
+  const fields = header.split('/');
+  if (fields.length < 3) {
+    ResultFormatter.unknown(results, header, '/');
+    return;
+  }
+  const msgInfo = fields[0].split(/\s+/);
+  if (msgInfo.length === 3) {
+    ResultFormatter.unknownArr(results, msgInfo.slice(0, 2), ' ');
+    ResultFormatter.flightNumber(results, msgInfo[2]);
+  } else {
+    ResultFormatter.unknown(results, header, '/');
+    return;
+  }
+
+  const otherInfo1 = fields[1].split(/\s+/);
+  if (otherInfo1.length === 2) {
+    ResultFormatter.day(results, parseInt(otherInfo1[0], 10));
+    ResultFormatter.departureAirport(results, otherInfo1[1]);
+  } else {
+    ResultFormatter.unknownArr(results, otherInfo1, ' ');
+  }
+
+  const otherInfo2 = fields[2].split(/\s+/);
+  if (otherInfo2.length === 2) {
+    ResultFormatter.arrivalAirport(results, otherInfo2[0]);
+    ResultFormatter.tail(results, otherInfo2[1].replace('.', ''));
+  } else {
+    ResultFormatter.unknownArr(results, otherInfo2, ' ');
+  }
+
+  if (fields.length > 3) {
+    ResultFormatter.unknownArr(results, fields.slice(3), '/');
+  }
+}
+
+function parseTags(part: string, results: DecodeResult) {
+  const kvPair = part.split(/\s+/);
+  if (kvPair.length < 2) {
+    ResultFormatter.unknown(results, part, '/');
+    return;
+  }
+  const tag = kvPair[0];
+  const val = kvPair.slice(1).join(' ');
+
+  switch (tag) {
+    case 'POS': {
+      // don't use decodeStringCoordinates because of different position format
+      const posRegex = /^(?<latd>[NS])(?<lat>.+)(?<lngd>[EW])(?<lng>.+)/;
+      const posResult = val.match(posRegex);
+      const lat =
+        Number(posResult?.groups?.lat) *
+        (posResult?.groups?.latd === 'S' ? -1 : 1);
+      const lon =
+        Number(posResult?.groups?.lng) *
+        (posResult?.groups?.lngd === 'W' ? -1 : 1);
+      const position = {
+        latitude: Number.isInteger(lat) ? lat / 1000 : lat / 100,
+        longitude: Number.isInteger(lon) ? lon / 1000 : lon / 100,
+      };
+      ResultFormatter.position(results, position);
+      break;
+    }
+    case 'ALT':
+      ResultFormatter.altitude(results, parseInt(val.replace('+', ''), 10));
+      break;
+    case 'FL': // Handle "FL 360"
+      ResultFormatter.altitude(results, parseInt(val, 10) * 100);
+      break;
+    case 'MCH':
+      ResultFormatter.mach(results, parseInt(val, 10) / 1000);
+      break;
+    case 'SPD':
+      ResultFormatter.groundspeed(results, parseInt(val, 10));
+      break;
+    case 'TAS':
+      ResultFormatter.airspeed(results, parseInt(val, 10));
+      break;
+    case 'SAT':
+      ResultFormatter.temperature(results, val);
+      break;
+    case 'FB':
+      // ignoring, assuming FOB and avoiding duplicates.
+      break;
+    case 'FOB':
+      // Strip non-numeric like 'N' in 'N009414'
+      ResultFormatter.currentFuel(
+        results,
+        parseInt(val.replace(/\D/g, ''), 10),
+      );
+      break;
+    case 'UTC':
+      ResultFormatter.timestamp(results, DateTimeUtils.convertHHMMSSToTod(val));
+      break;
+    case 'ETA': {
+      const hhmm = val.split('.')[0].replace(':', '');
+      ResultFormatter.eta(results, DateTimeUtils.convertHHMMSSToTod(hhmm));
+      break;
+    }
+    case 'HDG':
+      ResultFormatter.heading(results, parseInt(val, 10));
+      break;
+    case 'NWYP':
+      results.raw.next_waypoint = val;
+      break;
+    case 'SWN':
+      // wind speed, do nothing for
+      ResultFormatter.unknown(results, part, '/');
+      break;
+    case 'DWN':
+      // wind direction, do nothing for now
+      ResultFormatter.unknown(results, part, '/');
+      break;
+    case 'AD':
+      // do nothing, as it shows in the header
+      break;
+    default:
+      ResultFormatter.unknown(results, part, '/');
+  }
+}
+
+function parseCsvFormat(text: string, results: DecodeResult) {
+  const csvParts = text.split(',');
+  if (csvParts.length !== 9) {
+    return;
+  }
+  const header = csvParts[0].trim().split(/\s+/);
+  ResultFormatter.unknown(results, header[0], ' ');
+  ResultFormatter.unknown(results, header[1], ' ');
+  ResultFormatter.position(
+    results,
+    CoordinateUtils.decodeStringCoordinates(header[2]),
+  );
+  ResultFormatter.unknown(results, csvParts[1]);
+  ResultFormatter.timestamp(
+    results,
+    DateTimeUtils.convertHHMMSSToTod(csvParts[2]),
+  );
+  ResultFormatter.unknownArr(results, csvParts.slice(4, 6), ',');
+  ResultFormatter.temperature(
+    results,
+    (
+      (csvParts[6].charAt(0) === 'M' ? -1 : 1) *
+      parseInt(csvParts[6].slice(1), 10)
+    ).toString(),
+  );
+  ResultFormatter.airspeed(results, parseInt(csvParts[7], 10));
+  ResultFormatter.currentFuel(results, parseInt(csvParts[8], 10));
+}
