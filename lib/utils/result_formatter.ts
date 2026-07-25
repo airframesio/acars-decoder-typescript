@@ -294,7 +294,7 @@ export class ResultFormatter {
       type: 'message_checksum',
       code: 'CHECKSUM',
       label: 'Message Checksum',
-      value: '0x' + ('0000' + decodeResult.raw.checksum.toString(16)).slice(-4),
+      value: '0x' + (decodeResult.raw.checksum >>> 0).toString(16).padStart(4, '0'),
     });
   }
 
