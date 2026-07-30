@@ -24,6 +24,7 @@ const pluginClasses = [
   Plugins.Label_13Through18_Slash,
   Plugins.Label_15,
   Plugins.Label_15_FST,
+  Plugins.Label_16_AUTPOS,
   Plugins.Label_16_Honeywell,
   Plugins.Label_16_N_Space,
   Plugins.Label_16_POSA1,
