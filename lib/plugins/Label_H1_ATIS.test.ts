@@ -32,6 +32,7 @@ describe('Label H1 ATIS Subscription', () => {
     expect(decodeResult.raw.arrival_icao).toBe('KSFO');
     expect(decodeResult.raw.atis_code).toBe('030');
     expect(decodeResult.raw.checksum).toBe(0xaff5c);
+    expect(decodeResult.raw.sequence_number).toBe(95);
   });
 
   test('decodes OERK ATIS subscription', () => {

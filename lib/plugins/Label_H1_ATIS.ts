@@ -43,6 +43,7 @@ export class Label_H1_ATIS extends DecoderPlugin {
 
     ResultFormatter.flightNumber(decodeResult, flight);
     ResultFormatter.arrivalAirport(decodeResult, facility);
+    ResultFormatter.sequenceNumber(decodeResult, parseInt(seq, 10));
 
     decodeResult.raw.atis_code = code;
     decodeResult.formatted.items.push({
