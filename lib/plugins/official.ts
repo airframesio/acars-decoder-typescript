@@ -9,6 +9,7 @@ export * from './Label_12_POS';
 export * from './Label_13Through18_Slash';
 export * from './Label_15';
 export * from './Label_15_FST';
+export * from './Label_16_AUTPOS';
 export * from './Label_16_Honeywell';
 export * from './Label_16_N_Space';
 export * from './Label_16_POSA1';
