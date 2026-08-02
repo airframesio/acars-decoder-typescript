@@ -37,7 +37,7 @@ describe('ResultFormatter.checksum', () => {
     expect(item.value).toBe('0xaff5c');
   });
 
-  test('preserves full hex for 32-bit checksum (no truncation)', () => {
+  test('preserves full hex for 24-bit checksum (no truncation)', () => {
     const dr = makeDecodeResult();
     ResultFormatter.checksum(dr, 0x123456);
     expect(dr.raw.checksum).toBe(0x123456);
@@ -46,11 +46,12 @@ describe('ResultFormatter.checksum', () => {
   });
 
   test('displays large 32-bit CRC without sign artifacts', () => {
-    // 0xDEADBEEF has the top bit set; toString(16) on a signed int would
-    // produce a negative string. >>> 0 coerces to unsigned first.
+    // 0xDEADBEEF has the top bit set; pass the signed int32 representation
+    // (-559038737) to actually exercise the >>> 0 unsigned coercion path.
     const dr = makeDecodeResult();
-    ResultFormatter.checksum(dr, 0xdeadbeef);
-    expect(dr.raw.checksum).toBe(0xdeadbeef);
+    const signedChecksum = -559038737; // int32 representation of 0xdeadbeef
+    ResultFormatter.checksum(dr, signedChecksum);
+    expect(dr.raw.checksum).toBe(signedChecksum);
     const item = dr.formatted.items[dr.formatted.items.length - 1];
     expect(item.value).toBe('0xdeadbeef');
   });
