@@ -43,13 +43,11 @@ export class Label_QQ extends DecoderPlugin {
       ResultFormatter.unknown(decodeResult, message.text.substring(42, 45));
       ResultFormatter.position(decodeResult, pos);
 
-      if (decodeResult.remaining.text !== '---') {
-        ResultFormatter.groundspeed(
-          decodeResult,
-          Number(message.text.substring(45, 48)),
-        );
+      const gsField = message.text.substring(45, 48);
+      if (decodeResult.remaining.text !== '---' && gsField !== '---') {
+        ResultFormatter.groundspeed(decodeResult, Number(gsField));
       } else {
-        ResultFormatter.unknown(decodeResult, message.text.substring(45, 48));
+        ResultFormatter.unknown(decodeResult, gsField);
       }
       ResultFormatter.unknown(decodeResult, message.text.substring(48));
     } else {
