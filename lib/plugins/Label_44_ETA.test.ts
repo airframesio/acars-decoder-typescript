@@ -58,6 +58,31 @@ describe('Label 44 Preamble ETA', () => {
     expect(decodeResult.formatted.items[8].value).toBe('8.1');
   });
 
+  test('skips a malformed timestamp field instead of throwing (issue #498)', () => {
+    // convertHHMMSSToTod('ABCD') yields NaN; before the fix this aborted
+    // the decode with "RangeError: Invalid time value".
+    message.text = '00ETA03,N38241W081357,330,KBNA,KBWI,1107,ABCD,0208,008.1';
+    let decodeResult;
+    expect(() => {
+      decodeResult = plugin.decode(message);
+    }).not.toThrow();
+    expect(decodeResult.decoded).toBe(true);
+    expect(decodeResult.decoder.decodeLevel).toBe('full');
+    expect(decodeResult.raw.message_timestamp).toBeUndefined();
+    expect(decodeResult.raw.eta_time).toBe(7680);
+    expect(decodeResult.raw.departure_icao).toBe('KBNA');
+    expect(decodeResult.raw.arrival_icao).toBe('KBWI');
+    // 9 items minus the skipped Message Timestamp
+    expect(decodeResult.formatted.items.length).toBe(8);
+    expect(decodeResult.formatted.items[6].label).toBe(
+      'Estimated Time of Arrival',
+    );
+    expect(decodeResult.formatted.items[6].value).toBe('02:08:00');
+    expect(
+      decodeResult.formatted.items.some((i) => i.code === 'TIMESTAMP'),
+    ).toBe(false);
+  });
+
   test('does not decode invalid', () => {
     message.text = '00OFF01 Bogus message';
     const decodeResult = plugin.decode(message);

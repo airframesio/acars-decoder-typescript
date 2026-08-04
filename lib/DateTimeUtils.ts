@@ -77,6 +77,9 @@ export class DateTimeUtils {
    * @returns
    */
   public static timestampToString(time: number): string {
+    if (isNaN(time)) {
+      return '';
+    }
     const date = new Date(time * 1000);
 
     if (time < 86400) {
