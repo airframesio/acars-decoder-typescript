@@ -63,3 +63,35 @@ describe('ResultFormatter.checksum', () => {
     expect(item.value).toBe('0x0abc');
   });
 });
+
+describe('ResultFormatter timestamp family NaN guards', () => {
+  // Malformed time fields (e.g. convertHHMMSSToTod('ABCD') -> NaN) must not
+  // abort the whole decode via timestampToString's RangeError (issue #498).
+  const cases: Array<[string, (dr: DecodeResult) => void, string]> = [
+    ['timestamp', (dr) => ResultFormatter.timestamp(dr, NaN), 'message_timestamp'],
+    ['eta', (dr) => ResultFormatter.eta(dr, NaN), 'eta_time'],
+    ['out', (dr) => ResultFormatter.out(dr, NaN), 'out_time'],
+    ['off', (dr) => ResultFormatter.off(dr, NaN), 'off_time'],
+    ['on', (dr) => ResultFormatter.on(dr, NaN), 'on_time'],
+    ['in', (dr) => ResultFormatter.in(dr, NaN), 'in_time'],
+    ['engineStart', (dr) => ResultFormatter.engineStart(dr, NaN), 'engine_start_time'],
+    ['engineStop', (dr) => ResultFormatter.engineStop(dr, NaN), 'engine_stop_time'],
+  ];
+
+  test.each(cases)(
+    '%s skips NaN instead of throwing',
+    (_name, invoke, rawKey) => {
+      const dr = makeDecodeResult();
+      expect(() => invoke(dr)).not.toThrow();
+      expect(dr.formatted.items.length).toBe(0);
+      expect((dr.raw as Record<string, unknown>)[rawKey]).toBeUndefined();
+    },
+  );
+
+  test('eta still formats a valid time-of-day', () => {
+    const dr = makeDecodeResult();
+    ResultFormatter.eta(dr, 7680);
+    expect(dr.raw.eta_time).toBe(7680);
+    expect(dr.formatted.items[0].value).toBe('02:08:00');
+  });
+});

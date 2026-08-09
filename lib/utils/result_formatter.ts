@@ -169,6 +169,9 @@ export class ResultFormatter {
   }
 
   static eta(decodeResult: DecodeResult, time: number) {
+    if (isNaN(time)) {
+      return;
+    }
     decodeResult.raw.eta_time = time;
     decodeResult.formatted.items.push({
       type: 'time',
@@ -380,6 +383,9 @@ export class ResultFormatter {
   }
 
   static out(decodeResult: DecodeResult, time: number) {
+    if (isNaN(time)) {
+      return;
+    }
     decodeResult.raw.out_time = time;
     decodeResult.formatted.items.push({
       type: 'time',
@@ -390,6 +396,9 @@ export class ResultFormatter {
   }
 
   static off(decodeResult: DecodeResult, time: number) {
+    if (isNaN(time)) {
+      return;
+    }
     decodeResult.raw.off_time = time;
     decodeResult.formatted.items.push({
       type: 'time',
@@ -400,6 +409,9 @@ export class ResultFormatter {
   }
 
   static on(decodeResult: DecodeResult, time: number) {
+    if (isNaN(time)) {
+      return;
+    }
     decodeResult.raw.on_time = time;
     decodeResult.formatted.items.push({
       type: 'time',
@@ -410,6 +422,9 @@ export class ResultFormatter {
   }
 
   static in(decodeResult: DecodeResult, time: number) {
+    if (isNaN(time)) {
+      return;
+    }
     decodeResult.raw.in_time = time;
     decodeResult.formatted.items.push({
       type: 'time',
@@ -420,6 +435,9 @@ export class ResultFormatter {
   }
 
   static engineStart(decodeResult: DecodeResult, time: number) {
+    if (isNaN(time)) {
+      return;
+    }
     decodeResult.raw.engine_start_time = time;
     decodeResult.formatted.items.push({
       type: 'time',
@@ -429,6 +447,9 @@ export class ResultFormatter {
     });
   }
   static engineStop(decodeResult: DecodeResult, time: number) {
+    if (isNaN(time)) {
+      return;
+    }
     decodeResult.raw.engine_stop_time = time;
     decodeResult.formatted.items.push({
       type: 'time',
@@ -651,6 +672,9 @@ export class ResultFormatter {
   }
 
   static timestamp(decodeResult: DecodeResult, value: number) {
+    if (isNaN(value)) {
+      return;
+    }
     decodeResult.raw.message_timestamp = value;
     decodeResult.formatted.items.push({
       type: 'time',

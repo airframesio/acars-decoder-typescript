@@ -23,3 +23,16 @@ describe('DateTimeUtils.UTCDateTimeToString', () => {
     expect(out).toContain('12:30:45');
   });
 });
+
+describe('DateTimeUtils.timestampToString', () => {
+  it('returns an empty string for NaN instead of throwing RangeError', () => {
+    // new Date(NaN).toISOString() throws "Invalid time value". A malformed
+    // time field (e.g. convertHHMMSSToTod("ABCD")) must not abort the decode.
+    expect(() => DateTimeUtils.timestampToString(NaN)).not.toThrow();
+    expect(DateTimeUtils.timestampToString(NaN)).toBe('');
+  });
+
+  it('still formats a valid time-of-day', () => {
+    expect(DateTimeUtils.timestampToString(4980)).toBe('01:23:00');
+  });
+});
