@@ -117,6 +117,29 @@ describe('Label QQ', () => {
     expect(decodeResult.formatted.items[2].value).toBe('00:58:00');
   });
 
+  test('decodes Label QQ groundspeed placeholder after non-placeholder field (#507)', () => {
+    // Variant 1 layout but field 45..48 is '---' while 42..45 is '028'.
+    // Previously the guard tested remaining.text (the 42..45 field), so this
+    // message stored NaN groundspeed and rendered "NaN knots".
+    message.text = 'KLGBKLAX0004\r\n001FE07000444N3349.8W11810.1028---0009';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoded).toBe(true);
+    expect(decodeResult.decoder.decodeLevel).toBe('partial');
+    expect(decodeResult.decoder.name).toBe('label-qq');
+    expect(decodeResult.raw.departure_icao).toBe('KLGB');
+    expect(decodeResult.raw.arrival_icao).toBe('KLAX');
+    expect(decodeResult.raw.position.latitude).toBe(33.83);
+    expect(decodeResult.raw.position.longitude).toBe(-118.16833333333334);
+    expect(decodeResult.raw.groundspeed).toBeUndefined();
+    expect(Number.isNaN(decodeResult.raw.groundspeed)).toBe(false);
+    expect(decodeResult.remaining.text).toBe('028,---,0009');
+    expect(decodeResult.formatted.items.length).toBe(4);
+    expect(
+      decodeResult.formatted.items.some((item) => item.code === 'GSPD'),
+    ).toBe(false);
+  });
+
   // disabled because all messages should decode
   test.skip('decodes Label QQ <invalid>', () => {
     message.text = 'QQ Bogus message';
