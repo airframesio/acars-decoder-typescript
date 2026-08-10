@@ -2,6 +2,7 @@
   "name": "@airframes/acars-decoder",
   "version": "1.9.1",
   "description": "ACARS Message Decoder for TypeScript/JavaScript",
+  "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
@@ -13,7 +14,7 @@
     "acars-decoder-test": "./dist/bin/acars-decoder-test.js"
   },
   "scripts": {
-    "build": "tsup",
+    "build": "tsdown",
     "lint": "eslint .",
     "test": "jest"
   },
@@ -55,7 +56,7 @@
     "prettier": "^3.8.1",
     "ts-jest": "^29.2.6",
     "ts-node": "^10.9.2",
-    "tsup": "^8.4.0",
+    "tsdown": "^0.22.14",
     "typescript": "^5.8.2",
     "typescript-eslint": "^8.54.0"
   },
