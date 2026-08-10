@@ -41,7 +41,7 @@
     "@stylistic/eslint-plugin": "^5.7.1",
     "@types/jest": "^30.0.0",
     "@types/pako": "^1.0.7",
-    "@types/node": "^25.0.9",
+    "@types/node": "^26.1.2",
     "@typescript-eslint/eslint-plugin": "^8.54.0",
     "@typescript-eslint/parser": "^8.54.0",
     "babel-jest": "^30.2.0",
