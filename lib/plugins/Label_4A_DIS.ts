@@ -16,8 +16,14 @@ export class Label_4A_DIS extends DecoderPlugin {
   decode(message: Message, options: Options = {}): DecodeResult {
     const decodeResult = this.initResult(message, 'Latest New Format');
 
-    decodeResult.decoded = true;
     const fields = message.text.split(',');
+    if (fields.length < 2 || !fields[1] || fields[1].length < 3) {
+      decodeResult.decoded = false;
+      this.setDecodeLevel(decodeResult, decodeResult.decoded);
+      return decodeResult;
+    }
+
+    decodeResult.decoded = true;
     ResultFormatter.timestamp(
       decodeResult,
       DateTimeUtils.convertHHMMSSToTod(fields[1].substring(2) + '00'),

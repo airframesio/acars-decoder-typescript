@@ -39,15 +39,23 @@ describe('Label 4A preamble DIS', () => {
     expect(decodeResult.formatted.items[2].value).toBe('@HOLD CNX');
   });
 
-  // disabled because all messages should decode
-  test.skip('decodes Label 4A_DIS <invalid>', () => {
-    message.text = '4A_DIS Bogus message';
+  test('does not throw on comma-less DIS payload', () => {
+    message.text = 'DIS';
     const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(false);
     expect(decodeResult.decoder.decodeLevel).toBe('none');
     expect(decodeResult.decoder.name).toBe('label-4a-dis');
     expect(decodeResult.formatted.description).toBe('Latest New Format');
+    expect(decodeResult.formatted.items.length).toBe(0);
+  });
+
+  test('does not throw on DIS with empty field after comma', () => {
+    message.text = 'DIS,';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoded).toBe(false);
+    expect(decodeResult.decoder.decodeLevel).toBe('none');
     expect(decodeResult.formatted.items.length).toBe(0);
   });
 });
