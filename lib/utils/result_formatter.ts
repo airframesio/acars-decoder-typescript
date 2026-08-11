@@ -303,6 +303,9 @@ export class ResultFormatter {
   }
 
   static groundspeed(decodeResult: DecodeResult, value: number) {
+    if (isNaN(value)) {
+      return;
+    }
     decodeResult.raw.groundspeed = value;
     decodeResult.formatted.items.push({
       type: 'aircraft_groundspeed',
@@ -313,6 +316,9 @@ export class ResultFormatter {
   }
 
   static airspeed(decodeResult: DecodeResult, value: number) {
+    if (isNaN(value)) {
+      return;
+    }
     decodeResult.raw.airspeed = value;
     decodeResult.formatted.items.push({
       type: 'airspeed',
@@ -323,6 +329,9 @@ export class ResultFormatter {
   }
 
   static mach(decodeResult: DecodeResult, value: number) {
+    if (isNaN(value)) {
+      return;
+    }
     decodeResult.raw.mach = value;
     decodeResult.formatted.items.push({
       type: 'mach',
@@ -363,6 +372,9 @@ export class ResultFormatter {
   }
 
   static heading(decodeResult: DecodeResult, value: number) {
+    if (isNaN(value)) {
+      return;
+    }
     decodeResult.raw.heading = value;
     decodeResult.formatted.items.push({
       type: 'heading',
@@ -460,6 +472,9 @@ export class ResultFormatter {
   }
 
   static day(decodeResult: DecodeResult, day: number) {
+    if (isNaN(day)) {
+      return;
+    }
     decodeResult.raw.day = day;
     decodeResult.formatted.items.push({
       type: 'day',
@@ -470,6 +485,9 @@ export class ResultFormatter {
   }
 
   static month(decodeResult: DecodeResult, month: number) {
+    if (isNaN(month)) {
+      return;
+    }
     decodeResult.raw.month = month;
     decodeResult.formatted.items.push({
       type: 'month',
@@ -480,6 +498,9 @@ export class ResultFormatter {
   }
 
   static departureDay(decodeResult: DecodeResult, day: number) {
+    if (isNaN(day)) {
+      return;
+    }
     decodeResult.raw.departure_day = day;
     decodeResult.formatted.items.push({
       type: 'day',
@@ -490,6 +511,9 @@ export class ResultFormatter {
   }
 
   static arrivalDay(decodeResult: DecodeResult, day: number) {
+    if (isNaN(day)) {
+      return;
+    }
     decodeResult.raw.arrival_day = day;
     decodeResult.formatted.items.push({
       type: 'day',

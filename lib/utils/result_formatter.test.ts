@@ -95,3 +95,57 @@ describe('ResultFormatter timestamp family NaN guards', () => {
     expect(dr.formatted.items[0].value).toBe('02:08:00');
   });
 });
+
+describe('ResultFormatter numeric formatters NaN guards', () => {
+  // Non-numeric ACARS fields ('---', '***', whitespace) become NaN via
+  // Number()/parseInt(); these must disappear from formatted.items rather
+  // than surfacing as literal "NaN" strings (issue #494).
+  const cases: Array<[string, (dr: DecodeResult) => void, string]> = [
+    ['heading', (dr) => ResultFormatter.heading(dr, NaN), 'heading'],
+    ['groundspeed', (dr) => ResultFormatter.groundspeed(dr, NaN), 'groundspeed'],
+    ['airspeed', (dr) => ResultFormatter.airspeed(dr, NaN), 'airspeed'],
+    ['mach', (dr) => ResultFormatter.mach(dr, NaN), 'mach'],
+    ['day', (dr) => ResultFormatter.day(dr, NaN), 'day'],
+    ['month', (dr) => ResultFormatter.month(dr, NaN), 'month'],
+    ['departureDay', (dr) => ResultFormatter.departureDay(dr, NaN), 'departure_day'],
+    ['arrivalDay', (dr) => ResultFormatter.arrivalDay(dr, NaN), 'arrival_day'],
+  ];
+
+  test.each(cases)(
+    '%s skips NaN instead of pushing a "NaN" item',
+    (_name, invoke, rawKey) => {
+      const dr = makeDecodeResult();
+      invoke(dr);
+      expect(dr.formatted.items.length).toBe(0);
+      expect((dr.raw as Record<string, unknown>)[rawKey]).toBeUndefined();
+    },
+  );
+
+  test('heading still formats a valid value', () => {
+    const dr = makeDecodeResult();
+    ResultFormatter.heading(dr, 270);
+    expect(dr.raw.heading).toBe(270);
+    expect(dr.formatted.items[0].value).toBe('270');
+  });
+
+  test('groundspeed still formats a valid value', () => {
+    const dr = makeDecodeResult();
+    ResultFormatter.groundspeed(dr, 420);
+    expect(dr.raw.groundspeed).toBe(420);
+    expect(dr.formatted.items[0].value).toBe('420 knots');
+  });
+
+  test('mach still formats a valid value', () => {
+    const dr = makeDecodeResult();
+    ResultFormatter.mach(dr, 0.84);
+    expect(dr.raw.mach).toBe(0.84);
+    expect(dr.formatted.items[0].value).toBe('0.84 mach');
+  });
+
+  test('day still formats a valid value', () => {
+    const dr = makeDecodeResult();
+    ResultFormatter.day(dr, 12);
+    expect(dr.raw.day).toBe(12);
+    expect(dr.formatted.items[0].value).toBe('12');
+  });
+});
