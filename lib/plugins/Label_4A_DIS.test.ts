@@ -58,4 +58,22 @@ describe('Label 4A preamble DIS', () => {
     expect(decodeResult.decoder.decodeLevel).toBe('none');
     expect(decodeResult.formatted.items.length).toBe(0);
   });
+
+  test('does not decode DIS payload without comma', () => {
+    message.text = 'DIS01';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoded).toBe(false);
+    expect(decodeResult.decoder.decodeLevel).toBe('none');
+    expect(decodeResult.formatted.items.length).toBe(0);
+  });
+
+  test('does not decode DIS payload without callsign', () => {
+    message.text = 'DIS01,190009';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoded).toBe(false);
+    expect(decodeResult.decoder.decodeLevel).toBe('none');
+    expect(decodeResult.formatted.items.length).toBe(0);
+  });
 });

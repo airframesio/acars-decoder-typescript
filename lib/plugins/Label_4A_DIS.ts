@@ -17,7 +17,7 @@ export class Label_4A_DIS extends DecoderPlugin {
     const decodeResult = this.initResult(message, 'Latest New Format');
 
     const fields = message.text.split(',');
-    if (fields.length < 2 || !fields[1] || fields[1].length < 3) {
+    if (fields.length < 3 || !fields[1] || fields[1].length < 3 || !fields[2]) {
       decodeResult.decoded = false;
       this.setDecodeLevel(decodeResult, decodeResult.decoded);
       return decodeResult;
