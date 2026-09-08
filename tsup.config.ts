@@ -1,7 +1,11 @@
 import { defineConfig } from 'tsup';
 
 export default defineConfig({
-  entry: ['index.ts'],
+  entry: {
+    index: 'index.ts',
+    'bin/acars-decoder': 'lib/bin/acars-decoder.ts',
+    'bin/acars-decoder-test': 'lib/bin/acars-decoder-test.ts',
+  },
   format: ['cjs', 'esm'],
   dts: true,
   splitting: false,
