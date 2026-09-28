@@ -34,5 +34,24 @@ describe('DateTimeUtils.timestampToString', () => {
 
   it('still formats a valid time-of-day', () => {
     expect(DateTimeUtils.timestampToString(4980)).toBe('01:23:00');
+    expect(DateTimeUtils.timestampToString(86399)).toBe('23:59:59');
+  });
+
+  it('formats a full timestamp with its date', () => {
+    expect(DateTimeUtils.timestampToString(1704164645)).toBe(
+      '2024-01-02T03:04:05Z',
+    );
+  });
+});
+
+describe('DateTimeUtils.convertDayTimeToTod', () => {
+  it.each([
+    ['01000000', 'YYYY-MM-01T00:00:00'],
+    ['15123456', 'YYYY-MM-15T12:34:56'],
+    ['31235959', 'YYYY-MM-31T23:59:59'],
+  ])('keeps the day of month when formatting %s', (time, expected) => {
+    expect(
+      DateTimeUtils.timestampToString(DateTimeUtils.convertDayTimeToTod(time)),
+    ).toBe(expected);
   });
 });
