@@ -86,9 +86,10 @@ export class DateTimeUtils {
       // only time, no date
       return date.toISOString().slice(11, 19);
     }
-    if (time < 2678400) {
-      // unknown month and date
-      return `YYYY-MM-${date.toISOString().slice(8, 19)}`;
+    if (time < 32 * 86400) {
+      // unknown month, day of month is time / 86400
+      const day = String(Math.floor(time / 86400)).padStart(2, '0');
+      return `YYYY-MM-${day}T${date.toISOString().slice(11, 19)}`;
     }
     //strip off millis
     return date.toISOString().slice(0, -5) + 'Z';
