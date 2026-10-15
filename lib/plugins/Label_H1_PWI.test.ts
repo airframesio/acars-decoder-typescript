@@ -37,7 +37,7 @@ describe('Label H1 PWI', () => {
     );
   });
 
-  test('decodes Label H1 Preamble POS <invalid>', () => {
+  test('decodes <invalid>', () => {
     message.text = 'PWI Bogus message';
     const decodeResult = plugin.decode(message);
 

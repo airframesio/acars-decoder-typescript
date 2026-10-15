@@ -22,7 +22,9 @@ export class DateTimeUtils {
     // Build the date in one call so an incremental setUTC* on a Date that
     // was initialised to "now" can't roll the month forward when the
     // current real-world day is later than the last day of the target.
-    const utcDate = new Date(Date.UTC(year, month, day, hours, minutes, seconds));
+    const utcDate = new Date(
+      Date.UTC(year, month, day, hours, minutes, seconds),
+    );
     return utcDate.toUTCString();
   }
 

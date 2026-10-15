@@ -13,6 +13,7 @@ import * as Plugins from './plugins/official';
  */
 const pluginClasses = [
   Plugins.CBand, // first, for now, so it can wrap other plugins
+  Plugins.LibAcars,
   Plugins.Arinc702,
   Plugins.Label_ColonComma,
   Plugins.Label_5Z_Slash,

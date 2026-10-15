@@ -1,3 +1,4 @@
+export * from './Lib_ACARS';
 export * from './CBand';
 export * from './ARINC_702';
 export * from './Label_5Z_Slash';

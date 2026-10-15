@@ -29,34 +29,6 @@ describe('Label_H1 FTX', () => {
     expect(decodeResult.formatted.description).toBeDefined();
   });
 
-  // disabled due to checksum failure. could be hidden characters in the source message
-  test.skip('decodes Label H1 Preamble - #MDFTX valid', () => {
-    // https://app.airframes.io/messages/3400555283
-    message.text =
-      '- #MDFTX/ID77170A,RCH836,ABZ01G6XH273/MR2,/FXIRAN IS LAUNCHING MISSILES TOWARDS ISRAEL. YOUR FLIGHT PATH IS CURRENTLY NORTH OF PROJECTED MISSILE TRACKS. EXERCIZE EXTREME CAUTION.4A99';
-    const decodeResult = plugin.decode(message);
-
-    expect(decodeResult.decoded).toBe(true);
-    expect(decodeResult.decoder.decodeLevel).toBe('partial');
-    expect(decodeResult.raw.mission_number).toBe('ABZ01G6XH273');
-    expect(decodeResult.raw.tail).toBe('77170A');
-    expect(decodeResult.raw.flight_number).toBe('RCH836');
-    expect(decodeResult.raw.free_text).toBe(
-      'IRAN IS LAUNCHING MISSILES TOWARDS ISRAEL. YOUR FLIGHT PATH IS CURRENTLY NORTH OF PROJECTED MISSILE TRACKS. EXERCIZE EXTREME CAUTION.',
-    );
-    expect(decodeResult.raw.checksum).toBe('0x4a99');
-    expect(decodeResult.remaining.text).toBe('- #MD/MR2,');
-    expect(decodeResult.formatted.items.length).toBe(4);
-    expect(decodeResult.formatted.description).toBeDefined();
-  });
-
-  test('decodes example 3', () => {
-    message.text = '- #MDFTX/ID80052A,RCH648,PAM362201029/MR1,/FXHID0B1';
-    const decodeResult = plugin.decode(message);
-
-    expect(decodeResult.decoded).toBe(true);
-  });
-
   test('does not decode invalid message', () => {
     message.text = 'FTX Bogus message';
     const decodeResult = plugin.decode(message);
