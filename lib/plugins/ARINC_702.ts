@@ -54,8 +54,7 @@ export class Arinc702 extends DecoderPlugin {
     const hashParts = msg.split('#');
     if (hashParts.length == 2) {
       // need a better way to figure this out
-      const offset =
-        hashParts[0] === '- ' || isNaN(parseInt(hashParts[1][1])) ? 3 : 4;
+      const offset = isNaN(parseInt(hashParts[1][1])) ? 3 : 4;
       decoded = Arinc702Helper.decodeH1Message(
         decodeResult,
         msg.slice(hashParts[0].length + offset),

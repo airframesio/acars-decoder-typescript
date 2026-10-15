@@ -68,14 +68,26 @@ describe('ResultFormatter timestamp family NaN guards', () => {
   // Malformed time fields (e.g. convertHHMMSSToTod('ABCD') -> NaN) must not
   // abort the whole decode via timestampToString's RangeError (issue #498).
   const cases: Array<[string, (dr: DecodeResult) => void, string]> = [
-    ['timestamp', (dr) => ResultFormatter.timestamp(dr, NaN), 'message_timestamp'],
+    [
+      'timestamp',
+      (dr) => ResultFormatter.timestamp(dr, NaN),
+      'message_timestamp',
+    ],
     ['eta', (dr) => ResultFormatter.eta(dr, NaN), 'eta_time'],
     ['out', (dr) => ResultFormatter.out(dr, NaN), 'out_time'],
     ['off', (dr) => ResultFormatter.off(dr, NaN), 'off_time'],
     ['on', (dr) => ResultFormatter.on(dr, NaN), 'on_time'],
     ['in', (dr) => ResultFormatter.in(dr, NaN), 'in_time'],
-    ['engineStart', (dr) => ResultFormatter.engineStart(dr, NaN), 'engine_start_time'],
-    ['engineStop', (dr) => ResultFormatter.engineStop(dr, NaN), 'engine_stop_time'],
+    [
+      'engineStart',
+      (dr) => ResultFormatter.engineStart(dr, NaN),
+      'engine_start_time',
+    ],
+    [
+      'engineStop',
+      (dr) => ResultFormatter.engineStop(dr, NaN),
+      'engine_stop_time',
+    ],
   ];
 
   test.each(cases)(
@@ -102,12 +114,20 @@ describe('ResultFormatter numeric formatters NaN guards', () => {
   // than surfacing as literal "NaN" strings (issue #494).
   const cases: Array<[string, (dr: DecodeResult) => void, string]> = [
     ['heading', (dr) => ResultFormatter.heading(dr, NaN), 'heading'],
-    ['groundspeed', (dr) => ResultFormatter.groundspeed(dr, NaN), 'groundspeed'],
+    [
+      'groundspeed',
+      (dr) => ResultFormatter.groundspeed(dr, NaN),
+      'groundspeed',
+    ],
     ['airspeed', (dr) => ResultFormatter.airspeed(dr, NaN), 'airspeed'],
     ['mach', (dr) => ResultFormatter.mach(dr, NaN), 'mach'],
     ['day', (dr) => ResultFormatter.day(dr, NaN), 'day'],
     ['month', (dr) => ResultFormatter.month(dr, NaN), 'month'],
-    ['departureDay', (dr) => ResultFormatter.departureDay(dr, NaN), 'departure_day'],
+    [
+      'departureDay',
+      (dr) => ResultFormatter.departureDay(dr, NaN),
+      'departure_day',
+    ],
     ['arrivalDay', (dr) => ResultFormatter.arrivalDay(dr, NaN), 'arrival_day'],
   ];
 

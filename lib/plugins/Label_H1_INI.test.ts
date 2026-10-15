@@ -43,29 +43,6 @@ describe('Label_H1 INI', () => {
     expect(sequenceResponseItem?.value).toBe('0');
   });
 
-  test('#MD valid', () => {
-    // https://app.airframes.io/messages/3400583424
-    message.text =
-      '- #MDINI/ID99206A,RCH206,AAM7029H1275/MR0,0/AFKSUU,KBUR/TD011535,1535EE66';
-    const decodeResult = plugin.decode(message);
-
-    expect(decodeResult.decoded).toBe(true);
-    expect(decodeResult.decoder.decodeLevel).toBe('partial');
-    expect(decodeResult.raw.tail).toBe('99206A');
-    expect(decodeResult.raw.flight_number).toBe('RCH206');
-    expect(decodeResult.raw.mission_number).toBe('AAM7029H1275');
-    expect(decodeResult.raw.sequence_number).toBe(0);
-    expect(decodeResult.raw.sequence_response).toBe(0);
-    expect(decodeResult.raw.departure_icao).toBe('KSUU');
-    expect(decodeResult.raw.arrival_icao).toBe('KBUR');
-    expect(decodeResult.raw.planned_departure_time).toBe('011535');
-    expect(decodeResult.raw.estimated_departure_time).toBe('1535');
-    expect(decodeResult.raw.checksum).toBe(0xee66);
-    expect(decodeResult.remaining.text).toBe('- #MD/');
-    expect(decodeResult.formatted.items.length).toBe(9);
-    expect(decodeResult.formatted.description).toBe('Initial Report');
-  });
-
   test('INI <invalid>', () => {
     message.text = 'INI Bogus message';
     const decodeResult = plugin.decode(message);
