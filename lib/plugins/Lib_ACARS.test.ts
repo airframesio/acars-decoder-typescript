@@ -16,7 +16,7 @@ describe('LibACARS plugin', () => {
     expect(plugin.qualifiers).toBeDefined();
     expect(plugin.qualifiers()).toEqual({
       labels: ['*'],
-      preambles: ['- '],
+      preambles: ['- #'],
     });
   });
 

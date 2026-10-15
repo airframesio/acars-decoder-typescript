@@ -13,7 +13,7 @@ export class LibAcars extends DecoderPlugin {
   qualifiers() {
     return {
       labels: ['*'],
-      preambles: ['- '],
+      preambles: ['- #'],
     };
   }
 
