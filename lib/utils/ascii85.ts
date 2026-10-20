@@ -34,10 +34,10 @@ export function ascii85Decode(input: string): Uint8Array | null {
       value = value * 85 + digit;
     }
 
-    if (chunkLen === 5 && value > 0xffffffff) return null;
+    // Applies to padded short tails too: a group whose value exceeds uint32 is invalid input.
+    if (value > 0xffffffff) return null;
 
-    // Use >>> 0 to simulate uint32 overflow for padded groups
-    const v = value >>> 0;
+    const v = value;
     const numBytes = chunkLen === 5 ? 4 : chunkLen - 1;
     if (numBytes >= 1) output.push((v >>> 24) & 0xff);
     if (numBytes >= 2) output.push((v >>> 16) & 0xff);
