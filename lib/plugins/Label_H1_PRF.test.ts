@@ -15,7 +15,6 @@ describe('Label H1 PRF', () => {
     message.text = 'PRF/TR,246,1,0,P10,102936,P8,P44,130131137,0,169,KDCA,KMCO,01O,1311,1142,SWA1500,328005,1086,1086,44136B';
     const decodeResult = plugin.decode(message);
 
-    console.log(JSON.stringify(decodeResult, null, 2));
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.raw.checksum).toBe(0x136b);
@@ -25,6 +24,7 @@ describe('Label H1 PRF', () => {
     expect(decodeResult.raw.departure_runway).toBe('01O');
     expect(decodeResult.raw.flight_number).toBe('SWA1500');
     expect(decodeResult.formatted.items.length).toBe(6);
+    expect(decodeResult.remaining.text).toBe(',246,1,0,P10,P8,P44,130131137,0,169,1311,1142,328005,1086,1086,44');
   });
 
 

@@ -364,7 +364,7 @@ function processLandingReport(decodeResult: DecodeResult, data: string[]) {
 }
 
 // trajectory? track?
-// ?,?,?,?,?,off-HHMMSS,?,?,?,?,?,dep,arr,dep_rw,??,??,flight_number,?,?,?,?
+// ?,?,?,?,?,off-HHMMSS,?,?,?,?,?,dep,arr,dep_rw,?,?,flight_number,?,?,?,?
 function processTR(decodeResult: DecodeResult, data: string[]) {
   if (data.length !== 21) {
         ResultFormatter.unknownArr(decodeResult, data, ',');
