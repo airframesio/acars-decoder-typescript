@@ -151,6 +151,9 @@ export class Arinc702Helper {
         case 'TD':
           processTimeOfDeparture(decodeResult, data.split(','));
           break;
+        case 'TR':
+          processTR(decodeResult, data.split(','));
+          break;
         case 'TS':
           Arinc702Helper.processTimeStamp(decodeResult, data.split(','));
           break;
@@ -360,6 +363,24 @@ function processLandingReport(decodeResult: DecodeResult, data: string[]) {
   }
 }
 
+// trajectory? track?
+// ?,?,?,?,?,off-HHMMSS,?,?,?,?,?,dep,arr,dep_rw,?,?,flight_number,?,?,?,?
+function processTR(decodeResult: DecodeResult, data: string[]) {
+  if (data.length !== 21) {
+    ResultFormatter.unknownArr(decodeResult, data, ',');
+    return;
+  }
+  ResultFormatter.unknownArr(decodeResult, data.slice(0, 5), ',');
+  ResultFormatter.off(decodeResult, DateTimeUtils.convertHHMMSSToTod(data[5]));
+  ResultFormatter.unknownArr(decodeResult, data.slice(6, 11), ',');
+  ResultFormatter.departureAirport(decodeResult, data[11]);
+  ResultFormatter.arrivalAirport(decodeResult, data[12]);
+  ResultFormatter.departureRunway(decodeResult, data[13]);
+  ResultFormatter.unknownArr(decodeResult, data.slice(14, 16), ',');
+  ResultFormatter.flightNumber(decodeResult, data[16]);
+  ResultFormatter.unknownArr(decodeResult, data.slice(17), ',');
+}
+
 function processCenterOfGravity(decodeResult: DecodeResult, data: string[]) {
   if (data.length === 1) {
     if (data[0] !== undefined && data[0] !== '') {
@@ -437,6 +458,8 @@ function processIMI(decodeResult: DecodeResult, type: string): boolean {
     decodeResult.formatted.description = 'Load Distribution Information';
   } else if (type === 'PER') {
     decodeResult.formatted.description = 'Performance Report';
+  } else if (type === 'PRF') {
+    decodeResult.formatted.description = 'Profile Report';
   } else if (type === 'POS') {
     decodeResult.formatted.description = 'Position Report';
   } else if (type === 'PRG') {
