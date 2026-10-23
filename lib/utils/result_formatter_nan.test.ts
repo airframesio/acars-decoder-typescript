@@ -14,15 +14,19 @@ describe('#541 — NaN guards for desiredAltitude and version', () => {
     it('skips non-numeric desired altitude', () => {
       const result = makeResult();
       ResultFormatter.desiredAltitude(result, NaN);
-      expect((result.raw as Record<string, unknown>).desired_alt).toBeUndefined();
-      expect(result.formatted.items.some((i) => i.type === 'desired_altitude')).toBe(false);
+      expect(
+        (result.raw as Record<string, unknown>).desired_alt,
+      ).toBeUndefined();
+      expect(
+        result.formatted.items.some((i) => i.type === 'desired_altitude'),
+      ).toBe(false);
     });
 
     it('still formats a valid desired altitude', () => {
       const result = makeResult();
       ResultFormatter.desiredAltitude(result, 34000);
       expect(result.formatted.items).toContainEqual(
-        expect.objectContaining({ type: 'desired_altitude', value: '34000' })
+        expect.objectContaining({ type: 'desired_altitude', value: '34000' }),
       );
     });
   });
@@ -32,14 +36,16 @@ describe('#541 — NaN guards for desiredAltitude and version', () => {
       const result = makeResult();
       ResultFormatter.version(result, NaN);
       expect((result.raw as Record<string, unknown>).version).toBeUndefined();
-      expect(result.formatted.items.some((i) => i.type === 'version')).toBe(false);
+      expect(result.formatted.items.some((i) => i.type === 'version')).toBe(
+        false,
+      );
     });
 
     it('still formats a valid version', () => {
       const result = makeResult();
       ResultFormatter.version(result, 2.0);
       expect(result.formatted.items).toContainEqual(
-        expect.objectContaining({ type: 'version', value: 'v2.0' })
+        expect.objectContaining({ type: 'version', value: 'v2.0' }),
       );
     });
   });
