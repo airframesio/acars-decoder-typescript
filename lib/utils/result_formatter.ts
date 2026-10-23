@@ -606,6 +606,9 @@ export class ResultFormatter {
   }
 
   static version(decodeResult: DecodeResult, value: number) {
+    if (isNaN(value)) {
+      return;
+    }
     decodeResult.raw.version = value;
     decodeResult.formatted.items.push({
       type: 'version',
@@ -646,6 +649,9 @@ export class ResultFormatter {
   }
 
   static desiredAltitude(decodeResult: DecodeResult, value: number) {
+    if (isNaN(value)) {
+      return;
+    }
     decodeResult.raw.desired_alt = value;
     decodeResult.formatted.items.push({
       type: 'desired_altitude',
