@@ -138,6 +138,12 @@ export class MessageDecoder {
           // buckets are seeded via wildcardEntries.slice() below).
           const wildcardInsertIndex = this.wildcardEntries.length - 1;
           for (const bucket of this.candidatesByLabel.values()) {
+            // Skip buckets that already hold this plugin: a plugin whose
+            // qualifiers list a specific label before '*' has already been
+            // pushed into that bucket by the specific-label branch below.
+            if (bucket.some((e) => e.plugin === plugin)) {
+              continue;
+            }
             bucket.splice(wildcardInsertIndex, 0, entry);
           }
         }
