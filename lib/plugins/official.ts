@@ -49,7 +49,7 @@ export * from './Label_83';
 export * from './Label_8E';
 export * from './Label_B6';
 export * from './Label_ColonComma';
-export * from './Label_H1_76401'
+export * from './Label_H1_76401';
 export * from './Label_H1_ATIS';
 export * from './Label_H1_EZF';
 export * from './Label_H1_FLR';

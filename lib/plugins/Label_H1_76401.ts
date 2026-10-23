@@ -43,6 +43,8 @@ export class Label_H1_76401 extends DecoderPlugin {
           longitude: position.longitude,
           time: DateTimeUtils.convertHHMMSSToTod(line.substring(13, 19)),
         });
+      } else {
+        ResultFormatter.unknown(decodeResult, line.substring(0, 19), '');
       }
       ResultFormatter.unknown(decodeResult, line.substring(19), '\r\n');
     }
@@ -52,7 +54,10 @@ export class Label_H1_76401 extends DecoderPlugin {
     if (waypoints.length > 0) {
       const lastWaypoint = waypoints[waypoints.length - 1];
       // should be true, making typescript happy
-      if (lastWaypoint.latitude && lastWaypoint.longitude) {
+      if (
+        lastWaypoint.latitude !== undefined &&
+        lastWaypoint.longitude !== undefined
+      ) {
         ResultFormatter.position(decodeResult, {
           latitude: lastWaypoint.latitude,
           longitude: lastWaypoint.longitude,
@@ -60,7 +65,7 @@ export class Label_H1_76401 extends DecoderPlugin {
       }
 
       // should be true, making typescript happy
-      if (lastWaypoint.time) {
+      if (lastWaypoint.time !== undefined) {
         ResultFormatter.timestamp(decodeResult, lastWaypoint.time);
       }
     }
