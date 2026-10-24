@@ -38,7 +38,7 @@ export class Label_H1_76401 extends DecoderPlugin {
       );
       if (position) {
         waypoints.push({
-          name: CoordinateUtils.coordinateString(position),
+          name: line.substring(0, 13),
           latitude: position.latitude,
           longitude: position.longitude,
           time: DateTimeUtils.convertHHMMSSToTod(line.substring(13, 19)),
