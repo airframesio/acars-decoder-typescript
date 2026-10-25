@@ -78,6 +78,15 @@ describe('CoordinateUtils', () => {
         }),
       ).toBe('12.345 S, 67.890 W');
     });
+
+    test('formats zero coordinates as N/E', () => {
+      expect(
+        CoordinateUtils.coordinateString({
+          latitude: 0,
+          longitude: 0,
+        }),
+      ).toBe('0.000 N, 0.000 E');
+    });
   });
 
   describe('getDirection', () => {
