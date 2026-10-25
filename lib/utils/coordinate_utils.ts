@@ -76,8 +76,8 @@ export class CoordinateUtils {
     latitude: number;
     longitude: number;
   }): string {
-    const latDir = coords.latitude > 0 ? 'N' : 'S';
-    const lonDir = coords.longitude > 0 ? 'E' : 'W';
+    const latDir = coords.latitude >= 0 ? 'N' : 'S';
+    const lonDir = coords.longitude >= 0 ? 'E' : 'W';
     return `${Math.abs(coords.latitude).toFixed(3)} ${latDir}, ${Math.abs(coords.longitude).toFixed(3)} ${lonDir}`;
   }
 
