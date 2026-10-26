@@ -43,6 +43,8 @@ const pluginClasses = [
   Plugins.Label_2P_FM4,
   Plugins.Label_2P_FM5,
   Plugins.Label_30_Slash_EA,
+  Plugins.Label_37_SWA,
+  Plugins.Label_40_SWA,
   Plugins.Label_44_ETA,
   Plugins.Label_44_IN,
   Plugins.Label_44_OFF,
