@@ -174,6 +174,112 @@ describe('Label_37_SWA', () => {
     expect(decodeResult.raw.station_iata).toBeUndefined();
   });
 
+  test('keeps the wind speed when the wind direction is a placeholder', () => {
+    // KMCI,KLAS,N 38.523,W100.807,37999,252,460,.797,15.4,2022,259,***,060,-53,142080
+    message.text =
+      '09BP-HJ\nA,EVKA(D-KO/8LY:I8KXJHHYLH6K86MMMKI:IKN HKY6M6KJ:YNKIHIIKI:MK***KH HK9:8KJNIHLH';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoder.decodeLevel).toBe('full');
+    expect(decodeResult.raw.wind).toBeUndefined();
+    expect(decodeResult.raw.wind_speed).toBe('60 knots');
+    expect(decodeResult.raw.wind_direction).toBeUndefined();
+  });
+
+  test('keeps the wind direction when the wind speed is a placeholder', () => {
+    // KMCI,KLAS,N 38.523,W100.807,37999,252,460,.797,15.4,2022,259,274,***,-53,142080
+    message.text =
+      '09BP-HJ\nA,EVKA(D-KO/8LY:I8KXJHHYLH6K86MMMKI:IKN HKY6M6KJ:YNKIHIIKI:MKI6NK***K9:8KJNIHLH';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoder.decodeLevel).toBe('full');
+    expect(decodeResult.raw.wind).toBeUndefined();
+    expect(decodeResult.raw.wind_direction).toBe('274 degrees');
+    expect(decodeResult.raw.wind_speed).toBeUndefined();
+  });
+
+  test('keeps a latitude whose longitude is missing', () => {
+    // KMCI,KLAS,N 38.523,,37999,252,460,.797,15.4,2022,259,274,060,-53,142080
+    message.text =
+      '09BP-HJ\nA,EVKA(D-KO/8LY:I8KK86MMMKI:IKN HKY6M6KJ:YNKIHIIKI:MKI6NKH HK9:8KJNIHLH';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.raw.position).toBeUndefined();
+    expect(decodeResult.decoder.decodeLevel).toBe('partial');
+    expect(decodeResult.remaining.text).toBe('N 38.523');
+  });
+
+  test('consumes position placeholders without a position', () => {
+    // KMCI,KLAS,----.---,----.---,37999,252,460,.797,15.4,2022,259,274,060,-53,142080
+    message.text =
+      '09BP-HJ\nA,EVKA(D-K9999Y999K9999Y999K86MMMKI:IKN HKY6M6KJ:YNKIHIIKI:MKI6NKH HK9:8KJNIHLH';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.raw.position).toBeUndefined();
+    expect(decodeResult.decoder.decodeLevel).toBe('full');
+    expect(decodeResult.remaining.text).toBeUndefined();
+  });
+
+  test('keeps an out-of-range position out of the decoded fields', () => {
+    // KMCI,KLAS,N 91.001,W181.001,37999,252,460,.797,15.4,2022,259,274,060,-53,142080
+    message.text =
+      '09BP-HJ\nA,EVKA(D-KO/MJYHHJKXJLJYHHJK86MMMKI:IKN HKY6M6KJ:YNKIHIIKI:MKI6NKH HK9:8KJNIHLH';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.raw.position).toBeUndefined();
+    expect(decodeResult.decoder.decodeLevel).toBe('partial');
+    expect(decodeResult.remaining.text).toBe('N 91.001,W181.001');
+  });
+
+  test('keeps an out-of-range ETA out of the decoded fields', () => {
+    // KMCI,KLAS,N 38.523,W100.807,37999,252,460,.797,15.4,2460,259,274,060,-53,142080
+    message.text =
+      '09BP-HJ\nA,EVKA(D-KO/8LY:I8KXJHHYLH6K86MMMKI:IKN HKY6M6KJ:YNKIN HKI:MKI6NKH HK9:8KJNIHLH';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.raw.eta_time).toBeUndefined();
+    expect(decodeResult.decoder.decodeLevel).toBe('partial');
+    expect(decodeResult.remaining.text).toBe('2460');
+  });
+
+  test('keeps an out-of-range MXR03 ETA out of the decoded fields', () => {
+    // KBWI,2460,0|
+    message.text = '01.:/3P\n)JH(ZO7-3Z3\n';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.raw.arrival_icao).toBe('KBWI');
+    expect(decodeResult.raw.eta_time).toBeUndefined();
+    expect(decodeResult.decoder.decodeLevel).toBe('partial');
+    expect(decodeResult.remaining.text).toBe('2460');
+  });
+
+  test('shows MXR03 text only when its header fails the layout', () => {
+    // KBWI,2226,7| (report codes are 0-3)
+    message.text = '01.:/3P\n)JH(ZOOO-ZS\n';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoded).toBe(true);
+    expect(decodeResult.decoder.decodeLevel).toBe('partial');
+    expect(decodeResult.raw.maintenance_code).toBeUndefined();
+    expect(decodeResult.raw.text).toBe('KBWI,2226,7\n');
+  });
+
+  test('shows text only when a known type breaks its layout', () => {
+    // KMCI,KLAS,N 38.523,W100.807,3799X,252,460,.797,15.4,2022,259,274,060,-53,142080
+    message.text =
+      '09BP-HJ\nA,EVKA(D-KO/8LY:I8KXJHHYLH6K86MM4KI:IKN HKY6M6KJ:YNKIHIIKI:MKI6NKH HK9:8KJNIHLH';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoded).toBe(true);
+    expect(decodeResult.decoder.decodeLevel).toBe('partial');
+    expect(decodeResult.formatted.description).toBe('Position Report');
+    expect(decodeResult.raw.position).toBeUndefined();
+    expect(decodeResult.raw.altitude).toBeUndefined();
+    expect(decodeResult.raw.text).toBe(
+      'KMCI,KLAS,N 38.523,W100.807,3799X,252,460,.797,15.4,2022,259,274,060,-53,142080',
+    );
+  });
+
   test('does not decode a body outside the SWA layout', () => {
     message.text = '01ABCDE';
     const decodeResult = plugin.decode(message);

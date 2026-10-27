@@ -106,12 +106,12 @@ export class Label_37_SWA extends DecoderPlugin {
       prefix &&
       swaMatchesLayout(fields.slice(0, prefix.length), [prefix])
     ) {
-      this.writeMaintenance(decodeResult, d.text, fields);
-      decodeResult.decoder.decodeLevel = 'full';
+      const rest = this.writeMaintenance(decodeResult, d.text, fields);
+      decodeResult.decoder.decodeLevel = rest === 0 ? 'full' : 'partial';
       return decodeResult;
     }
 
-    if (clean && !layouts) {
+    if (clean && !layouts && !prefix) {
       // Free text and the report types whose fields are not read: the text in full.
       const lines = d.text.split('|');
       const route = lines[0].match(/^([A-Z]{4}),([A-Z]{4})$/);
@@ -176,6 +176,16 @@ export class Label_37_SWA extends DecoderPlugin {
             'Wind',
             `${windDir} degrees at ${windSpeed} knots`,
           );
+        } else if (windDir !== undefined) {
+          w.item(
+            11,
+            'wind_direction',
+            'WDIR',
+            'Wind Direction',
+            `${windDir} degrees`,
+          );
+        } else if (windSpeed !== undefined) {
+          w.item(12, 'wind_speed', 'WSPD', 'Wind Speed', `${windSpeed} knots`);
         }
         const sat = w.int(13);
         if (sat !== undefined)
@@ -297,12 +307,13 @@ export class Label_37_SWA extends DecoderPlugin {
     return w.finish();
   }
 
-  /** MXR03: destination, ETA, code, then the category and text. */
+  /** MXR03: destination, ETA, code, then the category and text; returns how many header
+   * fields went to `remaining`. */
   private writeMaintenance(
     decodeResult: DecodeResult,
     text: string,
     fields: string[],
-  ) {
+  ): number {
     const w = new SwaFieldWriter(decodeResult, fields.slice(0, 3));
     w.arrival(0);
     w.eta(1);
@@ -319,5 +330,6 @@ export class Label_37_SWA extends DecoderPlugin {
     if (body.trim() !== '') {
       ResultFormatter.text(decodeResult, body.split('|').join('\n'));
     }
+    return w.finish();
   }
 }

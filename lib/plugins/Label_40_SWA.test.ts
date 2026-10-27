@@ -71,7 +71,7 @@ describe('Label_40_SWA', () => {
     expect(decodeResult.raw.report_interval).toBe(5);
   });
 
-  test('decodes free text in each table', () => {
+  test('decodes free text in table 07', () => {
     // FTX01 table 07: raw L is Q.
     message.text = 'FTX01,07L';
     const decodeResult = plugin.decode(message);
@@ -80,6 +80,25 @@ describe('Label_40_SWA', () => {
     expect(decodeResult.decoder.decodeLevel).toBe('full');
     expect(decodeResult.formatted.description).toBe('Dispatch Free Text');
     expect(decodeResult.raw.text).toBe('Q');
+  });
+
+  test.each([
+    // Every FTX01 opens "DISPATCH MSG" and a line break; these are its raw forms in each table.
+    ['FTX01,01H 73AJEWV.7T\n'],
+    ['FTX01,026:EUJO0,HBE \n'],
+    ['FTX01,039BOV-D6L47OH\n'],
+    ['FTX01,04Q(KCJNO 17KZ\n'],
+    ['FTX01,052AUO,W0:3IU8\n'],
+    ['FTX01,0672Z):Y83A.Z4\n'],
+    ['FTX01,07)5PJWR 3:DP1\n'],
+    ['FTX01,08(P8Y2H6A1V8,\n'],
+    ['FTX01,09A2JOKET069J)\n'],
+  ])('decodes the FTX01 opening %j', (text) => {
+    message.text = text;
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoder.decodeLevel).toBe('full');
+    expect(decodeResult.raw.text).toBe('DISPATCH MSG\n');
   });
 
   test('does not decode PIC01', () => {

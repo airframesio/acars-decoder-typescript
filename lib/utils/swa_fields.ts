@@ -143,14 +143,27 @@ export class SwaFieldWriter {
       ResultFormatter.arrivalAirport(this.decodeResult, v);
   }
 
+  /**
+   * Writes the position when both coordinates are present and in range. Otherwise the
+   * placeholders are consumed and any coordinate that was sent stays for `remaining`.
+   */
   position(latIndex: number, lonIndex: number) {
-    const lat = this.take(latIndex);
-    const lon = this.take(lonIndex);
-    if (!/^[NS] ?\d/.test(lat) || !/^[EW] ?\d/.test(lon)) return;
-    ResultFormatter.position(this.decodeResult, {
-      latitude: (lat[0] === 'N' ? 1 : -1) * Number(lat.substring(1).trim()),
-      longitude: (lon[0] === 'E' ? 1 : -1) * Number(lon.substring(1).trim()),
-    });
+    const lat = this.fields[latIndex] ?? '';
+    const lon = this.fields[lonIndex] ?? '';
+    const latitude = /^[NS] ?\d/.test(lat)
+      ? (lat[0] === 'N' ? 1 : -1) * Number(lat.substring(1).trim())
+      : NaN;
+    const longitude = /^[EW] ?\d/.test(lon)
+      ? (lon[0] === 'E' ? 1 : -1) * Number(lon.substring(1).trim())
+      : NaN;
+    if (Math.abs(latitude) <= 90 && Math.abs(longitude) <= 180) {
+      this.used.add(latIndex);
+      this.used.add(lonIndex);
+      ResultFormatter.position(this.decodeResult, { latitude, longitude });
+      return;
+    }
+    if (!/^[NS] ?\d/.test(lat)) this.used.add(latIndex);
+    if (!/^[EW] ?\d/.test(lon)) this.used.add(lonIndex);
   }
 
   /** A whole number, or undefined for a placeholder. */
@@ -175,13 +188,17 @@ export class SwaFieldWriter {
     }
   }
 
+  /** HHMM; a placeholder is consumed, and a time out of range stays for `remaining`. */
   eta(i: number) {
-    const v = this.take(i);
-    if (/^\d{4}$/.test(v)) {
+    const v = this.fields[i] ?? '';
+    if (/^(?:[01]\d|2[0-3])[0-5]\d$/.test(v)) {
+      this.used.add(i);
       ResultFormatter.eta(
         this.decodeResult,
         DateTimeUtils.convertHHMMSSToTod(v),
       );
+    } else if (!/^\d{4}$/.test(v)) {
+      this.used.add(i);
     }
   }
 
