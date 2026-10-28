@@ -75,8 +75,11 @@ function plain(table: string, body: string, pass: Record<string, string>) {
 export function decodeSwaLabel37(body: string): SwaDecoded | undefined {
   const b = body.replace(/\r/g, '');
   const table = SWA_LABEL_37_TABLES[b.substring(0, 2)];
-  const nl = b.indexOf('\n');
-  if (!table || nl < 0) return undefined;
+  if (!table) return undefined;
+  let nl = b.indexOf('\n');
+  // TAR02 ends its header with the field separator instead of a line break.
+  if (nl !== 7 && b.length > 7 && lookup(table, b[7]) === ',') nl = 7;
+  if (nl < 0) return undefined;
   let type = '';
   for (const c of b.substring(2, Math.min(nl, 7))) {
     type += lookup(table, c) ?? SWA_UNREAD;
@@ -91,8 +94,15 @@ export function decodeSwaLabel40(body: string): SwaDecoded | undefined {
     // Not compressed: `POS01,Y,05` turns position reporting on, every 05 minutes.
     return { type: 'POS01', text: b.trim() };
   }
-  const table =
-    b[5] === ',' ? SWA_LABEL_40_TABLES[b.substring(6, 8)] : undefined;
+  const code = b[5] === ',' ? b.substring(6, 8) : '';
+  if (code === '00') {
+    // Table code 00 is plain text (seen on GEN01 PDC acknowledgements).
+    return {
+      type: b.substring(0, 5),
+      text: b.substring(8).replace(/\n/g, '|'),
+    };
+  }
+  const table = SWA_LABEL_40_TABLES[code];
   if (!table) return undefined;
   return {
     type: b.substring(0, 5),
@@ -100,7 +110,65 @@ export function decodeSwaLabel40(body: string): SwaDecoded | undefined {
   };
 }
 
-/** True for a type name in the SWA form, three letters and two digits (POS01, FTX01). */
-export function isSwaType(type: string): boolean {
-  return /^[A-Z]{3}\d{2}$/.test(type);
+/**
+ * Type names seen from Southwest aircraft in a year of airframes traffic. Another airline's label
+ * 37 text can decode to a name of the same shape (TRF04, YYY41), so only these are decoded.
+ */
+const SWA_TYPES: Record<'37' | '40', Set<string>> = {
+  '37': new Set([
+    'ADV01',
+    'CLB02',
+    'DIV02',
+    'DVC01',
+    'ETA03',
+    'FCM01',
+    'FCR03',
+    'FFD01',
+    'FHD04',
+    'FLI01',
+    'FTD02',
+    'GAM02',
+    'GSR02',
+    'HGD03',
+    'HLD01',
+    'INN03',
+    'INR04',
+    'MXR03',
+    'OFF02',
+    'OFP01',
+    'ONN02',
+    'OUT03',
+    'PFR03',
+    'PFR04',
+    'PJS01',
+    'PNS01',
+    'POS01',
+    'POS02',
+    'PRM01',
+    'RRR01',
+    'RTG03',
+    'RTG04',
+    'RTG05',
+    'TAR02',
+    'TDM01',
+    'TOD03',
+    'TRB02',
+    'TXI02',
+    'VXR02',
+  ]),
+  '40': new Set([
+    'ASR01',
+    'DVP01',
+    'FTX01',
+    'GAR03',
+    'GEN01',
+    'PIC01',
+    'POS01',
+    'WFC01',
+  ]),
+};
+
+/** True for a type name Southwest sends on that label (POS01, FTX01). */
+export function isSwaType(type: string, label: '37' | '40'): boolean {
+  return SWA_TYPES[label].has(type);
 }

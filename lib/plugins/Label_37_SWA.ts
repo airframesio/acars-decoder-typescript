@@ -11,6 +11,7 @@ import {
   SWA_PREFIX_LAYOUTS,
   SwaFieldWriter,
   swaFields,
+  swaHideCrewIds,
   swaMatchesLayout,
 } from '../utils/swa_fields';
 
@@ -23,6 +24,7 @@ const DESCRIPTIONS: Record<string, string> = {
   FLI01: 'Flight Initialization',
   CLB02: 'Climb Report',
   POS01: 'Position Report',
+  POS02: 'Position Report',
   HGD03: 'HowGozit Report',
   ETA03: 'ETA Report',
   INR04: 'In Range Report',
@@ -78,7 +80,8 @@ export class Label_37_SWA extends DecoderPlugin {
     decodeResult.message = message;
 
     const d = decodeSwaLabel37(message.text);
-    if (!d || !isSwaType(d.type)) {
+    // PRM01 carries crew employee numbers; it is not decoded.
+    if (!d || !isSwaType(d.type, '37') || d.type === 'PRM01') {
       if (options.debug) {
         console.log(`Decoder: Unknown 37 message: ${message.text}`);
       }
@@ -92,10 +95,11 @@ export class Label_37_SWA extends DecoderPlugin {
       DESCRIPTIONS[d.type] ?? 'Southwest Message';
     decodeResult.raw.preamble = d.type;
 
-    const fields = swaFields(d.text);
+    const text = swaHideCrewIds(d.text);
+    const fields = swaFields(text);
     const layouts = SWA_LAYOUTS[d.type];
     const prefix = SWA_PREFIX_LAYOUTS[d.type];
-    const clean = !d.text.includes(SWA_UNREAD);
+    const clean = !text.includes(SWA_UNREAD);
     if (clean && layouts && swaMatchesLayout(fields, layouts)) {
       const rest = this.writeFields(decodeResult, d.type, fields);
       decodeResult.decoder.decodeLevel = rest === 0 ? 'full' : 'partial';
@@ -106,14 +110,14 @@ export class Label_37_SWA extends DecoderPlugin {
       prefix &&
       swaMatchesLayout(fields.slice(0, prefix.length), [prefix])
     ) {
-      const rest = this.writeMaintenance(decodeResult, d.text, fields);
+      const rest = this.writeMaintenance(decodeResult, text, fields);
       decodeResult.decoder.decodeLevel = rest === 0 ? 'full' : 'partial';
       return decodeResult;
     }
 
     if (clean && !layouts && !prefix) {
       // Free text and the report types whose fields are not read: the text in full.
-      const lines = d.text.split('|');
+      const lines = text.split('|');
       const route = lines[0].match(/^([A-Z]{4}),([A-Z]{4})$/);
       if (route && d.type === 'FTD02') {
         ResultFormatter.departureAirport(decodeResult, route[1]);
@@ -126,7 +130,7 @@ export class Label_37_SWA extends DecoderPlugin {
     }
 
     // An unread character or a field that breaks the type's layout: show the text only.
-    ResultFormatter.text(decodeResult, d.text.split('|').join('\n'));
+    ResultFormatter.text(decodeResult, text.split('|').join('\n'));
     decodeResult.decoder.decodeLevel = 'partial';
     return decodeResult;
   }
@@ -140,6 +144,7 @@ export class Label_37_SWA extends DecoderPlugin {
     const w = new SwaFieldWriter(decodeResult, fields);
     switch (type) {
       case 'POS01':
+      case 'POS02':
       case 'HGD03':
       case 'FHD04': {
         // from, to, lat, lon, alt, IAS, TAS, Mach, FOB, ETA, track, wind dir, wind kt, SAT, gross wt
@@ -203,6 +208,10 @@ export class Label_37_SWA extends DecoderPlugin {
             `${gw} pounds`,
           );
         }
+        // The 16-field POS01 and POS02 end with the send time, HHMMSS.
+        if (type !== 'FHD04' && fields.length === 16) {
+          w.time(15, (r, t) => ResultFormatter.timestamp(r, t));
+        }
         if (type === 'FHD04') {
           w.item(14, 'event', 'EVT', 'Event', fields[14]);
           w.use(15);
@@ -240,35 +249,54 @@ export class Label_37_SWA extends DecoderPlugin {
         w.position(4, 5);
         break;
       case 'INR04':
+        // ETA (11-19 min after the report time in every one of 34,851), then the report time.
         w.departure(0);
         w.arrival(1);
+        w.eta(2);
+        w.time(3, (r, t) => ResultFormatter.timestamp(r, t));
         w.fuel(4);
         w.position(5, 6);
         break;
       case 'FLI01':
         w.departure(0);
         w.arrival(1);
+        w.time(2, (r, t) => ResultFormatter.timestamp(r, t));
         w.fuel(3);
         w.position(4, 5);
         break;
       case 'OUT03':
+        // Out time, FOB, a second fuel figure (not established), front door (L1) closed.
+        w.departure(0);
+        w.arrival(1);
+        w.time(2, (r, t) => ResultFormatter.out(r, t));
+        w.fuel(3);
+        w.timeItem(5, 'front_door_closed_time', 'L1CLS', 'Front Door Closed');
+        break;
       case 'TXI02':
         w.departure(0);
         w.arrival(1);
+        w.timeItem(2, 'taxi_start_time', 'TAXI', 'Taxi Start Time');
         w.fuel(3);
         break;
       case 'INN03':
         w.departure(0);
         w.arrival(1);
+        // In time, then front door (L1) opened; the four door flags are not established.
+        w.time(2, (r, t) => ResultFormatter.in(r, t));
+        w.timeItem(3, 'front_door_open_time', 'L1OPN', 'Front Door Opened');
         w.fuel(4);
         break;
       case 'RTG04':
       case 'RTG05':
+        // Out, in, report time; the four door flags are not established.
         w.departure(0);
         w.arrival(1);
+        w.time(2, (r, t) => ResultFormatter.out(r, t));
+        w.time(3, (r, t) => ResultFormatter.in(r, t));
+        w.time(4, (r, t) => ResultFormatter.timestamp(r, t));
         w.fuel(5);
         break;
-      case 'TDM01':
+      case 'TDM01': {
         w.departure(0);
         w.arrival(1);
         w.position(2, 3);
@@ -277,7 +305,18 @@ export class Label_37_SWA extends DecoderPlugin {
           DOORS[w.use(4)],
           w.use(5) === 'O' ? 'open' : 'closed',
         );
+        // Date (MMDD) and time (HHMMSS) of the door event.
+        const md = fields[6];
+        if (/^(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01])$/.test(md)) {
+          w.use(6);
+          ResultFormatter.month(decodeResult, Number(md.substring(0, 2)));
+          ResultFormatter.day(decodeResult, Number(md.substring(2)));
+        } else if (!/^\d+$/.test(md)) {
+          w.use(6);
+        }
+        w.time(7, (r, t) => ResultFormatter.timestamp(r, t));
         break;
+      }
       case 'FCM01': {
         // L, R (engines), A (APU), each 1 running / 0 off; fuel in hundreds of pounds
         const names: Record<string, string> = {
@@ -298,6 +337,7 @@ export class Label_37_SWA extends DecoderPlugin {
           }
         }
         ResultFormatter.currentFuel(decodeResult, Number(w.use(4)) * 100);
+        w.time(5, (r, t) => ResultFormatter.timestamp(r, t));
         break;
       }
       case 'VXR02':

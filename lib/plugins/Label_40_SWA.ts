@@ -10,6 +10,8 @@ import {
   SWA_LAYOUTS,
   SwaFieldWriter,
   swaFields,
+  swaHideCrewIds,
+  swaIsCrewSchedule,
   swaMatchesLayout,
 } from '../utils/swa_fields';
 
@@ -58,8 +60,14 @@ export class Label_40_SWA extends DecoderPlugin {
     decodeResult.message = message;
 
     const d = decodeSwaLabel40(message.text);
-    // PIC01 (duty-extension request) carries crew employee numbers; it is not decoded.
-    if (!d || !isSwaType(d.type) || d.type === 'PIC01') {
+    // PIC01 (duty-extension request) and the GEN01 crew schedule messages carry crew employee
+    // numbers; they are not decoded.
+    if (
+      !d ||
+      !isSwaType(d.type, '40') ||
+      d.type === 'PIC01' ||
+      (d.type === 'GEN01' && swaIsCrewSchedule(d.text))
+    ) {
       if (options.debug) {
         console.log(`Decoder: Unknown 40 message: ${message.text}`);
       }
@@ -91,9 +99,10 @@ export class Label_40_SWA extends DecoderPlugin {
       return decodeResult;
     }
 
-    const fields = swaFields(d.text);
+    const text = swaHideCrewIds(d.text);
+    const fields = swaFields(text);
     const layouts = SWA_LAYOUTS[d.type];
-    const clean = !d.text.includes(SWA_UNREAD);
+    const clean = !text.includes(SWA_UNREAD);
     if (clean && layouts && swaMatchesLayout(fields, layouts)) {
       const w = new SwaFieldWriter(decodeResult, fields);
       if (d.type === 'ASR01') {
@@ -123,7 +132,7 @@ export class Label_40_SWA extends DecoderPlugin {
       return decodeResult;
     }
 
-    ResultFormatter.text(decodeResult, d.text.split('|').join('\n'));
+    ResultFormatter.text(decodeResult, text.split('|').join('\n'));
     decodeResult.decoder.decodeLevel = clean && !layouts ? 'full' : 'partial';
     return decodeResult;
   }

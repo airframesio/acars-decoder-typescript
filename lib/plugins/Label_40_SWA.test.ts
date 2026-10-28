@@ -101,6 +101,49 @@ describe('Label_40_SWA', () => {
     expect(decodeResult.raw.text).toBe('DISPATCH MSG\n');
   });
 
+  test('does not decode a crew schedule message (crew employee numbers)', () => {
+    // MSG FROM CREW SCHEDULE|26 BOS-BWI|CAE 12345 FOE 654321| (made-up numbers)
+    message.text =
+      'GEN01,05IU836SMI30S4)3U0:42YG4\nLT3.MUB.)A\n0,43JLNPR36M43TRPNLJ\n';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoded).toBe(false);
+    expect(decodeResult.formatted.items.length).toBe(0);
+    expect(decodeResult.raw.text).toBeUndefined();
+  });
+
+  test('hides a crew employee number in dispatch free text', () => {
+    // DISPATCH MSG|FO 654321 IS ON THE SCHEDULE| (made-up number)
+    message.text = 'FTX01,0672Z):Y83A.Z4\n5,ALMNOPQA2ZA,-AY36AZ8367X/6\n';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoded).toBe(true);
+    expect(decodeResult.raw.text).toBe(
+      'DISPATCH MSG\nFO ****** IS ON THE SCHEDULE\n',
+    );
+  });
+
+  test('decodes table code 00 as plain text', () => {
+    message.text =
+      'GEN01,00PRE DEPT CLR ,PDC MSG RECEIVED        ,\nPDC NOT AVAILABLE       \nCONTACT CLNC DEL        \n\n';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoded).toBe(true);
+    expect(decodeResult.decoder.decodeLevel).toBe('full');
+    expect(decodeResult.formatted.description).toBe('Company Message');
+    expect(decodeResult.raw.text).toBe(
+      'PRE DEPT CLR ,PDC MSG RECEIVED        ,\nPDC NOT AVAILABLE       \nCONTACT CLNC DEL        \n\n',
+    );
+  });
+
+  test('does not decode a type name Southwest does not send', () => {
+    message.text = 'ABC12,07L';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoded).toBe(false);
+    expect(decodeResult.decoder.decodeLevel).toBe('none');
+  });
+
   test('does not decode PIC01', () => {
     message.text = 'PIC01,01ABC';
     const decodeResult = plugin.decode(message);

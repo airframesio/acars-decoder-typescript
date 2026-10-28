@@ -42,6 +42,7 @@ export const SWA_LAYOUTS: Record<string, string[][]> = {
     [...POS, INT],
     [...POS, INT, HMS],
   ],
+  POS02: [[...POS, INT, HMS]],
   HGD03: [[...POS, INT]],
   FHD04: [
     [
@@ -88,6 +89,23 @@ export const SWA_LAYOUTS: Record<string, string[][]> = {
 export const SWA_PREFIX_LAYOUTS: Record<string, string[]> = {
   MXR03: [APT, '(?:\\d{4}|)', '[0-3]'],
 };
+
+/** A crew position code followed by an employee number: captain, first officer, flight attendant. */
+const CREW_ID = /\b(CAE|FOE|CA|FO|FA|PILOT ?:)( ?)(\d{5,7})\b/g;
+
+/** Crew schedule uplinks list the crew by employee number; they are not decoded. */
+export function swaIsCrewSchedule(text: string): boolean {
+  return /CREW SCH|PART ?117|\b(?:CAE|FOE) ?\d{5,7}\b/.test(text);
+}
+
+/** Replaces the digits of an employee number written after a crew position code with '*'. */
+export function swaHideCrewIds(text: string): string {
+  return text.replace(
+    CREW_ID,
+    (_, who: string, gap: string, num: string) =>
+      `${who}${gap}${'*'.repeat(num.length)}`,
+  );
+}
 
 export function swaFields(text: string): string[] {
   return text.replace(/\|/g, ',').split(',');
@@ -188,18 +206,36 @@ export class SwaFieldWriter {
     }
   }
 
-  /** HHMM; a placeholder is consumed, and a time out of range stays for `remaining`. */
-  eta(i: number) {
+  /**
+   * HHMM or HHMMSS as seconds of the day. A placeholder is consumed; a time out of range is
+   * left for `remaining`.
+   */
+  tod(i: number): number | undefined {
     const v = this.fields[i] ?? '';
-    if (/^(?:[01]\d|2[0-3])[0-5]\d$/.test(v)) {
+    if (/^(?:[01]\d|2[0-3])[0-5]\d(?:[0-5]\d)?$/.test(v)) {
       this.used.add(i);
-      ResultFormatter.eta(
-        this.decodeResult,
-        DateTimeUtils.convertHHMMSSToTod(v),
-      );
-    } else if (!/^\d{4}$/.test(v)) {
-      this.used.add(i);
+      return DateTimeUtils.convertHHMMSSToTod(v);
     }
+    if (!/^\d+$/.test(v)) this.used.add(i);
+    return undefined;
+  }
+
+  /** Writes a time through a ResultFormatter helper such as `out`, `in` or `timestamp`. */
+  time(i: number, write: (decodeResult: DecodeResult, time: number) => void) {
+    const t = this.tod(i);
+    if (t !== undefined) write(this.decodeResult, t);
+  }
+
+  /** A time with no ResultFormatter helper, written as HH:MM:SS. */
+  timeItem(i: number, key: string, code: string, label: string) {
+    const t = this.tod(i);
+    if (t !== undefined) {
+      this.item(i, key, code, label, DateTimeUtils.timestampToString(t));
+    }
+  }
+
+  eta(i: number) {
+    this.time(i, (r, t) => ResultFormatter.eta(r, t));
   }
 
   /** Fields not written above, non-empty, to `remaining`. */

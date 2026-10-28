@@ -110,7 +110,11 @@ describe('Label_37_SWA', () => {
       door: 'L2 (aft entry)',
       state: 'open',
     });
-    expect(decodeResult.remaining.text).toBe('1019,033718');
+    expect(decodeResult.raw.month).toBe(10);
+    expect(decodeResult.raw.day).toBe(19);
+    expect(decodeResult.raw.message_timestamp).toBe(3 * 3600 + 37 * 60 + 18);
+    expect(decodeResult.decoder.decodeLevel).toBe('full');
+    expect(decodeResult.remaining.text).toBeUndefined();
   });
 
   test('decodes FCM01 engine and fuel state', () => {
@@ -124,7 +128,9 @@ describe('Label_37_SWA', () => {
     expect(decodeResult.raw.right_engine).toBe('running');
     expect(decodeResult.raw.apu).toBe('running');
     expect(decodeResult.raw.fuel_on_board).toBe(11500);
-    expect(decodeResult.remaining.text).toBe('B0,0449');
+    expect(decodeResult.raw.message_timestamp).toBe(4 * 3600 + 49 * 60);
+    // B (most likely the parking brake) is not established, so it stays unread.
+    expect(decodeResult.remaining.text).toBe('B0');
   });
 
   test('decodes MXR03 maintenance report, nothing to report', () => {
@@ -278,6 +284,149 @@ describe('Label_37_SWA', () => {
     expect(decodeResult.raw.text).toBe(
       'KMCI,KLAS,N 38.523,W100.807,3799X,252,460,.797,15.4,2022,259,274,060,-53,142080',
     );
+  });
+
+  test('decodes POS02 position report with its send time', () => {
+    // PHOG,PHNL,N 21.015,W157.673,7578,250,285,.433, 7.7,1624,043,084,013,  9,121200,161925
+    message.text =
+      '036S954\n6GS(K6GOHKOX4BJ5B0KFB0MJCMLKM0M7K405K470KJ LLKXMJMKBC4 K5 LK57 K5BLKXXDKB4B455KBCBD40';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoded).toBe(true);
+    expect(decodeResult.decoder.decodeLevel).toBe('full');
+    expect(decodeResult.formatted.description).toBe('Position Report');
+    expect(decodeResult.raw.departure_icao).toBe('PHOG');
+    expect(decodeResult.raw.arrival_icao).toBe('PHNL');
+    expect(decodeResult.raw.position).toEqual({
+      latitude: 21.015,
+      longitude: -157.673,
+    });
+    expect(decodeResult.raw.altitude).toBe(7578);
+    expect(decodeResult.raw.gross_weight).toBe('121200 pounds');
+    expect(decodeResult.raw.message_timestamp).toBe(16 * 3600 + 19 * 60 + 25);
+    expect(decodeResult.remaining.text).toBeUndefined();
+  });
+
+  test('decodes the send time of a 16-field POS01', () => {
+    // KMCI,KLAS,N 38.523,W100.807,37999,252,460,.797,15.4,2022,259,274,060,-53,142080,043032
+    message.text =
+      '09BP-HJ\nA,EVKA(D-KO/8LY:I8KXJHHYLH6K86MMMKI:IKN HKY6M6KJ:YNKIHIIKI:MKI6NKH HK9:8KJNIHLHKHN8H8I';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoder.decodeLevel).toBe('full');
+    expect(decodeResult.raw.message_timestamp).toBe(4 * 3600 + 30 * 60 + 32);
+    expect(decodeResult.remaining.text).toBeUndefined();
+  });
+
+  test('decodes INR04 in-range report times', () => {
+    // KDAL,KHOU,1830,1817,12.3,N 30.123,W 95.456 (ETA, then the report time)
+    message.text = '02N96C:\n,FB.H, TPH3RJCH3R30H3Y)JH9GJC)3YJH5G/4):4D';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoder.decodeLevel).toBe('full');
+    expect(decodeResult.raw.eta_time).toBe(18 * 3600 + 30 * 60);
+    expect(decodeResult.raw.message_timestamp).toBe(18 * 3600 + 17 * 60);
+    expect(decodeResult.raw.fuel_on_board).toBe(12300);
+    expect(decodeResult.raw.position).toEqual({
+      latitude: 30.123,
+      longitude: -95.456,
+    });
+  });
+
+  test('decodes OUT03 out time and front door close', () => {
+    // KDAL,KHOU,1205,23.4,23.1,1204 (the second fuel figure is not established)
+    message.text = '063XYKH\n7- 6O7:3XOJIKFOIHMGOIHMJOJIKG';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.raw.out_time).toBe(12 * 3600 + 5 * 60);
+    expect(decodeResult.raw.front_door_closed_time).toBe('12:04:00');
+    expect(decodeResult.raw.fuel_on_board).toBe(23400);
+    expect(decodeResult.decoder.decodeLevel).toBe('partial');
+    expect(decodeResult.remaining.text).toBe('23.1');
+  });
+
+  test('decodes TXI02 taxi start time', () => {
+    // KDAL,KHOU,1210,23.3
+    message.text = '07UW4),\n5M0QZ5O7:ZG,G)Z,H(H';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoder.decodeLevel).toBe('full');
+    expect(decodeResult.raw.taxi_start_time).toBe('12:10:00');
+    expect(decodeResult.raw.fuel_on_board).toBe(23300);
+  });
+
+  test('decodes INN03 in time and front door open', () => {
+    // KHOU,KDAL,1305,1307,12.1,O,C,C,O (the four door flags are not established)
+    message.text = '08N77R:\nOT1VGO)H6G :R9G :R4G A0 G1GXGXG1';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.raw.in_time).toBe(13 * 3600 + 5 * 60);
+    expect(decodeResult.raw.front_door_open_time).toBe('13:07:00');
+    expect(decodeResult.raw.fuel_on_board).toBe(12100);
+    expect(decodeResult.decoder.decodeLevel).toBe('partial');
+    expect(decodeResult.remaining.text).toBe('O,C,C,O');
+  });
+
+  test('decodes FLI01 initialization time', () => {
+    // KDAL,KHOU,1130,23.9,N 32.847,W 96.851
+    message.text = '05/2MCZ\nN.I2AN0PSAZZ CAD B,A3V DBGE)ATV,FBG(Z';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoder.decodeLevel).toBe('full');
+    expect(decodeResult.raw.message_timestamp).toBe(11 * 3600 + 30 * 60);
+    expect(decodeResult.raw.fuel_on_board).toBe(23900);
+  });
+
+  test('decodes RTG05 return to gate times', () => {
+    // KDAL,    ,1201,1208,1209,23.4,O,C,C,C (out, in, report time)
+    message.text = '0382(50\nVTEHKXXXXKB45BKB457KB45DK4LJ KSKQKQKQ';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.raw.out_time).toBe(12 * 3600 + 1 * 60);
+    expect(decodeResult.raw.in_time).toBe(12 * 3600 + 8 * 60);
+    expect(decodeResult.raw.message_timestamp).toBe(12 * 3600 + 9 * 60);
+    expect(decodeResult.raw.fuel_on_board).toBe(23400);
+    expect(decodeResult.remaining.text).toBe('O,C,C,C');
+  });
+
+  test('decodes TAR02, whose header ends in a comma', () => {
+    // TAR02,KBOS,KMDW,060,221249,N 42.366,W 70.988
+    message.text = '056I5CDAN-PRANO.TACFCADDZDE,A3VEDB FFATV)CB,GG';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoded).toBe(true);
+    expect(decodeResult.raw.preamble).toBe('TAR02');
+    expect(decodeResult.raw.text).toBe(
+      'KBOS,KMDW,060,221249,N 42.366,W 70.988',
+    );
+  });
+
+  test('does not decode a type name Southwest does not send', () => {
+    // YYY41|KDAL,KHOU: another airline's text can decode to a name of the same shape.
+    message.text = '019997N\n)LAEZ)DF8';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoded).toBe(false);
+    expect(decodeResult.decoder.decodeLevel).toBe('none');
+  });
+
+  test('does not decode PRM01 (crew employee numbers)', () => {
+    // PRM01 with a made-up number: 1234567,KDAL,KHOU|
+    message.text = '0368N5B\nB4L 0CMKVTEHKVGS/\n';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoded).toBe(false);
+    expect(decodeResult.formatted.items.length).toBe(0);
+    expect(decodeResult.raw.text).toBeUndefined();
+  });
+
+  test('hides a crew employee number in free text', () => {
+    // KDAL,KHOU|CA 12345 ON BOARD| (made-up number)
+    message.text = '04QE638\nS6OB2S,C0\nPOH 8L4ZHCTH(COU6\n';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoded).toBe(true);
+    expect(decodeResult.raw.text).toBe('CA ***** ON BOARD\n');
   });
 
   test('does not decode a body outside the SWA layout', () => {
