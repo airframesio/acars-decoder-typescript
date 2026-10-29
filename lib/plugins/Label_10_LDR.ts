@@ -19,7 +19,9 @@ function runway(value: string): string {
 // Fields below were matched against the landing card answering each request (113 pairs,
 // latest request before each card) unless noted.
 
-// runway condition code, sent as 6 less the code: 113 of 113 pairs
+// runway condition code, sent as 6 less the code: 113 of 113 pairs. The names are the FAA
+// runway condition codes: 0 is NIL braking action, a real code, not unknown. Codes 2 to 6
+// are seen; 0 and 1 are not.
 const RUNWAY_CONDITION: Record<number, string> = {
   6: 'dry',
   5: 'good',
