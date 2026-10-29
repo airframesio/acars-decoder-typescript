@@ -108,7 +108,8 @@ export class Label_40_SWA extends DecoderPlugin {
         });
       } else if (d.type === 'GAR03') {
         // gate, five Y/N flags (meaning not established), ramp frequency
-        ResultFormatter.gate(decodeResult, w.use(0).trim());
+        // GAR03 answers the in-flight GAM02 gate request, so this is the arrival gate.
+        ResultFormatter.arrivalGate(decodeResult, w.use(0).trim());
         if (fields[6] !== '999.999') {
           w.item(
             6,

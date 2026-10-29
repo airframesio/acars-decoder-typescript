@@ -56,7 +56,7 @@ describe('Label_40_SWA', () => {
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.formatted.description).toBe('Gate Assignment Response');
-    expect(decodeResult.raw.gate).toBe('C45');
+    expect(decodeResult.raw.arrival_gate).toBe('C45');
     expect(decodeResult.raw.ramp_frequency).toBe('129.300 MHz');
     expect(decodeResult.remaining.text).toBe('N,N,Y,N,N');
   });

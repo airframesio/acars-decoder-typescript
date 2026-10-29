@@ -449,13 +449,13 @@ export class ResultFormatter {
     });
   }
 
-  static gate(decodeResult: DecodeResult, value: string) {
-    decodeResult.raw.gate = value;
+  static arrivalGate(decodeResult: DecodeResult, value: string) {
+    decodeResult.raw.arrival_gate = value;
     decodeResult.formatted.items.push({
       type: 'gate',
-      code: 'GATE',
-      label: 'Gate',
-      value: decodeResult.raw.gate,
+      code: 'AGATE',
+      label: 'Arrival Gate',
+      value: decodeResult.raw.arrival_gate,
     });
   }
 

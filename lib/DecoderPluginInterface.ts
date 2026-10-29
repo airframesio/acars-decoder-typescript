@@ -51,7 +51,9 @@ export interface RawFields {
   departure_runway?: string;
   arrival_runway?: string;
   alternate_runway?: string;
-  gate?: string;
+
+  // Gates
+  arrival_gate?: string;
 
   // Times (seconds since midnight or epoch)
   message_timestamp?: number;

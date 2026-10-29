@@ -292,12 +292,12 @@ describe('ResultFormatter speed, track, wind, weight and gate', () => {
     ]);
   });
 
-  test('gate', () => {
+  test('arrivalGate', () => {
     const dr = makeDecodeResult();
-    ResultFormatter.gate(dr, 'B12');
-    expect(dr.raw.gate).toBe('B12');
+    ResultFormatter.arrivalGate(dr, 'B12');
+    expect(dr.raw.arrival_gate).toBe('B12');
     expect(dr.formatted.items).toEqual([
-      { type: 'gate', code: 'GATE', label: 'Gate', value: 'B12' },
+      { type: 'gate', code: 'AGATE', label: 'Arrival Gate', value: 'B12' },
     ]);
   });
 });
