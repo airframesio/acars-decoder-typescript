@@ -13,15 +13,16 @@ import {
   swaMatchesLayout,
 } from '../utils/swa_fields';
 
+// By type; the two digits are the type's version.
 const DESCRIPTIONS: Record<string, string> = {
-  FTX01: 'Dispatch Free Text',
-  GEN01: 'Company Message',
-  WFC01: 'Field Condition Report',
-  DVP01: 'Divert Plan',
-  PIC01: 'Part 117 Duty Extension Request',
   ASR01: 'Approach Stability Report',
+  DVP01: 'Divert Plan',
+  FTX01: 'Dispatch Free Text',
   GAR03: 'Gate Assignment Response',
+  GEN01: 'Company Message',
+  PIC01: 'Part 117 Duty Extension Request',
   POS01: 'Position Report Request',
+  WFC01: 'Field Condition Report',
 };
 
 // ASR01 fields, in order.
@@ -76,13 +77,14 @@ export class Label_40_SWA extends DecoderPlugin {
     if (d.type === 'POS01') {
       const m = d.text.match(/^POS01,Y,(\d{2})$/);
       if (m) {
-        decodeResult.formatted.items.push({
-          type: 'report_interval',
-          code: 'RPTINT',
-          label: 'Position Report Interval',
-          value: `${Number(m[1])} minutes`,
-        });
-        decodeResult.raw.report_interval = Number(m[1]);
+        ResultFormatter.raw(
+          decodeResult,
+          'report_interval',
+          'RPTINT',
+          'Position Report Interval',
+          `${Number(m[1])} minutes`,
+          Number(m[1]),
+        );
         decodeResult.decoder.decodeLevel = 'full';
       } else {
         ResultFormatter.unknown(decodeResult, d.text);
@@ -106,7 +108,7 @@ export class Label_40_SWA extends DecoderPlugin {
         });
       } else if (d.type === 'GAR03') {
         // gate, five Y/N flags (meaning not established), ramp frequency
-        w.item(0, 'gate', 'GATE', 'Gate', fields[0].trim());
+        ResultFormatter.gate(decodeResult, w.use(0).trim());
         if (fields[6] !== '999.999') {
           w.item(
             6,

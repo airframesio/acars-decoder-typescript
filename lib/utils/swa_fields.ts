@@ -1,5 +1,6 @@
 import { DateTimeUtils } from '../DateTimeUtils';
 import { DecodeResult } from '../DecoderPluginInterface';
+import { CoordinateUtils } from './coordinate_utils';
 import { ResultFormatter } from './result_formatter';
 
 /**
@@ -36,14 +37,12 @@ const POS = [
 ];
 const ASR = ' *-?\\d+(?:\\.[\\d-])?|XX\\.X';
 
-/** Each type's layouts, one pattern per field. A type may have more than one layout. */
+/** Each type's layouts, one pattern per field, by type. A type may have more than one layout. */
 export const SWA_LAYOUTS: Record<string, string[][]> = {
-  POS01: [
-    [...POS, INT],
-    [...POS, INT, HMS],
-  ],
-  POS02: [[...POS, INT, HMS]],
-  HGD03: [[...POS, INT]],
+  ASR01: [[ASR, ASR, ASR, ASR, ASR, ASR, ASR, ASR, '', '']],
+  CLB02: [[APT, APT, LAT, '', LON, FOB, T4]],
+  ETA03: [[APT, APT, T4, FOB, LAT, LON]],
+  FCM01: [['L[\\d-]', 'R[\\d-]', 'A[\\d-]', 'B[\\d-]', '\\d+', T4]],
   FHD04: [
     [
       ...POS,
@@ -56,18 +55,8 @@ export const SWA_LAYOUTS: Record<string, string[][]> = {
       '\\d{5}',
     ],
   ],
-  GAM02: [[APT, APT, T4, LAT, LON]],
-  CLB02: [[APT, APT, LAT, '', LON, FOB, T4]],
-  ETA03: [[APT, APT, T4, FOB, LAT, LON]],
-  INR04: [[APT, APT, T4, T4, FOB, LAT, LON]],
   FLI01: [[APT, APT, T4, FOB, LAT, LON]],
-  OUT03: [[APT, APT, T4, FOB, FOB, T4]],
-  TXI02: [[APT, APT, T4, FOB]],
-  INN03: [[APT, APT, T4, T4, FOB, OC, OC, OC, OC]],
-  RTG04: [[APT, APT, T4, T4, T4, FOB, OC, OC, OC, OC]],
-  RTG05: [[APT, APT, T4, T4, T4, FOB, OC, OC, OC, OC]],
-  TDM01: [[APT, APT, LAT, LON, '(?:L1|L2|CR|SV)', OC, T4, HMS]],
-  FCM01: [['L[\\d-]', 'R[\\d-]', 'A[\\d-]', 'B[\\d-]', '\\d+', T4]],
+  GAM02: [[APT, APT, T4, LAT, LON]],
   GAR03: [
     [
       '[A-Z0-9]{1,4} *',
@@ -81,7 +70,19 @@ export const SWA_LAYOUTS: Record<string, string[][]> = {
       '',
     ],
   ],
-  ASR01: [[ASR, ASR, ASR, ASR, ASR, ASR, ASR, ASR, '', '']],
+  HGD03: [[...POS, INT]],
+  INN03: [[APT, APT, T4, T4, FOB, OC, OC, OC, OC]],
+  INR04: [[APT, APT, T4, T4, FOB, LAT, LON]],
+  OUT03: [[APT, APT, T4, FOB, FOB, T4]],
+  POS01: [
+    [...POS, INT],
+    [...POS, INT, HMS],
+  ],
+  POS02: [[...POS, INT, HMS]],
+  RTG04: [[APT, APT, T4, T4, T4, FOB, OC, OC, OC, OC]],
+  RTG05: [[APT, APT, T4, T4, T4, FOB, OC, OC, OC, OC]],
+  TDM01: [[APT, APT, LAT, LON, '(?:L1|L2|CR|SV)', OC, T4, HMS]],
+  TXI02: [[APT, APT, T4, FOB]],
   VXR02: [['[A-Z]{3}']],
 };
 
@@ -120,11 +121,10 @@ export class SwaFieldWriter {
     return this.fields[i] ?? '';
   }
 
-  /** A field with no ResultFormatter helper; `key` is its name in `raw` and its item type. */
+  /** A field with no specific ResultFormatter helper; `key` is its name in `raw`. */
   item(i: number, key: string, code: string, label: string, value: string) {
     this.used.add(i);
-    this.decodeResult.raw[key] = value;
-    this.decodeResult.formatted.items.push({ type: key, code, label, value });
+    ResultFormatter.raw(this.decodeResult, key, code, label, value);
   }
 
   /** Marks a field as read without writing it (it was written together with another). */
@@ -151,11 +151,13 @@ export class SwaFieldWriter {
   position(latIndex: number, lonIndex: number) {
     const lat = this.fields[latIndex] ?? '';
     const lon = this.fields[lonIndex] ?? '';
+    // Decimal degrees after the hemisphere letter (N 38.523, W100.807). CoordinateUtils' parsers
+    // read the packed N38523W100807 form, so only its sign helper applies.
     const latitude = /^[NS] ?\d/.test(lat)
-      ? (lat[0] === 'N' ? 1 : -1) * Number(lat.substring(1).trim())
+      ? CoordinateUtils.getDirection(lat) * Number(lat.substring(1).trim())
       : NaN;
     const longitude = /^[EW] ?\d/.test(lon)
-      ? (lon[0] === 'E' ? 1 : -1) * Number(lon.substring(1).trim())
+      ? CoordinateUtils.getDirection(lon) * Number(lon.substring(1).trim())
       : NaN;
     if (Math.abs(latitude) <= 90 && Math.abs(longitude) <= 180) {
       this.used.add(latIndex);

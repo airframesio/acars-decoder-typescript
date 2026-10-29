@@ -79,7 +79,9 @@ export function decodeSwaLabel37(body: string): SwaDecoded | undefined {
   let nl = b.indexOf('\n');
   // TAR02 ends its header with the field separator instead of a line break.
   if (nl !== 7 && b.length > 7 && lookup(table, b[7]) === ',') nl = 7;
-  if (nl < 0) return undefined;
+  // The header line is the code and the type, 7 characters (a few carry one more). Longer first
+  // lines are other airlines' text, such as a DDHHMM stamp that starts with 01-09.
+  if (nl < 0 || nl > 8) return undefined;
   let type = '';
   for (const c of b.substring(2, Math.min(nl, 7))) {
     type += lookup(table, c) ?? SWA_UNREAD;

@@ -34,15 +34,16 @@ describe('Label_37_SWA', () => {
       longitude: -100.807,
     });
     expect(decodeResult.raw.altitude).toBe(37999);
-    expect(decodeResult.raw.indicated_airspeed).toBe('252 knots');
+    expect(decodeResult.raw.indicated_airspeed).toBe(252);
     expect(decodeResult.raw.airspeed).toBe(460);
     expect(decodeResult.raw.mach).toBe(0.797);
     expect(decodeResult.raw.fuel_on_board).toBe(15400);
     expect(decodeResult.raw.eta_time).toBe(20 * 3600 + 22 * 60);
-    expect(decodeResult.raw.track).toBe('259 degrees');
-    expect(decodeResult.raw.wind).toBe('274 degrees at 60 knots');
+    expect(decodeResult.raw.track).toBe(259);
+    expect(decodeResult.raw.wind_direction).toBe(274);
+    expect(decodeResult.raw.wind_speed).toBe(60);
     expect(decodeResult.raw.outside_air_temperature).toBe(-53);
-    expect(decodeResult.raw.gross_weight).toBe('142080 pounds');
+    expect(decodeResult.raw.gross_weight).toBe(142080);
     expect(decodeResult.formatted.items.length).toBe(13);
     expect(decodeResult.remaining.text).toBeUndefined();
   });
@@ -59,7 +60,7 @@ describe('Label_37_SWA', () => {
     expect(decodeResult.raw.arrival_icao).toBe('KMDW');
     expect(decodeResult.raw.altitude).toBe(21003);
     expect(decodeResult.raw.event).toBe('OFF');
-    expect(decodeResult.raw.gross_weight).toBe('134440 pounds');
+    expect(decodeResult.raw.gross_weight).toBe(134440);
     expect(decodeResult.raw.frequency).toBe('130.450 MHz');
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.remaining.text).toBe('   1,210150,00000');
@@ -187,8 +188,7 @@ describe('Label_37_SWA', () => {
     const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoder.decodeLevel).toBe('full');
-    expect(decodeResult.raw.wind).toBeUndefined();
-    expect(decodeResult.raw.wind_speed).toBe('60 knots');
+    expect(decodeResult.raw.wind_speed).toBe(60);
     expect(decodeResult.raw.wind_direction).toBeUndefined();
   });
 
@@ -199,8 +199,7 @@ describe('Label_37_SWA', () => {
     const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoder.decodeLevel).toBe('full');
-    expect(decodeResult.raw.wind).toBeUndefined();
-    expect(decodeResult.raw.wind_direction).toBe('274 degrees');
+    expect(decodeResult.raw.wind_direction).toBe(274);
     expect(decodeResult.raw.wind_speed).toBeUndefined();
   });
 
@@ -302,7 +301,7 @@ describe('Label_37_SWA', () => {
       longitude: -157.673,
     });
     expect(decodeResult.raw.altitude).toBe(7578);
-    expect(decodeResult.raw.gross_weight).toBe('121200 pounds');
+    expect(decodeResult.raw.gross_weight).toBe(121200);
     expect(decodeResult.raw.message_timestamp).toBe(16 * 3600 + 19 * 60 + 25);
     expect(decodeResult.remaining.text).toBeUndefined();
   });
@@ -399,6 +398,15 @@ describe('Label_37_SWA', () => {
     expect(decodeResult.raw.text).toBe(
       'KBOS,KMDW,060,221249,N 42.366,W 70.988',
     );
+  });
+
+  test('does not decode a header line longer than 8 characters', () => {
+    // POS01 followed by 26103042 on the first line: the shape of another airline's DDHHMM stamp.
+    message.text = '014F63NO-N3P37O\n)LAEZ)DF8';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoded).toBe(false);
+    expect(decodeResult.decoder.decodeLevel).toBe('none');
   });
 
   test('does not decode a type name Southwest does not send', () => {

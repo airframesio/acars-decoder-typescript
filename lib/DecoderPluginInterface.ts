@@ -29,7 +29,11 @@ export interface RawFields {
   heading?: number;
   groundspeed?: number;
   airspeed?: number;
+  indicated_airspeed?: number;
   mach?: number;
+  track?: number;
+  wind_direction?: number;
+  wind_speed?: number;
 
   // Flight identification
   flight_number?: string;
@@ -47,6 +51,7 @@ export interface RawFields {
   departure_runway?: string;
   arrival_runway?: string;
   alternate_runway?: string;
+  gate?: string;
 
   // Times (seconds since midnight or epoch)
   message_timestamp?: number;
@@ -80,6 +85,7 @@ export interface RawFields {
   total_air_temperature?: number;
 
   // Weight & balance
+  gross_weight?: number;
   center_of_gravity?: number;
   cg_lower_limit?: number;
   cg_upper_limit?: number;

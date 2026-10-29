@@ -14,35 +14,37 @@ import {
   swaMatchesLayout,
 } from '../utils/swa_fields';
 
+// By type. The two digits are the type's version and are kept: versions differ in layout
+// (POS01 15 or 16 fields, POS02 16).
 const DESCRIPTIONS: Record<string, string> = {
-  OUT03: 'Out Report',
-  TXI02: 'Taxi Report',
+  ADV01: 'Ride Conditions Report',
+  CLB02: 'Climb Report',
+  DVC01: 'Divert Plan (Crew Copy)',
+  ETA03: 'ETA Report',
+  FCM01: 'Engine and Fuel State',
+  FCR03: 'Runway Condition Report',
+  FHD04: 'Frequency Handoff Report',
+  FLI01: 'Flight Initialization',
+  FTD02: 'Free Text to Dispatch',
+  GAM02: 'Gate Assignment Request',
+  HGD03: 'HowGozit Report',
+  HLD01: 'Holding Report',
+  INN03: 'In Report',
+  INR04: 'In Range Report',
+  MXR03: 'Maintenance Report',
   OFF02: 'Off Report',
   ONN02: 'On Report',
-  INN03: 'In Report',
-  FLI01: 'Flight Initialization',
-  CLB02: 'Climb Report',
+  OUT03: 'Out Report',
+  PFR03: 'Post Flight Report',
   POS01: 'Position Report',
   POS02: 'Position Report',
-  HGD03: 'HowGozit Report',
-  ETA03: 'ETA Report',
-  INR04: 'In Range Report',
-  GAM02: 'Gate Assignment Request',
-  MXR03: 'Maintenance Report',
-  FTD02: 'Free Text to Dispatch',
-  TRB02: 'Turbulence Report',
-  HLD01: 'Holding Report',
-  DVC01: 'Divert Plan (Crew Copy)',
-  FCR03: 'Runway Condition Report',
-  VXR02: 'Voice Call Request',
+  RRR01: 'Reroute Report',
   RTG04: 'Return to Gate Report',
   RTG05: 'Return to Gate Report',
   TDM01: 'Door Report',
-  FCM01: 'Engine and Fuel State',
-  RRR01: 'Reroute Report',
-  ADV01: 'Ride Conditions Report',
-  FHD04: 'Frequency Handoff Report',
-  PFR03: 'Post Flight Report',
+  TRB02: 'Turbulence Report',
+  TXI02: 'Taxi Report',
+  VXR02: 'Voice Call Request',
 };
 
 const DOORS: Record<string, string> = {
@@ -151,45 +153,16 @@ export class Label_37_SWA extends DecoderPlugin {
         w.position(2, 3);
         w.altitude(4);
         const ias = w.int(5);
-        if (ias !== undefined) {
-          w.item(
-            5,
-            'indicated_airspeed',
-            'IAS',
-            'Indicated Airspeed',
-            `${ias} knots`,
-          );
-        }
+        if (ias !== undefined)
+          ResultFormatter.indicatedAirspeed(decodeResult, ias);
         const tas = w.int(6);
         if (tas !== undefined) ResultFormatter.airspeed(decodeResult, tas);
         ResultFormatter.mach(decodeResult, Number(w.use(7)));
         w.fuel(8);
         w.eta(9);
         const track = w.int(10);
-        if (track !== undefined) {
-          w.item(10, 'track', 'TRK', 'Track', `${track} degrees`);
-        }
-        const windDir = w.int(11);
-        const windSpeed = w.int(12);
-        if (windDir !== undefined && windSpeed !== undefined) {
-          w.item(
-            11,
-            'wind',
-            'WIND',
-            'Wind',
-            `${windDir} degrees at ${windSpeed} knots`,
-          );
-        } else if (windDir !== undefined) {
-          w.item(
-            11,
-            'wind_direction',
-            'WDIR',
-            'Wind Direction',
-            `${windDir} degrees`,
-          );
-        } else if (windSpeed !== undefined) {
-          w.item(12, 'wind_speed', 'WSPD', 'Wind Speed', `${windSpeed} knots`);
-        }
+        if (track !== undefined) ResultFormatter.track(decodeResult, track);
+        ResultFormatter.wind(decodeResult, w.int(11), w.int(12));
         const sat = w.int(13);
         if (sat !== undefined)
           ResultFormatter.temperature(decodeResult, `${sat}`);
@@ -197,15 +170,7 @@ export class Label_37_SWA extends DecoderPlugin {
         // frequency in use, 00000.
         const gwIndex = type === 'FHD04' ? 16 : 14;
         const gw = w.int(gwIndex);
-        if (gw !== undefined) {
-          w.item(
-            gwIndex,
-            'gross_weight',
-            'GWT',
-            'Gross Weight',
-            `${gw} pounds`,
-          );
-        }
+        if (gw !== undefined) ResultFormatter.grossWeight(decodeResult, gw);
         // The 16-field POS01 and POS02 end with the send time, HHMMSS.
         if (type !== 'FHD04' && fields.length === 16) {
           w.time(15, (r, t) => ResultFormatter.timestamp(r, t));
