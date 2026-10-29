@@ -219,3 +219,121 @@ describe('#541 — NaN guards for desiredAltitude and version', () => {
     });
   });
 });
+
+describe('ResultFormatter speed, track, wind, weight and gate', () => {
+  test('indicatedAirspeed', () => {
+    const dr = makeDecodeResult();
+    ResultFormatter.indicatedAirspeed(dr, 252);
+    expect(dr.raw.indicated_airspeed).toBe(252);
+    expect(dr.formatted.items).toEqual([
+      {
+        type: 'indicated_airspeed',
+        code: 'IAS',
+        label: 'Indicated Airspeed',
+        value: '252 knots',
+      },
+    ]);
+  });
+
+  test('track', () => {
+    const dr = makeDecodeResult();
+    ResultFormatter.track(dr, 259);
+    expect(dr.raw.track).toBe(259);
+    expect(dr.formatted.items).toEqual([
+      { type: 'track', code: 'TRK', label: 'Track', value: '259 degrees' },
+    ]);
+  });
+
+  test('wind with direction and speed', () => {
+    const dr = makeDecodeResult();
+    ResultFormatter.wind(dr, 274, 60);
+    expect(dr.raw.wind_direction).toBe(274);
+    expect(dr.raw.wind_speed).toBe(60);
+    expect(dr.formatted.items).toEqual([
+      {
+        type: 'wind',
+        code: 'WIND',
+        label: 'Wind',
+        value: '274 degrees at 60 knots',
+      },
+    ]);
+  });
+
+  test('wind with only one of direction and speed', () => {
+    const dr = makeDecodeResult();
+    ResultFormatter.wind(dr, undefined, 60);
+    expect(dr.raw.wind_direction).toBeUndefined();
+    expect(dr.raw.wind_speed).toBe(60);
+    expect(dr.formatted.items[0].label).toBe('Wind Speed');
+    expect(dr.formatted.items[0].value).toBe('60 knots');
+
+    const dr2 = makeDecodeResult();
+    ResultFormatter.wind(dr2, 274, undefined);
+    expect(dr2.raw.wind_direction).toBe(274);
+    expect(dr2.formatted.items[0].label).toBe('Wind Direction');
+    expect(dr2.formatted.items[0].value).toBe('274 degrees');
+
+    const dr3 = makeDecodeResult();
+    ResultFormatter.wind(dr3, undefined, undefined);
+    expect(dr3.formatted.items.length).toBe(0);
+  });
+
+  test('grossWeight', () => {
+    const dr = makeDecodeResult();
+    ResultFormatter.grossWeight(dr, 142080);
+    expect(dr.raw.gross_weight).toBe(142080);
+    expect(dr.formatted.items).toEqual([
+      {
+        type: 'gross_weight',
+        code: 'GWT',
+        label: 'Gross Weight',
+        value: '142080 pounds',
+      },
+    ]);
+  });
+
+  test('arrivalGate', () => {
+    const dr = makeDecodeResult();
+    ResultFormatter.arrivalGate(dr, 'B12');
+    expect(dr.raw.arrival_gate).toBe('B12');
+    expect(dr.formatted.items).toEqual([
+      { type: 'gate', code: 'AGATE', label: 'Arrival Gate', value: 'B12' },
+    ]);
+  });
+});
+
+describe('ResultFormatter.raw', () => {
+  test('writes a named field and its item', () => {
+    const dr = makeDecodeResult();
+    ResultFormatter.raw(
+      dr,
+      'taxi_start_time',
+      'TAXI',
+      'Taxi Start Time',
+      '12:10:00',
+    );
+    expect(dr.raw.taxi_start_time).toBe('12:10:00');
+    expect(dr.formatted.items).toEqual([
+      {
+        type: 'taxi_start_time',
+        code: 'TAXI',
+        label: 'Taxi Start Time',
+        value: '12:10:00',
+      },
+    ]);
+  });
+
+  test('can store a different value in raw than it shows', () => {
+    const dr = makeDecodeResult();
+    ResultFormatter.raw(
+      dr,
+      'report_interval',
+      'RPTINT',
+      'Position Report Interval',
+      '5 minutes',
+      5,
+    );
+    expect(dr.raw.report_interval).toBe(5);
+    expect(dr.formatted.items[0].value).toBe('5 minutes');
+  });
+});

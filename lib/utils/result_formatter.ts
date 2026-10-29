@@ -384,6 +384,81 @@ export class ResultFormatter {
     });
   }
 
+  static indicatedAirspeed(decodeResult: DecodeResult, value: number) {
+    if (isNaN(value)) {
+      return;
+    }
+    decodeResult.raw.indicated_airspeed = value;
+    decodeResult.formatted.items.push({
+      type: 'indicated_airspeed',
+      code: 'IAS',
+      label: 'Indicated Airspeed',
+      value: `${decodeResult.raw.indicated_airspeed} knots`,
+    });
+  }
+
+  static track(decodeResult: DecodeResult, value: number) {
+    if (isNaN(value)) {
+      return;
+    }
+    decodeResult.raw.track = value;
+    decodeResult.formatted.items.push({
+      type: 'track',
+      code: 'TRK',
+      label: 'Track',
+      value: `${decodeResult.raw.track} degrees`,
+    });
+  }
+
+  /** Wind at the aircraft; either half may be missing. */
+  static wind(decodeResult: DecodeResult, direction?: number, speed?: number) {
+    const hasDirection = direction !== undefined && !isNaN(direction);
+    const hasSpeed = speed !== undefined && !isNaN(speed);
+    if (hasDirection) decodeResult.raw.wind_direction = direction;
+    if (hasSpeed) decodeResult.raw.wind_speed = speed;
+    if (!hasDirection && !hasSpeed) {
+      return;
+    }
+    decodeResult.formatted.items.push({
+      type: 'wind',
+      code: 'WIND',
+      label: !hasSpeed
+        ? 'Wind Direction'
+        : !hasDirection
+          ? 'Wind Speed'
+          : 'Wind',
+      value: [
+        hasDirection ? `${direction} degrees` : '',
+        hasSpeed ? `${speed} knots` : '',
+      ]
+        .filter((s) => s !== '')
+        .join(' at '),
+    });
+  }
+
+  static grossWeight(decodeResult: DecodeResult, pounds: number) {
+    if (isNaN(pounds)) {
+      return;
+    }
+    decodeResult.raw.gross_weight = pounds;
+    decodeResult.formatted.items.push({
+      type: 'gross_weight',
+      code: 'GWT',
+      label: 'Gross Weight',
+      value: `${decodeResult.raw.gross_weight} pounds`,
+    });
+  }
+
+  static arrivalGate(decodeResult: DecodeResult, value: string) {
+    decodeResult.raw.arrival_gate = value;
+    decodeResult.formatted.items.push({
+      type: 'gate',
+      code: 'AGATE',
+      label: 'Arrival Gate',
+      value: decodeResult.raw.arrival_gate,
+    });
+  }
+
   static tail(decodeResult: DecodeResult, value: string) {
     decodeResult.raw.tail = value;
     decodeResult.formatted.items.push({
@@ -732,6 +807,22 @@ export class ResultFormatter {
       label: 'Sequence Response',
       value: decodeResult.raw.sequence_response.toString(),
     });
+  }
+
+  /**
+   * A field with no specific helper: `key` is its name in `raw` and its item type. `rawValue`
+   * is stored in `raw` when it differs from the text shown (a number, for example).
+   */
+  static raw(
+    decodeResult: DecodeResult,
+    key: string,
+    code: string,
+    label: string,
+    value: string,
+    rawValue: unknown = value,
+  ) {
+    decodeResult.raw[key] = rawValue;
+    decodeResult.formatted.items.push({ type: key, code, label, value });
   }
 
   static unknown(decodeResult: DecodeResult, value: string, sep: string = ',') {
