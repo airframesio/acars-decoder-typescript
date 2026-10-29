@@ -10,8 +10,6 @@ import {
   SWA_LAYOUTS,
   SwaFieldWriter,
   swaFields,
-  swaHideCrewIds,
-  swaIsCrewSchedule,
   swaMatchesLayout,
 } from '../utils/swa_fields';
 
@@ -20,6 +18,7 @@ const DESCRIPTIONS: Record<string, string> = {
   GEN01: 'Company Message',
   WFC01: 'Field Condition Report',
   DVP01: 'Divert Plan',
+  PIC01: 'Part 117 Duty Extension Request',
   ASR01: 'Approach Stability Report',
   GAR03: 'Gate Assignment Response',
   POS01: 'Position Report Request',
@@ -60,14 +59,7 @@ export class Label_40_SWA extends DecoderPlugin {
     decodeResult.message = message;
 
     const d = decodeSwaLabel40(message.text);
-    // PIC01 (duty-extension request) and the GEN01 crew schedule messages carry crew employee
-    // numbers; they are not decoded.
-    if (
-      !d ||
-      !isSwaType(d.type, '40') ||
-      d.type === 'PIC01' ||
-      (d.type === 'GEN01' && swaIsCrewSchedule(d.text))
-    ) {
+    if (!d || !isSwaType(d.type, '40')) {
       if (options.debug) {
         console.log(`Decoder: Unknown 40 message: ${message.text}`);
       }
@@ -99,7 +91,7 @@ export class Label_40_SWA extends DecoderPlugin {
       return decodeResult;
     }
 
-    const text = swaHideCrewIds(d.text);
+    const text = d.text;
     const fields = swaFields(text);
     const layouts = SWA_LAYOUTS[d.type];
     const clean = !text.includes(SWA_UNREAD);

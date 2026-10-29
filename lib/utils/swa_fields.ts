@@ -90,23 +90,6 @@ export const SWA_PREFIX_LAYOUTS: Record<string, string[]> = {
   MXR03: [APT, '(?:\\d{4}|)', '[0-3]'],
 };
 
-/** A crew position code followed by an employee number: captain, first officer, flight attendant. */
-const CREW_ID = /\b(CAE|FOE|CA|FO|FA|PILOT ?:)( ?)(\d{5,7})\b/g;
-
-/** Crew schedule uplinks list the crew by employee number; they are not decoded. */
-export function swaIsCrewSchedule(text: string): boolean {
-  return /CREW SCH|PART ?117|\b(?:CAE|FOE) ?\d{5,7}\b/.test(text);
-}
-
-/** Replaces the digits of an employee number written after a crew position code with '*'. */
-export function swaHideCrewIds(text: string): string {
-  return text.replace(
-    CREW_ID,
-    (_, who: string, gap: string, num: string) =>
-      `${who}${gap}${'*'.repeat(num.length)}`,
-  );
-}
-
 export function swaFields(text: string): string[] {
   return text.replace(/\|/g, ',').split(',');
 }

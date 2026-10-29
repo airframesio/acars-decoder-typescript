@@ -101,25 +101,26 @@ describe('Label_40_SWA', () => {
     expect(decodeResult.raw.text).toBe('DISPATCH MSG\n');
   });
 
-  test('does not decode a crew schedule message (crew employee numbers)', () => {
+  test('decodes a crew schedule message as sent', () => {
     // MSG FROM CREW SCHEDULE|26 BOS-BWI|CAE 12345 FOE 654321| (made-up numbers)
     message.text =
       'GEN01,05IU836SMI30S4)3U0:42YG4\nLT3.MUB.)A\n0,43JLNPR36M43TRPNLJ\n';
     const decodeResult = plugin.decode(message);
 
-    expect(decodeResult.decoded).toBe(false);
-    expect(decodeResult.formatted.items.length).toBe(0);
-    expect(decodeResult.raw.text).toBeUndefined();
+    expect(decodeResult.decoded).toBe(true);
+    expect(decodeResult.raw.text).toBe(
+      'MSG FROM CREW SCHEDULE\n26 BOS-BWI\nCAE 12345 FOE 654321\n',
+    );
   });
 
-  test('hides a crew employee number in dispatch free text', () => {
+  test('decodes dispatch free text as sent', () => {
     // DISPATCH MSG|FO 654321 IS ON THE SCHEDULE| (made-up number)
     message.text = 'FTX01,0672Z):Y83A.Z4\n5,ALMNOPQA2ZA,-AY36AZ8367X/6\n';
     const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.raw.text).toBe(
-      'DISPATCH MSG\nFO ****** IS ON THE SCHEDULE\n',
+      'DISPATCH MSG\nFO 654321 IS ON THE SCHEDULE\n',
     );
   });
 
@@ -144,12 +145,19 @@ describe('Label_40_SWA', () => {
     expect(decodeResult.decoder.decodeLevel).toBe('none');
   });
 
-  test('does not decode PIC01', () => {
-    message.text = 'PIC01,01ABC';
+  test('decodes PIC01 duty extension request', () => {
+    // WITH MAX EXT AVAIL|LATEST OFF TIME 0501Z|
+    message.text = 'PIC01,03ZBDL47- 4A D4-K-B3\n3-DAOD4NWW4DB7A4505F:\n';
     const decodeResult = plugin.decode(message);
 
-    expect(decodeResult.decoded).toBe(false);
-    expect(decodeResult.formatted.items.length).toBe(0);
+    expect(decodeResult.decoded).toBe(true);
+    expect(decodeResult.decoder.decodeLevel).toBe('full');
+    expect(decodeResult.formatted.description).toBe(
+      'Part 117 Duty Extension Request',
+    );
+    expect(decodeResult.raw.text).toBe(
+      'WITH MAX EXT AVAIL\nLATEST OFF TIME 0501Z\n',
+    );
   });
 
   test('does not decode a body outside the SWA layout', () => {

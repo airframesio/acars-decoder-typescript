@@ -410,23 +410,22 @@ describe('Label_37_SWA', () => {
     expect(decodeResult.decoder.decodeLevel).toBe('none');
   });
 
-  test('does not decode PRM01 (crew employee numbers)', () => {
-    // PRM01 with a made-up number: 1234567,KDAL,KHOU|
+  test('decodes PRM01 as text', () => {
+    // 1234567,KDAL,KHOU| (made-up number)
     message.text = '0368N5B\nB4L 0CMKVTEHKVGS/\n';
     const decodeResult = plugin.decode(message);
 
-    expect(decodeResult.decoded).toBe(false);
-    expect(decodeResult.formatted.items.length).toBe(0);
-    expect(decodeResult.raw.text).toBeUndefined();
+    expect(decodeResult.decoded).toBe(true);
+    expect(decodeResult.raw.text).toBe('1234567,KDAL,KHOU\n');
   });
 
-  test('hides a crew employee number in free text', () => {
+  test('decodes crew free text as sent', () => {
     // KDAL,KHOU|CA 12345 ON BOARD| (made-up number)
     message.text = '04QE638\nS6OB2S,C0\nPOH 8L4ZHCTH(COU6\n';
     const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
-    expect(decodeResult.raw.text).toBe('CA ***** ON BOARD\n');
+    expect(decodeResult.raw.text).toBe('CA 12345 ON BOARD\n');
   });
 
   test('does not decode a body outside the SWA layout', () => {

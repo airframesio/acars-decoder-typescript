@@ -11,7 +11,6 @@ import {
   SWA_PREFIX_LAYOUTS,
   SwaFieldWriter,
   swaFields,
-  swaHideCrewIds,
   swaMatchesLayout,
 } from '../utils/swa_fields';
 
@@ -80,8 +79,7 @@ export class Label_37_SWA extends DecoderPlugin {
     decodeResult.message = message;
 
     const d = decodeSwaLabel37(message.text);
-    // PRM01 carries crew employee numbers; it is not decoded.
-    if (!d || !isSwaType(d.type, '37') || d.type === 'PRM01') {
+    if (!d || !isSwaType(d.type, '37')) {
       if (options.debug) {
         console.log(`Decoder: Unknown 37 message: ${message.text}`);
       }
@@ -95,7 +93,7 @@ export class Label_37_SWA extends DecoderPlugin {
       DESCRIPTIONS[d.type] ?? 'Southwest Message';
     decodeResult.raw.preamble = d.type;
 
-    const text = swaHideCrewIds(d.text);
+    const text = d.text;
     const fields = swaFields(text);
     const layouts = SWA_LAYOUTS[d.type];
     const prefix = SWA_PREFIX_LAYOUTS[d.type];
