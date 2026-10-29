@@ -27,22 +27,27 @@ describe('Label_10_LDR', () => {
 
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
-    expect(decodeResult.formatted.items.length).toBe(6);
-    expect(decodeResult.formatted.items[0].label).toBe('Aircraft Position');
-    expect(decodeResult.formatted.items[0].value).toBe('38.151 N, 76.623 W');
-    expect(decodeResult.formatted.items[1].label).toBe('Altitude');
-    expect(decodeResult.formatted.items[1].value).toBe('37003 feet');
-    expect(decodeResult.formatted.items[2].label).toBe('Origin');
-    expect(decodeResult.formatted.items[2].value).toBe('KATL');
-    expect(decodeResult.formatted.items[3].label).toBe('Destination');
-    expect(decodeResult.formatted.items[3].value).toBe('KLGA');
-    expect(decodeResult.formatted.items[4].label).toBe('Alternate Destination');
-    expect(decodeResult.formatted.items[4].value).toBe('KLGA');
-    expect(decodeResult.formatted.items[5].label).toBe('Arrival Runway');
-    expect(decodeResult.formatted.items[5].value).toBe('22');
-    expect(decodeResult.remaining.text).toBe(
-      'LDR01,189,C,SWA-2600-016,0,0,0,,,,,,,0,0,0,00,,135.1,08.6,143.7,,,',
+    expect(decodeResult.formatted.description).toBe('Landing Data Request');
+    expect(decodeResult.formatted.items.map((i) => [i.label, i.value])).toEqual(
+      [
+        ['Software Version', 'SWA-2600-016'],
+        ['Aircraft Position', '38.151 N, 76.623 W'],
+        ['Altitude', '37003 feet'],
+        ['Fuel On Board', '10200'],
+        ['Origin', 'KATL'],
+        ['Destination', 'KLGA'],
+        ['Landing Airport', 'KLGA'],
+        ['Arrival Runway', '22'],
+        ['Zero Fuel Weight', '135100 pounds'],
+        ['Landing Fuel', '8600 pounds'],
+        ['Landing Weight', '143700 pounds'],
+      ],
     );
+    expect(decodeResult.raw.fuel_on_board).toBe(10200);
+    expect(decodeResult.raw.zero_fuel_weight).toBe(135100);
+    expect(decodeResult.raw.landing_fuel).toBe(8600);
+    expect(decodeResult.raw.landing_weight).toBe(143700);
+    expect(decodeResult.remaining.text).toBe('189,C,0,0,0,0,0,0,00,,,,');
   });
 
   test('decodes Label 10 Preamble LDR variant 2', () => {
@@ -52,24 +57,89 @@ describe('Label_10_LDR', () => {
 
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
-    expect(decodeResult.formatted.items.length).toBe(7);
-    expect(decodeResult.formatted.items[0].label).toBe('Aircraft Position');
-    expect(decodeResult.formatted.items[0].value).toBe('37.873 N, 79.541 W');
-    expect(decodeResult.formatted.items[1].label).toBe('Altitude');
-    expect(decodeResult.formatted.items[1].value).toBe('30998 feet');
-    expect(decodeResult.formatted.items[2].label).toBe('Origin');
-    expect(decodeResult.formatted.items[2].value).toBe('KBNA');
-    expect(decodeResult.formatted.items[3].label).toBe('Destination');
-    expect(decodeResult.formatted.items[3].value).toBe('KBOS');
-    expect(decodeResult.formatted.items[4].label).toBe('Alternate Destination');
-    expect(decodeResult.formatted.items[4].value).toBe('KBOS');
-    expect(decodeResult.formatted.items[5].label).toBe('Arrival Runway');
-    expect(decodeResult.formatted.items[5].value).toBe('27');
-    expect(decodeResult.formatted.items[6].label).toBe('Alternate Runway');
-    expect(decodeResult.formatted.items[6].value).toBe('33L,22L');
-    expect(decodeResult.remaining.text).toBe(
-      'LDR01,189,C,SWA-2600-016,0,0,1,,,,,,,0,0,0,00,,131.2,11.4,142.6,,,',
+    expect(decodeResult.formatted.items.map((i) => [i.label, i.value])).toEqual(
+      [
+        ['Software Version', 'SWA-2600-016'],
+        ['Aircraft Position', '37.873 N, 79.541 W'],
+        ['Altitude', '30998 feet'],
+        ['Fuel On Board', '16600'],
+        ['Origin', 'KBNA'],
+        ['Destination', 'KBOS'],
+        ['Landing Airport', 'KBOS'],
+        ['Arrival Runway', '27'],
+        ['Alternate Runway', '33L,22L'],
+        ['Zero Fuel Weight', '131200 pounds'],
+        ['Landing Fuel', '11400 pounds'],
+        ['Landing Weight', '142600 pounds'],
+      ],
     );
+    expect(decodeResult.remaining.text).toBe('189,C,0,0,1,0,0,0,00,,,,');
+  });
+
+  test('decodes the airport weather the crew entered', () => {
+    // https://app.airframes.io/messages/7921227262
+    message.text =
+      'LDR01,189,D,SWA-2600-019,0,N 32.482,W 99.294,34022,  8.7,KDAL,KMAF,KMAF,16R/,/,/,0,0,130,16,26,022,014,3014,0,0,0,00,,108.1,06.8,114.9,,,';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoded).toBe(true);
+    expect(decodeResult.decoder.decodeLevel).toBe('partial');
+    expect(decodeResult.formatted.items.map((i) => [i.label, i.value])).toEqual(
+      [
+        ['Software Version', 'SWA-2600-019'],
+        ['Aircraft Position', '32.482 N, 99.294 W'],
+        ['Altitude', '34022 feet'],
+        ['Fuel On Board', '8700'],
+        ['Origin', 'KDAL'],
+        ['Destination', 'KMAF'],
+        ['Landing Airport', 'KMAF'],
+        ['Arrival Runway', '16R'],
+        ['Wind', '130 degrees at 16 knots'],
+        ['Wind Gust', '26 knots'],
+        ['Outside Air Temperature (C)', '22 degrees'],
+        ['Dew Point (C)', '14 degrees'],
+        ['Altimeter', '30.14 inHg'],
+        ['Zero Fuel Weight', '108100 pounds'],
+        ['Landing Fuel', '6800 pounds'],
+        ['Landing Weight', '114900 pounds'],
+      ],
+    );
+    expect(decodeResult.raw.altimeter).toBe(30.14);
+    expect(decodeResult.remaining.text).toBe('189,D,0,0,0,0,0,0,00,,,,');
+  });
+
+  test('decodes a divert, where the landing airport is not the destination', () => {
+    // https://app.airframes.io/messages/6578341950 (runway 22 is at KAMA, not KDAL)
+    message.text =
+      'LDR01,189,D,SWA-2600-019,0,N 34.403,W 99.617,33022, 11.0,KSMF,KDAL,KAMA,22/,/,/,0,0,,,,,,,0,0,0,00,,115.6,09.9,125.5,,,';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.raw.departure_icao).toBe('KSMF');
+    expect(decodeResult.raw.arrival_icao).toBe('KDAL');
+    expect(decodeResult.raw.landing_icao).toBe('KAMA');
+    expect(decodeResult.raw.arrival_runway).toBe('22');
+    expect(decodeResult.raw.landing_weight).toBe(125500);
+  });
+
+  test('keeps a runway suffix with the runway', () => {
+    // https://app.airframes.io/messages/7921358729 (the card names the runway 11/AIB too)
+    message.text =
+      'LDR01,189,D,SWA-2600-019,0,N 32.416,W 95.941,37000, 12.2,KLAS,KMSY,KMSY,11/AIB,/,/,0,0,,,,,,,0,0,0,00,,131.3,09.5,140.8,,,';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.raw.arrival_runway).toBe('11/AIB');
+  });
+
+  test('leaves out a position and altitude the request does not have', () => {
+    // https://app.airframes.io/messages/7920148994
+    message.text =
+      'LDR01,189,D,SWA-2600-019,0,----.---,----.---,,  8.2,KLAS,KHOU,KHOU,13R/,/,/,0,0,,,,,,,0,0,0,00,,129.2,06.0,135.2,,,';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoded).toBe(true);
+    expect(decodeResult.raw.position).toBeUndefined();
+    expect(decodeResult.raw.altitude).toBeUndefined();
+    expect(decodeResult.raw.landing_weight).toBe(135200);
   });
 
   test('decodes Label 10 Preamble LDR <invalid>', () => {
@@ -79,7 +149,7 @@ describe('Label_10_LDR', () => {
     expect(decodeResult.decoded).toBe(false);
     expect(decodeResult.decoder.decodeLevel).toBe('none');
     expect(decodeResult.decoder.name).toBe('label-10-ldr');
-    expect(decodeResult.formatted.description).toBe('Position Report');
+    expect(decodeResult.formatted.description).toBe('Landing Data Request');
     expect(decodeResult.message).toBe(message);
   });
 });

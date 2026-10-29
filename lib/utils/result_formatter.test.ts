@@ -337,3 +337,97 @@ describe('ResultFormatter.raw', () => {
     expect(dr.formatted.items[0].value).toBe('5 minutes');
   });
 });
+
+describe('ResultFormatter landing data and track points', () => {
+  test('landingAirport', () => {
+    const dr = makeDecodeResult();
+    ResultFormatter.landingAirport(dr, 'KAMA');
+    expect(dr.raw.landing_icao).toBe('KAMA');
+    expect(dr.formatted.items).toEqual([
+      { type: 'icao', code: 'LAND', label: 'Landing Airport', value: 'KAMA' },
+    ]);
+  });
+
+  test('trackPoint adds each point to raw.track_points', () => {
+    const dr = makeDecodeResult();
+    const point = {
+      latitude: 36.36167,
+      longitude: -121.595,
+      day: 4,
+      time: 84480,
+      altitude: 23951,
+      temperature: -22.5,
+      windDirection: 187,
+      windSpeed: 45,
+      phase: 'Descent',
+    };
+    ResultFormatter.trackPoint(dr, point);
+    ResultFormatter.trackPoint(dr, { ...point, altitude: 22146 });
+    expect(dr.raw.track_points).toEqual([point, { ...point, altitude: 22146 }]);
+    expect(dr.formatted.items[0]).toEqual({
+      type: 'track_point',
+      code: 'TRKPT',
+      label: 'Track Point',
+      value:
+        '36.362 N, 121.595 W at 23:28:00, 23951 feet, -22.5 C, wind 187 degrees at 45 knots, Descent',
+    });
+    expect(dr.formatted.items.length).toBe(2);
+  });
+
+  test('runwayLandingData shows only the parts sent', () => {
+    const dr = makeDecodeResult();
+    ResultFormatter.runwayLandingData(dr, {
+      runway: '35L',
+      length: 8472,
+      flaps: 30,
+      headwind: 11,
+      crosswind: 8,
+      crosswindSide: 'L',
+      vref: 132,
+      vtarget: 138,
+      additive: 6,
+      maxLandingWeight: '129.2/S',
+      landingWeight: 128000,
+      stoppingMargins: { AB2: 1235, AB3: 2644, ABM: 4070 },
+    });
+    ResultFormatter.runwayLandingData(dr, {
+      runway: '33',
+      length: 6847,
+      headwind: -20,
+      crosswind: 5,
+      crosswindSide: 'L',
+      landingWeight: 126000,
+      stoppingMargins: {},
+      notes: ['20KT TAILGUST >10 LIMIT'],
+    });
+    expect(dr.raw.landing_runways?.length).toBe(2);
+    expect(dr.formatted.items[0]).toEqual({
+      type: 'runway_landing_data',
+      code: 'RWYLDG',
+      label: 'Runway Landing Data',
+      value:
+        '35L: 8472 feet, flaps 30, headwind 11 knots, crosswind 8 knots left, VREF 132 knots, VTGT 138 knots (+6), MRLW 129.2/S, LDW 128000 pounds, stopping margin AB2 1235 feet, AB3 2644 feet, ABM 4070 feet',
+    });
+    expect(dr.formatted.items[1].value).toBe(
+      '33: 6847 feet, tailwind 20 knots, crosswind 5 knots left, LDW 126000 pounds, 20KT TAILGUST >10 LIMIT',
+    );
+  });
+});
+
+describe('ResultFormatter.variableWind', () => {
+  test('shows a variable wind with its speed', () => {
+    const dr = makeDecodeResult();
+    ResultFormatter.variableWind(dr, 4);
+    expect(dr.raw.wind_speed).toBe(4);
+    expect(dr.raw.wind_direction).toBeUndefined();
+    expect(dr.raw.wind_variable).toBe(true);
+    expect(dr.formatted.items).toEqual([
+      {
+        type: 'wind',
+        code: 'WIND',
+        label: 'Wind',
+        value: 'variable at 4 knots',
+      },
+    ]);
+  });
+});
