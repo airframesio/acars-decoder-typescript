@@ -221,6 +221,8 @@ export class Label_11_LDR extends DecoderPlugin {
         head &&
         next !== undefined &&
         !next.startsWith('FLAPS') &&
+        // a FLAPS line cut off by the end of the block
+        !'FLAPS'.startsWith(next.trim()) &&
         !RUNWAY_START.test(next)
       ) {
         // a runway sent with notes instead of figures, e.g. MQTW 148.0 EXCEEDED

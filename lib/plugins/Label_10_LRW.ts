@@ -22,7 +22,7 @@ export class Label_10_LRW extends DecoderPlugin {
 
     // type, airline ID, layout, software, always 0, not yet understood, origin, destination
     const parts = message.text.split(',');
-    if (parts.length < 8) {
+    if (parts.length < 8 || parts[7].trim() === '') {
       return this.failUnknown(decodeResult, message.text, options);
     }
 

@@ -86,7 +86,7 @@ export class Label_H1_SWA_Track extends DecoderPlugin {
     ResultFormatter.arrivalAirport(decodeResult, header[6]);
     // one more each leg, the same in every report of a leg (8,634 of 8,634 legs); it starts
     // again when the ACMS software is reloaded, so it is not the aircraft's lifetime cycles
-    if (/^\d+$/.test(header[7])) {
+    if (/^\d{1,15}$/.test(header[7])) {
       ResultFormatter.raw(
         decodeResult,
         'leg_counter',
@@ -107,16 +107,24 @@ export class Label_H1_SWA_Track extends DecoderPlugin {
     );
     if (unknown.length > 0) ResultFormatter.unknownArr(decodeResult, unknown);
 
-    // lines[1] is the number of points
+    // lines[1] is the number of points; the MAX sends it with a comma after it
+    const count = lines[1]?.match(/^(\d+),?$/)?.[1];
+    if (lines[1] !== undefined && count === undefined) {
+      ResultFormatter.unknown(decodeResult, lines[1], nl);
+    }
     for (const line of lines.slice(2)) {
       if (line === '' || line === ':') continue;
       const m = line.match(POINT);
-      // day 01-31, hour 00-23, minute 00-59
+      // day 01-31, hour 00-23, minute 00-59, wind direction up to 360, and minutes of latitude
+      // and longitude under 60
       if (
         !m ||
         !(Number(m[5]) >= 1 && Number(m[5]) <= 31) ||
         Number(m[6]) > 23 ||
-        Number(m[7]) > 59
+        Number(m[7]) > 59 ||
+        Number(m[10]) > 360 ||
+        Number(m[1].slice(3)) > 59 ||
+        Number(m[3].slice(4)) > 59
       ) {
         ResultFormatter.unknown(decodeResult, line, nl);
         continue;
@@ -124,7 +132,11 @@ export class Label_H1_SWA_Track extends DecoderPlugin {
       const position = CoordinateUtils.decodeStringCoordinatesDecimalMinutes(
         `${m[1]}${m[2]}${m[3]}${m[4]}`,
       );
-      if (!position) {
+      if (
+        !position ||
+        Math.abs(position.latitude) > 90 ||
+        Math.abs(position.longitude) > 180
+      ) {
         ResultFormatter.unknown(decodeResult, line, nl);
         continue;
       }
@@ -139,7 +151,9 @@ export class Label_H1_SWA_Track extends DecoderPlugin {
         windSpeed: Number(m[11]),
         phase: PHASES[m[12]] ?? m[12],
         humiditySensor: m[14] === '1',
-        ...(Number(m[13]) > 0 ? { waterVapor: Number(m[13]) } : {}),
+        ...(m[14] === '1' && Number(m[13]) > 0
+          ? { waterVapor: Number(m[13]) }
+          : {}),
       });
     }
 
@@ -154,7 +168,9 @@ export class Label_H1_SWA_Track extends DecoderPlugin {
       ResultFormatter.timestamp(decodeResult, last.time);
     }
 
-    this.setDecodeLevel(decodeResult, true);
+    // fewer or more points than the report says it has: not all of it was decoded
+    const counted = count !== undefined && Number(count) === points.length;
+    this.setDecodeLevel(decodeResult, true, counted ? undefined : 'partial');
     return decodeResult;
   }
 }

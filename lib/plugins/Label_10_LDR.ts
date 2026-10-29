@@ -112,43 +112,45 @@ export class Label_10_LDR extends DecoderPlugin {
       unknown.push(parts[16]);
     }
 
-    // airport weather, when the crew enters it: wind, gust, temperature, dew point, altimeter
+    // airport weather, when the crew enters it: wind, gust, temperature, dew point, altimeter;
+    // a field that is not a whole number is kept as remaining
     const [windDir, windSpeed, gust, temp, dew, altimeter] = parts
       .slice(17, 23)
-      .map((field) => field.trim());
-    if (windDir !== '' || windSpeed !== '') {
-      ResultFormatter.wind(
-        decodeResult,
-        windDir === '' ? undefined : Number(windDir),
-        windSpeed === '' ? undefined : Number(windSpeed),
-      );
+      .map((field) => {
+        const value = field.trim();
+        if (/^-?\d+$/.test(value)) return Number(value);
+        if (value !== '') unknown.push(field);
+        return undefined;
+      });
+    if (windDir !== undefined || windSpeed !== undefined) {
+      ResultFormatter.wind(decodeResult, windDir, windSpeed);
     }
-    if (gust !== '') {
+    if (gust !== undefined) {
       ResultFormatter.raw(
         decodeResult,
         'wind_gust',
         'GUST',
         'Wind Gust',
-        `${Number(gust)} knots`,
-        Number(gust),
+        `${gust} knots`,
+        gust,
       );
     }
     ResultFormatter.temperature(
       decodeResult,
-      temp === '' ? '' : `${Number(temp)}`,
+      temp === undefined ? '' : `${temp}`,
     );
-    if (dew !== '') {
+    if (dew !== undefined) {
       ResultFormatter.raw(
         decodeResult,
         'dew_point',
         'DEWPT',
         'Dew Point (C)',
-        `${Number(dew)} degrees`,
-        Number(dew),
+        `${dew} degrees`,
+        dew,
       );
     }
-    if (altimeter !== '') {
-      const inHg = Number(altimeter) / 100;
+    if (altimeter !== undefined) {
+      const inHg = altimeter / 100;
       ResultFormatter.raw(
         decodeResult,
         'altimeter',

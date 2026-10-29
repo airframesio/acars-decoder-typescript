@@ -183,6 +183,100 @@ describe('Label H1 Southwest track report', () => {
     );
   });
 
+  test.each([
+    ['hour 24', '042400'],
+    ['minute 60', '042360'],
+  ])('keeps a point with %s as remaining', (_, time) => {
+    // https://app.airframes.io/messages/7745679345, the second point's time changed
+    const bad = `N3627.6,W12140.2,${time},22146,-17.3,192,047,DC,00000,1,`;
+    message.text =
+      '++76502,204,B737-700,261004,WN1193,KSAN,KSFO,2541,SW2501\r\n2\r\n' +
+      'N3621.7,W12135.7,042328,23951,-22.5,187,045,DC,00000,1,\r\n' +
+      `${bad}\r\n:\r\n`;
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.raw.track_points?.length).toBe(1);
+    expect(decodeResult.remaining.text).toBe(bad);
+  });
+
+  test.each([
+    ['a latitude past 90 degrees', 'N9000.1,W12140.2'],
+    ['a latitude with 60 minutes', 'N3660.0,W12140.2'],
+    ['a longitude past 180 degrees', 'N3627.6,E18000.1'],
+    ['a longitude with 60 minutes', 'N3627.6,W12160.0'],
+  ])('keeps a point with %s as remaining', (_, position) => {
+    // https://app.airframes.io/messages/7745679345, the second point's position changed
+    const bad = `${position},042329,22146,-17.3,192,047,DC,00000,1,`;
+    message.text =
+      '++76502,204,B737-700,261004,WN1193,KSAN,KSFO,2541,SW2501\r\n2\r\n' +
+      'N3621.7,W12135.7,042328,23951,-22.5,187,045,DC,00000,1,\r\n' +
+      `${bad}\r\n:\r\n`;
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.raw.track_points?.length).toBe(1);
+    expect(decodeResult.raw.position?.latitude).toBeCloseTo(36.36167, 5);
+    expect(decodeResult.remaining.text).toBe(bad);
+  });
+
+  test('keeps a point with a wind direction past 360 as remaining', () => {
+    // https://app.airframes.io/messages/7745679345, the second point's wind direction changed
+    const bad = 'N3627.6,W12140.2,042329,22146,-17.3,999,047,DC,00000,1,';
+    message.text =
+      '++76502,204,B737-700,261004,WN1193,KSAN,KSFO,2541,SW2501\r\n2\r\n' +
+      'N3621.7,W12135.7,042328,23951,-22.5,187,045,DC,00000,1,\r\n' +
+      `${bad}\r\n:\r\n`;
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.raw.track_points?.length).toBe(1);
+    expect(decodeResult.remaining.text).toBe(bad);
+  });
+
+  test('reads a MAX point count, which is sent with a comma', () => {
+    // https://app.airframes.io/messages/7589546633, the first point only, with its count
+    message.text =
+      '++86501,N8744B,B7378MAX,260916,WN1059,KSAT,KBWI,1255,SMX34-2502-F320\r\n1,\r\n' +
+      'N3841.1,W07713.3,161419,15284,-00.0,334,011,DC,00000,0,\r\n:\r\n';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoder.decodeLevel).toBe('full');
+    expect(decodeResult.remaining.text).toBeUndefined();
+  });
+
+  test('marks a report with fewer points than its count as partial', () => {
+    // https://app.airframes.io/messages/7745679345 with four of its six points removed
+    message.text =
+      '++76502,204,B737-700,261004,WN1193,KSAN,KSFO,2541,SW2501\r\n6\r\n' +
+      'N3621.7,W12135.7,042328,23951,-22.5,187,045,DC,00000,1,\r\n' +
+      'N3627.6,W12140.2,042329,22146,-17.3,192,047,DC,00000,1,\r\n:\r\n';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.raw.track_points?.length).toBe(2);
+    expect(decodeResult.decoder.decodeLevel).toBe('partial');
+  });
+
+  test('keeps a leg counter too long to be a number as remaining', () => {
+    // https://app.airframes.io/messages/7745679345 with a 16-digit leg counter
+    message.text =
+      '++76502,204,B737-700,261004,WN1193,KSAN,KSFO,9007199254740993,SW2501\r\n1\r\n' +
+      'N3621.7,W12135.7,042328,23951,-22.5,187,045,DC,00000,1,\r\n:\r\n';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.raw.leg_counter).toBeUndefined();
+    expect(decodeResult.remaining.text).toBe('9007199254740993');
+  });
+
+  test('shows no water vapor from an aircraft without a humidity sensor', () => {
+    // https://app.airframes.io/messages/7177601900 with the sensor flag changed to 0
+    message.text =
+      '++76502,269,B737-700,260719,WN2802,KSAN,KSJC,2169,SW2501\n1\n' +
+      'N3307.1,W11747.1,191921,19509,-06.0,150,011,CL,02722,0,\n:\n';
+    const decodeResult = plugin.decode(message);
+
+    const point = decodeResult.raw.track_points![0];
+    expect(point.humiditySensor).toBe(false);
+    expect(point.waterVapor).toBeUndefined();
+  });
+
   test('decodes water vapor from the humidity sensor', () => {
     // https://app.airframes.io/messages/7177601900
     message.text =

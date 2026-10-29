@@ -311,6 +311,24 @@ describe('Label_10_LDR', () => {
     expect(decodeResult.raw.altimeter).toBeUndefined();
   });
 
+  test('keeps unreadable weather fields as remaining', () => {
+    // https://app.airframes.io/messages/7921227262 with the gust, dew point and altimeter damaged
+    message.text =
+      'LDR01,189,D,SWA-2600-019,0,N 32.482,W 99.294,34022,  8.7,KDAL,KMAF,KMAF,16R/,/,/,0,0,130,1X,X6,022,O14,30.1,0,0,0,00,,108.1,06.8,114.9,,,';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.raw.wind_direction).toBe(130);
+    expect(decodeResult.raw.wind_speed).toBeUndefined();
+    expect(decodeResult.raw.wind_gust).toBeUndefined();
+    expect(decodeResult.raw.outside_air_temperature).toBe(22);
+    expect(decodeResult.raw.dew_point).toBeUndefined();
+    expect(decodeResult.raw.altimeter).toBeUndefined();
+    expect(
+      decodeResult.formatted.items.filter((i) => /NaN/.test(i.value)),
+    ).toEqual([]);
+    expect(decodeResult.remaining.text).toBe('0,1X,X6,O14,30.1');
+  });
+
   test('decodes Label 10 Preamble LDR <invalid>', () => {
     message.text = 'LDR Bogus Message';
     const decodeResult = plugin.decode(message);

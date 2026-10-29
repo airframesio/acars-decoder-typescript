@@ -517,6 +517,22 @@ describe('Label 11 LDR landing data', () => {
     );
   });
 
+  test('keeps a runway cut off inside the word FLAPS', () => {
+    // https://app.airframes.io/messages/7911900305, cut inside the second runway's FLAPS line
+    message.text =
+      'LDR01,KSMF LANDING DATA,FLT     METAR-2253Z\n1717    WIND       LDW\nTIME    317/14G--  128.0\n' +
+      '2340Z   OAT/DEW  35L    \n        022/003  35R    \n        QNH\n        30.01\n' +
+      'REMARKS\nCK WING FROST IF FUEL\nTEMP LESS THAN +5\n \n \n \n \n' +
+      '35L                 8472\nFLAPS 30                \nVREF/VTGT        11H/08L\n' +
+      ' 132/138 +6    AB2  1235\nMRLW 129.2/S   AB3  2644\n LDW 128.0     ABM  4070\n \n' +
+      '35R                 8605\nFLAP';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoder.decodeLevel).toBe('partial');
+    expect(decodeResult.raw.landing_runways?.length).toBe(1);
+    expect(decodeResult.remaining.text).toBe('35R                 8605\nFLAP');
+  });
+
   test('marks a card cut off inside its header as partial', () => {
     // https://app.airframes.io/messages/7909419361, the first three lines
     message.text =
