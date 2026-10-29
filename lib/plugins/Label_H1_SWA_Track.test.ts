@@ -32,8 +32,11 @@ describe('Label H1 Southwest track report', () => {
     const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
-    expect(decodeResult.decoder.decodeLevel).toBe('partial');
+    expect(decodeResult.decoder.decodeLevel).toBe('full');
     expect(decodeResult.formatted.description).toBe('Track Report');
+    expect(decodeResult.raw.ship_number).toBe('204');
+    expect(decodeResult.raw.leg_counter).toBe(2541);
+    expect(decodeResult.raw.software_version).toBe('SW2501');
     expect(decodeResult.raw.aircraft_type).toBe('B737-700');
     expect(decodeResult.raw.report_date).toBe('2026-10-04');
     expect(decodeResult.raw.flight_number).toBe('WN1193');
@@ -52,7 +55,10 @@ describe('Label H1 Southwest track report', () => {
       windDirection: 187,
       windSpeed: 45,
       phase: 'Descent',
+      humiditySensor: true,
     });
+    // a sensor is fitted, but 00000 is no reading
+    expect(points[0].waterVapor).toBeUndefined();
     expect(points[5].temperature).toBe(-2);
 
     // the latest point is the aircraft's position
@@ -62,22 +68,23 @@ describe('Label H1 Southwest track report', () => {
     expect(decodeResult.raw.message_timestamp).toBe(84780); // 23:33
 
     expect(decodeResult.formatted.items.map((i) => i.label)).toEqual([
+      'Ship Number',
       'Aircraft Type',
       'Report Date',
       'Flight Number',
       'Origin',
       'Destination',
+      'Leg Counter',
+      'Software Version',
       ...Array(6).fill('Track Point'),
       'Aircraft Position',
       'Altitude',
       'Message Timestamp',
     ]);
-    expect(decodeResult.formatted.items[5].value).toBe(
+    expect(decodeResult.formatted.items[8].value).toBe(
       '36.362 N, 121.595 W on day 4 at 23:28:00, 23951 feet, -22.5 C, wind 187 degrees at 45 knots, Descent',
     );
-    expect(decodeResult.remaining.text).toBe(
-      '204,2541,SW2501\r\n' + Array(6).fill('00000,1').join('\r\n'),
-    );
+    expect(decodeResult.remaining.text).toBeUndefined();
   });
 
   test('decodes a MAX report, which sends the tail', () => {
@@ -93,20 +100,22 @@ describe('Label H1 Southwest track report', () => {
     const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
-    expect(decodeResult.decoder.decodeLevel).toBe('partial');
+    expect(decodeResult.decoder.decodeLevel).toBe('full');
     expect(decodeResult.raw.tail).toBe('N8744B');
+    expect(decodeResult.raw.ship_number).toBeUndefined();
+    expect(decodeResult.raw.software_version).toBe('SMX34-2502-F320');
     expect(decodeResult.raw.aircraft_type).toBe('B7378MAX');
     const points = decodeResult.raw.track_points!;
     expect(points.length).toBe(6);
     expect(points[0].temperature).toBe(0);
     expect(points[1].temperature).toBe(1.8);
     expect(points[4].altitude).toBe(9040);
-    // ER has no established name: the code is shown as sent
-    expect(points[5].phase).toBe('ER');
+    // the MAX sends ER where the 737-700 and -800 send CR
+    expect(points[5].phase).toBe('En Route');
+    // no humidity sensor
+    expect(points[0].humiditySensor).toBe(false);
     expect(decodeResult.raw.altitude).toBe(8988);
-    expect(decodeResult.remaining.text).toBe(
-      '1255,SMX34-2502-F320\r\n' + Array(6).fill('00000,0').join('\r\n'),
-    );
+    expect(decodeResult.remaining.text).toBeUndefined();
   });
 
   test('decodes a #DFB report and drops the block headers inside it', () => {
@@ -124,9 +133,10 @@ describe('Label H1 Southwest track report', () => {
     expect(points.length).toBe(3);
     expect(points[2].temperature).toBe(-18.5);
     expect(points[2].phase).toBe('Climb');
-    expect(decodeResult.remaining.text).toBe(
-      'XXX,2465,SW2501\n' + Array(3).fill('00000,0').join('\n'),
-    );
+    // XXX: the report has no ship number
+    expect(decodeResult.raw.ship_number).toBeUndefined();
+    expect(decodeResult.raw.leg_counter).toBe(2465);
+    expect(decodeResult.remaining.text).toBeUndefined();
   });
 
   test('decodes the complete points of a cut-off report and keeps the rest', () => {
@@ -142,9 +152,7 @@ describe('Label H1 Southwest track report', () => {
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.raw.track_points?.length).toBe(2);
     expect(decodeResult.raw.altitude).toBe(22146);
-    expect(decodeResult.remaining.text).toBe(
-      '204,2541,SW2501\r\n00000,1\r\n00000,1\r\nN3633.2,W12144.7,042330,20332,-',
-    );
+    expect(decodeResult.remaining.text).toBe('N3633.2,W12144.7,042330,20332,-');
   });
 
   test('is chosen by the message decoder', () => {
@@ -171,7 +179,27 @@ describe('Label H1 Southwest track report', () => {
     expect(decodeResult.raw.track_points?.length).toBe(1);
     expect(decodeResult.raw.message_timestamp).toBe(84480); // 23:28, the valid point
     expect(decodeResult.remaining.text).toBe(
-      '204,2541,SW2501\r\n00000,1\r\nN3627.6,W12140.2,042460,22146,-17.3,192,047,DC,00000,1,',
+      'N3627.6,W12140.2,042460,22146,-17.3,192,047,DC,00000,1,',
+    );
+  });
+
+  test('decodes water vapor from the humidity sensor', () => {
+    // https://app.airframes.io/messages/7177601900
+    message.text =
+      '++76502,269,B737-700,260719,WN2802,KSAN,KSJC,2169,SW2501\n3\n' +
+      'N3307.1,W11747.1,191921,19509,-06.0,150,011,CL,02722,1,\n' +
+      'N3308.8,W11748.8,191921,20269,-07.5,138,013,CL,02424,1,\n' +
+      'N3310.5,W11750.6,191922,21019,-08.0,175,009,CL,01821,1,\n:\n';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoder.decodeLevel).toBe('full');
+    const points = decodeResult.raw.track_points!;
+    expect(points.map((p) => p.waterVapor)).toEqual([2722, 2424, 1821]);
+    expect(
+      decodeResult.formatted.items.find((i) => i.label === 'Track Point')
+        ?.value,
+    ).toBe(
+      '33.118 N, 117.785 W on day 19 at 19:21:00, 19509 feet, -6 C, wind 150 degrees at 11 knots, Climb, water vapor 2722 ppmv',
     );
   });
 

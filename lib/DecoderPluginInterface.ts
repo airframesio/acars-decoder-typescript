@@ -1,3 +1,4 @@
+import { AlternativeRunway } from './types/alternative_runway';
 import { Route } from './types/route';
 import { RunwayLandingData } from './types/runway_landing_data';
 import { TrackPoint } from './types/track_point';
@@ -57,6 +58,7 @@ export interface RawFields {
   arrival_runway?: string;
   alternate_runway?: string;
   landing_runways?: RunwayLandingData[];
+  alternative_runways?: AlternativeRunway[];
 
   // Gates
   arrival_gate?: string;

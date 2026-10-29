@@ -20,4 +20,8 @@ export interface TrackPoint {
   windSpeed: number;
   /** flight phase name, or the code as sent when it has no established name */
   phase: string;
+  /** whether the aircraft has a humidity sensor */
+  humiditySensor?: boolean;
+  /** water vapor from the humidity sensor, parts per million by volume */
+  waterVapor?: number;
 }

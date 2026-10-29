@@ -476,7 +476,10 @@ export class ResultFormatter {
         `${CoordinateUtils.coordinateString(point)} on day ${point.day} at ` +
         `${DateTimeUtils.timestampToString(point.time)}, ` +
         `${point.altitude} feet, ${point.temperature} C, ` +
-        `wind ${point.windDirection} degrees at ${point.windSpeed} knots, ${point.phase}`,
+        `wind ${point.windDirection} degrees at ${point.windSpeed} knots, ${point.phase}` +
+        (point.waterVapor === undefined
+          ? ''
+          : `, water vapor ${point.waterVapor} ppmv`),
     });
   }
 
@@ -525,11 +528,12 @@ export class ResultFormatter {
       parts.push(`stopping margin ${margins.join(', ')}`);
     }
     parts.push(...(data.notes ?? []));
+    const variant = data.variant === undefined ? '' : ` (${data.variant})`;
     decodeResult.formatted.items.push({
       type: 'runway_landing_data',
       code: 'RWYLDG',
       label: 'Runway Landing Data',
-      value: `${data.runway}: ${parts.join(', ')}`,
+      value: `${data.runway}${variant}: ${parts.join(', ')}`,
     });
   }
 

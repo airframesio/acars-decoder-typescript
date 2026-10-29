@@ -412,6 +412,39 @@ describe('ResultFormatter landing data and track points', () => {
       '33: 6847 feet, tailwind 20 knots, crosswind 5 knots left, LDW 126000 pounds, 20KT TAILGUST >10 LIMIT',
     );
   });
+
+  test('runwayLandingData describes a runway variant after its name', () => {
+    const dr = makeDecodeResult();
+    ResultFormatter.runwayLandingData(dr, {
+      runway: '11/AIB -E1804F',
+      variant: '1804 feet off the east end',
+      length: 8300,
+      stoppingMargins: {},
+    });
+    expect(dr.formatted.items[0].value).toBe(
+      '11/AIB -E1804F (1804 feet off the east end): 8300 feet',
+    );
+  });
+
+  test('trackPoint adds water vapor when there is a reading', () => {
+    const dr = makeDecodeResult();
+    ResultFormatter.trackPoint(dr, {
+      latitude: 33.11833,
+      longitude: -117.785,
+      day: 19,
+      time: 69660,
+      altitude: 19509,
+      temperature: -6,
+      windDirection: 150,
+      windSpeed: 11,
+      phase: 'Climb',
+      humiditySensor: true,
+      waterVapor: 2722,
+    });
+    expect(dr.formatted.items[0].value).toBe(
+      '33.118 N, 117.785 W on day 19 at 19:21:00, 19509 feet, -6 C, wind 150 degrees at 11 knots, Climb, water vapor 2722 ppmv',
+    );
+  });
 });
 
 describe('ResultFormatter.variableWind', () => {

@@ -4,6 +4,8 @@
 export interface RunwayLandingData {
   /** runway as sent, with any suffix */
   runway: string;
+  /** what the runway's variant is, e.g. 1804 feet off the east end */
+  variant?: string;
   /** feet */
   length?: number;
   flaps?: number;

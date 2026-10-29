@@ -180,11 +180,76 @@ describe('Label 11 LDR landing data', () => {
       decodeResult.formatted.items.find((i) => i.label === 'Runways')?.value,
     ).toBe('11/AIB');
     expect(decodeResult.raw.landing_runways?.[0].runway).toBe('11/AIB -E1804F');
+    expect(decodeResult.raw.landing_runways?.[0].variant).toBe(
+      '1804 feet off the east end',
+    );
     expect(decodeResult.raw.landing_runways?.[0].length).toBe(8047);
     expect(decodeResult.raw.landing_runways?.[0].stoppingMargins).toEqual({
       AB2: 797,
       AB3: 2202,
       ABM: 3634,
+    });
+    expect(
+      decodeResult.formatted.items.find(
+        (i) => i.label === 'Runway Landing Data',
+      )?.value,
+    ).toBe(
+      '11/AIB -E1804F (1804 feet off the east end): 8047 feet, flaps 30, headwind 2 knots, crosswind 8 knots left, VREF 132 knots, VTGT 137 knots (+5), MRLW 151.5/S, LDW 121400 pounds, stopping margin AB2 797 feet, AB3 2202 feet, ABM 3634 feet',
+    );
+  });
+
+  test('decodes the alternative runways offered for an unavailable runway', () => {
+    // https://app.airframes.io/messages/7904009994
+    message.text =
+      'LDR01,KMSY LANDING DATA,FLT     METAR-1653Z\n4202    WIND       LDW\nTIME    062/08G--  118.8\n' +
+      '1710Z   OAT/DEW\n        023/008\n        QNH\n        30.19\n' +
+      'REMARKS\nRWY CURRENTLY UNAVAIL   \n--- ALTERNATIVE RWYS ---\n' +
+      '11-E1804F         11/AIB\n29-E1804F         29/AIB\n \n \n';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoder.decodeLevel).toBe('full');
+    expect(decodeResult.raw.remarks).toBe('RWY CURRENTLY UNAVAIL');
+    expect(decodeResult.raw.alternative_runways).toEqual([
+      {
+        runway: '11/AIB',
+        name: '11-E1804F',
+        variant: '1804 feet off the east end',
+      },
+      {
+        runway: '29/AIB',
+        name: '29-E1804F',
+        variant: '1804 feet off the east end',
+      },
+    ]);
+    expect(
+      decodeResult.formatted.items.find(
+        (i) => i.label === 'Alternative Runways',
+      )?.value,
+    ).toBe(
+      '11/AIB (1804 feet off the east end), 29/AIB (1804 feet off the east end)',
+    );
+    expect(decodeResult.raw.landing_runways).toBeUndefined();
+  });
+
+  test('decodes a plain list of alternative runways', () => {
+    // https://app.airframes.io/messages/7837896986
+    message.text =
+      'LDR01,KMCO LANDING DATA,FLT     METAR-1053Z\n4872    WIND       LDW\nTIME    357/04G--  138.5\n' +
+      '1130Z   OAT/DEW\n        022/022\n        QNH\n        30.06\n' +
+      'REMARKS\nNO VALID RWYS REQUESTED \n--- ALTERNATIVE RWYS ---\n' +
+      '18L                     \n36R                     \n35L                     \n' +
+      '17R                     \n35R                     \n \n \n \n \n \n \n';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoder.decodeLevel).toBe('full');
+    expect(decodeResult.raw.remarks).toBe('NO VALID RWYS REQUESTED');
+    expect(
+      decodeResult.formatted.items.find(
+        (i) => i.label === 'Alternative Runways',
+      )?.value,
+    ).toBe('18L, 36R, 35L, 17R, 35R');
+    expect(decodeResult.raw.alternative_runways?.[0]).toEqual({
+      runway: '18L',
     });
   });
 
@@ -387,8 +452,9 @@ describe('Label 11 LDR landing data', () => {
     expect(runways[1].stoppingMargins).toEqual({ ABM: 1213 });
   });
 
-  test('keeps a runway heading cut off after the remarks', () => {
-    // https://app.airframes.io/messages/7904009664 (the first block only)
+  test('keeps an alternative runway cut off by the end of the block as remaining', () => {
+    // https://app.airframes.io/messages/7904009664 (the first block only: the full card has
+    // 11-E1804F where this one ends)
     message.text =
       'LDR01,KMSY LANDING DATA,FLT     METAR-1653Z\n4202    WIND       LDW\nTIME    062/08G--  118.8\n' +
       '1710Z   OAT/DEW\n        023/008\n        QNH\n        30.19\n' +
@@ -396,10 +462,24 @@ describe('Label 11 LDR landing data', () => {
     const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
-    expect(decodeResult.raw.remarks).toBe(
-      'RWY CURRENTLY UNAVAIL --- ALTERNATIVE RWYS ---',
-    );
+    expect(decodeResult.raw.remarks).toBe('RWY CURRENTLY UNAVAIL');
+    expect(decodeResult.raw.alternative_runways).toBeUndefined();
     expect(decodeResult.remaining.text).toBe('11');
+  });
+
+  test('keeps a runway heading cut off after the remarks', () => {
+    // https://app.airframes.io/messages/7911900305, cut inside the first runway's heading
+    message.text =
+      'LDR01,KSMF LANDING DATA,FLT     METAR-2253Z\n1717    WIND       LDW\nTIME    317/14G--  128.0\n' +
+      '2340Z   OAT/DEW  35L    \n        022/003  35R    \n        QNH\n        30.01\n' +
+      'REMARKS\nCK WING FROST IF FUEL\nTEMP LESS THAN +5\n \n \n \n \n35L';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoder.decodeLevel).toBe('partial');
+    expect(decodeResult.raw.remarks).toBe(
+      'CK WING FROST IF FUEL TEMP LESS THAN +5',
+    );
+    expect(decodeResult.remaining.text).toBe('35L');
   });
 
   test('keeps a runway heading cut off after a runway', () => {

@@ -15,6 +15,23 @@ function runway(value: string): string {
   return suffix.trim() === '' ? rwy.trim() : `${rwy.trim()}/${suffix.trim()}`;
 }
 
+// Fields below were matched against the landing card answering each request (113 pairs,
+// latest request before each card) unless noted.
+
+// runway condition code, sent as 6 less the code: 113 of 113 pairs
+const RUNWAY_CONDITION: Record<number, string> = {
+  6: 'dry',
+  5: 'good',
+  4: 'good to medium',
+  3: 'medium',
+  2: 'medium to poor',
+  1: 'poor',
+  0: 'nil',
+};
+
+// 0 and 1 in 53 of 54 pairs; 2 in 6 of 6 cards that say FLAPS 15
+const FLAPS: Record<string, number> = { '0': 30, '1': 40, '2': 15 };
+
 /**
  * Southwest Airlines landing data request (LDR01), answered by the label 11 landing data card.
  */
@@ -70,6 +87,35 @@ export class Label_10_LDR extends DecoderPlugin {
       ResultFormatter.alternateRunway(decodeResult, altRwy);
     }
 
+    const unknown = [parts[1], parts[2], parts[4]];
+    const condition = parts[15].trim();
+    if (/^[1-6]$/.test(condition)) {
+      const code = 6 - Number(condition);
+      ResultFormatter.raw(
+        decodeResult,
+        'runway_condition_code',
+        'RCC',
+        'Runway Condition Code',
+        `${code} (${RUNWAY_CONDITION[code]})`,
+        code,
+      );
+    } else if (condition !== '0') {
+      unknown.push(parts[15]);
+    }
+    const flaps = FLAPS[parts[16].trim()];
+    if (flaps !== undefined) {
+      ResultFormatter.raw(
+        decodeResult,
+        'landing_flaps',
+        'FLAPS',
+        'Landing Flaps',
+        `${flaps}`,
+        flaps,
+      );
+    } else {
+      unknown.push(parts[16]);
+    }
+
     // airport weather, when the crew enters it: wind, gust, temperature, dew point, altimeter
     const [windDir, windSpeed, gust, temp, dew, altimeter] = parts
       .slice(17, 23)
@@ -117,6 +163,52 @@ export class Label_10_LDR extends DecoderPlugin {
       );
     }
 
+    // 1 = engine anti-ice, 113 of 113 pairs (the card says ENGINE ANTI-ICE ON); 2 is in only
+    // three requests, so it is shown as sent
+    const antiIce = parts[23].trim();
+    if (/^[1-9]$/.test(antiIce)) {
+      ResultFormatter.raw(
+        decodeResult,
+        'anti_ice',
+        'ANTIICE',
+        'Anti-Ice',
+        antiIce === '1' ? 'engine' : antiIce,
+        Number(antiIce),
+      );
+    } else if (antiIce !== '0') {
+      unknown.push(parts[23]);
+    }
+    // en route icing: two requests that differ from another only here, and only their cards
+    // say ENROUTE ICING CONDITIONS (none of 59 cards for a 0 do); 20 requests
+    const flags: [string, string, string, string][] = [
+      [parts[24], 'enroute_icing', 'ICING', 'En Route Icing'],
+      // the card says HGS AIII: 113 of 113 pairs, 32 requests
+      [parts[25], 'hgs_approach', 'HGS', 'HGS Approach'],
+    ];
+    for (const [value, key, code, label] of flags) {
+      if (value.trim() === '1') {
+        ResultFormatter.raw(decodeResult, key, code, label, 'yes', true);
+      } else if (value.trim() !== '0') {
+        unknown.push(value);
+      }
+    }
+    // a non-normal configuration chosen from a list on the aircraft; 7 requests in 2737, too
+    // few to name the codes, so the code is shown as sent
+    const nonNormal = parts[26].trim();
+    if (/^\d+$/.test(nonNormal) && Number(nonNormal) !== 0) {
+      ResultFormatter.raw(
+        decodeResult,
+        'non_normal_configuration',
+        'NNC',
+        'Non-Normal Configuration',
+        `${Number(nonNormal)}`,
+        Number(nonNormal),
+      );
+    } else if (!/^0+$/.test(nonNormal)) {
+      unknown.push(parts[26]);
+    }
+    if (parts[27].trim() !== '') unknown.push(parts[27]);
+
     // zero fuel weight + landing fuel = landing weight
     const weights: [string, string, string, string][] = [
       ['zero_fuel_weight', 'ZFW', 'Zero Fuel Weight', parts[28]],
@@ -136,13 +228,39 @@ export class Label_10_LDR extends DecoderPlugin {
       );
     }
 
-    ResultFormatter.unknownArr(decodeResult, [
-      ...parts.slice(1, 3),
-      parts[4],
-      ...parts.slice(15, 17),
-      ...parts.slice(23, 28),
-      ...parts.slice(31),
-    ]);
+    // the missed approach climb gradient (feet per nautical mile) and the altitude it is
+    // needed to, as the approach chart gives them: 33 requests, matched to the FAA charts for
+    // KBUR runway 8 and KRNO runway 17R; ----. is none
+    const gradient = (parts[31] ?? '').trim();
+    if (/^\d+$/.test(gradient)) {
+      ResultFormatter.raw(
+        decodeResult,
+        'missed_approach_gradient',
+        'MAGRAD',
+        'Missed Approach Climb Gradient',
+        `${Number(gradient)} feet per nautical mile`,
+        Number(gradient),
+      );
+    } else if (gradient !== '' && gradient !== '----.') {
+      unknown.push(parts[31]);
+    }
+    const missedAltitude = (parts[32] ?? '').trim();
+    if (/^\d+$/.test(missedAltitude)) {
+      ResultFormatter.raw(
+        decodeResult,
+        'missed_approach_altitude',
+        'MAALT',
+        'Missed Approach Altitude',
+        `${Number(missedAltitude)} feet`,
+        Number(missedAltitude),
+      );
+    } else if (missedAltitude !== '') {
+      unknown.push(parts[32]);
+    }
+    unknown.push(...parts.slice(33).filter((field) => field.trim() !== ''));
+
+    // airline ID, request layout, and a field that is always 0
+    ResultFormatter.unknownArr(decodeResult, unknown);
 
     decodeResult.decoded = true;
     decodeResult.decoder.decodeLevel = 'partial';

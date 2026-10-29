@@ -1,8 +1,10 @@
 import { DateTimeUtils } from '../DateTimeUtils';
 import { DecoderPlugin } from '../DecoderPlugin';
 import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
+import { AlternativeRunway } from '../types/alternative_runway';
 import { RunwayLandingData } from '../types/runway_landing_data';
 import { ResultFormatter } from '../utils/result_formatter';
+import { RunwayUtils } from '../utils/runway_utils';
 
 /** HHMM as seconds of the day, or undefined when out of range. */
 function tod(hours: string, minutes: string): number | undefined {
@@ -14,6 +16,12 @@ function tod(hours: string, minutes: string): number | undefined {
 /** Weights are sent in thousands of pounds. */
 function pounds(value: string): number {
   return Math.round(Number(value) * 1000);
+}
+
+/** The description of a runway's variant, e.g. 11/AIB -E1804F, when it has one. */
+function variant(runway: string): { variant?: string } {
+  const description = RunwayUtils.variantDescription(runway);
+  return description === undefined ? {} : { variant: description };
 }
 
 // The header is two columns of labels over values; runways the card covers sit at the right.
@@ -35,6 +43,10 @@ const HEADER = [
 const RUNWAY = /^(\d{1,2}[LRC]?(?:\/\S+)?(?: -\S+)?)\s+(\d{1,5})\s*$/;
 // a runway heading, whole or cut off by the end of the message
 const RUNWAY_START = /^\d{1,2}[LRC]?(?:\/\S+)?(?: -\S+)?(?:\s{2,}\d*)?\s*$/;
+// Under the remarks of a card for a runway it cannot use: one runway per line, a variant
+// with its name first (11-E1804F         11/AIB)
+const ALTERNATIVES = '--- ALTERNATIVE RWYS ---';
+const ALTERNATIVE = /^(?:(.+?)\s{2,})?(\d{1,2}[LRC]?(?:\/\S+)?)\s*$/;
 const BLOCK = [
   /^FLAPS (\d{2}|--)\s*$/,
   /^VREF\/VTGT\s+(?:(\d{2})([HT])\/(\d{2})([LR])|---\/---)\s*$/,
@@ -161,9 +173,14 @@ export class Label_11_LDR extends DecoderPlugin {
 
     const rest = lines.slice(i);
     let at = 0;
+    const alternatives: AlternativeRunway[] = [];
     if (rest[0]?.trim() === 'REMARKS') {
       const remarks: string[] = [];
       for (at = 1; at < rest.length && !RUNWAY_START.test(rest[at]); at++) {
+        if (rest[at].trim() === ALTERNATIVES) {
+          at = this.alternatives(rest, at + 1, alternatives, unknown);
+          break;
+        }
         if (rest[at].trim() !== '') remarks.push(rest[at].trim());
       }
       if (remarks.length > 0) {
@@ -175,6 +192,18 @@ export class Label_11_LDR extends DecoderPlugin {
           remarks.join(' '),
         );
       }
+    }
+    if (alternatives.length > 0) {
+      ResultFormatter.raw(
+        decodeResult,
+        'alternative_runways',
+        'ALTRWY',
+        'Alternative Runways',
+        alternatives
+          .map((a) => (a.variant ? `${a.runway} (${a.variant})` : a.runway))
+          .join(', '),
+        alternatives,
+      );
     }
 
     const blocks: RunwayLandingData[] = [];
@@ -197,6 +226,7 @@ export class Label_11_LDR extends DecoderPlugin {
         // a runway sent with notes instead of figures, e.g. MQTW 148.0 EXCEEDED
         blocks.push({
           runway: head[1],
+          ...variant(head[1]),
           length: Number(head[2]),
           stoppingMargins: {},
         });
@@ -242,6 +272,7 @@ export class Label_11_LDR extends DecoderPlugin {
 
     const data: RunwayLandingData = {
       runway: head[1],
+      ...variant(head[1]),
       length: Number(head[2]),
       stoppingMargins: {},
     };
@@ -266,5 +297,34 @@ export class Label_11_LDR extends DecoderPlugin {
       if (feet !== '----') data.stoppingMargins[setting] = Number(feet);
     }
     return data;
+  }
+
+  /**
+   * The runways listed after ALTERNATIVE RWYS, which run to the end of the card. Returns the
+   * index of the line after them.
+   */
+  private alternatives(
+    lines: string[],
+    from: number,
+    out: AlternativeRunway[],
+    unknown: string[],
+  ): number {
+    for (let n = from; n < lines.length; n++) {
+      const line = lines[n];
+      if (line.trim() === '') continue;
+      const m = line.match(ALTERNATIVE);
+      // a last line with no newline after it may be cut off by the end of the block
+      if (!m || n === lines.length - 1) {
+        unknown.push(line.trim());
+        continue;
+      }
+      const name = m[1]?.trim();
+      out.push({
+        runway: m[2],
+        ...(name === undefined ? {} : { name }),
+        ...variant(name ?? m[2]),
+      });
+    }
+    return lines.length;
   }
 }
