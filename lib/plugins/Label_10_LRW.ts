@@ -1,6 +1,7 @@
 import { DecoderPlugin } from '../DecoderPlugin';
 import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
 import { ResultFormatter } from '../utils/result_formatter';
+import { swaRequestHeader } from '../utils/swa_request';
 
 /**
  * Southwest Airlines landing runways request (LRW01), answered by the label 11 LRW01 list of
@@ -25,18 +26,10 @@ export class Label_10_LRW extends DecoderPlugin {
       return this.failUnknown(decodeResult, message.text, options);
     }
 
-    ResultFormatter.raw(
-      decodeResult,
-      'software_version',
-      'SWVER',
-      'Software Version',
-      parts[3],
-    );
+    swaRequestHeader(decodeResult, parts[1], parts[2], parts[3]);
     ResultFormatter.departureAirport(decodeResult, parts[6]);
     ResultFormatter.arrivalAirport(decodeResult, parts[7]);
     ResultFormatter.unknownArr(decodeResult, [
-      parts[1],
-      parts[2],
       parts[4],
       parts[5],
       ...parts.slice(8).filter((field) => field.trim() !== ''),

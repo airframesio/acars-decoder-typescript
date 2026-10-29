@@ -29,13 +29,15 @@ describe('Label 10 LRW landing runways request', () => {
     expect(decodeResult.formatted.description).toBe('Landing Runways Request');
     expect(decodeResult.formatted.items.map((i) => [i.label, i.value])).toEqual(
       [
+        ['Airline ID', '189 (Southwest)'],
+        ['Request Layout', 'D'],
         ['Software Version', 'SWA-2600-019'],
         ['Origin', 'KLGA'],
         ['Destination', 'KATL'],
       ],
     );
-    // airline ID 189, layout D, a field that is always 0, and one not yet understood
-    expect(decodeResult.remaining.text).toBe('189,D,0,1');
+    // a field that is always 0, and one not yet understood
+    expect(decodeResult.remaining.text).toBe('0,1');
   });
 
   test('is chosen by the message decoder', () => {

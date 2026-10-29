@@ -30,6 +30,8 @@ describe('Label_10_LDR', () => {
     expect(decodeResult.formatted.description).toBe('Landing Data Request');
     expect(decodeResult.formatted.items.map((i) => [i.label, i.value])).toEqual(
       [
+        ['Airline ID', '189 (Southwest)'],
+        ['Request Layout', 'C'],
         ['Software Version', 'SWA-2600-016'],
         ['Aircraft Position', '38.151 N, 76.623 W'],
         ['Altitude', '37003 feet'],
@@ -49,8 +51,8 @@ describe('Label_10_LDR', () => {
     expect(decodeResult.raw.landing_fuel).toBe(8600);
     expect(decodeResult.raw.landing_weight).toBe(143700);
     expect(decodeResult.raw.landing_flaps).toBe(30);
-    // airline ID 189, layout C and a field that is always 0
-    expect(decodeResult.remaining.text).toBe('189,C,0');
+    // a field that is always 0
+    expect(decodeResult.remaining.text).toBe('0');
   });
 
   test('decodes Label 10 Preamble LDR variant 2', () => {
@@ -62,6 +64,8 @@ describe('Label_10_LDR', () => {
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.formatted.items.map((i) => [i.label, i.value])).toEqual(
       [
+        ['Airline ID', '189 (Southwest)'],
+        ['Request Layout', 'C'],
         ['Software Version', 'SWA-2600-016'],
         ['Aircraft Position', '37.873 N, 79.541 W'],
         ['Altitude', '30998 feet'],
@@ -77,7 +81,7 @@ describe('Label_10_LDR', () => {
         ['Landing Weight', '142600 pounds'],
       ],
     );
-    expect(decodeResult.remaining.text).toBe('189,C,0');
+    expect(decodeResult.remaining.text).toBe('0');
   });
 
   test('decodes the airport weather the crew entered', () => {
@@ -90,6 +94,8 @@ describe('Label_10_LDR', () => {
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.formatted.items.map((i) => [i.label, i.value])).toEqual(
       [
+        ['Airline ID', '189 (Southwest)'],
+        ['Request Layout', 'D'],
         ['Software Version', 'SWA-2600-019'],
         ['Aircraft Position', '32.482 N, 99.294 W'],
         ['Altitude', '34022 feet'],
@@ -110,7 +116,7 @@ describe('Label_10_LDR', () => {
       ],
     );
     expect(decodeResult.raw.altimeter).toBe(30.14);
-    expect(decodeResult.remaining.text).toBe('189,D,0');
+    expect(decodeResult.remaining.text).toBe('0');
   });
 
   test('decodes the runway condition, flaps 40 and engine anti-ice', () => {
@@ -121,6 +127,8 @@ describe('Label_10_LDR', () => {
 
     expect(decodeResult.formatted.items.map((i) => [i.label, i.value])).toEqual(
       [
+        ['Airline ID', '189 (Southwest)'],
+        ['Request Layout', 'D'],
         ['Software Version', 'SWA-2600-019'],
         ['Aircraft Position', '41.349 N, 89.968 W'],
         ['Altitude', '27495 feet'],
@@ -141,7 +149,7 @@ describe('Label_10_LDR', () => {
     expect(decodeResult.raw.runway_condition_code).toBe(5);
     expect(decodeResult.raw.landing_flaps).toBe(40);
     expect(decodeResult.raw.anti_ice).toBe(1);
-    expect(decodeResult.remaining.text).toBe('189,D,0');
+    expect(decodeResult.remaining.text).toBe('0');
   });
 
   test('decodes a worse runway condition and en route icing', () => {
@@ -181,7 +189,7 @@ describe('Label_10_LDR', () => {
       decodeResult.formatted.items.find((i) => i.label === 'HGS Approach')
         ?.value,
     ).toBe('yes');
-    expect(decodeResult.remaining.text).toBe('189,D,0');
+    expect(decodeResult.remaining.text).toBe('0');
   });
 
   test('decodes flaps 15 and shows the non-normal configuration code as sent', () => {
@@ -195,7 +203,7 @@ describe('Label_10_LDR', () => {
     expect(items).toContainEqual(['Non-Normal Configuration', '6']);
     expect(decodeResult.raw.landing_flaps).toBe(15);
     expect(decodeResult.raw.non_normal_configuration).toBe(6);
-    expect(decodeResult.remaining.text).toBe('189,D,0');
+    expect(decodeResult.remaining.text).toBe('0');
   });
 
   test('shows anti-ice setting 2 as sent', () => {
@@ -223,7 +231,7 @@ describe('Label_10_LDR', () => {
     ]);
     expect(decodeResult.raw.missed_approach_gradient).toBe(340);
     expect(decodeResult.raw.missed_approach_altitude).toBe(2500);
-    expect(decodeResult.remaining.text).toBe('189,D,0');
+    expect(decodeResult.remaining.text).toBe('0');
   });
 
   test('treats a missed approach gradient of dashes as none', () => {
@@ -234,7 +242,7 @@ describe('Label_10_LDR', () => {
 
     expect(decodeResult.raw.missed_approach_gradient).toBeUndefined();
     expect(decodeResult.raw.missed_approach_altitude).toBeUndefined();
-    expect(decodeResult.remaining.text).toBe('189,C,0');
+    expect(decodeResult.remaining.text).toBe('0');
   });
 
   test('decodes a divert, where the landing airport is not the destination', () => {

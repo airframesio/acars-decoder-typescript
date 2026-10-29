@@ -1,6 +1,7 @@
 import { DecoderPlugin } from '../DecoderPlugin';
 import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
 import { ResultFormatter } from '../utils/result_formatter';
+import { swaRequestHeader } from '../utils/swa_request';
 
 /** Weights and fuel are sent in thousands of pounds. */
 function pounds(value: string): number | undefined {
@@ -56,13 +57,7 @@ export class Label_10_LDR extends DecoderPlugin {
       return this.failUnknown(decodeResult, message.text, options);
     }
 
-    ResultFormatter.raw(
-      decodeResult,
-      'software_version',
-      'SWVER',
-      'Software Version',
-      parts[3],
-    );
+    swaRequestHeader(decodeResult, parts[1], parts[2], parts[3]);
     const lat = parts[5];
     const lon = parts[6];
     const position = {
@@ -87,7 +82,8 @@ export class Label_10_LDR extends DecoderPlugin {
       ResultFormatter.alternateRunway(decodeResult, altRwy);
     }
 
-    const unknown = [parts[1], parts[2], parts[4]];
+    // always 0
+    const unknown = [parts[4]];
     const condition = parts[15].trim();
     if (/^[1-6]$/.test(condition)) {
       const code = 6 - Number(condition);
@@ -259,7 +255,6 @@ export class Label_10_LDR extends DecoderPlugin {
     }
     unknown.push(...parts.slice(33).filter((field) => field.trim() !== ''));
 
-    // airline ID, request layout, and a field that is always 0
     ResultFormatter.unknownArr(decodeResult, unknown);
 
     decodeResult.decoded = true;
