@@ -3,8 +3,10 @@ import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
 import { ResultFormatter } from '../utils/result_formatter';
 
 /** Weights and fuel are sent in thousands of pounds. */
-function pounds(value: string): number {
-  return Math.round(Number(value) * 1000);
+function pounds(value: string): number | undefined {
+  if (value.trim() === '') return undefined;
+  const thousands = Number(value);
+  return Number.isFinite(thousands) ? Math.round(thousands * 1000) : undefined;
 }
 
 /** `22/` is runway 22; anything after the slash is part of the runway's name, as on the card. */
@@ -54,7 +56,8 @@ export class Label_10_LDR extends DecoderPlugin {
     if (parts[7].trim() !== '') {
       ResultFormatter.altitude(decodeResult, Number(parts[7]));
     }
-    ResultFormatter.currentFuel(decodeResult, pounds(parts[8]));
+    const fuel = pounds(parts[8]);
+    if (fuel !== undefined) ResultFormatter.currentFuel(decodeResult, fuel);
     ResultFormatter.departureAirport(decodeResult, parts[9]);
     ResultFormatter.arrivalAirport(decodeResult, parts[10]);
     // the airport the card is for: the destination, or the airport of a divert
@@ -68,10 +71,9 @@ export class Label_10_LDR extends DecoderPlugin {
     }
 
     // airport weather, when the crew enters it: wind, gust, temperature, dew point, altimeter
-    const [windDir, windSpeed, gust, temp, dew, altimeter] = parts.slice(
-      17,
-      23,
-    );
+    const [windDir, windSpeed, gust, temp, dew, altimeter] = parts
+      .slice(17, 23)
+      .map((field) => field.trim());
     if (windDir !== '' || windSpeed !== '') {
       ResultFormatter.wind(
         decodeResult,
@@ -122,13 +124,15 @@ export class Label_10_LDR extends DecoderPlugin {
       ['landing_weight', 'LDW', 'Landing Weight', parts[30]],
     ];
     for (const [key, code, label, value] of weights) {
+      const amount = pounds(value);
+      if (amount === undefined) continue;
       ResultFormatter.raw(
         decodeResult,
         key,
         code,
         label,
-        `${pounds(value)} pounds`,
-        pounds(value),
+        `${amount} pounds`,
+        amount,
       );
     }
 

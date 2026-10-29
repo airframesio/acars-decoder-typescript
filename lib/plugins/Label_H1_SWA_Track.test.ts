@@ -73,7 +73,7 @@ describe('Label H1 Southwest track report', () => {
       'Message Timestamp',
     ]);
     expect(decodeResult.formatted.items[5].value).toBe(
-      '36.362 N, 121.595 W at 23:28:00, 23951 feet, -22.5 C, wind 187 degrees at 45 knots, Descent',
+      '36.362 N, 121.595 W on day 4 at 23:28:00, 23951 feet, -22.5 C, wind 187 degrees at 45 knots, Descent',
     );
     expect(decodeResult.remaining.text).toBe(
       '204,2541,SW2501\r\n' + Array(6).fill('00000,1').join('\r\n'),
@@ -157,6 +157,22 @@ describe('Label H1 Southwest track report', () => {
     });
     expect(decodeResult.decoder.name).toBe('label-h1-swa-track');
     expect(decodeResult.raw.track_points?.length).toBe(1);
+  });
+
+  test('keeps a point with an impossible time as remaining', () => {
+    // https://app.airframes.io/messages/7745679345, the second point's time changed to 24:60
+    message.text =
+      '++76502,204,B737-700,261004,WN1193,KSAN,KSFO,2541,SW2501\r\n2\r\n' +
+      'N3621.7,W12135.7,042328,23951,-22.5,187,045,DC,00000,1,\r\n' +
+      'N3627.6,W12140.2,042460,22146,-17.3,192,047,DC,00000,1,\r\n:\r\n';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoder.decodeLevel).toBe('partial');
+    expect(decodeResult.raw.track_points?.length).toBe(1);
+    expect(decodeResult.raw.message_timestamp).toBe(84480); // 23:28, the valid point
+    expect(decodeResult.remaining.text).toBe(
+      '204,2541,SW2501\r\n00000,1\r\nN3627.6,W12140.2,042460,22146,-17.3,192,047,DC,00000,1,',
+    );
   });
 
   test('does not decode a bad header', () => {

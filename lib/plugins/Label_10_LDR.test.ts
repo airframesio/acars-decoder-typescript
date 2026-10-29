@@ -142,6 +142,38 @@ describe('Label_10_LDR', () => {
     expect(decodeResult.raw.landing_weight).toBe(135200);
   });
 
+  test('leaves out blank fuel and weights', () => {
+    // https://app.airframes.io/messages/6578341950 with fuel and the three weights blanked
+    message.text =
+      'LDR01,189,D,SWA-2600-019,0,N 34.403,W 99.617,33022,,KSMF,KDAL,KAMA,22/,/,/,0,0,,,,,,,0,0,0,00,,,,,,,';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoded).toBe(true);
+    expect(decodeResult.raw.fuel_on_board).toBeUndefined();
+    expect(decodeResult.raw.zero_fuel_weight).toBeUndefined();
+    expect(decodeResult.raw.landing_fuel).toBeUndefined();
+    expect(decodeResult.raw.landing_weight).toBeUndefined();
+    expect(
+      decodeResult.formatted.items.filter((i) =>
+        /pounds|^0$|NaN/.test(i.value),
+      ),
+    ).toEqual([]);
+  });
+
+  test('treats weather fields of spaces as not entered', () => {
+    // https://app.airframes.io/messages/7921227262 with the six weather fields as spaces
+    message.text =
+      'LDR01,189,D,SWA-2600-019,0,N 32.482,W 99.294,34022,  8.7,KDAL,KMAF,KMAF,16R/,/,/,0,0, , , , , , ,0,0,0,00,,108.1,06.8,114.9,,,';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.raw.wind_direction).toBeUndefined();
+    expect(decodeResult.raw.wind_speed).toBeUndefined();
+    expect(decodeResult.raw.wind_gust).toBeUndefined();
+    expect(decodeResult.raw.outside_air_temperature).toBeUndefined();
+    expect(decodeResult.raw.dew_point).toBeUndefined();
+    expect(decodeResult.raw.altimeter).toBeUndefined();
+  });
+
   test('decodes Label 10 Preamble LDR <invalid>', () => {
     message.text = 'LDR Bogus Message';
     const decodeResult = plugin.decode(message);

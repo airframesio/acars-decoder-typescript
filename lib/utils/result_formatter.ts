@@ -473,7 +473,7 @@ export class ResultFormatter {
       code: 'TRKPT',
       label: 'Track Point',
       value:
-        `${CoordinateUtils.coordinateString(point)} at ` +
+        `${CoordinateUtils.coordinateString(point)} on day ${point.day} at ` +
         `${DateTimeUtils.timestampToString(point.time)}, ` +
         `${point.altitude} feet, ${point.temperature} C, ` +
         `wind ${point.windDirection} degrees at ${point.windSpeed} knots, ${point.phase}`,

@@ -4,6 +4,13 @@ import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
 import { RunwayLandingData } from '../types/runway_landing_data';
 import { ResultFormatter } from '../utils/result_formatter';
 
+/** HHMM as seconds of the day, or undefined when out of range. */
+function tod(hours: string, minutes: string): number | undefined {
+  const h = Number(hours);
+  const m = Number(minutes);
+  return h <= 23 && m <= 59 ? h * 3600 + m * 60 : undefined;
+}
+
 /** Weights are sent in thousands of pounds. */
 function pounds(value: string): number {
   return Math.round(Number(value) * 1000);
@@ -24,7 +31,10 @@ const HEADER = [
 // One block per runway: runway and length (feet), flaps, wind components, speeds and the
 // AB2 stopping margin, MRLW and the AB3 margin, LDW and the ABM margin. `-` fills what the
 // card could not work out.
-const RUNWAY = /^(\d{1,2}[LRC]?(?:\/\S+)?(?: -\S+)?)\s+(\d{4,5})\s*$/;
+// an unavailable runway is sent with length 0
+const RUNWAY = /^(\d{1,2}[LRC]?(?:\/\S+)?(?: -\S+)?)\s+(\d{1,5})\s*$/;
+// a runway heading, whole or cut off by the end of the message
+const RUNWAY_START = /^\d{1,2}[LRC]?(?:\/\S+)?(?: -\S+)?(?:\s{2,}\d*)?\s*$/;
 const BLOCK = [
   /^FLAPS (\d{2}|--)\s*$/,
   /^VREF\/VTGT\s+(?:(\d{2})([HT])\/(\d{2})([LR])|---\/---)\s*$/,
@@ -56,9 +66,13 @@ export class Label_11_LDR extends DecoderPlugin {
       return this.failUnknown(decodeResult, message.text, options);
     }
 
+    const unknown: string[] = [];
     ResultFormatter.landingAirport(decodeResult, first[1]);
-    if (first[2] !== undefined) {
-      const metar = Number(first[2]) * 3600 + Number(first[3]) * 60;
+    const metar = first[2] === undefined ? undefined : tod(first[2], first[3]);
+    if (first[2] !== undefined && metar === undefined) {
+      unknown.push(`METAR-${first[2]}${first[3]}Z`);
+    }
+    if (metar !== undefined) {
       ResultFormatter.raw(
         decodeResult,
         'metar_time',
@@ -101,10 +115,12 @@ export class Label_11_LDR extends DecoderPlugin {
           pounds(m[4]),
         );
       } else if (i === 3) {
-        ResultFormatter.timestamp(
-          decodeResult,
-          Number(m[1]) * 3600 + Number(m[2]) * 60,
-        );
+        const time = tod(m[1], m[2]);
+        if (time === undefined) {
+          unknown.push(`${m[1]}${m[2]}Z`);
+        } else {
+          ResultFormatter.timestamp(decodeResult, time);
+        }
         runways.push(m[3]);
       } else if (i === 4) {
         ResultFormatter.temperature(decodeResult, `${Number(m[1])}`);
@@ -147,7 +163,7 @@ export class Label_11_LDR extends DecoderPlugin {
     let at = 0;
     if (rest[0]?.trim() === 'REMARKS') {
       const remarks: string[] = [];
-      for (at = 1; at < rest.length && !RUNWAY.test(rest[at]); at++) {
+      for (at = 1; at < rest.length && !RUNWAY_START.test(rest[at]); at++) {
         if (rest[at].trim() !== '') remarks.push(rest[at].trim());
       }
       if (remarks.length > 0) {
@@ -162,7 +178,6 @@ export class Label_11_LDR extends DecoderPlugin {
     }
 
     const blocks: RunwayLandingData[] = [];
-    const unknown: string[] = [];
     while (at < rest.length) {
       const block = this.runwayBlock(rest.slice(at, at + 1 + BLOCK.length));
       if (block) {
@@ -176,8 +191,8 @@ export class Label_11_LDR extends DecoderPlugin {
       if (
         head &&
         next !== undefined &&
-        !BLOCK[0].test(next) &&
-        !RUNWAY.test(next)
+        !next.startsWith('FLAPS') &&
+        !RUNWAY_START.test(next)
       ) {
         // a runway sent with notes instead of figures, e.g. MQTW 148.0 EXCEEDED
         blocks.push({
@@ -190,7 +205,7 @@ export class Label_11_LDR extends DecoderPlugin {
       }
       const last = blocks[blocks.length - 1];
       if (line.trim() !== '') {
-        if (last && !head) {
+        if (last && !RUNWAY_START.test(line)) {
           // a note under a runway, e.g. 20KT TAILGUST >10 LIMIT
           last.notes = [...(last.notes ?? []), line.trim()];
         } else {
@@ -208,7 +223,12 @@ export class Label_11_LDR extends DecoderPlugin {
       ResultFormatter.unknown(decodeResult, unknown.join(nl), nl);
     }
 
-    this.setDecodeLevel(decodeResult, true);
+    // a card cut off inside its header leaves nothing unknown, but it is not whole
+    this.setDecodeLevel(
+      decodeResult,
+      true,
+      i < HEADER.length ? 'partial' : undefined,
+    );
     return decodeResult;
   }
 

@@ -358,6 +358,117 @@ describe('Label 11 LDR landing data', () => {
     );
   });
 
+  test('decodes an unavailable runway, sent with length 0', () => {
+    // https://app.airframes.io/messages/7857750353
+    message.text =
+      'LDR01,KMDW LANDING DATA,FLT     METAR-2153Z\n329     WIND       LDW\nTIME    254/10G--  138.3\n' +
+      '2244Z   OAT/DEW         \n        013/002  31R    \n        QNH\n        30.45\n' +
+      'REMARKS\nCK WING FROST IF FUEL\nTEMP LESS THAN +5\n \n \n \n \n' +
+      '22                     0\nFLAPS --                \nVREF/VTGT        ---/---\n' +
+      ' ---/---       AB2  ----\nMRLW -----/-   AB3  ----\n LDW 138.3     ABM  ----\n' +
+      '/////INVALID RUNWAY/////\n' +
+      '31R                 5826\nFLAPS 40                \nVREF/VTGT        04H/09L\n' +
+      ' 136/141 +5    AB2  ----\nMRLW 146.3/S   AB3  ----\n LDW 138.3     ABM  1213\n \n';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoder.decodeLevel).toBe('full');
+    expect(decodeResult.raw.remarks).toBe(
+      'CK WING FROST IF FUEL TEMP LESS THAN +5',
+    );
+    const runways = decodeResult.raw.landing_runways!;
+    expect(runways.map((r) => r.runway)).toEqual(['22', '31R']);
+    expect(runways[0]).toEqual({
+      runway: '22',
+      length: 0,
+      landingWeight: 138300,
+      stoppingMargins: {},
+      notes: ['/////INVALID RUNWAY/////'],
+    });
+    expect(runways[1].stoppingMargins).toEqual({ ABM: 1213 });
+  });
+
+  test('keeps a runway heading cut off after the remarks', () => {
+    // https://app.airframes.io/messages/7904009664 (the first block only)
+    message.text =
+      'LDR01,KMSY LANDING DATA,FLT     METAR-1653Z\n4202    WIND       LDW\nTIME    062/08G--  118.8\n' +
+      '1710Z   OAT/DEW\n        023/008\n        QNH\n        30.19\n' +
+      'REMARKS\nRWY CURRENTLY UNAVAIL   \n--- ALTERNATIVE RWYS ---\n11';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoder.decodeLevel).toBe('partial');
+    expect(decodeResult.raw.remarks).toBe(
+      'RWY CURRENTLY UNAVAIL --- ALTERNATIVE RWYS ---',
+    );
+    expect(decodeResult.remaining.text).toBe('11');
+  });
+
+  test('keeps a runway heading cut off after a runway', () => {
+    // https://app.airframes.io/messages/7911900305, cut inside the second runway's heading
+    message.text =
+      'LDR01,KSMF LANDING DATA,FLT     METAR-2253Z\n1717    WIND       LDW\nTIME    317/14G--  128.0\n' +
+      '2340Z   OAT/DEW  35L    \n        022/003  35R    \n        QNH\n        30.01\n' +
+      'REMARKS\nCK WING FROST IF FUEL\nTEMP LESS THAN +5\n \n \n \n \n' +
+      '35L                 8472\nFLAPS 30                \nVREF/VTGT        11H/08L\n' +
+      ' 132/138 +6    AB2  1235\nMRLW 129.2/S   AB3  2644\n LDW 128.0     ABM  4070\n \n' +
+      '35R                 86';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoder.decodeLevel).toBe('partial');
+    expect(decodeResult.raw.landing_runways?.length).toBe(1);
+    expect(decodeResult.raw.landing_runways?.[0].notes).toBeUndefined();
+    expect(decodeResult.remaining.text).toBe('35R                 86');
+  });
+
+  test('keeps a runway cut off in its FLAPS line', () => {
+    // https://app.airframes.io/messages/7911900305, cut inside the second runway's FLAPS line
+    message.text =
+      'LDR01,KSMF LANDING DATA,FLT     METAR-2253Z\n1717    WIND       LDW\nTIME    317/14G--  128.0\n' +
+      '2340Z   OAT/DEW  35L    \n        022/003  35R    \n        QNH\n        30.01\n' +
+      'REMARKS\nCK WING FROST IF FUEL\nTEMP LESS THAN +5\n \n \n \n \n' +
+      '35L                 8472\nFLAPS 30                \nVREF/VTGT        11H/08L\n' +
+      ' 132/138 +6    AB2  1235\nMRLW 129.2/S   AB3  2644\n LDW 128.0     ABM  4070\n \n' +
+      '35R                 8605\nFLAPS 3';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoder.decodeLevel).toBe('partial');
+    expect(decodeResult.raw.landing_runways?.length).toBe(1);
+    expect(decodeResult.remaining.text).toBe(
+      '35R                 8605\nFLAPS 3',
+    );
+  });
+
+  test('marks a card cut off inside its header as partial', () => {
+    // https://app.airframes.io/messages/7909419361, the first three lines
+    message.text =
+      'LDR01,KOAK LANDING DATA,FLT     METAR-1553Z\n' +
+      '1974    WIND       LDW\n' +
+      'TIME    317/05G--  137.6\n';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoded).toBe(true);
+    expect(decodeResult.decoder.decodeLevel).toBe('partial');
+    expect(decodeResult.raw.landing_weight).toBe(137600);
+  });
+
+  test('keeps times out of range as remaining', () => {
+    // https://app.airframes.io/messages/7909419361 with the METAR time 25:60 and the card time 24:75
+    message.text =
+      'LDR01,KOAK LANDING DATA,FLT     METAR-2560Z\n' +
+      '1974    WIND       LDW\n' +
+      'TIME    317/05G--  137.6\n' +
+      '2475Z   OAT/DEW  30     \n' +
+      '        015/012\n        QNH\n        30.08\n' +
+      'REMARKS\nCK WING FROST IF FUEL\nTEMP LESS THAN +5\n \n';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoded).toBe(true);
+    expect(decodeResult.decoder.decodeLevel).toBe('partial');
+    expect(decodeResult.raw.landing_icao).toBe('KOAK');
+    expect(decodeResult.raw.metar_time).toBeUndefined();
+    expect(decodeResult.raw.message_timestamp).toBeUndefined();
+    expect(decodeResult.remaining.text).toBe('METAR-2560Z\n2475Z');
+  });
+
   test('is chosen by the message decoder', () => {
     const decoder = new MessageDecoder();
     const decodeResult = decoder.decode({

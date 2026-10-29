@@ -76,7 +76,13 @@ export class Label_H1_SWA_Track extends DecoderPlugin {
     for (const line of lines.slice(2)) {
       if (line === '' || line === ':') continue;
       const m = line.match(POINT);
-      if (!m) {
+      // day 01-31, hour 00-23, minute 00-59
+      if (
+        !m ||
+        !(Number(m[5]) >= 1 && Number(m[5]) <= 31) ||
+        Number(m[6]) > 23 ||
+        Number(m[7]) > 59
+      ) {
         ResultFormatter.unknown(decodeResult, line, nl);
         continue;
       }

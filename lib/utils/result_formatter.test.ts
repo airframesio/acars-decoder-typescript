@@ -369,7 +369,7 @@ describe('ResultFormatter landing data and track points', () => {
       code: 'TRKPT',
       label: 'Track Point',
       value:
-        '36.362 N, 121.595 W at 23:28:00, 23951 feet, -22.5 C, wind 187 degrees at 45 knots, Descent',
+        '36.362 N, 121.595 W on day 4 at 23:28:00, 23951 feet, -22.5 C, wind 187 degrees at 45 knots, Descent',
     });
     expect(dr.formatted.items.length).toBe(2);
   });
