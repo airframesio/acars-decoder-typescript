@@ -115,12 +115,12 @@ export class Label_10_LDR extends DecoderPlugin {
     }
 
     // airport weather, when the crew enters it: wind, gust, temperature, dew point, altimeter;
-    // a field that is not a whole number is kept as remaining
+    // each is at most four digits (2,737 requests), so anything else is kept as remaining
     const [windDir, windSpeed, gust, temp, dew, altimeter] = parts
       .slice(17, 23)
       .map((field) => {
         const value = field.trim();
-        if (/^-?\d+$/.test(value)) return Number(value);
+        if (/^-?\d{1,4}$/.test(value)) return Number(value);
         if (value !== '') unknown.push(field);
         return undefined;
       });

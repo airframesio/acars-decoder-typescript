@@ -60,6 +60,15 @@ describe('Label 10 LRW landing runways request', () => {
     expect(decodeResult.decoder.decodeLevel).toBe('none');
   });
 
+  test('does not decode a destination of spaces', () => {
+    // https://app.airframes.io/messages/6177652203 with the destination as spaces
+    message.text = 'LRW01,189,D,SWA-2600-019,0,1,KLGA,    ,';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoded).toBe(false);
+    expect(decodeResult.decoder.decodeLevel).toBe('none');
+  });
+
   test('does not decode a short message', () => {
     message.text = 'LRW01,189,D';
     const decodeResult = plugin.decode(message);

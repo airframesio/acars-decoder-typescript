@@ -329,6 +329,19 @@ describe('Label_10_LDR', () => {
     expect(decodeResult.remaining.text).toBe('0,1X,X6,O14,30.1');
   });
 
+  test('keeps a weather field too long to be a reading as remaining', () => {
+    // https://app.airframes.io/messages/7921227262 with a 400-digit gust
+    const gust = '9'.repeat(400);
+    message.text = `LDR01,189,D,SWA-2600-019,0,N 32.482,W 99.294,34022,  8.7,KDAL,KMAF,KMAF,16R/,/,/,0,0,130,16,${gust},022,014,3014,0,0,0,00,,108.1,06.8,114.9,,,`;
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.raw.wind_gust).toBeUndefined();
+    expect(
+      decodeResult.formatted.items.filter((i) => /Infinity/.test(i.value)),
+    ).toEqual([]);
+    expect(decodeResult.remaining.text).toBe(`0,${gust}`);
+  });
+
   test('decodes Label 10 Preamble LDR <invalid>', () => {
     message.text = 'LDR Bogus Message';
     const decodeResult = plugin.decode(message);
