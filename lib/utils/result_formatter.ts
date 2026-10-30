@@ -3,6 +3,8 @@ import { CoordinateUtils } from './coordinate_utils';
 import { DateTimeUtils } from '../DateTimeUtils';
 import { RouteUtils } from './route_utils';
 import { Route } from '../types/route';
+import { RunwayLandingData } from '../types/runway_landing_data';
+import { TrackPoint } from '../types/track_point';
 import { Wind } from '../types/wind';
 
 /**
@@ -165,6 +167,17 @@ export class ResultFormatter {
       code: 'ALT_DST',
       label: 'Alternate Destination',
       value: decodeResult.raw.alternate_icao,
+    });
+  }
+
+  /** The airport landing data is for: the destination, or the airport of a divert. */
+  static landingAirport(decodeResult: DecodeResult, value: string) {
+    decodeResult.raw.landing_icao = value;
+    decodeResult.formatted.items.push({
+      type: 'icao',
+      code: 'LAND',
+      label: 'Landing Airport',
+      value: decodeResult.raw.landing_icao,
     });
   }
 
@@ -433,6 +446,98 @@ export class ResultFormatter {
       ]
         .filter((s) => s !== '')
         .join(' at '),
+    });
+  }
+
+  static variableWind(decodeResult: DecodeResult, speed: number) {
+    if (isNaN(speed)) {
+      return;
+    }
+    decodeResult.raw.wind_speed = speed;
+    decodeResult.raw.wind_variable = true;
+    decodeResult.formatted.items.push({
+      type: 'wind',
+      code: 'WIND',
+      label: 'Wind',
+      value: `variable at ${speed} knots`,
+    });
+  }
+
+  /**
+   * One point of a recorded track. The track is the route as flown, so each point is added to
+   * the route's waypoints; the item shows what the aircraft measured there as well.
+   */
+  static trackPoint(decodeResult: DecodeResult, point: TrackPoint) {
+    decodeResult.raw.route = {
+      ...decodeResult.raw.route,
+      waypoints: [...(decodeResult.raw.route?.waypoints ?? []), point],
+    };
+    decodeResult.formatted.items.push({
+      type: 'track_point',
+      code: 'TRKPT',
+      label: 'Track Point',
+      value:
+        `${CoordinateUtils.coordinateString(point)} on day ${point.day} at ` +
+        `${DateTimeUtils.timestampToString(point.time)}, ` +
+        `${point.altitude} feet, ${point.temperature} C, ` +
+        `wind ${point.windDirection} degrees at ${point.windSpeed} knots, ${point.phase}` +
+        (point.waterVapor === undefined
+          ? ''
+          : `, water vapor ${point.waterVapor} ppmv`),
+    });
+  }
+
+  static runwayLandingData(
+    decodeResult: DecodeResult,
+    data: RunwayLandingData,
+  ) {
+    decodeResult.raw.landing_runways = [
+      ...(decodeResult.raw.landing_runways ?? []),
+      data,
+    ];
+    const parts: string[] = [];
+    if (data.length !== undefined) parts.push(`${data.length} feet`);
+    if (data.flaps !== undefined) parts.push(`flaps ${data.flaps}`);
+    if (data.headwind !== undefined) {
+      parts.push(
+        data.headwind < 0
+          ? `tailwind ${-data.headwind} knots`
+          : `headwind ${data.headwind} knots`,
+      );
+    }
+    if (data.crosswind !== undefined) {
+      const side = { L: ' left', R: ' right' }[data.crosswindSide ?? 'L'];
+      parts.push(
+        `crosswind ${data.crosswind} knots${data.crosswindSide ? side : ''}`,
+      );
+    }
+    if (data.vref !== undefined) parts.push(`VREF ${data.vref} knots`);
+    if (data.vtarget !== undefined) {
+      const add =
+        data.additive === undefined
+          ? ''
+          : ` (${data.additive < 0 ? '' : '+'}${data.additive})`;
+      parts.push(`VTGT ${data.vtarget} knots${add}`);
+    }
+    if (data.maxLandingWeight !== undefined) {
+      parts.push(`MRLW ${data.maxLandingWeight}`);
+    }
+    if (data.landingWeight !== undefined) {
+      parts.push(`LDW ${data.landingWeight} pounds`);
+    }
+    const margins = Object.entries(data.stoppingMargins).map(
+      ([setting, feet]) => `${setting} ${feet} feet`,
+    );
+    if (margins.length > 0) {
+      parts.push(`stopping margin ${margins.join(', ')}`);
+    }
+    parts.push(...(data.notes ?? []));
+    const variant = data.variant === undefined ? '' : ` (${data.variant})`;
+    decodeResult.formatted.items.push({
+      type: 'runway_landing_data',
+      code: 'RWYLDG',
+      label: 'Runway Landing Data',
+      value: `${data.runway}${variant}: ${parts.join(', ')}`,
     });
   }
 

@@ -1,4 +1,6 @@
+import { AlternativeRunway } from './types/alternative_runway';
 import { Route } from './types/route';
+import { RunwayLandingData } from './types/runway_landing_data';
 import { Wind } from './types/wind';
 
 /**
@@ -34,6 +36,7 @@ export interface RawFields {
   track?: number;
   wind_direction?: number;
   wind_speed?: number;
+  wind_variable?: boolean;
 
   // Flight identification
   flight_number?: string;
@@ -46,11 +49,14 @@ export interface RawFields {
   arrival_icao?: string;
   arrival_iata?: string;
   alternate_icao?: string;
+  landing_icao?: string;
 
   // Runways
   departure_runway?: string;
   arrival_runway?: string;
   alternate_runway?: string;
+  landing_runways?: RunwayLandingData[];
+  alternative_runways?: AlternativeRunway[];
 
   // Gates
   arrival_gate?: string;

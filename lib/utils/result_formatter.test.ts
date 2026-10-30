@@ -337,3 +337,134 @@ describe('ResultFormatter.raw', () => {
     expect(dr.formatted.items[0].value).toBe('5 minutes');
   });
 });
+
+describe('ResultFormatter landing data and track points', () => {
+  test('landingAirport', () => {
+    const dr = makeDecodeResult();
+    ResultFormatter.landingAirport(dr, 'KAMA');
+    expect(dr.raw.landing_icao).toBe('KAMA');
+    expect(dr.formatted.items).toEqual([
+      { type: 'icao', code: 'LAND', label: 'Landing Airport', value: 'KAMA' },
+    ]);
+  });
+
+  test('trackPoint adds each point to the route', () => {
+    const dr = makeDecodeResult();
+    const point = {
+      name: 'N3621.7W12135.7',
+      latitude: 36.36167,
+      longitude: -121.595,
+      day: 4,
+      time: 84480,
+      altitude: 23951,
+      temperature: -22.5,
+      windDirection: 187,
+      windSpeed: 45,
+      phase: 'Descent',
+    };
+    ResultFormatter.trackPoint(dr, point);
+    ResultFormatter.trackPoint(dr, { ...point, altitude: 22146 });
+    expect(dr.raw.route).toEqual({
+      waypoints: [point, { ...point, altitude: 22146 }],
+    });
+    expect(dr.formatted.items[0]).toEqual({
+      type: 'track_point',
+      code: 'TRKPT',
+      label: 'Track Point',
+      value:
+        '36.362 N, 121.595 W on day 4 at 23:28:00, 23951 feet, -22.5 C, wind 187 degrees at 45 knots, Descent',
+    });
+    expect(dr.formatted.items.length).toBe(2);
+  });
+
+  test('runwayLandingData shows only the parts sent', () => {
+    const dr = makeDecodeResult();
+    ResultFormatter.runwayLandingData(dr, {
+      runway: '35L',
+      length: 8472,
+      flaps: 30,
+      headwind: 11,
+      crosswind: 8,
+      crosswindSide: 'L',
+      vref: 132,
+      vtarget: 138,
+      additive: 6,
+      maxLandingWeight: '129.2/S',
+      landingWeight: 128000,
+      stoppingMargins: { AB2: 1235, AB3: 2644, ABM: 4070 },
+    });
+    ResultFormatter.runwayLandingData(dr, {
+      runway: '33',
+      length: 6847,
+      headwind: -20,
+      crosswind: 5,
+      crosswindSide: 'L',
+      landingWeight: 126000,
+      stoppingMargins: {},
+      notes: ['20KT TAILGUST >10 LIMIT'],
+    });
+    expect(dr.raw.landing_runways?.length).toBe(2);
+    expect(dr.formatted.items[0]).toEqual({
+      type: 'runway_landing_data',
+      code: 'RWYLDG',
+      label: 'Runway Landing Data',
+      value:
+        '35L: 8472 feet, flaps 30, headwind 11 knots, crosswind 8 knots left, VREF 132 knots, VTGT 138 knots (+6), MRLW 129.2/S, LDW 128000 pounds, stopping margin AB2 1235 feet, AB3 2644 feet, ABM 4070 feet',
+    });
+    expect(dr.formatted.items[1].value).toBe(
+      '33: 6847 feet, tailwind 20 knots, crosswind 5 knots left, LDW 126000 pounds, 20KT TAILGUST >10 LIMIT',
+    );
+  });
+
+  test('runwayLandingData describes a runway variant after its name', () => {
+    const dr = makeDecodeResult();
+    ResultFormatter.runwayLandingData(dr, {
+      runway: '11/AIB -E1804F',
+      variant: '1804 feet off the east end',
+      length: 8300,
+      stoppingMargins: {},
+    });
+    expect(dr.formatted.items[0].value).toBe(
+      '11/AIB -E1804F (1804 feet off the east end): 8300 feet',
+    );
+  });
+
+  test('trackPoint adds water vapor when there is a reading', () => {
+    const dr = makeDecodeResult();
+    ResultFormatter.trackPoint(dr, {
+      name: 'N3307.1W11747.1',
+      latitude: 33.11833,
+      longitude: -117.785,
+      day: 19,
+      time: 69660,
+      altitude: 19509,
+      temperature: -6,
+      windDirection: 150,
+      windSpeed: 11,
+      phase: 'Climb',
+      humiditySensor: true,
+      waterVapor: 2722,
+    });
+    expect(dr.formatted.items[0].value).toBe(
+      '33.118 N, 117.785 W on day 19 at 19:21:00, 19509 feet, -6 C, wind 150 degrees at 11 knots, Climb, water vapor 2722 ppmv',
+    );
+  });
+});
+
+describe('ResultFormatter.variableWind', () => {
+  test('shows a variable wind with its speed', () => {
+    const dr = makeDecodeResult();
+    ResultFormatter.variableWind(dr, 4);
+    expect(dr.raw.wind_speed).toBe(4);
+    expect(dr.raw.wind_direction).toBeUndefined();
+    expect(dr.raw.wind_variable).toBe(true);
+    expect(dr.formatted.items).toEqual([
+      {
+        type: 'wind',
+        code: 'WIND',
+        label: 'Wind',
+        value: 'variable at 4 knots',
+      },
+    ]);
+  });
+});
