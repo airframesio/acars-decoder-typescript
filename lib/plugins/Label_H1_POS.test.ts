@@ -424,6 +424,93 @@ describe('Label_H1 POS', () => {
     );
   });
 
+  test('decodes Southwest variant', () => {
+    // WN1793 KPIT-KLAS in the climb
+    message.text =
+      'POSN40281W080542,DILNE,021507,158,TVTRN,56,022414,ROD,M8,276031,366K,290K,1594,370,KPIT,KLAS,,182,062759,1633,73/PR1594,238,340,370,,44,9,287060,M51,180,P0,P0/RI:DA:KPIT:AA:KLAS..TVTRN..ROD..DONVE..SPI..AGENT..KK57E..DUUZE..KD51W..FLOOD..KD48S..TYEGR:A:CHOWW4.TYEGR:F:WOLPH48AF';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoded).toBe(true);
+    expect(decodeResult.decoder.decodeLevel).toBe('partial');
+    expect(decodeResult.formatted.description).toBe('Position Report');
+    expect(decodeResult.raw.position?.latitude).toBeCloseTo(40.468, 3);
+    expect(decodeResult.raw.position?.longitude).toBeCloseTo(-80.903, 3);
+    expect(decodeResult.raw.altitude).toBe(15800);
+    expect(decodeResult.formatted.items[2].label).toBe('Aircraft Route');
+    expect(decodeResult.formatted.items[2].value).toBe(
+      'DILNE@02:15:07 > TVTRN@02:24:14 > ROD',
+    );
+    expect(decodeResult.raw.next_waypoint_distance).toBe(56);
+    expect(decodeResult.raw.outside_air_temperature).toBe(-8);
+    expect(decodeResult.raw.wind_direction).toBe(276);
+    expect(decodeResult.raw.wind_speed).toBe(31);
+    expect(decodeResult.raw.airspeed).toBe(366);
+    expect(decodeResult.raw.indicated_airspeed).toBe(290);
+    expect(decodeResult.raw.gross_weight).toBe(159400);
+    expect(decodeResult.raw.fuel_on_board).toBe(37000);
+    expect(decodeResult.raw.departure_icao).toBe('KPIT');
+    expect(decodeResult.formatted.items[11].label).toBe('Destination');
+    expect(decodeResult.formatted.items[11].value).toBe('KLAS');
+    expect(decodeResult.raw.arrival_runway).toBeUndefined();
+    expect(decodeResult.raw.destination_fuel).toBe(18200);
+    expect(decodeResult.raw.eta_time).toBe(6 * 3600 + 27 * 60 + 59);
+    expect(decodeResult.raw.destination_distance).toBe(1633);
+    expect(decodeResult.raw.cruise_altitude).toBe(34000);
+    expect(decodeResult.raw.cruise_temperature).toBe(-51);
+    expect(decodeResult.raw.transition_altitude).toBe(18000);
+    expect(decodeResult.remaining.text).toBe('73/PR238,,44,9,287060,P0,P0');
+  });
+
+  test('decodes Southwest variant with a destination runway', () => {
+    message.text =
+      'POSN41167W082339,AYYLE,123109,191,BRNIN,3,123139,GTLKE,M15,270024,423K,319K,1271,138,KCLE,KMDW,31R,103,131033,240,73/PR1271,222,260,138,,63,80,275023,M32,180,P0,P0/RI:DA:KCLE:AA:KMDW(31R):D:GTLKE6.BAGEL:F:BAGEL:A:PANGG7.BAGEL:F:HILLS:AP:ILS 31R.HILLS:F:EON8E85';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoded).toBe(true);
+    expect(decodeResult.decoder.decodeLevel).toBe('partial');
+    expect(decodeResult.formatted.items[12].label).toBe('Arrival Runway');
+    expect(decodeResult.formatted.items[12].value).toBe('31R');
+    expect(decodeResult.raw.next_waypoint_distance).toBe(3);
+    expect(decodeResult.raw.gross_weight).toBe(127100);
+    expect(decodeResult.raw.cruise_altitude).toBe(26000);
+    expect(decodeResult.remaining.text).toBe('73/PR222,,63,80,275023,P0,P0');
+  });
+
+  test('decodes Southwest variant on a vectors leg', () => {
+    // no distance or ETA to the next waypoint
+    message.text =
+      'POSN30372W097531,RW18R,164804,166,VECTOR,,,WLMRT,M2,182016,389K,300K,1347,205,KAUS,KDEN,,133,182028,2,73/PR1347,222,400,205,,80,41,076016,M55,180,P0,P0/WQ400:ABI.DOGIN.ZIGEE71E2';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoded).toBe(true);
+    expect(decodeResult.decoder.decodeLevel).toBe('partial');
+    expect(decodeResult.formatted.items[2].value).toBe(
+      'RW18R@16:48:04 > VECTOR > WLMRT',
+    );
+    expect(decodeResult.raw.next_waypoint_distance).toBeUndefined();
+    expect(decodeResult.raw.airspeed).toBe(389);
+    expect(decodeResult.raw.destination_fuel).toBe(13300);
+    expect(decodeResult.remaining.text).toBe('73/PR222,,80,41,076016,P0,P0');
+  });
+
+  test('decodes Southwest variant with blank fields', () => {
+    // on the ground: no last waypoint, wind, gross weight, ETA or distance to go
+    message.text =
+      'POSN42218W071010,,111128,0,520,0,,NHANT,P17,,100K,045K,,150,KBOS,KBWI,33L,,,,73/PR,222,,150,,,,,,180,P0,P0/RI:DA:KBOS:AA:KBWI:R:04R(33L):D:SSOXS7:F:SSOXS..DISCO..SSOXS.Q167.ZIZZI..KNUKK..ATR..LAFLN:A:MIIDY4.LAFLN:F:JANNS:AP:ILS 33L.JANNS:F:YANNIACF9';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoded).toBe(true);
+    expect(decodeResult.decoder.decodeLevel).toBe('partial');
+    expect(decodeResult.raw.altitude).toBe(0);
+    expect(decodeResult.raw.wind_speed).toBeUndefined();
+    expect(decodeResult.raw.gross_weight).toBeUndefined();
+    expect(decodeResult.raw.fuel_on_board).toBe(15000);
+    expect(decodeResult.raw.destination_fuel).toBeUndefined();
+    expect(decodeResult.raw.cruise_altitude).toBeUndefined();
+    expect(decodeResult.raw.transition_altitude).toBe(18000);
+    expect(decodeResult.remaining.text).toBe('73/PR,222,,,,,,,P0,P0');
+  });
+
   test('decodes Label H1 Preamble #M1BPOS <invalid>', () => {
     message.text = '#M1BPOS Bogus message';
     const decodeResult = plugin.decode(message);

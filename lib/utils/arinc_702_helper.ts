@@ -54,6 +54,8 @@ export class Arinc702Helper {
       return false;
     }
     const fields = data.split('/');
+    // the Southwest position report has its own /PR layout
+    const southwest = isSouthwestPosition(fields[0]);
     const canDecode = parseMessageType(decodeResult, fields[0]);
     if (!canDecode) {
       decodeResult.decoded = false;
@@ -116,7 +118,11 @@ export class Arinc702Helper {
           processMessageReference(decodeResult, data.split(','));
           break;
         case 'PR':
-          processPerformanceData(decodeResult, data.split(','));
+          if (southwest) {
+            processSouthwestPerformanceData(decodeResult, data.split(','));
+          } else {
+            processPerformanceData(decodeResult, data.split(','));
+          }
           break;
         //case 'PR':
         // TODO: decode /PR fields
@@ -207,6 +213,10 @@ export class Arinc702Helper {
     );
     if (position) {
       ResultFormatter.position(decodeResult, position);
+    }
+    if (data.length === SOUTHWEST_POSITION_FIELDS) {
+      processSouthwestPosition(decodeResult, data);
+      return;
     }
     if (data.length >= 10) {
       // variant 1, short
@@ -539,6 +549,202 @@ function processPerformanceData(decodeResult: DecodeResult, data: string[]) {
   }
   if (remaining.length > 0 && remaining.some((r) => r !== '')) {
     ResultFormatter.unknown(decodeResult, remaining.join(','), '/PR');
+  }
+}
+
+/**
+ * Southwest 737 position report: 21 fields, tested on 3,520 reports (2025-11 to 2026-10). No
+ * other airline's POS report on disk has 21 fields.
+ *
+ * 0 position, 1 last waypoint, 2 time over it, 3 altitude (hundreds of feet), 4 next waypoint,
+ * 5 distance to it (nm), 6 ETA there, 7 the waypoint after, 8 outside air temperature, 9 wind
+ * (DDDSSS), 10 true airspeed, 11 indicated airspeed, 12 gross weight and 13 fuel on board
+ * (hundreds of pounds), 14 origin, 15 destination, 16 destination runway, 17 fuel at
+ * destination (hundreds of pounds), 18 ETA at destination, 19 distance to destination (nm),
+ * 20 unknown (always 73).
+ */
+const SOUTHWEST_POSITION_FIELDS = 21;
+const SOUTHWEST_TIME = /^([01]\d|2[0-3])[0-5]\d[0-5]\d$/;
+
+function isSouthwestPosition(messagePart: string): boolean {
+  return (
+    messagePart.startsWith('POS') &&
+    messagePart.substring(3).split(',').length === SOUTHWEST_POSITION_FIELDS
+  );
+}
+
+/** Matches a field; a blank field is skipped and one that does not match is unknown. */
+function southwestField(value: string, pattern: RegExp, unknown: string[]) {
+  if (value === '') {
+    return undefined;
+  }
+  const m = value.match(pattern);
+  if (!m) {
+    unknown.push(value);
+    return undefined;
+  }
+  return m;
+}
+
+function processSouthwestPosition(decodeResult: DecodeResult, data: string[]) {
+  const unknown: string[] = [];
+  const field = (i: number, pattern: RegExp) =>
+    southwestField(data[i], pattern, unknown);
+
+  const altitude = field(3, /^\d+$/);
+  if (altitude) {
+    ResultFormatter.altitude(decodeResult, Number(altitude[0]) * 100);
+  }
+  // distance and ETA are blank on a vectors leg
+  processRoute(
+    decodeResult,
+    data[1],
+    field(2, SOUTHWEST_TIME)?.[0] ?? '',
+    data[4],
+    field(6, SOUTHWEST_TIME)?.[0] ?? '',
+    data[7],
+  );
+  // nm; time to the next waypoint x true airspeed agrees on 97.1% of 3,433 reports
+  const next = field(5, /^\d+$/);
+  if (next) {
+    ResultFormatter.raw(
+      decodeResult,
+      'next_waypoint_distance',
+      'NEXT_DIST',
+      'Distance to Next Waypoint',
+      `${Number(next[0])} nm`,
+      Number(next[0]),
+    );
+  }
+  if (field(8, /^[MP]\d+$/)) {
+    ResultFormatter.temperature(decodeResult, data[8]);
+  }
+  const wind = field(9, /^([0-2]\d\d|3[0-5]\d|360)(\d{3})$/);
+  if (wind) {
+    ResultFormatter.wind(decodeResult, Number(wind[1]), Number(wind[2]));
+  }
+  // the true airspeed worked out from field 11, the altitude and the temperature is within
+  // 5 kt of field 10 on 95.1% of 3,448 reports
+  const tas = field(10, /^(\d+)K$/);
+  if (tas) {
+    ResultFormatter.airspeed(decodeResult, Number(tas[1]));
+  }
+  const ias = field(11, /^(\d+)K$/);
+  if (ias) {
+    ResultFormatter.indicatedAirspeed(decodeResult, Number(ias[1]));
+  }
+  // gross weight less fuel on board stays under each 737 type's maximum zero fuel weight
+  const weight = field(12, /^\d+$/);
+  if (weight) {
+    ResultFormatter.grossWeight(decodeResult, Number(weight[0]) * 100);
+  }
+  const fuel = field(13, /^\d+$/);
+  if (fuel) {
+    ResultFormatter.currentFuel(decodeResult, Number(fuel[0]) * 100);
+  }
+  if (field(14, /^[A-Z]{4}$/)) {
+    ResultFormatter.departureAirport(decodeResult, data[14]);
+  }
+  if (field(15, /^[A-Z]{4}$/)) {
+    ResultFormatter.arrivalAirport(decodeResult, data[15]);
+  }
+  // blank until a runway is entered; then the same as the route's (1,170 of 1,170)
+  if (field(16, /^\d{1,2}[A-Z]?$/)) {
+    ResultFormatter.arrivalRunway(decodeResult, data[16]);
+  }
+  // fuel on board less this, over the distance to go, is 10.5 to 12.1 lb a nm (median by type)
+  const destinationFuel = field(17, /^\d+$/);
+  if (destinationFuel) {
+    ResultFormatter.raw(
+      decodeResult,
+      'destination_fuel',
+      'DEST_FUEL',
+      'Fuel at Destination',
+      `${Number(destinationFuel[0]) * 100}`,
+      Number(destinationFuel[0]) * 100,
+    );
+  }
+  const eta = field(18, SOUTHWEST_TIME);
+  if (eta) {
+    ResultFormatter.eta(decodeResult, DateTimeUtils.convertHHMMSSToTod(eta[0]));
+  }
+  const distance = field(19, /^\d+$/);
+  if (distance) {
+    ResultFormatter.raw(
+      decodeResult,
+      'destination_distance',
+      'DEST_DIST',
+      'Distance to Destination',
+      `${Number(distance[0])} nm`,
+      Number(distance[0]),
+    );
+  }
+  if (data[20] !== '') {
+    unknown.push(data[20]);
+  }
+  if (unknown.length > 0) {
+    ResultFormatter.unknownArr(decodeResult, unknown);
+  }
+}
+
+/**
+ * /PR of the Southwest position report, 12 fields: 0 gross weight and 3 fuel on board (the
+ * same as position fields 12 and 13 on 3,449 of 3,450 reports, so not shown again), 2 cruise
+ * altitude (hundreds of feet), 8 temperature at cruise altitude (ISA +4 C median), 9 transition
+ * altitude (hundreds of feet: 180 from US airports, 185 only from Cancun, where it is 18,500
+ * feet, 170 only from Punta Cana). The rest is unknown: 1 is set by 737 type (222 -700,
+ * 262 -800, 238 MAX), 4 is blank.
+ */
+function processSouthwestPerformanceData(
+  decodeResult: DecodeResult,
+  data: string[],
+) {
+  const unknown: string[] = [];
+  data.forEach((value, i) => {
+    if (i === 0 && Number(value) * 100 === decodeResult.raw.gross_weight) {
+      return;
+    }
+    if (i === 3 && Number(value) * 100 === decodeResult.raw.fuel_on_board) {
+      return;
+    }
+    if (i === 2 && /^\d+$/.test(value)) {
+      ResultFormatter.raw(
+        decodeResult,
+        'cruise_altitude',
+        'CRZ_ALT',
+        'Cruise Altitude',
+        `${Number(value) * 100} feet`,
+        Number(value) * 100,
+      );
+      return;
+    }
+    if (i === 8 && /^[MP]\d+$/.test(value)) {
+      const temperature = Number(value.replace('M', '-').replace('P', '+'));
+      ResultFormatter.raw(
+        decodeResult,
+        'cruise_temperature',
+        'CRZ_TEMP',
+        'Cruise Temperature (C)',
+        `${temperature} degrees`,
+        temperature,
+      );
+      return;
+    }
+    if (i === 9 && /^\d+$/.test(value)) {
+      ResultFormatter.raw(
+        decodeResult,
+        'transition_altitude',
+        'TRANS_ALT',
+        'Transition Altitude',
+        `${Number(value) * 100} feet`,
+        Number(value) * 100,
+      );
+      return;
+    }
+    unknown.push(value);
+  });
+  if (unknown.some((v) => v !== '')) {
+    ResultFormatter.unknown(decodeResult, unknown.join(','), '/PR');
   }
 }
 
