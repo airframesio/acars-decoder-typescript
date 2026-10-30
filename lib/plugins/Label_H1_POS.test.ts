@@ -511,6 +511,22 @@ describe('Label_H1 POS', () => {
     expect(decodeResult.remaining.text).toBe('73/PR,222,,,,,,,P0,P0');
   });
 
+  test('leaves a Southwest /PR without 12 fields undecoded', () => {
+    // WN1793 with the last /PR field removed and the checksum redone
+    message.text =
+      'POSN40281W080542,DILNE,021507,158,TVTRN,56,022414,ROD,M8,276031,366K,290K,1594,370,KPIT,KLAS,,182,062759,1633,73/PR1594,238,340,370,,44,9,287060,M51,180,P0/RI:DA:KPIT:AA:KLAS..TVTRN..ROD..DONVE..SPI..AGENT..KK57E..DUUZE..KD51W..FLOOD..KD48S..TYEGR:A:CHOWW4.TYEGR:F:WOLPH167E';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoded).toBe(true);
+    expect(decodeResult.decoder.decodeLevel).toBe('partial');
+    expect(decodeResult.raw.next_waypoint_distance).toBe(56);
+    expect(decodeResult.raw.cruise_altitude).toBeUndefined();
+    expect(decodeResult.raw.transition_altitude).toBeUndefined();
+    expect(decodeResult.remaining.text).toBe(
+      '73/PR1594,238,340,370,,44,9,287060,M51,180,P0',
+    );
+  });
+
   test('decodes Label H1 Preamble #M1BPOS <invalid>', () => {
     message.text = '#M1BPOS Bogus message';
     const decodeResult = plugin.decode(message);

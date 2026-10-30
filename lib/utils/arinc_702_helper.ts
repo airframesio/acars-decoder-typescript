@@ -687,8 +687,11 @@ function processSouthwestPosition(decodeResult: DecodeResult, data: string[]) {
   }
 }
 
+const SOUTHWEST_PERFORMANCE_FIELDS = 12;
+
 /**
- * /PR of the Southwest position report, 12 fields: 0 gross weight and 3 fuel on board (the
+ * /PR of the Southwest position report, 12 fields (3,450 of 3,450 reports; any other count is
+ * left undecoded): 0 gross weight and 3 fuel on board (the
  * same as position fields 12 and 13 on 3,449 of 3,450 reports, so not shown again), 2 cruise
  * altitude (hundreds of feet), 8 temperature at cruise altitude (ISA +4 C median), 9 transition
  * altitude (hundreds of feet: 180 from US airports, 185 only from Cancun, where it is 18,500
@@ -699,6 +702,10 @@ function processSouthwestPerformanceData(
   decodeResult: DecodeResult,
   data: string[],
 ) {
+  if (data.length !== SOUTHWEST_PERFORMANCE_FIELDS) {
+    ResultFormatter.unknown(decodeResult, data.join(','), '/PR');
+    return;
+  }
   const unknown: string[] = [];
   data.forEach((value, i) => {
     if (i === 0 && Number(value) * 100 === decodeResult.raw.gross_weight) {
