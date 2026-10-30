@@ -61,6 +61,7 @@ const pluginClasses = [
   Plugins.Label_4T_ETA,
   Plugins.Label_B6_Forwardslash,
   Plugins.Label_H1_76401,
+  Plugins.Label_H1_A02,
   Plugins.Label_H1_ATIS,
   Plugins.Label_H1_EZF,
   Plugins.Label_H1_FLR,
