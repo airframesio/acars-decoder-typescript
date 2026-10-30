@@ -1,7 +1,12 @@
+import { Waypoint } from './waypoint';
+
 /**
- * One point of an aircraft's recorded track.
+ * One point of an aircraft's recorded track: a waypoint of the route it flew, with the
+ * conditions the aircraft measured there.
  */
-export interface TrackPoint {
+export interface TrackPoint extends Waypoint {
+  /** the position as sent, e.g. N3621.7W12135.7 */
+  name: string;
   /** latitude in decimal degrees */
   latitude: number;
   /** longitude in decimal degrees */

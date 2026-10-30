@@ -1,4 +1,5 @@
 import { MessageDecoder } from '../MessageDecoder';
+import { TrackPoint } from '../types/track_point';
 import { Label_H1_SWA_Track } from './Label_H1_SWA_Track';
 
 describe('Label H1 Southwest track report', () => {
@@ -43,11 +44,13 @@ describe('Label H1 Southwest track report', () => {
     expect(decodeResult.raw.departure_icao).toBe('KSAN');
     expect(decodeResult.raw.arrival_icao).toBe('KSFO');
 
-    const points = decodeResult.raw.track_points!;
+    const points = decodeResult.raw.route!.waypoints as TrackPoint[];
     expect(points.length).toBe(6);
     expect(points[0].latitude).toBeCloseTo(36.36167, 5);
     expect(points[0].longitude).toBeCloseTo(-121.595, 5);
     expect(points[0]).toMatchObject({
+      // the position as sent names the point
+      name: 'N3621.7W12135.7',
       day: 4,
       time: 84480, // 23:28
       altitude: 23951,
@@ -105,7 +108,7 @@ describe('Label H1 Southwest track report', () => {
     expect(decodeResult.raw.ship_number).toBeUndefined();
     expect(decodeResult.raw.software_version).toBe('SMX34-2502-F320');
     expect(decodeResult.raw.aircraft_type).toBe('B7378MAX');
-    const points = decodeResult.raw.track_points!;
+    const points = decodeResult.raw.route!.waypoints as TrackPoint[];
     expect(points.length).toBe(6);
     expect(points[0].temperature).toBe(0);
     expect(points[1].temperature).toBe(1.8);
@@ -129,7 +132,7 @@ describe('Label H1 Southwest track report', () => {
 
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.raw.flight_number).toBe('WN0786');
-    const points = decodeResult.raw.track_points!;
+    const points = decodeResult.raw.route!.waypoints as TrackPoint[];
     expect(points.length).toBe(3);
     expect(points[2].temperature).toBe(-18.5);
     expect(points[2].phase).toBe('Climb');
@@ -150,7 +153,7 @@ describe('Label H1 Southwest track report', () => {
 
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
-    expect(decodeResult.raw.track_points?.length).toBe(2);
+    expect(decodeResult.raw.route?.waypoints?.length).toBe(2);
     expect(decodeResult.raw.altitude).toBe(22146);
     expect(decodeResult.remaining.text).toBe('N3633.2,W12144.7,042330,20332,-');
   });
@@ -164,7 +167,7 @@ describe('Label H1 Southwest track report', () => {
         'N3621.7,W12135.7,042328,23951,-22.5,187,045,DC,00000,1,\r\n:\r\n',
     });
     expect(decodeResult.decoder.name).toBe('label-h1-swa-track');
-    expect(decodeResult.raw.track_points?.length).toBe(1);
+    expect(decodeResult.raw.route?.waypoints?.length).toBe(1);
   });
 
   test('keeps a point with an impossible time as remaining', () => {
@@ -176,7 +179,7 @@ describe('Label H1 Southwest track report', () => {
     const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
-    expect(decodeResult.raw.track_points?.length).toBe(1);
+    expect(decodeResult.raw.route?.waypoints?.length).toBe(1);
     expect(decodeResult.raw.message_timestamp).toBe(84480); // 23:28, the valid point
     expect(decodeResult.remaining.text).toBe(
       'N3627.6,W12140.2,042460,22146,-17.3,192,047,DC,00000,1,',
@@ -195,7 +198,7 @@ describe('Label H1 Southwest track report', () => {
       `${bad}\r\n:\r\n`;
     const decodeResult = plugin.decode(message);
 
-    expect(decodeResult.raw.track_points?.length).toBe(1);
+    expect(decodeResult.raw.route?.waypoints?.length).toBe(1);
     expect(decodeResult.remaining.text).toBe(bad);
   });
 
@@ -213,7 +216,7 @@ describe('Label H1 Southwest track report', () => {
       `${bad}\r\n:\r\n`;
     const decodeResult = plugin.decode(message);
 
-    expect(decodeResult.raw.track_points?.length).toBe(1);
+    expect(decodeResult.raw.route?.waypoints?.length).toBe(1);
     expect(decodeResult.raw.position?.latitude).toBeCloseTo(36.36167, 5);
     expect(decodeResult.remaining.text).toBe(bad);
   });
@@ -227,7 +230,7 @@ describe('Label H1 Southwest track report', () => {
       `${bad}\r\n:\r\n`;
     const decodeResult = plugin.decode(message);
 
-    expect(decodeResult.raw.track_points?.length).toBe(1);
+    expect(decodeResult.raw.route?.waypoints?.length).toBe(1);
     expect(decodeResult.remaining.text).toBe(bad);
   });
 
@@ -250,7 +253,7 @@ describe('Label H1 Southwest track report', () => {
       'N3627.6,W12140.2,042329,22146,-17.3,192,047,DC,00000,1,\r\n:\r\n';
     const decodeResult = plugin.decode(message);
 
-    expect(decodeResult.raw.track_points?.length).toBe(2);
+    expect(decodeResult.raw.route?.waypoints?.length).toBe(2);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
   });
 
@@ -272,7 +275,7 @@ describe('Label H1 Southwest track report', () => {
       'N3307.1,W11747.1,191921,19509,-06.0,150,011,CL,02722,0,\n:\n';
     const decodeResult = plugin.decode(message);
 
-    const point = decodeResult.raw.track_points![0];
+    const point = (decodeResult.raw.route!.waypoints as TrackPoint[])[0];
     expect(point.humiditySensor).toBe(false);
     expect(point.waterVapor).toBeUndefined();
   });
@@ -287,7 +290,7 @@ describe('Label H1 Southwest track report', () => {
     const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoder.decodeLevel).toBe('full');
-    const points = decodeResult.raw.track_points!;
+    const points = decodeResult.raw.route!.waypoints as TrackPoint[];
     expect(points.map((p) => p.waterVapor)).toEqual([2722, 2424, 1821]);
     expect(
       decodeResult.formatted.items.find((i) => i.label === 'Track Point')

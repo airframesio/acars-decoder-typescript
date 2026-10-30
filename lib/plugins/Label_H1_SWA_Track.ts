@@ -1,5 +1,6 @@
 import { DecoderPlugin } from '../DecoderPlugin';
 import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
+import { TrackPoint } from '../types/track_point';
 import { CoordinateUtils } from '../utils/coordinate_utils';
 import { ResultFormatter } from '../utils/result_formatter';
 
@@ -141,6 +142,7 @@ export class Label_H1_SWA_Track extends DecoderPlugin {
         continue;
       }
       ResultFormatter.trackPoint(decodeResult, {
+        name: `${m[1]}.${m[2]}${m[3]}.${m[4]}`,
         ...position,
         day: Number(m[5]),
         time: Number(m[6]) * 3600 + Number(m[7]) * 60,
@@ -157,7 +159,7 @@ export class Label_H1_SWA_Track extends DecoderPlugin {
       });
     }
 
-    const points = decodeResult.raw.track_points ?? [];
+    const points = (decodeResult.raw.route?.waypoints ?? []) as TrackPoint[];
     const last = points[points.length - 1];
     if (last) {
       ResultFormatter.position(decodeResult, {

@@ -463,11 +463,15 @@ export class ResultFormatter {
     });
   }
 
+  /**
+   * One point of a recorded track. The track is the route as flown, so each point is added to
+   * the route's waypoints; the item shows what the aircraft measured there as well.
+   */
   static trackPoint(decodeResult: DecodeResult, point: TrackPoint) {
-    decodeResult.raw.track_points = [
-      ...(decodeResult.raw.track_points ?? []),
-      point,
-    ];
+    decodeResult.raw.route = {
+      ...decodeResult.raw.route,
+      waypoints: [...(decodeResult.raw.route?.waypoints ?? []), point],
+    };
     decodeResult.formatted.items.push({
       type: 'track_point',
       code: 'TRKPT',

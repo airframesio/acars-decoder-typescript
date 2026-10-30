@@ -1,7 +1,6 @@
 import { AlternativeRunway } from './types/alternative_runway';
 import { Route } from './types/route';
 import { RunwayLandingData } from './types/runway_landing_data';
-import { TrackPoint } from './types/track_point';
 import { Wind } from './types/wind';
 
 /**
@@ -38,7 +37,6 @@ export interface RawFields {
   wind_direction?: number;
   wind_speed?: number;
   wind_variable?: boolean;
-  track_points?: TrackPoint[];
 
   // Flight identification
   flight_number?: string;

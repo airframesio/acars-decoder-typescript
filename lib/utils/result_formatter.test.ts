@@ -348,9 +348,10 @@ describe('ResultFormatter landing data and track points', () => {
     ]);
   });
 
-  test('trackPoint adds each point to raw.track_points', () => {
+  test('trackPoint adds each point to the route', () => {
     const dr = makeDecodeResult();
     const point = {
+      name: 'N3621.7W12135.7',
       latitude: 36.36167,
       longitude: -121.595,
       day: 4,
@@ -363,7 +364,9 @@ describe('ResultFormatter landing data and track points', () => {
     };
     ResultFormatter.trackPoint(dr, point);
     ResultFormatter.trackPoint(dr, { ...point, altitude: 22146 });
-    expect(dr.raw.track_points).toEqual([point, { ...point, altitude: 22146 }]);
+    expect(dr.raw.route).toEqual({
+      waypoints: [point, { ...point, altitude: 22146 }],
+    });
     expect(dr.formatted.items[0]).toEqual({
       type: 'track_point',
       code: 'TRKPT',
@@ -429,6 +432,7 @@ describe('ResultFormatter landing data and track points', () => {
   test('trackPoint adds water vapor when there is a reading', () => {
     const dr = makeDecodeResult();
     ResultFormatter.trackPoint(dr, {
+      name: 'N3307.1W11747.1',
       latitude: 33.11833,
       longitude: -117.785,
       day: 19,
