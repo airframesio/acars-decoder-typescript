@@ -163,4 +163,28 @@ describe('Label H1 A02', () => {
     expect(decodeResult.decoded).toBe(false);
     expect(decodeResult.decoder.decodeLevel).toBe('none');
   });
+
+  test('does not decode a header alone', () => {
+    message.text = 'A02/A31902,1,1/';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoded).toBe(false);
+    expect(decodeResult.decoder.decodeLevel).toBe('none');
+  });
+
+  test('leaves a repeated block, a bad time and a bad position undecoded', () => {
+    message.text =
+      'A02/A32102,1,1/CCN157UW,OCT18,256148,MMSD,KORD,2636/CCN999XX,OCT18,210148,KAAA,KBBB,0001/X61386,W0822,N999,073,289,0169,XXXX/';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoded).toBe(true);
+    expect(decodeResult.decoder.decodeLevel).toBe('partial');
+    expect(decodeResult.raw.tail).toBe('N157UW');
+    expect(decodeResult.raw.report_time).toBeUndefined();
+    expect(decodeResult.raw.position).toBeUndefined();
+    expect(decodeResult.raw.true_heading).toBe(138.6);
+    expect(decodeResult.remaining.text).toBe(
+      '256148/W0822,N999/CCN999XX,OCT18,210148,KAAA,KBBB,0001',
+    );
+  });
 });

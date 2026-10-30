@@ -336,6 +336,27 @@ export class Label_H1_A02 extends DecoderPlugin {
     if (parts[0] !== 'A02' || !header) {
       return this.failUnknown(decodeResult, message.text, options);
     }
+
+    // a complete report ends with '/'; a copy of the first block alone is cut short
+    const cut = !text.endsWith('/');
+    const blocks: Record<string, string[]> = {};
+    const unknown: string[] = [];
+    parts.slice(2).forEach((part, i, all) => {
+      if (part === '') return;
+      const m = part.match(BLOCK);
+      // a block sent twice keeps its first copy
+      if (!m || (cut && i === all.length - 1) || blocks[m[1]]) {
+        unknown.push(part);
+        return;
+      }
+      const fields = m[2].split(',');
+      if (fields[fields.length - 1] === '') fields.pop();
+      blocks[m[1]] = fields;
+    });
+    if (Object.keys(blocks).length === 0 && unknown.length === 0) {
+      return this.failUnknown(decodeResult, message.text, options);
+    }
+
     ResultFormatter.raw(
       decodeResult,
       'aircraft_type',
@@ -351,22 +372,6 @@ export class Label_H1_A02 extends DecoderPlugin {
       `${header[2]} of ${header[3]}`,
       Number(header[2]),
     );
-
-    // a complete report ends with '/'; a copy of the first block alone is cut short
-    const cut = !text.endsWith('/');
-    const blocks: Record<string, string[]> = {};
-    const unknown: string[] = [];
-    parts.slice(2).forEach((part, i, all) => {
-      if (part === '') return;
-      const m = part.match(BLOCK);
-      if (!m || (cut && i === all.length - 1)) {
-        unknown.push(part);
-        return;
-      }
-      const fields = m[2].split(',');
-      if (fields[fields.length - 1] === '') fields.pop();
-      blocks[m[1]] = fields;
-    });
 
     this.flight(decodeResult, blocks['CC']);
     const config = this.codes(decodeResult, blocks['C1']);
@@ -429,7 +434,7 @@ export class Label_H1_A02 extends DecoderPlugin {
         'Report Date',
         date,
       );
-    if (time && /^\d{6}$/.test(time)) {
+    if (time && /^([01]\d|2[0-3])[0-5]\d[0-5]\d$/.test(time)) {
       ResultFormatter.raw(
         decodeResult,
         'report_time',
@@ -572,10 +577,12 @@ export class Label_H1_A02 extends DecoderPlugin {
       const lon = blocks[b][1]?.match(/^([EW])(\d{4})$/);
       const lat = blocks[b][2]?.match(/^([NS])(\d{3})$/);
       if (!lon || !lat) return undefined;
-      return {
-        latitude: (lat[1] === 'S' ? -1 : 1) * (Number(lat[2]) / 10),
-        longitude: (lon[1] === 'W' ? -1 : 1) * (Number(lon[2]) / 10),
-      };
+      const latitude = (lat[1] === 'S' ? -1 : 1) * (Number(lat[2]) / 10);
+      const longitude = (lon[1] === 'W' ? -1 : 1) * (Number(lon[2]) / 10);
+      if (Math.abs(latitude) > 90 || Math.abs(longitude) > 180) {
+        return undefined;
+      }
+      return { latitude, longitude };
     });
     if (positions.some((p) => p === undefined)) {
       ResultFormatter.unknown(
