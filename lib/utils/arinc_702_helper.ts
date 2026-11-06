@@ -201,12 +201,23 @@ export class Arinc702Helper {
     }
   }
 
+  /**
+   * Decodes the fields of a POS report after the IMI: the position, then by field count the
+   * Southwest layout (21 fields), the short variant (10 or more) or the long one (14 or more).
+   *
+   * @param decodeResult - object to store decoded results in
+   * @param data - the report's comma-separated fields
+   */
   public static processPosition(decodeResult: DecodeResult, data: string[]) {
     const position = CoordinateUtils.decodeStringCoordinatesDecimalMinutes(
       data[0],
     );
     if (position) {
       ResultFormatter.position(decodeResult, position);
+    }
+    if (data.length === SOUTHWEST_POSITION_FIELDS) {
+      processSouthwestPosition(decodeResult, data);
+      return;
     }
     if (data.length >= 10) {
       // variant 1, short
@@ -483,62 +494,232 @@ function processIMI(decodeResult: DecodeResult, type: string): boolean {
   return true;
 }
 
+/**
+ * /PR, performance data. The fields mean the same in every layout on disk (6,201 reports with
+ * /PR from WN, AS, AA, B6, BA and AC; 12, 18 and 19 fields), so shorter and longer ones just
+ * carry fewer or more of them:
+ * - 0 gross weight (hundreds of pounds);
+ * - 2 cruise altitude (hundreds of feet): one value for the whole flight on 85-100% of each
+ *   airline's flights, and present in a flight plan sent before departure (FPN TNCA-TNCB: 110);
+ * - 3 fuel on board (hundreds of pounds);
+ * - 8 temperature at cruise altitude: M7 with the 110 above, ISA at 11,000 feet, while the
+ *   aircraft was on the ground;
+ * - 9 transition altitude (hundreds of feet) of the departure: 180 from US airports, 185 from
+ *   Mexico, 60 from London, 50 from Berlin, 30 from Amsterdam.
+ * The rest is unknown. Fields 0 and 3 are the same as the Southwest position report's gross
+ * weight and fuel on board on 3,449 of 3,450 reports, so a value the report already gave is not
+ * shown again. Field 3 is otherwise left in the remaining text, since /DT also shows a figure as
+ * fuel on board and the two would clash.
+ */
 function processPerformanceData(decodeResult: DecodeResult, data: string[]) {
-  // /PR fields contain performance data
-  // Known field positions (12-field short variant and 18-field long variant):
-  // [0]: ground speed (knots * 10 or similar)
-  // [1]: indicated airspeed or mach-related
-  // [2]: altitude in hundreds of feet
-  // [3]: fuel-related value
-  // [4]: unknown (often empty)
-  // [5]: fuel flow or consumption
-  // [6]: fuel-related
-  // [7]: wind data (DDDSSSS format) or empty
-  // [8]: temperature (M=minus, P=plus)
-  // [9]: heading or unknown
-
   if (data.length < 3) {
     ResultFormatter.unknownArr(decodeResult, data, ',');
     return;
   }
-
-  // Field 2: altitude in hundreds
-  if (data[2] !== undefined && data[2] !== '') {
-    const alt = Number(data[2]) * 100;
-    if (!isNaN(alt) && alt > 0) {
-      ResultFormatter.altitude(decodeResult, alt);
-    }
+  const remaining = data.filter(
+    (value, i) => !decodePerformanceField(decodeResult, i, value),
+  );
+  if (remaining.some((r) => r !== '')) {
+    ResultFormatter.unknown(decodeResult, remaining.join(','), '/PR');
   }
+}
 
-  // Field 8: temperature (if present)
-  if (data.length > 8 && data[8] !== undefined && data[8] !== '') {
+/** Decodes one /PR field; false leaves it in the remaining text. */
+function decodePerformanceField(
+  decodeResult: DecodeResult,
+  i: number,
+  value: string,
+): boolean {
+  const hundreds = /^\d+$/.test(value) ? Number(value) * 100 : undefined;
+  switch (i) {
+    case 0:
+      if (hundreds === undefined) {
+        return false;
+      }
+      if (decodeResult.raw.gross_weight === undefined) {
+        ResultFormatter.grossWeight(decodeResult, hundreds);
+        return true;
+      }
+      return decodeResult.raw.gross_weight === hundreds;
+    case 2:
+      if (!hundreds) {
+        return false;
+      }
+      ResultFormatter.raw(
+        decodeResult,
+        'cruise_altitude',
+        'CRZ_ALT',
+        'Cruise Altitude',
+        `${hundreds} feet`,
+        hundreds,
+      );
+      return true;
+    case 3:
+      return (
+        hundreds !== undefined && decodeResult.raw.fuel_on_board === hundreds
+      );
+    case 8: {
+      if (!/^[MP]\d+$/.test(value)) {
+        return false;
+      }
+      const temperature = Number(value.replace('M', '-').replace('P', '+'));
+      ResultFormatter.raw(
+        decodeResult,
+        'cruise_temperature',
+        'CRZ_TEMP',
+        'Cruise Temperature (C)',
+        `${temperature} degrees`,
+        temperature,
+      );
+      return true;
+    }
+    case 9:
+      if (hundreds === undefined) {
+        return false;
+      }
+      ResultFormatter.raw(
+        decodeResult,
+        'transition_altitude',
+        'TRANS_ALT',
+        'Transition Altitude',
+        `${hundreds} feet`,
+        hundreds,
+      );
+      return true;
+    default:
+      return false;
+  }
+}
+
+/**
+ * Southwest 737 position report: 21 fields, tested on 3,520 reports (2025-11 to 2026-10). No
+ * other airline's POS report on disk has 21 fields.
+ *
+ * 0 position, 1 last waypoint, 2 time over it, 3 altitude (hundreds of feet), 4 next waypoint,
+ * 5 distance to it (nm), 6 ETA there, 7 the waypoint after, 8 outside air temperature, 9 wind
+ * (DDDSSS), 10 true airspeed, 11 indicated airspeed, 12 gross weight and 13 fuel on board
+ * (hundreds of pounds), 14 origin, 15 destination, 16 destination runway, 17 fuel at
+ * destination (hundreds of pounds), 18 ETA at destination, 19 distance to destination (nm),
+ * 20 unknown (always 73).
+ */
+const SOUTHWEST_POSITION_FIELDS = 21;
+const SOUTHWEST_TIME = /^([01]\d|2[0-3])[0-5]\d[0-5]\d$/;
+
+/** Matches a field; a blank field is skipped and one that does not match is unknown. */
+function southwestField(value: string, pattern: RegExp, unknown: string[]) {
+  if (value === '') {
+    return undefined;
+  }
+  const m = value.match(pattern);
+  if (!m) {
+    unknown.push(value);
+    return undefined;
+  }
+  return m;
+}
+
+/**
+ * Decodes the 21 fields of the Southwest position report (layout above). A blank field is
+ * skipped; a field that does not fit its layout, and field 20, go to the remaining text.
+ */
+function processSouthwestPosition(decodeResult: DecodeResult, data: string[]) {
+  const unknown: string[] = [];
+  const field = (i: number, pattern: RegExp) =>
+    southwestField(data[i], pattern, unknown);
+
+  const altitude = field(3, /^\d+$/);
+  if (altitude) {
+    ResultFormatter.altitude(decodeResult, Number(altitude[0]) * 100);
+  }
+  // distance and ETA are blank on a vectors leg
+  processRoute(
+    decodeResult,
+    data[1],
+    field(2, SOUTHWEST_TIME)?.[0] ?? '',
+    data[4],
+    field(6, SOUTHWEST_TIME)?.[0] ?? '',
+    data[7],
+  );
+  // nm; time to the next waypoint x true airspeed agrees on 97.1% of 3,433 reports
+  const next = field(5, /^\d+$/);
+  if (next) {
+    ResultFormatter.raw(
+      decodeResult,
+      'next_waypoint_distance',
+      'NEXT_DIST',
+      'Distance to Next Waypoint',
+      `${Number(next[0])} nm`,
+      Number(next[0]),
+    );
+  }
+  if (field(8, /^[MP]\d+$/)) {
     ResultFormatter.temperature(decodeResult, data[8]);
   }
-
-  // Collect remaining undecoded fields
-  const remaining: string[] = [];
-  for (let i = 0; i < data.length; i++) {
-    if (
-      i === 2 &&
-      data[i] !== '' &&
-      !isNaN(Number(data[i])) &&
-      Number(data[i]) * 100 > 0
-    ) {
-      continue; // altitude - already decoded
-    }
-    if (
-      i === 8 &&
-      data[i] !== '' &&
-      (data[i].startsWith('M') ||
-        data[i].startsWith('P') ||
-        !isNaN(Number(data[i])))
-    ) {
-      continue; // temperature - already decoded
-    }
-    remaining.push(data[i]);
+  const wind = field(9, /^([0-2]\d\d|3[0-5]\d|360)(\d{3})$/);
+  if (wind) {
+    ResultFormatter.wind(decodeResult, Number(wind[1]), Number(wind[2]));
   }
-  if (remaining.length > 0 && remaining.some((r) => r !== '')) {
-    ResultFormatter.unknown(decodeResult, remaining.join(','), '/PR');
+  // the true airspeed worked out from field 11, the altitude and the temperature is within
+  // 5 kt of field 10 on 95.1% of 3,448 reports
+  const tas = field(10, /^(\d+)K$/);
+  if (tas) {
+    ResultFormatter.airspeed(decodeResult, Number(tas[1]));
+  }
+  const ias = field(11, /^(\d+)K$/);
+  if (ias) {
+    ResultFormatter.indicatedAirspeed(decodeResult, Number(ias[1]));
+  }
+  // gross weight less fuel on board stays under each 737 type's maximum zero fuel weight
+  const weight = field(12, /^\d+$/);
+  if (weight) {
+    ResultFormatter.grossWeight(decodeResult, Number(weight[0]) * 100);
+  }
+  const fuel = field(13, /^\d+$/);
+  if (fuel) {
+    ResultFormatter.currentFuel(decodeResult, Number(fuel[0]) * 100);
+  }
+  if (field(14, /^[A-Z]{4}$/)) {
+    ResultFormatter.departureAirport(decodeResult, data[14]);
+  }
+  if (field(15, /^[A-Z]{4}$/)) {
+    ResultFormatter.arrivalAirport(decodeResult, data[15]);
+  }
+  // blank until a runway is entered; then the same as the route's (1,170 of 1,170)
+  if (field(16, /^\d{1,2}[A-Z]?$/)) {
+    ResultFormatter.arrivalRunway(decodeResult, data[16]);
+  }
+  // fuel on board less this, over the distance to go, is 10.5 to 12.1 lb a nm (median by type)
+  const destinationFuel = field(17, /^\d+$/);
+  if (destinationFuel) {
+    ResultFormatter.raw(
+      decodeResult,
+      'destination_fuel',
+      'DEST_FUEL',
+      'Fuel at Destination',
+      `${Number(destinationFuel[0]) * 100}`,
+      Number(destinationFuel[0]) * 100,
+    );
+  }
+  const eta = field(18, SOUTHWEST_TIME);
+  if (eta) {
+    ResultFormatter.eta(decodeResult, DateTimeUtils.convertHHMMSSToTod(eta[0]));
+  }
+  const distance = field(19, /^\d+$/);
+  if (distance) {
+    ResultFormatter.raw(
+      decodeResult,
+      'destination_distance',
+      'DEST_DIST',
+      'Distance to Destination',
+      `${Number(distance[0])} nm`,
+      Number(distance[0]),
+    );
+  }
+  if (data[20] !== '') {
+    unknown.push(data[20]);
+  }
+  if (unknown.length > 0) {
+    ResultFormatter.unknownArr(decodeResult, unknown);
   }
 }
 

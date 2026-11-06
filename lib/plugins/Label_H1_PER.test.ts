@@ -17,16 +17,23 @@ describe('Label_H1 PER', () => {
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.raw.checksum).toBe(0x2917);
-    expect(decodeResult.raw.altitude).toBe(32000);
-    expect(decodeResult.raw.outside_air_temperature).toBe(-53);
-    expect(decodeResult.formatted.items.length).toBe(3);
-    expect(decodeResult.formatted.items[0].label).toBe('Altitude');
-    expect(decodeResult.formatted.items[0].value).toBe('32000 feet');
-    expect(decodeResult.formatted.items[1].label).toBe(
-      'Outside Air Temperature (C)',
+    expect(decodeResult.raw.gross_weight).toBe(133700);
+    expect(decodeResult.raw.cruise_altitude).toBe(32000);
+    expect(decodeResult.raw.cruise_temperature).toBe(-53);
+    expect(decodeResult.raw.transition_altitude).toBe(18000);
+    expect(decodeResult.formatted.items.length).toBe(5);
+    expect(decodeResult.formatted.items[0].label).toBe('Gross Weight');
+    expect(decodeResult.formatted.items[0].value).toBe('133700 pounds');
+    expect(decodeResult.formatted.items[1].label).toBe('Cruise Altitude');
+    expect(decodeResult.formatted.items[1].value).toBe('32000 feet');
+    expect(decodeResult.formatted.items[2].label).toBe(
+      'Cruise Temperature (C)',
     );
-    expect(decodeResult.formatted.items[1].value).toBe('-53 degrees');
-    expect(decodeResult.formatted.items[2].label).toBe('Message Checksum');
+    expect(decodeResult.formatted.items[2].value).toBe('-53 degrees');
+    expect(decodeResult.formatted.items[3].label).toBe('Transition Altitude');
+    expect(decodeResult.formatted.items[3].value).toBe('18000 feet');
+    expect(decodeResult.formatted.items[4].label).toBe('Message Checksum');
+    expect(decodeResult.remaining.text).toBe('262,222,,60,24,275103,P52,P0');
   });
 
   test('long variant', () => {
@@ -37,18 +44,20 @@ describe('Label_H1 PER', () => {
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.raw.checksum).toBe(0x388d);
-    expect(decodeResult.raw.altitude).toBe(34000);
-    expect(decodeResult.raw.outside_air_temperature).toBe(-56);
-    expect(decodeResult.formatted.items.length).toBe(3);
-    expect(decodeResult.formatted.items[0].label).toBe('Altitude');
-    expect(decodeResult.formatted.items[0].value).toBe('34000 feet');
-    expect(decodeResult.formatted.items[1].label).toBe(
-      'Outside Air Temperature (C)',
+    expect(decodeResult.raw.gross_weight).toBe(121800);
+    expect(decodeResult.raw.cruise_altitude).toBe(34000);
+    expect(decodeResult.raw.cruise_temperature).toBe(-56);
+    expect(decodeResult.raw.transition_altitude).toBe(18000);
+    expect(decodeResult.formatted.items.length).toBe(5);
+    expect(decodeResult.formatted.items[1].label).toBe('Cruise Altitude');
+    expect(decodeResult.formatted.items[1].value).toBe('34000 feet');
+    expect(decodeResult.formatted.items[2].label).toBe(
+      'Cruise Temperature (C)',
     );
-    expect(decodeResult.formatted.items[1].value).toBe('-56 degrees');
-    expect(decodeResult.formatted.items[2].label).toBe('Message Checksum');
+    expect(decodeResult.formatted.items[2].value).toBe('-56 degrees');
+    expect(decodeResult.formatted.items[4].label).toBe('Message Checksum');
     expect(decodeResult.remaining.text).toBe(
-      '1218,276,134,,0,68,,180,,,P30,P0,33936,,1084,284',
+      '276,134,,0,68,,,,P30,P0,33936,,1084,284',
     );
   });
 
