@@ -58,7 +58,7 @@ describe('Label H1 Preamble PRG', () => {
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.formatted.description).toBe('Progress Report');
-    expect(decodeResult.formatted.items.length).toBe(11);
+    expect(decodeResult.formatted.items.length).toBe(13);
     expect(decodeResult.formatted.items[0].label).toBe('Destination');
     expect(decodeResult.formatted.items[0].value).toBe('GCRR');
     expect(decodeResult.formatted.items[1].label).toBe('Arrival Runway');
@@ -69,24 +69,29 @@ describe('Label H1 Preamble PRG', () => {
       'Estimated Time of Arrival',
     );
     expect(decodeResult.formatted.items[3].value).toBe('16:30:55');
-    expect(decodeResult.formatted.items[4].label).toBe('Altitude');
-    expect(decodeResult.formatted.items[4].value).toBe('35000 feet');
-    expect(decodeResult.formatted.items[5].label).toBe('Route Status');
-    expect(decodeResult.formatted.items[5].value).toBe('Route Planned');
-    expect(decodeResult.formatted.items[6].label).toBe('Origin');
-    expect(decodeResult.formatted.items[6].value).toBe('EDDB');
-    expect(decodeResult.formatted.items[7].label).toBe('Destination');
-    expect(decodeResult.formatted.items[7].value).toBe(
+    expect(decodeResult.formatted.items[4].label).toBe('Gross Weight');
+    expect(decodeResult.formatted.items[4].value).toBe('154400 pounds');
+    expect(decodeResult.formatted.items[5].label).toBe('Cruise Altitude');
+    expect(decodeResult.formatted.items[5].value).toBe('35000 feet');
+    // Berlin's transition altitude is 5,000 feet
+    expect(decodeResult.formatted.items[6].label).toBe('Transition Altitude');
+    expect(decodeResult.formatted.items[6].value).toBe('5000 feet');
+    expect(decodeResult.formatted.items[7].label).toBe('Route Status');
+    expect(decodeResult.formatted.items[7].value).toBe('Route Planned');
+    expect(decodeResult.formatted.items[8].label).toBe('Origin');
+    expect(decodeResult.formatted.items[8].value).toBe('EDDB');
+    expect(decodeResult.formatted.items[9].label).toBe('Destination');
+    expect(decodeResult.formatted.items[9].value).toBe(
       'GCRR..N50059E004552..N49588E004338..N49241E002528..N49122E002199..PON.UN872..ERIGA..FUJTI',
     ); // TODO - pull out route
-    expect(decodeResult.formatted.items[8].label).toBe('Arrival Procedure');
-    expect(decodeResult.formatted.items[8].value).toBe('TERT1P');
-    expect(decodeResult.formatted.items[9].label).toBe('Approach Procedure');
-    expect(decodeResult.formatted.items[9].value).toBe(
+    expect(decodeResult.formatted.items[10].label).toBe('Arrival Procedure');
+    expect(decodeResult.formatted.items[10].value).toBe('TERT1P');
+    expect(decodeResult.formatted.items[11].label).toBe('Approach Procedure');
+    expect(decodeResult.formatted.items[11].value).toBe(
       'ILSZ03 starting at BAPAL(03O)',
     );
-    expect(decodeResult.formatted.items[10].label).toBe('Message Checksum');
-    expect(decodeResult.formatted.items[10].value).toBe('0x226d');
+    expect(decodeResult.formatted.items[12].label).toBe('Message Checksum');
+    expect(decodeResult.formatted.items[12].value).toBe('0x226d');
     expect(decodeResult.remaining.text).toBe(
       ':WS:FUJTI,360..BAKUP..BATAX..TAKAV..VEDOD',
     );

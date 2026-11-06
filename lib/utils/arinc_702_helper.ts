@@ -54,8 +54,6 @@ export class Arinc702Helper {
       return false;
     }
     const fields = data.split('/');
-    // the Southwest position report has its own /PR layout
-    const southwest = isSouthwestPosition(fields[0]);
     const canDecode = parseMessageType(decodeResult, fields[0]);
     if (!canDecode) {
       decodeResult.decoded = false;
@@ -118,11 +116,7 @@ export class Arinc702Helper {
           processMessageReference(decodeResult, data.split(','));
           break;
         case 'PR':
-          if (southwest) {
-            processSouthwestPerformanceData(decodeResult, data.split(','));
-          } else {
-            processPerformanceData(decodeResult, data.split(','));
-          }
+          processPerformanceData(decodeResult, data.split(','));
           break;
         //case 'PR':
         // TODO: decode /PR fields
@@ -493,62 +487,100 @@ function processIMI(decodeResult: DecodeResult, type: string): boolean {
   return true;
 }
 
+/**
+ * /PR, performance data. The fields mean the same in every layout on disk (6,201 reports with
+ * /PR from WN, AS, AA, B6, BA and AC; 12, 18 and 19 fields), so shorter and longer ones just
+ * carry fewer or more of them:
+ * - 0 gross weight (hundreds of pounds);
+ * - 2 cruise altitude (hundreds of feet): one value for the whole flight on 85-100% of each
+ *   airline's flights, and present in a flight plan sent before departure (FPN TNCA-TNCB: 110);
+ * - 3 fuel on board (hundreds of pounds);
+ * - 8 temperature at cruise altitude: M7 with the 110 above, ISA at 11,000 feet, while the
+ *   aircraft was on the ground;
+ * - 9 transition altitude (hundreds of feet) of the departure: 180 from US airports, 185 from
+ *   Mexico, 60 from London, 50 from Berlin, 30 from Amsterdam.
+ * The rest is unknown. Fields 0 and 3 are the same as the Southwest position report's gross
+ * weight and fuel on board on 3,449 of 3,450 reports, so a value the report already gave is not
+ * shown again. Field 3 is otherwise left in the remaining text, since /DT also shows a figure as
+ * fuel on board and the two would clash.
+ */
 function processPerformanceData(decodeResult: DecodeResult, data: string[]) {
-  // /PR fields contain performance data
-  // Known field positions (12-field short variant and 18-field long variant):
-  // [0]: ground speed (knots * 10 or similar)
-  // [1]: indicated airspeed or mach-related
-  // [2]: altitude in hundreds of feet
-  // [3]: fuel-related value
-  // [4]: unknown (often empty)
-  // [5]: fuel flow or consumption
-  // [6]: fuel-related
-  // [7]: wind data (DDDSSSS format) or empty
-  // [8]: temperature (M=minus, P=plus)
-  // [9]: heading or unknown
-
   if (data.length < 3) {
     ResultFormatter.unknownArr(decodeResult, data, ',');
     return;
   }
-
-  // Field 2: altitude in hundreds
-  if (data[2] !== undefined && data[2] !== '') {
-    const alt = Number(data[2]) * 100;
-    if (!isNaN(alt) && alt > 0) {
-      ResultFormatter.altitude(decodeResult, alt);
-    }
-  }
-
-  // Field 8: temperature (if present)
-  if (data.length > 8 && data[8] !== undefined && data[8] !== '') {
-    ResultFormatter.temperature(decodeResult, data[8]);
-  }
-
-  // Collect remaining undecoded fields
-  const remaining: string[] = [];
-  for (let i = 0; i < data.length; i++) {
-    if (
-      i === 2 &&
-      data[i] !== '' &&
-      !isNaN(Number(data[i])) &&
-      Number(data[i]) * 100 > 0
-    ) {
-      continue; // altitude - already decoded
-    }
-    if (
-      i === 8 &&
-      data[i] !== '' &&
-      (data[i].startsWith('M') ||
-        data[i].startsWith('P') ||
-        !isNaN(Number(data[i])))
-    ) {
-      continue; // temperature - already decoded
-    }
-    remaining.push(data[i]);
-  }
-  if (remaining.length > 0 && remaining.some((r) => r !== '')) {
+  const remaining = data.filter(
+    (value, i) => !decodePerformanceField(decodeResult, i, value),
+  );
+  if (remaining.some((r) => r !== '')) {
     ResultFormatter.unknown(decodeResult, remaining.join(','), '/PR');
+  }
+}
+
+/** Decodes one /PR field; false leaves it in the remaining text. */
+function decodePerformanceField(
+  decodeResult: DecodeResult,
+  i: number,
+  value: string,
+): boolean {
+  const hundreds = /^\d+$/.test(value) ? Number(value) * 100 : undefined;
+  switch (i) {
+    case 0:
+      if (hundreds === undefined) {
+        return false;
+      }
+      if (decodeResult.raw.gross_weight === undefined) {
+        ResultFormatter.grossWeight(decodeResult, hundreds);
+        return true;
+      }
+      return decodeResult.raw.gross_weight === hundreds;
+    case 2:
+      if (!hundreds) {
+        return false;
+      }
+      ResultFormatter.raw(
+        decodeResult,
+        'cruise_altitude',
+        'CRZ_ALT',
+        'Cruise Altitude',
+        `${hundreds} feet`,
+        hundreds,
+      );
+      return true;
+    case 3:
+      return (
+        hundreds !== undefined && decodeResult.raw.fuel_on_board === hundreds
+      );
+    case 8: {
+      if (!/^[MP]\d+$/.test(value)) {
+        return false;
+      }
+      const temperature = Number(value.replace('M', '-').replace('P', '+'));
+      ResultFormatter.raw(
+        decodeResult,
+        'cruise_temperature',
+        'CRZ_TEMP',
+        'Cruise Temperature (C)',
+        `${temperature} degrees`,
+        temperature,
+      );
+      return true;
+    }
+    case 9:
+      if (hundreds === undefined) {
+        return false;
+      }
+      ResultFormatter.raw(
+        decodeResult,
+        'transition_altitude',
+        'TRANS_ALT',
+        'Transition Altitude',
+        `${hundreds} feet`,
+        hundreds,
+      );
+      return true;
+    default:
+      return false;
   }
 }
 
@@ -565,13 +597,6 @@ function processPerformanceData(decodeResult: DecodeResult, data: string[]) {
  */
 const SOUTHWEST_POSITION_FIELDS = 21;
 const SOUTHWEST_TIME = /^([01]\d|2[0-3])[0-5]\d[0-5]\d$/;
-
-function isSouthwestPosition(messagePart: string): boolean {
-  return (
-    messagePart.startsWith('POS') &&
-    messagePart.substring(3).split(',').length === SOUTHWEST_POSITION_FIELDS
-  );
-}
 
 /** Matches a field; a blank field is skipped and one that does not match is unknown. */
 function southwestField(value: string, pattern: RegExp, unknown: string[]) {
@@ -684,74 +709,6 @@ function processSouthwestPosition(decodeResult: DecodeResult, data: string[]) {
   }
   if (unknown.length > 0) {
     ResultFormatter.unknownArr(decodeResult, unknown);
-  }
-}
-
-const SOUTHWEST_PERFORMANCE_FIELDS = 12;
-
-/**
- * /PR of the Southwest position report, 12 fields (3,450 of 3,450 reports; any other count is
- * left undecoded): 0 gross weight and 3 fuel on board (the
- * same as position fields 12 and 13 on 3,449 of 3,450 reports, so not shown again), 2 cruise
- * altitude (hundreds of feet), 8 temperature at cruise altitude (ISA +4 C median), 9 transition
- * altitude (hundreds of feet: 180 from US airports, 185 only from Cancun, where it is 18,500
- * feet, 170 only from Punta Cana). The rest is unknown: 1 is set by 737 type (222 -700,
- * 262 -800, 238 MAX), 4 is blank.
- */
-function processSouthwestPerformanceData(
-  decodeResult: DecodeResult,
-  data: string[],
-) {
-  if (data.length !== SOUTHWEST_PERFORMANCE_FIELDS) {
-    ResultFormatter.unknown(decodeResult, data.join(','), '/PR');
-    return;
-  }
-  const unknown: string[] = [];
-  data.forEach((value, i) => {
-    if (i === 0 && Number(value) * 100 === decodeResult.raw.gross_weight) {
-      return;
-    }
-    if (i === 3 && Number(value) * 100 === decodeResult.raw.fuel_on_board) {
-      return;
-    }
-    if (i === 2 && /^\d+$/.test(value)) {
-      ResultFormatter.raw(
-        decodeResult,
-        'cruise_altitude',
-        'CRZ_ALT',
-        'Cruise Altitude',
-        `${Number(value) * 100} feet`,
-        Number(value) * 100,
-      );
-      return;
-    }
-    if (i === 8 && /^[MP]\d+$/.test(value)) {
-      const temperature = Number(value.replace('M', '-').replace('P', '+'));
-      ResultFormatter.raw(
-        decodeResult,
-        'cruise_temperature',
-        'CRZ_TEMP',
-        'Cruise Temperature (C)',
-        `${temperature} degrees`,
-        temperature,
-      );
-      return;
-    }
-    if (i === 9 && /^\d+$/.test(value)) {
-      ResultFormatter.raw(
-        decodeResult,
-        'transition_altitude',
-        'TRANS_ALT',
-        'Transition Altitude',
-        `${Number(value) * 100} feet`,
-        Number(value) * 100,
-      );
-      return;
-    }
-    unknown.push(value);
-  });
-  if (unknown.some((v) => v !== '')) {
-    ResultFormatter.unknown(decodeResult, unknown.join(','), '/PR');
   }
 }
 
