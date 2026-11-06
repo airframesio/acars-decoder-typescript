@@ -201,6 +201,13 @@ export class Arinc702Helper {
     }
   }
 
+  /**
+   * Decodes the fields of a POS report after the IMI: the position, then by field count the
+   * Southwest layout (21 fields), the short variant (10 or more) or the long one (14 or more).
+   *
+   * @param decodeResult - object to store decoded results in
+   * @param data - the report's comma-separated fields
+   */
   public static processPosition(decodeResult: DecodeResult, data: string[]) {
     const position = CoordinateUtils.decodeStringCoordinatesDecimalMinutes(
       data[0],
@@ -611,6 +618,10 @@ function southwestField(value: string, pattern: RegExp, unknown: string[]) {
   return m;
 }
 
+/**
+ * Decodes the 21 fields of the Southwest position report (layout above). A blank field is
+ * skipped; a field that does not fit its layout, and field 20, go to the remaining text.
+ */
 function processSouthwestPosition(decodeResult: DecodeResult, data: string[]) {
   const unknown: string[] = [];
   const field = (i: number, pattern: RegExp) =>
