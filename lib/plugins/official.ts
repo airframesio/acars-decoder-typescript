@@ -32,6 +32,7 @@ export * from './Label_2P_FM4';
 export * from './Label_2P_FM5';
 export * from './Label_24_Slash';
 export * from './Label_30_Slash_EA';
+export * from './Label_33';
 export * from './Label_37_SWA';
 export * from './Label_40_SWA';
 export * from './Label_44_ETA';
