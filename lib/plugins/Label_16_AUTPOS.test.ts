@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, test } from '@jest/globals';
 import { MessageDecoder } from '../MessageDecoder';
 import { Label_16_AUTPOS } from './Label_16_AUTPOS';
 

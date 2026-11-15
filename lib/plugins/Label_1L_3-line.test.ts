@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, test } from '@jest/globals';
 import { MessageDecoder } from '../MessageDecoder';
 import { Label_1L_3Line } from './Label_1L_3-line';
 
