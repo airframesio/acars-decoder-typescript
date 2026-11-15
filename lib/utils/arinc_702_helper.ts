@@ -832,16 +832,28 @@ function processWindData(decodeResult: DecodeResult, message: string) {
   ResultFormatter.windData(decodeResult, wind);
 }
 
+/**
+ * Processes /RW
+ * data comes in split by `:`
+ * data[0] is dparture runways and data[1] is airport info
+ * runways are split by `.` each element is a potential takeoff runway
+ * each runway has information split by `,`
+ * currently only the first runway is processed as the takeoff runway
+ *
+ * @param decodeResult
+ * @param data
+ */
 function processRunway(decodeResult: DecodeResult, data: string[]) {
-  //FIXME - figure out names
   const parts = data[0].split('.');
   const more = parts[0].split(',');
 
   ResultFormatter.departureRunway(decodeResult, more[0]);
   ResultFormatter.unknownArr(decodeResult, more.slice(1), ',');
   ResultFormatter.unknownArr(decodeResult, parts.slice(1), '.');
-  ResultFormatter.departureAirport(decodeResult, data[1].split(',')[0]);
-  ResultFormatter.unknownArr(decodeResult, data[1].split(',').slice(1), ',');
+  if (data[1]) {
+    ResultFormatter.departureAirport(decodeResult, data[1].split(',')[0]);
+    ResultFormatter.unknownArr(decodeResult, data[1].split(',').slice(1), ',');
+  }
   //ResultFormatter.unknownArr(decodeResult, data.slice(2), ':');
 }
 function processSummary(decodeResult: DecodeResult, data: string[]) {

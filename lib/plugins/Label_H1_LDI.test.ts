@@ -50,6 +50,17 @@ describe('Label H1 LDI', () => {
     );
   });
 
+  test('variant 3', () => {
+    message.text =
+      'LDI/RW01L,,,,0,,1792,1805,P26,U01,266008,2,10,0,,P34,147150156.19R,,,,0,,1792,1801,P26,U00,266008,2,10,0,,P36,151154160.01R,,,,0,,1792,1792,P26,U02,266008,2,10,0,,P31,147149156.19L,,,,0,,1792,1797,P26,D01,266008,2,10,0,,P30,14814915650C4';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoded).toBe(true);
+    expect(decodeResult.decoder.decodeLevel).toBe('partial');
+    expect(decodeResult.raw.departure_runway).toBe('01L');
+    expect(decodeResult.raw.checksum).toBe(0x50c4);
+  });
+
   test('decodes response', () => {
     message.text = 'RESLDI/AK,7151B9';
     const decodeResult = plugin.decode(message);
