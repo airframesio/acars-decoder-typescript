@@ -64,6 +64,9 @@ export class Label_33 extends DecoderPlugin {
       }
       ResultFormatter.unknownArr(decodeResult, parts.slice(7));
     } else if (type === 'LDR01' && parts.length == 28) {
+      ResultFormatter.unknown(decodeResult, parts[1]);
+      ResultFormatter.unknown(decodeResult, parts[2]);
+      ResultFormatter.unknown(decodeResult, parts[3]);
       ResultFormatter.departureAirport(decodeResult, parts[4]);
       ResultFormatter.arrivalAirport(decodeResult, parts[5]);
       const rwy = parts[6].split('/');
