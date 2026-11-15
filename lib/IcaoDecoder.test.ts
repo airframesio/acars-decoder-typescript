@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, test } from '@jest/globals';
 import { IcaoDecoder } from './IcaoDecoder';
 
 describe('IcaoDecoder', () => {
