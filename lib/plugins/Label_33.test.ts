@@ -75,7 +75,7 @@ describe('Label 33 ', () => {
 
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
-    expect(decodeResult.raw.message_timestamp).toBe(1794711421);
+    expect(decodeResult.raw.message_timestamp).toBe(1794693421);
     expect(decodeResult.raw.departure_icao).toBe('KORD');
     expect(decodeResult.raw.arrival_icao).toBe('KDCA');
   });

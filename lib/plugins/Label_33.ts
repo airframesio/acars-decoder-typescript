@@ -79,7 +79,10 @@ export class Label_33 extends DecoderPlugin {
       ResultFormatter.unknownArr(decodeResult, parts.slice(8));
     } else if (type === 'P' && parts.length == 29) {
       ResultFormatter.unknown(decodeResult, parts[1]);
-      ResultFormatter.timestamp(decodeResult, Date.parse(parts[2]) / 1000);
+      ResultFormatter.timestamp(
+        decodeResult,
+        Date.parse(parts[2] + ' UTC') / 1000,
+      );
       ResultFormatter.unknown(decodeResult, parts[3]);
       ResultFormatter.unknown(decodeResult, parts[4]);
       ResultFormatter.unknown(decodeResult, parts[5]);
