@@ -99,6 +99,16 @@ describe('Label 80', () => {
     expect(decodeResult.remaining.text).toBe('N3950.1/W07548.3 3P01 POSRPT//');
   });
 
+  test('decodes POSRPT with zero tenths of a minute', () => {
+    message.text =
+      '3P01 POSRPT  0267/20 KBOS/KCHS .N3275J\n/POS N3950.0 W07548.3/ALT 38007';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoded).toBe(true);
+    expect(decodeResult.raw.position.latitude).toBeCloseTo(39.833, 3);
+    expect(decodeResult.raw.position.longitude).toBeCloseTo(-75.805, 3);
+  });
+
   test('decodes POS variant 1', () => {
     message.text =
       '3C01 POS N39328W077307  ,,143700,               ,      ,               ,P47,124,0069';
