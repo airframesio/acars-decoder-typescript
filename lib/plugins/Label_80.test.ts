@@ -54,8 +54,8 @@ describe('Label 80', () => {
     expect(decodeResult.formatted.description).toBe(
       'Airline Defined Position Report',
     );
-    expect(decodeResult.raw.position.latitude).toBe(35.391999999999996); // FIXME?: 35.392
-    expect(decodeResult.raw.position.longitude).toBe(-79.372);
+    expect(decodeResult.raw.position.latitude).toBeCloseTo(35.653, 3);
+    expect(decodeResult.raw.position.longitude).toBeCloseTo(-79.62, 3);
     expect(decodeResult.raw.departure_icao).toBe('KIAD');
     expect(decodeResult.raw.arrival_icao).toBe('MSLP');
     expect(decodeResult.raw.tail).toBe('N962AV');
@@ -89,14 +89,24 @@ describe('Label 80', () => {
     expect(decodeResult.raw.departure_icao).toBe('KBOS');
     expect(decodeResult.raw.tail).toBe('N3275J');
     expect(decodeResult.raw.message_timestamp).toBe(52565);
-    expect(decodeResult.raw.position.latitude).toBe(39.501);
-    expect(decodeResult.raw.position.longitude).toBe(-75.483);
+    expect(decodeResult.raw.position.latitude).toBeCloseTo(39.835, 3);
+    expect(decodeResult.raw.position.longitude).toBeCloseTo(-75.805, 3);
     expect(decodeResult.raw.altitude).toBe(38007);
     expect(decodeResult.raw.groundspeed).toBe(334);
     expect(decodeResult.raw.fuel_on_board).toBe(105);
     expect(decodeResult.raw.eta_time).toBe(58920);
     expect(decodeResult.formatted.items.length).toBe(11);
     expect(decodeResult.remaining.text).toBe('N3950.1/W07548.3 3P01 POSRPT//');
+  });
+
+  test('decodes POSRPT with zero tenths of a minute', () => {
+    message.text =
+      '3P01 POSRPT  0267/20 KBOS/KCHS .N3275J\n/POS N3950.0 W07548.3/ALT 38007';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoded).toBe(true);
+    expect(decodeResult.raw.position.latitude).toBeCloseTo(39.833, 3);
+    expect(decodeResult.raw.position.longitude).toBeCloseTo(-75.805, 3);
   });
 
   test('decodes POS variant 1', () => {
