@@ -99,11 +99,20 @@ describe('Label 16 Time of Day', () => {
     expect(decodeResult.formatted.description).toBe('Position Report');
     expect(decodeResult.message).toBe(message);
     expect(decodeResult.raw.message_timestamp).toBe(855);
-    expect(decodeResult.raw.position.latitude).toBeCloseTo(38.3595, 3);
-    expect(decodeResult.raw.position.longitude).toBeCloseTo(-78.5888, 3);
+    expect(decodeResult.raw.position.latitude).toBeCloseTo(38.599, 3);
+    expect(decodeResult.raw.position.longitude).toBeCloseTo(-78.981, 3);
     expect(decodeResult.raw.altitude).toBe(20274);
     expect(decodeResult.formatted.items.length).toBe(4);
     expect(decodeResult.remaining.text).toBe(' 3740');
+  });
+
+  test('decodes variant 3 with large minutes', () => {
+    message.text = '001415,20274,0047, 3740,N3859.99 W07759.99';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoded).toBe(true);
+    expect(decodeResult.raw.position.latitude).toBeCloseTo(39.0, 3);
+    expect(decodeResult.raw.position.longitude).toBeCloseTo(-78.0, 3);
   });
 
   test('decodes Label 16 variant <invalid>', () => {

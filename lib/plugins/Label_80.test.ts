@@ -54,8 +54,8 @@ describe('Label 80', () => {
     expect(decodeResult.formatted.description).toBe(
       'Airline Defined Position Report',
     );
-    expect(decodeResult.raw.position.latitude).toBe(35.391999999999996); // FIXME?: 35.392
-    expect(decodeResult.raw.position.longitude).toBe(-79.372);
+    expect(decodeResult.raw.position.latitude).toBeCloseTo(35.653, 3);
+    expect(decodeResult.raw.position.longitude).toBeCloseTo(-79.62, 3);
     expect(decodeResult.raw.departure_icao).toBe('KIAD');
     expect(decodeResult.raw.arrival_icao).toBe('MSLP');
     expect(decodeResult.raw.tail).toBe('N962AV');
@@ -89,8 +89,8 @@ describe('Label 80', () => {
     expect(decodeResult.raw.departure_icao).toBe('KBOS');
     expect(decodeResult.raw.tail).toBe('N3275J');
     expect(decodeResult.raw.message_timestamp).toBe(52565);
-    expect(decodeResult.raw.position.latitude).toBe(39.501);
-    expect(decodeResult.raw.position.longitude).toBe(-75.483);
+    expect(decodeResult.raw.position.latitude).toBeCloseTo(39.835, 3);
+    expect(decodeResult.raw.position.longitude).toBeCloseTo(-75.805, 3);
     expect(decodeResult.raw.altitude).toBe(38007);
     expect(decodeResult.raw.groundspeed).toBe(334);
     expect(decodeResult.raw.fuel_on_board).toBe(105);

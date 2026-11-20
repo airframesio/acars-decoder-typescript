@@ -117,8 +117,12 @@ export class Label_80 extends DecoderPlugin {
           Number(posResult?.groups?.lng) *
           (posResult?.groups?.lngd === 'W' ? -1 : 1);
         const position = {
-          latitude: Number.isInteger(lat) ? lat / 1000 : lat / 100,
-          longitude: Number.isInteger(lon) ? lon / 1000 : lon / 100,
+          latitude: Number.isInteger(lat)
+            ? lat / 1000
+            : CoordinateUtils.decimalMinutesToDecimalDegrees(lat),
+          longitude: Number.isInteger(lon)
+            ? lon / 1000
+            : CoordinateUtils.decimalMinutesToDecimalDegrees(lon),
         };
         ResultFormatter.position(results, position);
         break;
