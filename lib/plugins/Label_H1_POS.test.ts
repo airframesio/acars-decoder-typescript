@@ -554,3 +554,34 @@ describe('Label_H1 POS', () => {
     expect(decodeResult.formatted.items.length).toBe(0);
   });
 });
+
+// Military (AMC-format) POS reports seen on Airframes, 2026-11-19 to 2026-11-21
+describe('POS wind and speed', () => {
+  const decoder = new MessageDecoder();
+  const text =
+    'F35AMCFAMC#M2BPOS/ID66162A,RCH3245,PAM7887W2324/DC20112026,161626/MR71,/ET201743/PSN31364E124002,161625,350,SADLI,201621,PONIK,M48,259144,M767T449/CG362,,/FB636/VR320012';
+
+  test('wind, mach and true airspeed', () => {
+    const result = decoder.decode({ label: 'H1', text });
+
+    expect(result.decoded).toBe(true);
+    expect(result.raw.mission?.basic).toBe('7887');
+    expect(result.raw.altitude).toBe(35000);
+    expect(result.raw.outside_air_temperature).toBe(-48);
+    expect(result.raw.wind_direction).toBe(259);
+    expect(result.raw.wind_speed).toBe(144);
+    expect(result.raw.mach).toBe(0.767);
+    expect(result.raw.airspeed).toBe(449);
+  });
+
+  test('wind direction over 360 is not decoded', () => {
+    const result = decoder.decode({
+      label: 'H1',
+      text: 'F35AMCFAMC#M2BPOS/ID66162A,RCH3245,PAM7887W2324/DC20112026,161626/MR71,/ET201743/PSN31364E124002,161625,350,SADLI,201621,PONIK,M48,361018,M767T449/CG362,,/FB636/VR328587',
+    });
+
+    expect(result.decoded).toBe(true);
+    expect(result.raw.wind_direction).toBeUndefined();
+    expect(result.remaining.text).toContain('361018');
+  });
+});

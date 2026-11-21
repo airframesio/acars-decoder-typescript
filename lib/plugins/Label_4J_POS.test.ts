@@ -56,3 +56,38 @@ describe('Label 4J POS', () => {
     expect(decodeResult.formatted.items.length).toBe(0);
   });
 });
+
+// Military (AMC-format) POS reports seen on Airframes, 2026-11-19 to 2026-11-21
+describe('Label 4J military POS', () => {
+  const decoder = new MessageDecoder();
+
+  test('without callsign or mission (southern hemisphere)', () => {
+    const result = decoder.decode({
+      label: '4J',
+      text: 'POS/IDA97464,TROJ05,/DC19112026,231643/MR14,/ET200003/PSS30525E152131,231643,210,VEG01,192334,VONDO,M15,263020,T223/CG,,/FB308/VR327DD5',
+    });
+
+    expect(result.decoded).toBe(true);
+    expect(result.decoder.decodeLevel).toBe('full');
+    expect(result.raw.mission_number).toBe('');
+    expect(result.raw.mission).toBeUndefined();
+    expect(result.raw.position?.latitude).toBeLessThan(0);
+    expect(result.raw.wind_direction).toBe(263);
+    expect(result.raw.wind_speed).toBe(20);
+    expect(result.raw.airspeed).toBe(223);
+  });
+
+  test('MT speed and 4 digit wind', () => {
+    const result = decoder.decode({
+      label: '4J',
+      text: 'POS/ID23571S,,/DC19112026,234005/MR56,/ET192342/PSN64458W147121,234000,25,RW14,192342,EIL,P9,1138,MT150/CG271,180,350/FB332/VR323709',
+    });
+
+    expect(result.decoded).toBe(true);
+    expect(result.decoder.decodeLevel).toBe('full');
+    expect(result.raw.wind_direction).toBe(113);
+    expect(result.raw.wind_speed).toBe(8);
+    expect(result.raw.airspeed).toBe(150);
+    expect(result.raw.mach).toBeUndefined();
+  });
+});

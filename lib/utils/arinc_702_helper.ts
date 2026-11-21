@@ -1,3 +1,4 @@
+import type { WeatherReport } from '../types/weather_report';
 import { DateTimeUtils } from '../DateTimeUtils';
 import { DecodeResult } from '../DecoderPluginInterface';
 import { Waypoint } from '../types/waypoint';
@@ -111,7 +112,7 @@ export class Arinc702Helper {
           processIdentification(decodeResult, data.split(','));
           break;
         case 'LL':
-          processLatLon(decodeResult, fields[i], data);
+          processLatLon(decodeResult, data);
           break;
         case 'LR':
           processLandingReport(decodeResult, data.split(','));
@@ -120,13 +121,19 @@ export class Arinc702Helper {
           processMessageReference(decodeResult, data.split(','));
           break;
         case 'MT':
-          processWeatherReport(decodeResult, fields[i], data);
+          // the report is free text that can itself contain '/' (1/2SM, 07/02, R09/...),
+          // so it runs to the end of the message
+          processWeatherReport(
+            decodeResult,
+            fields.slice(i).join('/').substring(2),
+          );
+          i = fields.length;
           break;
         case 'OF':
-          processOffEvent(decodeResult, fields[i], data);
+          processOffEvent(decodeResult, data);
           break;
         case 'OT':
-          processOutEvent(decodeResult, fields[i], data.split(','));
+          processOutEvent(decodeResult, data.split(','));
           break;
         case 'PR':
           processPerformanceData(decodeResult, data.split(','));
@@ -473,8 +480,10 @@ function parseMessageType(
  */
 function processIMI(decodeResult: DecodeResult, type: string): boolean {
   if (type === 'DIS') {
-    // military (AMC) report with a lat/lon (/LL) and fuel; the name is unconfirmed
-    decodeResult.formatted.description = 'Position Report (DIS)';
+    // military (AMC) report carrying a lat/lon (/LL), /DR and fuel. What DIS stands for is
+    // not publicly documented, so the name is left generic. Not the same message as the
+    // label 4A DIS report (Label_4A_DIS).
+    decodeResult.formatted.description = 'DIS Report';
   } else if (type === 'FPN') {
     decodeResult.formatted.description = 'Flight Plan';
   } else if (type === 'FTX') {
@@ -965,7 +974,8 @@ function processMessageReference(decodeResult: DecodeResult, data: string[]) {
 /**
  * Wind and speed fields at the end of a 9-field /PS position (military AMC reports):
  * - wind as `ddds`, `dddss` or `dddsss` (direction in degrees, speed in knots), e.g. `208018`;
- * - speed as `T<tas>`, `MT<tas>` or `M<mach * 1000>T<tas>`, e.g. `T302`, `MT250` or `M080T460`.
+ * - speed as `T<tas>`, `MT<tas>` or `M<mach * 1000>T<tas>`, e.g. `T302`, `MT250` or `M800T460`
+ *   (`M` with no digits is the `MT<tas>` form, which carries no Mach number).
  * Anything else stays in the remaining text.
  */
 function processWindAndSpeed(
@@ -973,11 +983,12 @@ function processWindAndSpeed(
   wind: string,
   speed: string,
 ) {
-  if (/^\d{4,6}$/.test(wind)) {
+  const windMatch = /^([0-2]\d\d|3[0-5]\d|360)(\d{1,3})$/.exec(wind);
+  if (windMatch) {
     ResultFormatter.wind(
       decodeResult,
-      Number(wind.substring(0, 3)),
-      Number(wind.substring(3)),
+      Number(windMatch[1]),
+      Number(windMatch[2]),
     );
   } else if (wind !== '') {
     ResultFormatter.unknown(decodeResult, wind);
@@ -994,16 +1005,16 @@ function processWindAndSpeed(
 }
 
 /** /LL, a position as N12345E123456 (degrees and decimal minutes) */
-function processLatLon(
-  decodeResult: DecodeResult,
-  field: string,
-  data: string,
-) {
+function processLatLon(decodeResult: DecodeResult, data: string) {
   const position = CoordinateUtils.decodeStringCoordinatesDecimalMinutes(data);
-  if (position) {
+  if (
+    position &&
+    Number.isFinite(position.latitude) &&
+    Number.isFinite(position.longitude)
+  ) {
     ResultFormatter.position(decodeResult, position);
   } else {
-    ResultFormatter.unknown(decodeResult, field, '/');
+    ResultFormatter.unknown(decodeResult, 'LL' + data, '/');
   }
 }
 
@@ -1012,21 +1023,23 @@ function parseDayTime(value: string): { day: number; tod: number } | undefined {
   if (!/^\d{6}$/.test(value)) {
     return undefined;
   }
+  const day = Number(value.substring(0, 2));
+  const hour = Number(value.substring(2, 4));
+  const minute = Number(value.substring(4, 6));
+  if (day < 1 || day > 31 || hour > 23 || minute > 59) {
+    return undefined;
+  }
   return {
-    day: Number(value.substring(0, 2)),
+    day,
     tod: DateTimeUtils.convertHHMMSSToTod(value.substring(2) + '00'),
   };
 }
 
 /** /OF<DDHHMM>, the takeoff (wheels off) time */
-function processOffEvent(
-  decodeResult: DecodeResult,
-  field: string,
-  data: string,
-) {
+function processOffEvent(decodeResult: DecodeResult, data: string) {
   const off = parseDayTime(data);
   if (!off) {
-    ResultFormatter.unknown(decodeResult, field, '/');
+    ResultFormatter.unknown(decodeResult, 'OF' + data, '/');
     return;
   }
   ResultFormatter.day(decodeResult, off.day);
@@ -1037,59 +1050,72 @@ function processOffEvent(
  * /OT<DDHHMM>,<DDHHMM>,<fuel>, the out-of-gate time and the fuel on board then. The second
  * time is earlier than the first by a few minutes in the samples seen and is not decoded.
  */
-function processOutEvent(
-  decodeResult: DecodeResult,
-  field: string,
-  data: string[],
-) {
+function processOutEvent(decodeResult: DecodeResult, data: string[]) {
   const out = parseDayTime(data[0]);
   if (!out) {
-    ResultFormatter.unknown(decodeResult, field, '/');
+    ResultFormatter.unknown(decodeResult, 'OT' + data.join(','), '/');
     return;
   }
   ResultFormatter.day(decodeResult, out.day);
   ResultFormatter.out(decodeResult, out.tod);
+  // everything after the out time that is not decoded stays in the remaining text
+  const rest: string[] = [];
   if (data.length > 1 && data[1] !== '') {
-    ResultFormatter.unknown(decodeResult, data[1], '/OT');
+    rest.push(data[1]);
   }
-  if (data.length > 2 && /^\d+$/.test(data[2])) {
-    ResultFormatter.outFuel(decodeResult, Number(data[2]));
+  if (data.length > 2) {
+    if (/^\d+$/.test(data[2])) {
+      ResultFormatter.outFuel(decodeResult, Number(data[2]));
+    } else if (data[2] !== '') {
+      rest.push(data[2]);
+    }
+  }
+  rest.push(...data.slice(3).filter((v) => v !== ''));
+  if (rest.length > 0) {
+    ResultFormatter.unknown(decodeResult, 'OT' + rest.join(','), '/');
   }
 }
 
 /**
- * /MT<station>,<HHMM>,<report>, a METAR or TAF sent in answer to a weather request (WXR),
- * e.g. `MTKADW,0357,TAF KADW 210357Z VRB06KT 9999 FEW250 ...`
+ * /MT<station>,<HHMM>,<report>, weather text sent in answer to a weather request (WXR),
+ * e.g. `MTKADW,0357,TAF KADW 210357Z VRB06KT 9999 FEW250 ...`. The text is usually a METAR
+ * or TAF; anything else is kept with type `UNKNOWN`.
  */
-function processWeatherReport(
-  decodeResult: DecodeResult,
-  field: string,
-  data: string,
-) {
+function processWeatherReport(decodeResult: DecodeResult, data: string) {
   const match = /^([A-Z0-9]{4}),(\d{4}),(.*)$/s.exec(data);
   if (!match) {
-    ResultFormatter.unknown(decodeResult, field, '/');
+    ResultFormatter.unknown(decodeResult, 'MT' + data, '/');
     return;
   }
-  const [, station, time, report] = match;
-  const kind = /^TAF\b/.test(report.trim()) ? 'TAF' : 'METAR';
-  decodeResult.raw.weather_report = {
-    station,
-    time,
-    type: kind,
-    report: report.trim(),
+  const [, station, time, text] = match;
+  const report = text.trim();
+  let type: WeatherReport['type'] = 'UNKNOWN';
+  if (/^TAF\b/.test(report)) {
+    type = 'TAF';
+  } else if (
+    /^(?:(?:METAR|SPECI)\s+)?[A-Z][A-Z0-9]{3}\s+\d{6}Z\b/.test(report)
+  ) {
+    type = 'METAR';
+  }
+  const labels: Record<WeatherReport['type'], string> = {
+    TAF: 'Terminal Aerodrome Forecast',
+    METAR: 'Weather Observation',
+    UNKNOWN: 'Weather Text',
   };
-  decodeResult.formatted.items.push({
-    type: 'weather_station',
-    code: 'WX_STN',
-    label: 'Weather Station',
-    value: station,
-  });
-  decodeResult.formatted.items.push({
-    type: 'weather_report',
-    code: 'WX',
-    label:
-      kind === 'TAF' ? 'Terminal Aerodrome Forecast' : 'Weather Observation',
-    value: report.trim(),
-  });
+  const weather: WeatherReport = { station, time, type, report };
+  ResultFormatter.raw(
+    decodeResult,
+    'weather_station',
+    'WX_STN',
+    'Weather Station',
+    station,
+  );
+  ResultFormatter.raw(
+    decodeResult,
+    'weather_report',
+    'WX',
+    labels[type],
+    report,
+    weather,
+  );
 }

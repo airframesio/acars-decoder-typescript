@@ -75,16 +75,18 @@ export class MissionNumberUtils {
    * Resolves the day of year to a calendar date (UTC), given a reference
    * time such as when the message was received. The mission number carries
    * no year, so the year that puts the date closest to the reference is used.
+   * Day 366 only exists in leap years, so up to four years either side are
+   * searched.
    *
-   * @returns date as `YYYY-MM-DD`
+   * @returns date as `YYYY-MM-DD`, or null if no year fits
    */
   public static operatingDate(
     mission: MissionNumber,
-    reference: Date = new Date(),
-  ): string {
+    reference: Date,
+  ): string | null {
     const refYear = reference.getUTCFullYear();
     let best: Date | null = null;
-    for (const year of [refYear - 1, refYear, refYear + 1]) {
+    for (let year = refYear - 4; year <= refYear + 4; year++) {
       const candidate = new Date(Date.UTC(year, 0, mission.day_of_year));
       // day 366 of a non-leap year rolls into the next year; skip it
       if (candidate.getUTCFullYear() !== year) {
@@ -98,6 +100,6 @@ export class MissionNumberUtils {
         best = candidate;
       }
     }
-    return (best as Date).toISOString().substring(0, 10);
+    return best ? best.toISOString().substring(0, 10) : null;
   }
 }
