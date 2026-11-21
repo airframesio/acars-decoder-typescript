@@ -31,6 +31,8 @@ export interface MissionNumber {
   day_of_year: number;
 }
 
+// Deliberately loose: any 12 characters ending in a day of year. The third /ID element is
+// only seen on AMC-format messages, so a stricter pattern has not been needed.
 const MISSION_NUMBER_REGEX = /^[A-Z0-9]{9}(\d{3})$/;
 
 /** Default values some avionics send when no mission number has been entered */
@@ -76,9 +78,10 @@ export class MissionNumberUtils {
    * time such as when the message was received. The mission number carries
    * no year, so the year that puts the date closest to the reference is used.
    * Day 366 only exists in leap years, so up to four years either side are
-   * searched.
+   * searched. A mission operates close to when its messages are sent, so a
+   * date more than about six months from the reference is not returned.
    *
-   * @returns date as `YYYY-MM-DD`, or null if no year fits
+   * @returns date as `YYYY-MM-DD`, or null if no year fits within six months
    */
   public static operatingDate(
     mission: MissionNumber,
@@ -100,6 +103,13 @@ export class MissionNumberUtils {
         best = candidate;
       }
     }
-    return best ? best.toISOString().substring(0, 10) : null;
+    const maxDistance = 183 * 24 * 60 * 60 * 1000;
+    if (
+      best === null ||
+      Math.abs(best.getTime() - reference.getTime()) > maxDistance
+    ) {
+      return null;
+    }
+    return best.toISOString().substring(0, 10);
   }
 }

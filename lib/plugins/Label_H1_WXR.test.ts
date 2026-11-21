@@ -59,4 +59,15 @@ describe('Label_H1 WXR', () => {
     const wx = result.formatted.items.find((i) => i.code === 'WX');
     expect(wx?.label).toBe('Weather Text');
   });
+  test('trailing fuel and version fields are not part of the report', () => {
+    const result = decoder.decode({
+      label: 'H1',
+      text: '- #MDWXR/ID99207A,RCH3269,AAM7886W2324/MR4,120/MTKADW,1200,KADW 211200Z 1/2SM FG/FB123/VR32E371',
+    });
+
+    expect(result.decoded).toBe(true);
+    expect(result.decoder.decodeLevel).toBe('full');
+    expect(result.raw.weather_report?.report).toBe('KADW 211200Z 1/2SM FG');
+    expect(result.raw.fuel_on_board).toBe(123);
+  });
 });

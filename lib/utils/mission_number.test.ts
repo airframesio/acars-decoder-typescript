@@ -50,8 +50,18 @@ describe('MissionNumberUtils', () => {
     expect(
       MissionNumberUtils.operatingDate(
         mission,
-        new Date('2026-06-01T00:00:00Z'),
+        new Date('2025-01-10T00:00:00Z'),
       ),
     ).toBe('2024-12-31');
+  });
+
+  test('no date more than six months from the reference', () => {
+    const mission = MissionNumberUtils.parse('AAM125701366')!;
+    expect(
+      MissionNumberUtils.operatingDate(
+        mission,
+        new Date('2026-06-01T00:00:00Z'),
+      ),
+    ).toBeNull();
   });
 });

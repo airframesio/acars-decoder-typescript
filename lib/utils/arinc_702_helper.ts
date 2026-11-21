@@ -120,15 +120,22 @@ export class Arinc702Helper {
         case 'MR':
           processMessageReference(decodeResult, data.split(','));
           break;
-        case 'MT':
-          // the report is free text that can itself contain '/' (1/2SM, 07/02, R09/...),
-          // so it runs to the end of the message
+        case 'MT': {
+          // The report is free text that can itself contain '/' (1/2SM, 07/02, R09/...), so
+          // it runs to the end of the message, except for trailing fuel (/FB) and version
+          // (/VR) fields, which are decoded as usual. /MT is the last field in every sample
+          // seen so far.
+          let end = fields.length;
+          while (end > i + 1 && /^(?:FB\d+|VR\d+)$/.test(fields[end - 1])) {
+            end--;
+          }
           processWeatherReport(
             decodeResult,
-            fields.slice(i).join('/').substring(2),
+            fields.slice(i, end).join('/').substring(2),
           );
-          i = fields.length;
+          i = end - 1;
           break;
+        }
         case 'OF':
           processOffEvent(decodeResult, data);
           break;
@@ -976,7 +983,7 @@ function processMessageReference(decodeResult: DecodeResult, data: string[]) {
  * - wind as `ddds`, `dddss` or `dddsss` (direction in degrees, speed in knots), e.g. `208018`;
  * - speed as `T<tas>`, `MT<tas>` or `M<mach * 1000>T<tas>`, e.g. `T302`, `MT250` or `M800T460`
  *   (`M` with no digits is the `MT<tas>` form, which carries no Mach number).
- * Anything else stays in the remaining text.
+ * A Mach number outside 0.3-1.0 is treated as unreadable. Anything else stays in the remaining text.
  */
 function processWindAndSpeed(
   decodeResult: DecodeResult,
@@ -994,9 +1001,10 @@ function processWindAndSpeed(
     ResultFormatter.unknown(decodeResult, wind);
   }
   const speedMatch = /^(?:M(\d{3})?)?T(\d{3})$/.exec(speed);
-  if (speedMatch) {
+  const mach = speedMatch?.[1] ? Number(speedMatch[1]) / 1000 : undefined;
+  if (speedMatch && (mach === undefined || (mach >= 0.3 && mach <= 1.0))) {
     if (speedMatch[1]) {
-      ResultFormatter.mach(decodeResult, Number(speedMatch[1]) / 1000);
+      ResultFormatter.mach(decodeResult, mach as number);
     }
     ResultFormatter.airspeed(decodeResult, Number(speedMatch[2]));
   } else if (speed !== '') {

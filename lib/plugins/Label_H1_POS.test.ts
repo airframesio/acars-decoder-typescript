@@ -584,4 +584,15 @@ describe('POS wind and speed', () => {
     expect(result.raw.wind_direction).toBeUndefined();
     expect(result.remaining.text).toContain('361018');
   });
+  test('implausible Mach number is not decoded', () => {
+    const result = decoder.decode({
+      label: 'H1',
+      text: 'F35AMCFAMC#M2BPOS/ID66162A,RCH3245,PAM7887W2324/DC20112026,161626/MR71,/ET201743/PSN31364E124002,161625,350,SADLI,201621,PONIK,M48,259144,M080T460/CG362,,/FB636/VR325CA9',
+    });
+
+    expect(result.decoded).toBe(true);
+    expect(result.raw.mach).toBeUndefined();
+    expect(result.raw.airspeed).toBeUndefined();
+    expect(result.remaining.text).toContain('M080T460');
+  });
 });

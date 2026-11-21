@@ -48,6 +48,8 @@ export interface RawFields {
   mission?: MissionNumber;
   /** Weather text sent in answer to a weather request */
   weather_report?: WeatherReport;
+  /** ICAO code of the station a weather report is for (same as weather_report.station) */
+  weather_station?: string;
   callsign?: string;
   tail?: string;
 
