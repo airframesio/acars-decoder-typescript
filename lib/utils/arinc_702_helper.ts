@@ -1006,7 +1006,9 @@ function processWindAndSpeed(
 
 /** /LL, a position as N12345E123456 (degrees and decimal minutes) */
 function processLatLon(decodeResult: DecodeResult, data: string) {
-  const position = CoordinateUtils.decodeStringCoordinatesDecimalMinutes(data);
+  const position = /^[NS]\d{5}[EW]\d{6}$/.test(data)
+    ? CoordinateUtils.decodeStringCoordinatesDecimalMinutes(data)
+    : undefined;
   if (
     position &&
     Number.isFinite(position.latitude) &&

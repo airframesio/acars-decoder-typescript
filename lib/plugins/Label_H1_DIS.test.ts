@@ -19,4 +19,13 @@ describe('Label_H1 DIS', () => {
     expect(result.raw.fuel_on_board).toBe(1147);
     expect(result.remaining.text).toContain('DR0');
   });
+  test('malformed lat/lon stays in remaining', () => {
+    const result = decoder.decode({
+      label: 'H1',
+      text: 'DIS/ID38031S,RCH564,8JZ42NG3S325/DC21112026,174417/MR20,/LLN12345E/DR0/FB1147/VR32C402',
+    });
+
+    expect(result.raw.position).toBeUndefined();
+    expect(result.remaining.text).toContain('LLN12345E');
+  });
 });
