@@ -70,4 +70,13 @@ describe('Label_H1 WXR', () => {
     expect(result.raw.weather_report?.report).toBe('KADW 211200Z 1/2SM FG');
     expect(result.raw.fuel_on_board).toBe(123);
   });
+  test('invalid report time is not decoded', () => {
+    const result = decoder.decode({
+      label: 'H1',
+      text: '- #MDWXR/ID99207A,RCH3269,AAM7886W2324/MR4,120/MTKADW,2460,TESTB7EF',
+    });
+
+    expect(result.raw.weather_report).toBeUndefined();
+    expect(result.remaining.text).toContain('MTKADW,2460,TEST');
+  });
 });

@@ -1014,7 +1014,17 @@ function processWindAndSpeed(
 
 /** /LL, a position as N12345E123456 (degrees and decimal minutes) */
 function processLatLon(decodeResult: DecodeResult, data: string) {
-  const position = /^[NS]\d{5}[EW]\d{6}$/.test(data)
+  // [NS]DDMMm[EW]DDDMMm: degrees, whole minutes and tenths of a minute
+  const m = /^[NS](\d{2})(\d{2})\d[EW](\d{3})(\d{2})\d$/.exec(data);
+  const inRange =
+    m !== null &&
+    Number(m[2]) < 60 &&
+    Number(m[4]) < 60 &&
+    Number(m[1]) <= 90 &&
+    Number(m[3]) <= 180 &&
+    (Number(m[1]) < 90 || data.substring(3, 6) === '000') &&
+    (Number(m[3]) < 180 || data.substring(10, 13) === '000');
+  const position = inRange
     ? CoordinateUtils.decodeStringCoordinatesDecimalMinutes(data)
     : undefined;
   if (
@@ -1092,12 +1102,13 @@ function processOutEvent(decodeResult: DecodeResult, data: string[]) {
  * or TAF; anything else is kept with type `UNKNOWN`.
  */
 function processWeatherReport(decodeResult: DecodeResult, data: string) {
-  const match = /^([A-Z0-9]{4}),(\d{4}),(.*)$/s.exec(data);
+  const match = /^([A-Z0-9]{4}),([01]\d|2[0-3])([0-5]\d),(.*)$/s.exec(data);
   if (!match) {
     ResultFormatter.unknown(decodeResult, 'MT' + data, '/');
     return;
   }
-  const [, station, time, text] = match;
+  const [, station, hh, mm, text] = match;
+  const time = hh + mm;
   const report = text.trim();
   let type: WeatherReport['type'] = 'UNKNOWN';
   if (/^TAF\b/.test(report)) {

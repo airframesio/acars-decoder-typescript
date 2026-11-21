@@ -28,4 +28,13 @@ describe('Label_H1 DIS', () => {
     expect(result.raw.position).toBeUndefined();
     expect(result.remaining.text).toContain('LLN12345E');
   });
+  test('out-of-range lat/lon stays in remaining', () => {
+    const result = decoder.decode({
+      label: 'H1',
+      text: 'DIS/ID38031S,RCH564,8JZ42NG3S325/DC21112026,174417/MR20,/LLN91000E181000/DR0/FB1147/VR328254',
+    });
+
+    expect(result.raw.position).toBeUndefined();
+    expect(result.remaining.text).toContain('LLN91000E181000');
+  });
 });
