@@ -33,6 +33,9 @@ export interface MissionNumber {
 
 const MISSION_NUMBER_REGEX = /^[A-Z0-9]{9}(\d{3})$/;
 
+/** Default values some avionics send when no mission number has been entered */
+const PLACEHOLDERS = new Set(['COLLINSAM123', 'ZZZ123456789']);
+
 export class MissionNumberUtils {
   /**
    * Parses a 12 character AMC mission number.
@@ -40,7 +43,7 @@ export class MissionNumberUtils {
    * @returns the parsed mission number, or null if `value` does not look like one
    */
   public static parse(value: string | undefined): MissionNumber | null {
-    if (!value) {
+    if (!value || PLACEHOLDERS.has(value)) {
       return null;
     }
     const match = MISSION_NUMBER_REGEX.exec(value);

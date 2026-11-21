@@ -18,7 +18,7 @@ describe('Label 4J POS', () => {
     const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
-    expect(decodeResult.decoder.decodeLevel).toBe('partial');
+    expect(decodeResult.decoder.decodeLevel).toBe('full');
     // Raw field checks
     expect(decodeResult.raw.message_timestamp).toBe(1709476093);
     expect(decodeResult.raw.sequence_number).toBe(64);
@@ -39,8 +39,11 @@ describe('Label 4J POS', () => {
     expect(decodeResult.raw.fuel_on_board).toBe(732);
     expect(decodeResult.raw.version).toBe(3.2);
     expect(decodeResult.formatted.description).toBe('Position Report');
-    expect(decodeResult.formatted.items.length).toBe(16);
-    expect(decodeResult.remaining.text).toBe('27619,MT370');
+    expect(decodeResult.raw.wind_direction).toBe(276);
+    expect(decodeResult.raw.wind_speed).toBe(19);
+    expect(decodeResult.raw.airspeed).toBe(370);
+    expect(decodeResult.formatted.items.length).toBe(18);
+    expect(decodeResult.remaining.text).toBe('');
   });
 
   test('decodes <invalid>', () => {

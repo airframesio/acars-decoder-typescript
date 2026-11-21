@@ -26,7 +26,7 @@ describe('Label 1J/2J FTX', () => {
     expect(decodeResult.raw.text).toBe('4 QTR PHILLY UP 37-6');
     expect(decodeResult.raw.checksum).toBe(0x307a);
     expect(decodeResult.formatted.description).toBe('Free Text');
-    expect(decodeResult.formatted.items.length).toBe(5);
+    expect(decodeResult.formatted.items.length).toBe(6);
   });
 
   // Disabled due to checksum mismatch. Possibly copy-paste issue due to non-ascii characters in message?
@@ -49,7 +49,7 @@ describe('Label 1J/2J FTX', () => {
     );
     expect(decodeResult.raw.version).toBe(3.2);
     expect(decodeResult.raw.checksum).toBe(0x8d70);
-    expect(decodeResult.formatted.items.length).toBe(7);
+    expect(decodeResult.formatted.items.length).toBe(8);
     expect(decodeResult.remaining.text).toBe('M74/');
   });
 

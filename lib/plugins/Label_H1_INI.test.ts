@@ -30,7 +30,7 @@ describe('Label_H1 INI', () => {
     expect(decodeResult.raw.estimated_departure_time).toBe('1315');
     expect(decodeResult.raw.checksum).toBe(0x45ee);
     expect(decodeResult.remaining.text).toBe('');
-    expect(decodeResult.formatted.items.length).toBe(9);
+    expect(decodeResult.formatted.items.length).toBe(10);
     expect(decodeResult.formatted.description).toBe('Initial Report');
     const sequenceNumberItem = decodeResult.formatted.items.find(
       (item) => item.code === 'SEQ',

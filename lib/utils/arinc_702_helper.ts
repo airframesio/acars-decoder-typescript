@@ -4,6 +4,7 @@ import { Waypoint } from '../types/waypoint';
 import { Wind } from '../types/wind';
 import { CoordinateUtils } from './coordinate_utils';
 import { FlightPlanUtils } from './flight_plan_utils';
+import { MissionNumberUtils } from './mission_number';
 import { ResultFormatter } from './result_formatter';
 import { RouteUtils } from './route_utils';
 
@@ -109,11 +110,23 @@ export class Arinc702Helper {
         case 'ID':
           processIdentification(decodeResult, data.split(','));
           break;
+        case 'LL':
+          processLatLon(decodeResult, fields[i], data);
+          break;
         case 'LR':
           processLandingReport(decodeResult, data.split(','));
           break;
         case 'MR':
           processMessageReference(decodeResult, data.split(','));
+          break;
+        case 'MT':
+          processWeatherReport(decodeResult, fields[i], data);
+          break;
+        case 'OF':
+          processOffEvent(decodeResult, fields[i], data);
+          break;
+        case 'OT':
+          processOutEvent(decodeResult, fields[i], data.split(','));
           break;
         case 'PR':
           processPerformanceData(decodeResult, data.split(','));
@@ -189,8 +202,7 @@ export class Arinc702Helper {
       processRoute(decodeResult, data[3], data[1], data[5], data[4], undefined);
       ResultFormatter.altitude(decodeResult, Number(data[2]) * 100);
       ResultFormatter.temperature(decodeResult, data[6]);
-      ResultFormatter.unknown(decodeResult, data[7]);
-      ResultFormatter.unknown(decodeResult, data[8]);
+      processWindAndSpeed(decodeResult, data[7], data[8]);
     }
     if (data.length === 14) {
       // variant 2
@@ -317,8 +329,11 @@ function processIdentification(decodeResult: DecodeResult, data: string[]) {
     ResultFormatter.flightNumber(decodeResult, data[1]);
   }
   if (data.length > 2) {
-    //TODO: figure out what this is
     decodeResult.raw.mission_number = data[2];
+    const mission = MissionNumberUtils.parse(data[2]);
+    if (mission) {
+      ResultFormatter.missionNumber(decodeResult, mission);
+    }
   }
 }
 
@@ -457,7 +472,10 @@ function parseMessageType(
  * @returns
  */
 function processIMI(decodeResult: DecodeResult, type: string): boolean {
-  if (type === 'FPN') {
+  if (type === 'DIS') {
+    // military (AMC) report with a lat/lon (/LL) and fuel; the name is unconfirmed
+    decodeResult.formatted.description = 'Position Report (DIS)';
+  } else if (type === 'FPN') {
     decodeResult.formatted.description = 'Flight Plan';
   } else if (type === 'FTX') {
     decodeResult.formatted.description = 'Free Text';
@@ -467,6 +485,8 @@ function processIMI(decodeResult: DecodeResult, type: string): boolean {
     decodeResult.formatted.description = 'In-Range Report';
   } else if (type === 'LDI') {
     decodeResult.formatted.description = 'Load Distribution Information';
+  } else if (type === 'OOI') {
+    decodeResult.formatted.description = 'OOOI Event Report';
   } else if (type === 'PER') {
     decodeResult.formatted.description = 'Performance Report';
   } else if (type === 'PRF') {
@@ -940,4 +960,136 @@ function processMessageReference(decodeResult: DecodeResult, data: string[]) {
   if (data[1] !== '') {
     ResultFormatter.sequenceResponse(decodeResult, parseInt(data[1], 10));
   }
+}
+
+/**
+ * Wind and speed fields at the end of a 9-field /PS position (military AMC reports):
+ * - wind as `ddds`, `dddss` or `dddsss` (direction in degrees, speed in knots), e.g. `208018`;
+ * - speed as `T<tas>`, `MT<tas>` or `M<mach * 1000>T<tas>`, e.g. `T302`, `MT250` or `M080T460`.
+ * Anything else stays in the remaining text.
+ */
+function processWindAndSpeed(
+  decodeResult: DecodeResult,
+  wind: string,
+  speed: string,
+) {
+  if (/^\d{4,6}$/.test(wind)) {
+    ResultFormatter.wind(
+      decodeResult,
+      Number(wind.substring(0, 3)),
+      Number(wind.substring(3)),
+    );
+  } else if (wind !== '') {
+    ResultFormatter.unknown(decodeResult, wind);
+  }
+  const speedMatch = /^(?:M(\d{3})?)?T(\d{3})$/.exec(speed);
+  if (speedMatch) {
+    if (speedMatch[1]) {
+      ResultFormatter.mach(decodeResult, Number(speedMatch[1]) / 1000);
+    }
+    ResultFormatter.airspeed(decodeResult, Number(speedMatch[2]));
+  } else if (speed !== '') {
+    ResultFormatter.unknown(decodeResult, speed);
+  }
+}
+
+/** /LL, a position as N12345E123456 (degrees and decimal minutes) */
+function processLatLon(
+  decodeResult: DecodeResult,
+  field: string,
+  data: string,
+) {
+  const position = CoordinateUtils.decodeStringCoordinatesDecimalMinutes(data);
+  if (position) {
+    ResultFormatter.position(decodeResult, position);
+  } else {
+    ResultFormatter.unknown(decodeResult, field, '/');
+  }
+}
+
+/** DDHHMM to a day of the month and a time of day in seconds */
+function parseDayTime(value: string): { day: number; tod: number } | undefined {
+  if (!/^\d{6}$/.test(value)) {
+    return undefined;
+  }
+  return {
+    day: Number(value.substring(0, 2)),
+    tod: DateTimeUtils.convertHHMMSSToTod(value.substring(2) + '00'),
+  };
+}
+
+/** /OF<DDHHMM>, the takeoff (wheels off) time */
+function processOffEvent(
+  decodeResult: DecodeResult,
+  field: string,
+  data: string,
+) {
+  const off = parseDayTime(data);
+  if (!off) {
+    ResultFormatter.unknown(decodeResult, field, '/');
+    return;
+  }
+  ResultFormatter.day(decodeResult, off.day);
+  ResultFormatter.off(decodeResult, off.tod);
+}
+
+/**
+ * /OT<DDHHMM>,<DDHHMM>,<fuel>, the out-of-gate time and the fuel on board then. The second
+ * time is earlier than the first by a few minutes in the samples seen and is not decoded.
+ */
+function processOutEvent(
+  decodeResult: DecodeResult,
+  field: string,
+  data: string[],
+) {
+  const out = parseDayTime(data[0]);
+  if (!out) {
+    ResultFormatter.unknown(decodeResult, field, '/');
+    return;
+  }
+  ResultFormatter.day(decodeResult, out.day);
+  ResultFormatter.out(decodeResult, out.tod);
+  if (data.length > 1 && data[1] !== '') {
+    ResultFormatter.unknown(decodeResult, data[1], '/OT');
+  }
+  if (data.length > 2 && /^\d+$/.test(data[2])) {
+    ResultFormatter.outFuel(decodeResult, Number(data[2]));
+  }
+}
+
+/**
+ * /MT<station>,<HHMM>,<report>, a METAR or TAF sent in answer to a weather request (WXR),
+ * e.g. `MTKADW,0357,TAF KADW 210357Z VRB06KT 9999 FEW250 ...`
+ */
+function processWeatherReport(
+  decodeResult: DecodeResult,
+  field: string,
+  data: string,
+) {
+  const match = /^([A-Z0-9]{4}),(\d{4}),(.*)$/s.exec(data);
+  if (!match) {
+    ResultFormatter.unknown(decodeResult, field, '/');
+    return;
+  }
+  const [, station, time, report] = match;
+  const kind = /^TAF\b/.test(report.trim()) ? 'TAF' : 'METAR';
+  decodeResult.raw.weather_report = {
+    station,
+    time,
+    type: kind,
+    report: report.trim(),
+  };
+  decodeResult.formatted.items.push({
+    type: 'weather_station',
+    code: 'WX_STN',
+    label: 'Weather Station',
+    value: station,
+  });
+  decodeResult.formatted.items.push({
+    type: 'weather_report',
+    code: 'WX',
+    label:
+      kind === 'TAF' ? 'Terminal Aerodrome Forecast' : 'Weather Observation',
+    value: report.trim(),
+  });
 }

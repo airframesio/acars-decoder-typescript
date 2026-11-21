@@ -72,7 +72,7 @@ describe('Label H1 preamble REQ', () => {
     expect(decodeResult.raw.mission_number).toBe('LVZF1185C049');
     expect(decodeResult.raw.sequence_number).toBe(1);
     expect(decodeResult.raw.checksum).toBe(0x9310);
-    expect(decodeResult.formatted.items.length).toBe(4);
+    expect(decodeResult.formatted.items.length).toBe(5);
     expect(decodeResult.formatted.description).toBeDefined();
     expect(decodeResult.remaining.text).toBe('AU3');
   });

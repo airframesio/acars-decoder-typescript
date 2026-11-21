@@ -338,7 +338,7 @@ describe('Label_H1 FPN', () => {
     expect(decodeResult.raw.route.waypoints[19].name).toBe('BUMMR');
     expect(decodeResult.raw.checksum).toBe(0xe3e9);
     expect(decodeResult.formatted.description).toBe('Flight Plan');
-    expect(decodeResult.formatted.items.length).toBe(7);
+    expect(decodeResult.formatted.items.length).toBe(8);
     expect(decodeResult.message).toBe(message);
   });
 
@@ -370,6 +370,6 @@ describe('Label_H1 FPN', () => {
     expect(decodeResult.raw.route.waypoints.length).toBe(69); //nice
     expect(decodeResult.raw.checksum).toBe(0xc850);
     expect(decodeResult.formatted.description).toBe('Flight Plan');
-    expect(decodeResult.formatted.items.length).toBe(9);
+    expect(decodeResult.formatted.items.length).toBe(10);
   });
 });

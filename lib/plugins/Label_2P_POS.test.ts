@@ -37,9 +37,9 @@ describe('Label_2P Preamble POS', () => {
     expect(decodeResult.raw.fuel_on_board).toBe(857);
     expect(decodeResult.raw.version).toBe(3.2);
     expect(decodeResult.raw.checksum).toBe(0x2b89);
-    expect(decodeResult.formatted.items.length).toBe(11);
+    expect(decodeResult.formatted.items.length).toBe(13);
     expect(decodeResult.formatted.description).toBe('Position Report');
-    expect(decodeResult.remaining.text).toBe('M80/084081,');
+    expect(decodeResult.remaining.text).toBe('M80/');
   });
 
   test('<invalid>', () => {

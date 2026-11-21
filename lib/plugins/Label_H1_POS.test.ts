@@ -181,8 +181,11 @@ describe('Label_H1 POS', () => {
     expect(decodeResult.raw.fuel_on_board).toBe(742);
     expect(decodeResult.raw.version).toBe(3.2);
     expect(decodeResult.raw.checksum).toBe(0x4e17);
-    expect(decodeResult.formatted.items.length).toBe(15);
-    expect(decodeResult.remaining.text).toBe('F37A#M1B/267070,T468');
+    expect(decodeResult.formatted.items.length).toBe(17);
+    expect(decodeResult.raw.wind_direction).toBe(267);
+    expect(decodeResult.raw.wind_speed).toBe(70);
+    expect(decodeResult.raw.airspeed).toBe(468);
+    expect(decodeResult.remaining.text).toBe('F37A#M1B/');
   });
 
   test('variant 8', () => {

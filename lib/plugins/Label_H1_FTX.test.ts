@@ -26,7 +26,7 @@ describe('Label_H1 FTX', () => {
       'FYI .. TAF KSUX 021720Z 0218 0318 20017G28KT P6SM SKC FM022200 22012G18KT P6SM SKC .. PUTS YOUR CXWIND AT 26KT ON RWY 13 .. REDUCES TO 18KT AT 22Z',
     );
     expect(decodeResult.raw.checksum).toBe(0x4fef);
-    expect(decodeResult.formatted.items.length).toBe(5);
+    expect(decodeResult.formatted.items.length).toBe(6);
     expect(decodeResult.formatted.description).toBeDefined();
   });
 

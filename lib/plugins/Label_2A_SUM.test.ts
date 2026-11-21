@@ -66,7 +66,7 @@ describe('Label 2A preamble SUM', () => {
     expect(decodeResult.raw.in_fuel).toBe(52100);
     expect(decodeResult.raw.version).toBe(3.2);
     expect(decodeResult.raw.checksum).toBe(0x0e8b);
-    expect(decodeResult.formatted.items.length).toBe(16);
+    expect(decodeResult.formatted.items.length).toBe(17);
     expect(decodeResult.remaining.text).toBe('M90/');
   });
 
