@@ -271,6 +271,14 @@ describe('MessageDecoder', () => {
       ).toThrow('Duplicate decoder plugin name: label-15');
     });
 
+    test('registerPlugin rejects a whitespace-padded duplicate name', () => {
+      const decoder = new MessageDecoder();
+      decoder.registerPlugin(new StubPlugin(decoder, ' stub-pad ', ['99']));
+      expect(() =>
+        decoder.registerPlugin(new StubPlugin(decoder, 'stub-pad', ['98'])),
+      ).toThrow('Duplicate decoder plugin name: stub-pad');
+    });
+
     test('registerPlugin adds to label index', () => {
       const decoder = new MessageDecoder();
       const stub = new StubPlugin(decoder, 'stub-99', ['99']);
@@ -443,6 +451,23 @@ describe('MessageDecoder with malformed messages', () => {
     expect(throwingCalls).toBe(1);
     expect(result.decoded).toBe(true);
     expect(result.decoder.name).toBe('catching');
+  });
+
+  test('a thrown value that cannot be printed does not escape decode()', () => {
+    const decoder = new MessageDecoder();
+    class Unprintable extends StubPlugin {
+      decode(): never {
+        throw {
+          toString() {
+            throw new Error('no string for you');
+          },
+        };
+      }
+    }
+    decoder.registerPlugin(new Unprintable(decoder, 'unprintable', ['ZZ']));
+    const result = decoder.decode({ label: 'ZZ', text: 'anything' });
+    expect(result.decoded).toBe(false);
+    expect(result.error).toContain('unprintable (unprintable error)');
   });
 
   test('a plugin that returns nothing does not throw out of decode()', () => {
