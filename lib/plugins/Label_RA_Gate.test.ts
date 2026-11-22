@@ -52,8 +52,19 @@ describe('Label RA gate', () => {
     expect(r.raw.message_timestamp).toBe(9 * 3600 + 14 * 60 + 42);
     expect(r.raw.arrival_gate).toBe('43');
     expect(r.raw.gate_status).toBe('OPEN');
-    expect(r.remaining.text).toContain('OPS FREQ   131.575');
-    expect(r.remaining.text).not.toContain('GATE 43');
+    expect(r.raw.ramp_frequency).toBeUndefined();
+    expect(r.raw.ops_frequency).toBe(131.575);
+    expect(r.raw.eon_time).toBe(10 * 3600 + 3 * 60);
+    expect(r.raw.ground_power).toBe('NO');
+    expect(r.raw.planned_ground_time).toBe('02:13');
+    // Only the next flight block is left.
+    expect(r.remaining.text).toBe('NEXT FLT UA0943/22\nLPPT KIAD ETD 1220Z');
+    expect(r.formatted.items.find((i) => i.code === 'EON')?.value).toBe(
+      '10:03:00',
+    );
+    expect(r.formatted.items.find((i) => i.code === 'OPSFREQ')?.value).toBe(
+      '131.575 MHz',
+    );
   });
 
   test('decodes United gate assignment with plain lines', () => {
@@ -65,6 +76,23 @@ describe('Label RA gate', () => {
     expect(r.raw.arrival_icao).toBe('KDEN');
     expect(r.raw.arrival_gate).toBe('B47');
     expect(r.raw.gate_status).toBe('OPEN');
+    expect(r.raw.ramp_frequency).toBe(130.95);
+    expect(r.raw.ops_frequency).toBeUndefined();
+    expect(r.raw.eon_time).toBe(12 * 3600 + 8 * 60);
+    expect(r.raw.ground_power).toBe('YES');
+    expect(r.raw.planned_ground_time).toBe('01:36');
+    expect(r.remaining.text).toBe('NEXT FLT UA1127/09\nKDEN KSN');
+  });
+
+  test('does not take a gate from the United next flight block', () => {
+    const r = plugin.decode({
+      label: 'RA',
+      text: UNITED_PLAIN.replace('KDEN KSN', 'KDEN KSNA\r\nGATE C12   OPEN'),
+    });
+    expect(r.raw.arrival_gate).toBe('B47');
+    expect(r.remaining.text).toBe(
+      'NEXT FLT UA1127/09\nKDEN KSNA\nGATE C12   OPEN',
+    );
   });
 
   test('decodes United gate available later', () => {
@@ -73,6 +101,9 @@ describe('Label RA gate', () => {
     expect(r.raw.arrival_icao).toBe('PHNL');
     expect(r.raw.arrival_gate).toBe('G5');
     expect(r.raw.gate_status).toBe('AVAIL 06:30');
+    expect(r.raw.ramp_frequency).toBe(121.9);
+    expect(r.raw.ops_frequency).toBe(130.3);
+    expect(r.raw.eon_time).toBe(6 * 3600 + 39 * 60);
   });
 
   test('decodes United gate change, ignoring the crew alert line', () => {

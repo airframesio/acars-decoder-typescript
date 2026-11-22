@@ -15,6 +15,15 @@ const UNITED_FLIGHT =
 const UNITED_SENT = /^SENT:\s*(\d{2}):(\d{2}):(\d{2})Z$/;
 // "GATE 43    OPEN" or "GATE G5    AVAIL 06:30"
 const UNITED_GATE = new RegExp(`^GATE\\s+(${GATE})(?:\\s+(\\S.*))?$`);
+// "RAMP FREQ  130.950" / "OPS FREQ   131.575", either may be blank.
+const UNITED_FREQ = /^(RAMP|OPS) FREQ(?:\s+(\d+\.\d+))?$/;
+// Expected on (touchdown) time at the arrival airport.
+const UNITED_EON = /^EON\s+(\d{2})(\d{2})Z$/;
+const UNITED_GROUND_POWER = /^GROUND PWR AVAIL\s+-([A-Z]+)-$/;
+// "PLANNED GROUND TIME" then "IS 01:36" on the next line.
+const UNITED_GROUND_TIME = /^IS\s+(\d{2}:\d{2})$/;
+// The rest of the message is about the aircraft's next flight.
+const UNITED_NEXT_FLIGHT = /^NEXT FLT\b/;
 
 // Republic: "QUHDQDDRP~1ARRIVAL GATE" then "INFORMATION", then
 // "RPA N401YX YX4450 ORD MSN ETA = 0542 GATE = 16" (IATA airports).
@@ -78,12 +87,20 @@ export class Label_RA_Gate extends DecoderPlugin {
     let sent: RegExpExecArray | null = null;
     let gate: RegExpExecArray | null = null;
     let gateIdx = -1;
+    let eon: RegExpExecArray | null = null;
+    let groundPower: RegExpExecArray | null = null;
+    let groundTime: RegExpExecArray | null = null;
+    const freqs: Record<string, string> = {};
     const used = new Set<number>([0]);
     for (let i = 1; i < lines.length; i++) {
       if (!flight) {
         flight = UNITED_FLIGHT.exec(lines[i]);
         if (flight) used.add(i);
         continue;
+      }
+      // The next flight can name its own gate: leave that block unread.
+      if (UNITED_NEXT_FLIGHT.test(lines[i])) {
+        break;
       }
       if (!sent) {
         sent = UNITED_SENT.exec(lines[i]);
@@ -96,6 +113,34 @@ export class Label_RA_Gate extends DecoderPlugin {
       if (m) {
         gate = m;
         gateIdx = i;
+        continue;
+      }
+      const f = UNITED_FREQ.exec(lines[i]);
+      if (f) {
+        if (f[2]) freqs[f[1]] = f[2];
+        used.add(i);
+        continue;
+      }
+      const e = UNITED_EON.exec(lines[i]);
+      if (e) {
+        eon = e;
+        used.add(i);
+        continue;
+      }
+      const p = UNITED_GROUND_POWER.exec(lines[i]);
+      if (p) {
+        groundPower = p;
+        used.add(i);
+        continue;
+      }
+      if (lines[i] === 'PLANNED GROUND TIME') {
+        const t = UNITED_GROUND_TIME.exec(lines[i + 1] ?? '');
+        if (t) {
+          groundTime = t;
+          used.add(i);
+          used.add(i + 1);
+          i++;
+        }
       }
     }
     if (!flight || !gate) {
@@ -125,6 +170,55 @@ export class Label_RA_Gate extends DecoderPlugin {
         'GATESTAT',
         'Gate Status',
         gate[2].trim(),
+      );
+    }
+    if (eon) {
+      const tod = DateTimeUtils.convertHHMMSSToTod(eon[1] + eon[2]);
+      ResultFormatter.raw(
+        decodeResult,
+        'eon_time',
+        'EON',
+        'Estimated On Time',
+        DateTimeUtils.timestampToString(tod),
+        tod,
+      );
+    }
+    if (freqs.RAMP) {
+      ResultFormatter.raw(
+        decodeResult,
+        'ramp_frequency',
+        'RAMPFREQ',
+        'Ramp Frequency',
+        `${freqs.RAMP} MHz`,
+        Number(freqs.RAMP),
+      );
+    }
+    if (freqs.OPS) {
+      ResultFormatter.raw(
+        decodeResult,
+        'ops_frequency',
+        'OPSFREQ',
+        'Operations Frequency',
+        `${freqs.OPS} MHz`,
+        Number(freqs.OPS),
+      );
+    }
+    if (groundPower) {
+      ResultFormatter.raw(
+        decodeResult,
+        'ground_power',
+        'GNDPWR',
+        'Ground Power Available',
+        groundPower[1],
+      );
+    }
+    if (groundTime) {
+      ResultFormatter.raw(
+        decodeResult,
+        'planned_ground_time',
+        'GNDTIME',
+        'Planned Ground Time',
+        groundTime[1],
       );
     }
     return this.finish(decodeResult, lines, used);
