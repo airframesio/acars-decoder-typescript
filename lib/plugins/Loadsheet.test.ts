@@ -793,6 +793,27 @@ describe('Loadsheet', () => {
     });
   });
 
+  test('decodes synthetic: Max after an index is not a maximum', () => {
+    const result = decoder.decode({
+      label: 'RA',
+      text: 'LOADSHEET FINAL 0900 EDNO 1\nD0123/21 21NOV26\nZFW   272172  17,42 Max\nTOW   297997  36,27 Op. Max',
+    });
+    expect(result.decoded).toBe(true);
+    expect(result.raw.loadsheet).toEqual({
+      kind: 'loadsheet',
+      status: 'final',
+      edition: 1,
+      time: '0900',
+      flight_number: 'D0123',
+      flight_day: 21,
+      date: '2026-11-21',
+      zfw: 272172,
+      li_zfw: 17.42,
+      tow: 297997,
+      li_tow: 36.27,
+    });
+  });
+
   test('labels the passenger total as including infants', () => {
     const result = decoder.decode({
       label: 'RA',

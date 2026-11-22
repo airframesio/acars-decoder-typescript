@@ -174,7 +174,8 @@ const COLUMN_INDEX: [RegExp, IndexField][] = [
   [/^(?:LAW|LDW|LDG|LW) MAC:?\s+(\d+[.,]\d+)(?:\s|$)/, 'mac_law'],
 ];
 const MAX_BEFORE = /\bM(?:AX)?\s*(\d+)/;
-const MAX_AFTER = /\b(\d+)\s+(?:Op\.\s+)?Max\b/i;
+// Not the fraction of an index (17,42 Max closes the index, no maximum).
+const MAX_AFTER = /(?<![.,\d])(\d+)\s+(?:Op\.\s+)?Max\b/i;
 
 /**
  * Cheap check: could this text hold a loadsheet? Substring scans (plus the LS
