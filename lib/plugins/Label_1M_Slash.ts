@@ -30,7 +30,7 @@ export class Label_1M_Slash extends DecoderPlugin {
 
       decodeResult.raw.flight_number = results[0];
       // results[1]: ETA01 (???)
-      // results[2]: 230822 - UTC date of eta
+      // results[2]: 230822 - UTC date of eta (DDMMYY)
       ResultFormatter.departureAirport(decodeResult, results[3]);
       ResultFormatter.arrivalAirport(decodeResult, results[4]);
       ResultFormatter.alternateAirport(decodeResult, results[5]);
@@ -42,15 +42,11 @@ export class Label_1M_Slash extends DecoderPlugin {
       ); // results[8] EGLL27L
       // results[9]: 10(space) (???)
 
-      const yymmdd = results[2];
+      // results[2] is the UTC date as DDMMYY: Finnair '221126' was sent on
+      // 22 Nov 2026
       ResultFormatter.eta(
         decodeResult,
-        DateTimeUtils.convertDateTimeToEpoch(
-          results[7] + '00',
-          yymmdd.substring(4, 6) +
-            yymmdd.substring(2, 4) +
-            yymmdd.substring(0, 2),
-        ),
+        DateTimeUtils.convertDateTimeToEpoch(results[7] + '00', results[2]),
       );
     }
 
