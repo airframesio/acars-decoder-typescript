@@ -20,39 +20,44 @@ export class Label_1M_Slash extends DecoderPlugin {
     decodeResult.message = message;
 
     // Style: /BA0843/ETA01/230822/LDSP/EGLL/EGSS/2JK0(NEW LINE)1940/EGLL27L/10
-    const results = message.text.split(/\n|\//).slice(1); // Split by / and new line
+    const results = message.text.split(/\r?\n|\//).slice(1); // Split by / and new line
 
-    if (results) {
-      if (options.debug) {
-        console.log('Label 1M ETA: results');
-        console.log(results);
-      }
-
-      decodeResult.raw.flight_number = results[0];
-      // results[1]: ETA01 (???)
-      // results[2]: 230822 - UTC date of eta
-      ResultFormatter.departureAirport(decodeResult, results[3]);
-      ResultFormatter.arrivalAirport(decodeResult, results[4]);
-      ResultFormatter.alternateAirport(decodeResult, results[5]);
-      // results[6]: 2JK0 (???)
-      // results[7] 1940 - UTC eta
-      ResultFormatter.arrivalRunway(
-        decodeResult,
-        results[8].replace(results[4], ''),
-      ); // results[8] EGLL27L
-      // results[9]: 10(space) (???)
-
-      const yymmdd = results[2];
-      ResultFormatter.eta(
-        decodeResult,
-        DateTimeUtils.convertDateTimeToEpoch(
-          results[7] + '00',
-          yymmdd.substring(4, 6) +
-            yymmdd.substring(2, 4) +
-            yymmdd.substring(0, 2),
-        ),
-      );
+    if (
+      results.length < 9 ||
+      !/^\d{6}$/.test(results[2]) ||
+      !/^([01]\d|2[0-3])[0-5]\d$/.test(results[7])
+    ) {
+      ResultFormatter.unknown(decodeResult, message.text);
+      decodeResult.decoded = false;
+      decodeResult.decoder.decodeLevel = 'none';
+      return decodeResult;
     }
+
+    if (options.debug) {
+      console.log('Label 1M ETA: results');
+      console.log(results);
+    }
+
+    decodeResult.raw.flight_number = results[0];
+    // results[1]: ETA01 (???)
+    // results[2]: 230822 - UTC date of eta (DDMMYY)
+    ResultFormatter.departureAirport(decodeResult, results[3]);
+    ResultFormatter.arrivalAirport(decodeResult, results[4]);
+    ResultFormatter.alternateAirport(decodeResult, results[5]);
+    // results[6]: 2JK0 (???)
+    // results[7] 1940 - UTC eta
+    ResultFormatter.arrivalRunway(
+      decodeResult,
+      results[8].replace(results[4], ''),
+    ); // results[8] EGLL27L
+    // results[9]: 10(space) (???)
+
+    // results[2] is the UTC date as DDMMYY: Finnair '221126' was sent on
+    // 22 Nov 2026
+    ResultFormatter.eta(
+      decodeResult,
+      DateTimeUtils.convertDateTimeToEpoch(results[7] + '00', results[2]),
+    );
 
     decodeResult.decoded = true;
     decodeResult.decoder.decodeLevel = 'partial';
