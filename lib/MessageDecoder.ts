@@ -212,7 +212,21 @@ export class MessageDecoder {
       if (!this.matchesPreambles(text, entry.preambles)) {
         continue;
       }
-      const pluginResult = entry.plugin.decode(message, options);
+      let pluginResult: DecodeResult;
+      try {
+        pluginResult = entry.plugin.decode(message, options);
+      } catch (error) {
+        // Message text comes off the air and can be anything. A plugin that
+        // trips over an unexpected shape must not take the caller down with
+        // it: treat it as "not this plugin" and keep trying the others.
+        if (options.debug) {
+          console.log(
+            `Plugin ${(entry.plugin as { name?: string }).name ?? '?'} threw`,
+            error,
+          );
+        }
+        continue;
+      }
       if (pluginResult.decoded) {
         result = pluginResult;
         break;
