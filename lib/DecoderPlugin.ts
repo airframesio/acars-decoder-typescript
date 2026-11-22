@@ -11,13 +11,14 @@ import { MessageDecoder } from './MessageDecoder';
 export abstract class DecoderPlugin implements DecoderPluginInterface {
   decoder!: MessageDecoder;
 
-  name: string = 'unknown';
+  /** Plugin id, reported in DecodeResult.decoder.name. Every plugin sets its own. */
+  abstract name: string;
 
   defaultResult(): DecodeResult {
     return {
       decoded: false,
       decoder: {
-        name: 'unknown',
+        name: this.name,
         type: 'pattern-match',
         decodeLevel: 'none',
       },

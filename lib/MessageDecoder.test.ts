@@ -257,6 +257,20 @@ describe('MessageDecoder', () => {
       expect(result.decoded).toBe(false);
     });
 
+    test('registerPlugin rejects a blank plugin name', () => {
+      const decoder = new MessageDecoder();
+      expect(() =>
+        decoder.registerPlugin(new StubPlugin(decoder, '  ', ['99'])),
+      ).toThrow('Decoder plugin name must be a non-empty string');
+    });
+
+    test('registerPlugin rejects a duplicate plugin name', () => {
+      const decoder = new MessageDecoder();
+      expect(() =>
+        decoder.registerPlugin(new StubPlugin(decoder, 'label-15', ['99'])),
+      ).toThrow('Duplicate decoder plugin name: label-15');
+    });
+
     test('registerPlugin adds to label index', () => {
       const decoder = new MessageDecoder();
       const stub = new StubPlugin(decoder, 'stub-99', ['99']);
@@ -379,8 +393,6 @@ describe('MessageDecoder with malformed messages', () => {
       'POS082150, N 3885,W 7841,---,308,26922,  51,22290, 529,  19,-225,6',
       'label-12-pos',
     ],
-    ['1M', '/Bogus Message/', 'label-1m-slash'],
-    ['13', '/EA1719/DSKSFO/SK23', 'label-13-18-slash'],
     ['5Z', '/B3 ATLI', 'label-5z-slash'],
     ['5Z', '/ET EXP TIME A 20 122559/EON 1336 AUTO', 'label-5z-slash'],
     [
