@@ -67,6 +67,20 @@ describe('Label 10 PAD11', () => {
     expect(result.remaining.text).toBe('DLY 0022 93 0015 89 0007');
   });
 
+  test('only takes the 4PAD11 slot uplink', () => {
+    const result = new MessageDecoder().decode({
+      label: '10',
+      text: '5PAD11/SLOT\n\tIB154 ECOOL\n\tSTD 0335 STA 1310\n\tATD 0357\n\t',
+    });
+    expect(result.decoder.name).not.toBe('label-10-pad11');
+    expect(
+      plugin.decode({
+        label: '10',
+        text: '5PAD11/SLOT\n\tIB154 ECOOL\n\tSTD 0335 STA 1310\n\tATD 0357\n\t',
+      }).decoded,
+    ).toBe(false);
+  });
+
   test('does not decode other PAD11 uplinks', () => {
     for (const text of [
       ':PAD11\r\nPDC/ASAT RECEIVED',

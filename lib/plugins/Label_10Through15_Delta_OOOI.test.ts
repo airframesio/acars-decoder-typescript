@@ -212,6 +212,7 @@ describe('Labels 10-15 Delta OOOI reports', () => {
     expect(out.raw.day).toBeUndefined();
     expect(out.raw.departure_icao).toBeUndefined();
     expect(out.raw.flight_number).toBeUndefined();
+    expect(out.raw.flight_number).toBeUndefined();
 
     const off = plugin.decode({
       label: '10',
@@ -252,6 +253,15 @@ describe('Labels 10-15 Delta OOOI reports', () => {
     expect(off.decoded).toBe(true);
     expect(off.raw.off_time).toBeUndefined();
     expect(off.raw.out_time).toBe(1 * 3600 + 55 * 60);
+    expect(off.formatted.description).toBe('Out of Gate Report');
+
+    const decoded = new MessageDecoder().decode({
+      label: '10',
+      text: '  0110 ---- ----6\r\n0000----0196------------01550155            ',
+    });
+    expect(decoded.decoded).toBe(true);
+    expect(decoded.decoder.name).toBe('label-10-15-delta-oooi');
+    expect(decoded.raw.flight_number).toBeUndefined();
   });
 
   test('does not decode a delay remark', () => {

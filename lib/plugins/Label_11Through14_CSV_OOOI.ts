@@ -17,7 +17,7 @@ const REPORT_REGEX =
 // End of flight summary, label 16: OUT, OFF, ON, IN on the second line.
 //   'CAR,V03,CX 181 20261122 1,CX0181,22NOV26,VHHH,YSSY,01,Y\r\n1655,1721,0151,0157,1655,0829,---,...'
 const CAR_REGEX =
-  /^CAR,(?<version>V\d{2}),(?<airline>[A-Z0-9]{2}) ?(?<number>\d{1,4}) *(?<date>\d{8}) (?<seq>\d),[A-Z0-9]*,\d{2}[A-Z]{3}\d{2},(?<origin>[A-Z0-9]{4}|-{4}),(?<destination>[A-Z0-9]{4}|-{4}),\d{2},[A-Z]\r?\n(?<out>[\d-]{4}),(?<off>[\d-]{4}),(?<on>[\d-]{4}),(?<in>[\d-]{4}),(?<rest>[\s\S]*)$/;
+  /^CAR,(?<version>V\d{2}),(?<airline>[A-Z0-9]{2}) ?(?<number>\d{1,4}) *(?<date>\d{8}) (?<seq>\d),(?<flight2>[A-Z0-9]*),(?<date2>\d{2}[A-Z]{3}\d{2}),(?<origin>[A-Z0-9]{4}|-{4}),(?<destination>[A-Z0-9]{4}|-{4}),(?<field8>\d{2}),(?<field9>[A-Z])\r?\n(?<out>[\d-]{4}),(?<off>[\d-]{4}),(?<on>[\d-]{4}),(?<in>[\d-]{4}),(?<rest>[\s\S]*)$/;
 
 const CLOCK_REGEX = /^([01]\d|2[0-3])[0-5]\d$/;
 
@@ -143,6 +143,7 @@ export class Label_11Through14_CSV_OOOI extends DecoderPlugin {
       ResultFormatter.on,
       ResultFormatter.in,
     ];
+    const unknownTimes: string[] = [];
     times.forEach((time, i) => {
       if (CLOCK_REGEX.test(time)) {
         add[i].call(
@@ -150,10 +151,38 @@ export class Label_11Through14_CSV_OOOI extends DecoderPlugin {
           decodeResult,
           DateTimeUtils.convertHHMMSSToTod(time),
         );
+      } else if (!/^-+$/.test(time)) {
+        unknownTimes.push(time);
       }
     });
     ResultFormatter.unknown(decodeResult, groups.version);
     ResultFormatter.unknown(decodeResult, groups.seq);
+    // The repeated flight and date are kept only when they differ.
+    const months = 'JANFEBMARAPRMAYJUNJULAUGSEPOCTNOVDEC';
+    const date2 =
+      groups.date2.substring(5) +
+      String(months.indexOf(groups.date2.substring(2, 5)) / 3 + 1).padStart(
+        2,
+        '0',
+      ) +
+      groups.date2.substring(0, 2);
+    if (date2 !== groups.date.substring(2)) {
+      ResultFormatter.unknown(decodeResult, groups.date2);
+    }
+    const flight2 = /^(?<airline>[A-Z0-9]{2})(?<number>\d{1,4})$/.exec(
+      groups.flight2,
+    )?.groups;
+    if (
+      !flight2 ||
+      flight2.airline !== groups.airline ||
+      Number(flight2.number) !== Number(groups.number)
+    ) {
+      ResultFormatter.unknown(decodeResult, groups.flight2);
+    }
+    // Not known yet.
+    ResultFormatter.unknown(decodeResult, groups.field8);
+    ResultFormatter.unknown(decodeResult, groups.field9);
+    unknownTimes.forEach((t) => ResultFormatter.unknown(decodeResult, t));
     if (groups.rest.trim()) {
       ResultFormatter.unknown(decodeResult, groups.rest.trim());
     }

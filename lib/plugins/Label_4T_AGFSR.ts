@@ -27,9 +27,10 @@ export class Label_4T_AGFSR extends DecoderPlugin {
     decodeResult.message = message;
 
     const data = message.text.substring(5).split('/');
-    // The phase can hold a '/' ('TAXI/I').
-    if (data.length === 21) {
-      data.splice(8, 2, `${data[8]}/${data[9]}`);
+    // The phase can hold a '/' ('TAXI/I'). Any other extra '/' shifts the
+    // fields, so that message is left undecoded.
+    if (data.length === 21 && data[8] === 'TAXI' && data[9] === 'I') {
+      data.splice(8, 2, 'TAXI/I');
     }
 
     if (!message.text.startsWith('AGFSR') || data.length !== 20) {

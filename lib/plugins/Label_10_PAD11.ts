@@ -26,7 +26,7 @@ const CDM_REGEX =
 const SLOT_CHANGE_REGEX =
   /^:PAD11\r?\nSLOT CHANGE\r?\n(?<flight>\d{1,4}) +(?<dep>[A-Z]{3}) - (?<arr>[A-Z]{3})\r?\n[\s\S]*?^EOBT: (?<eobt>\d{4})\b/m;
 const SLOT_REGEX =
-  /^\dPAD11\/SLOT\r?\n\t?(?<flight>[A-Z0-9]{2}\d{1,4}) (?<tail>[A-Z0-9]{4,6})\r?\n\t?STD (?<std>\d{4}) STA (?<sta>\d{4})\r?\n\t?ATD (?<atd>\d{4})\b(?<rest>[\s\S]*)$/;
+  /^4PAD11\/SLOT\r?\n\t?(?<flight>[A-Z0-9]{2}\d{1,4}) (?<tail>[A-Z0-9]{4,6})\r?\n\t?STD (?<std>\d{4}) STA (?<sta>\d{4})\r?\n\t?ATD (?<atd>\d{4})\b(?<rest>[\s\S]*)$/;
 
 const CLOCK_REGEX = /^([01]\d|2[0-3])[0-5]\d$/;
 

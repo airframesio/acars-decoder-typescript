@@ -127,6 +127,16 @@ describe('Label 4T ETA', () => {
     );
   });
 
+  test('does not decode a report with another extra slash', () => {
+    for (const text of [
+      'AGFSR AC0842/21/22/YYZFRA/0853Z/839/5146.5N00231.5W/389/CRUISE/0137/0342/M54/277016/0261/112/500/0242/0257/****/****/',
+      'AGFSR AC0842/21/22/YYZFRA/0853Z/839/5146.5N00231.5W/389/CRUISE/0137/0342/M54/277016/0261/112/5/00/0242/0257/****/****',
+    ]) {
+      message.text = text;
+      expect(plugin.decode(message).decoded).toBe(false);
+    }
+  });
+
   test('decodes from MessageDecoder', () => {
     const decoder = new MessageDecoder();
     const decodeResult = decoder.decode({
