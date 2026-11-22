@@ -7,6 +7,8 @@ import { ResultFormatter } from '../utils/result_formatter';
 const WS_REGEX = /\s+/;
 const ALL_WS_REGEX = /\s/g;
 const ALL_DOTS_REGEX = /\./g;
+const SAS_ETA_REGEX =
+  /^(V\d{2}CA\d{3})\/(ETA-\d{2})\/((?:[01]\d|2[0-3])[0-5]\d)\/(.*)$/s;
 
 export class Label_83 extends DecoderPlugin {
   name = 'label-83';
@@ -25,7 +27,20 @@ export class Label_83 extends DecoderPlugin {
 
     decodeResult.decoded = true;
     const text = message.text;
-    if (text.startsWith('4DH3 ETAT2')) {
+    const sasEta = SAS_ETA_REGEX.exec(text);
+    if (sasEta) {
+      // SAS, about 30 minutes before arrival: 'V09CA033/ETA-30/0550/'
+      decodeResult.formatted.description = 'ETA Report';
+      ResultFormatter.unknown(decodeResult, sasEta[1], '/');
+      ResultFormatter.unknown(decodeResult, sasEta[2], '/');
+      ResultFormatter.eta(
+        decodeResult,
+        DateTimeUtils.convertHHMMSSToTod(sasEta[3]),
+      );
+      if (sasEta[4]) {
+        ResultFormatter.unknown(decodeResult, sasEta[4], '/');
+      }
+    } else if (text.startsWith('4DH3 ETAT2')) {
       // variant 2
       const fields = text.split(WS_REGEX);
       if (fields[2].length > 5) {

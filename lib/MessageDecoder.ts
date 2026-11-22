@@ -18,14 +18,19 @@ const pluginClasses = [
   Plugins.Loadsheet,
   Plugins.Label_ColonComma,
   Plugins.Label_5Z_Slash,
+  Plugins.Label_10Through15_Delta_OOOI,
   Plugins.Label_10_LDR,
   Plugins.Label_10_LRW,
   Plugins.Label_10_POS,
   Plugins.Label_10_Slash,
+  Plugins.Label_10_PAD11,
   Plugins.Label_11_LDR,
   Plugins.Label_11_LRW,
   Plugins.Label_12_N_Space,
   Plugins.Label_12_POS,
+  Plugins.Label_11Through14_OOOI,
+  Plugins.Label_10Through14_OOOI_Day,
+  Plugins.Label_11Through14_CSV_OOOI,
   Plugins.Label_13Through18_Slash,
   Plugins.Label_15,
   Plugins.Label_15_FST,
@@ -64,6 +69,8 @@ const pluginClasses = [
   Plugins.Label_4N,
   Plugins.Label_4T_AGFSR,
   Plugins.Label_4T_ETA,
+  Plugins.Label_4T_PSHBK,
+  Plugins.Label_4T_ATD_ARV,
   Plugins.Label_B6_Forwardslash,
   Plugins.Label_H1_76401,
   Plugins.Label_H1_A02,
@@ -80,12 +87,22 @@ const pluginClasses = [
   Plugins.Label_H2_02E,
   Plugins.Label_HX,
   Plugins.Label_58,
+  Plugins.Label_8B_OFFRP,
+  Plugins.Label_10_ETA,
+  Plugins.Label_11_INRANG,
+  Plugins.Label_14_PPR,
+  Plugins.Label_3A_ETA,
+  Plugins.Label_81_TRAKK,
+  Plugins.Label_FPR,
+  Plugins.Label_C1_Part117,
   Plugins.Label_80,
   Plugins.Label_83,
   Plugins.Label_8E,
   Plugins.Label_1M_Slash,
   Plugins.Label_MA,
   Plugins.Label_SQ,
+  Plugins.Label_QE_Report,
+  Plugins.Label_QE_Station,
   Plugins.Label_QP,
   Plugins.Label_QQ,
   Plugins.Label_QR,
@@ -126,6 +143,18 @@ export class MessageDecoder {
   }
 
   registerPlugin(plugin: DecoderPluginInterface): boolean {
+    const name = typeof plugin.name === 'string' ? plugin.name.trim() : '';
+    if (!name) {
+      throw new Error('Decoder plugin name must be a non-empty string');
+    }
+    if (
+      this.plugins.some(
+        (existing) =>
+          typeof existing.name === 'string' && existing.name.trim() === name,
+      )
+    ) {
+      throw new Error(`Duplicate decoder plugin name: ${name}`);
+    }
     this.plugins.push(plugin);
 
     const qualifiers = plugin.qualifiers();
@@ -209,16 +238,47 @@ export class MessageDecoder {
       },
     };
 
+    // Plugins that threw on this message, reported in result.error when
+    // nothing else decodes it.
+    const pluginFailures: string[] = [];
+
     for (let i = 0; i < candidates.length; i++) {
       const entry = candidates[i];
       if (!this.matchesPreambles(text, entry.preambles)) {
         continue;
       }
-      const pluginResult = entry.plugin.decode(message, options);
-      if (pluginResult.decoded) {
+      let pluginResult: DecodeResult | undefined;
+      try {
+        pluginResult = entry.plugin.decode(message, options);
+      } catch (error) {
+        // Message text comes off the air and can be anything. A plugin that
+        // trips over an unexpected shape must not take the caller down with
+        // it: treat it as "not this plugin" and keep trying the others.
+        const name = entry.plugin.name || 'unknown';
+        let detail: string;
+        try {
+          detail =
+            error instanceof Error
+              ? `${error.name}: ${error.message}`
+              : String(error);
+        } catch {
+          // A thrown value whose toString (or message getter) throws too.
+          detail = 'unprintable error';
+        }
+        pluginFailures.push(`${name} (${detail.slice(0, 200)})`);
+        if (options.debug) {
+          console.log(`Plugin ${name} threw`, error);
+        }
+        continue;
+      }
+      if (pluginResult?.decoded) {
         result = pluginResult;
         break;
       }
+    }
+
+    if (!result.decoded && pluginFailures.length > 0) {
+      result.error = `Decoder plugin failed: ${pluginFailures.join('; ')}`;
     }
 
     if (options.debug) {

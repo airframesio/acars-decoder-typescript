@@ -4,6 +4,18 @@ import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
 import { CoordinateUtils } from '../utils/coordinate_utils';
 import { ResultFormatter } from '../utils/result_formatter';
 
+const IN_TIME_REGEX = /^(?:IN )?TIME ?(\d{4}(?:\d{2})?)\s*$/;
+const FLIGHT_TIME_REGEX = /^\/M1[3-6] (OUT|OFF|ON|IN) TIME (\d{6})\s*$/;
+// hhmm or hhmmss with hours 00-23 and minutes/seconds 00-59
+const CLOCK_REGEX = /^([01]\d|2[0-3])[0-5]\d(?:[0-5]\d)?$/;
+
+// time of day in seconds, or NaN when the token is missing or not a clock
+function clockToTod(token: string | undefined): number {
+  return token !== undefined && CLOCK_REGEX.test(token)
+    ? DateTimeUtils.convertHHMMSSToTod(token)
+    : NaN;
+}
+
 export class Label_13Through18_Slash extends DecoderPlugin {
   name = 'label-13-18-slash';
 
@@ -19,15 +31,20 @@ export class Label_13Through18_Slash extends DecoderPlugin {
     decodeResult.decoder.name = this.name;
     decodeResult.message = message;
 
-    const lines = message.text.split('\r\n');
+    const lines = message.text.split(/\r?\n/);
     const parts = lines[0].split('/');
     const labelNumber = Number(parts[1].substring(0, 2));
     decodeResult.formatted.description = getMsgType(labelNumber);
 
-    // labels 13-17 have 4 parts, label 18 has 7 parts
+    // labels 13-17 have 4 parts, label 18 has 7 parts,
+    // or 3 parts when the flight times follow on their own lines
+    const flightTimes =
+      labelNumber === 18 &&
+      parts.length === 3 &&
+      parts[1].includes('FLT TIMES');
     if (
       (labelNumber !== 18 && parts.length !== 4) ||
-      (labelNumber === 18 && parts.length !== 7)
+      (labelNumber === 18 && parts.length !== 7 && !flightTimes)
     ) {
       if (options?.debug) {
         console.log(`Decoder: Unknown OOOI message: ${message.text}`);
@@ -43,7 +60,12 @@ export class Label_13Through18_Slash extends DecoderPlugin {
     ResultFormatter.departureAirport(decodeResult, data[1]);
     ResultFormatter.arrivalAirport(decodeResult, data[2]);
     decodeResult.raw.day = Number(data[3]);
-    const time = DateTimeUtils.convertHHMMSSToTod(data[4]);
+    // the 3-part FLT TIMES header may end before the clock (or with a
+    // trailing space, which leaves an empty token)
+    const time = clockToTod(data[4]);
+    if (data[4] && isNaN(time)) {
+      ResultFormatter.unknown(decodeResult, data[4], ' ');
+    }
     if (labelNumber === 13) {
       ResultFormatter.out(decodeResult, time);
     } else if (labelNumber === 14) {
@@ -52,6 +74,20 @@ export class Label_13Through18_Slash extends DecoderPlugin {
       ResultFormatter.on(decodeResult, time);
     } else if (labelNumber === 16) {
       ResultFormatter.in(decodeResult, time);
+    } else {
+      // labels 17 and 18 report the event times separately
+      ResultFormatter.timestamp(decodeResult, time);
+    }
+
+    if (labelNumber === 17 || labelNumber === 18) {
+      // post reports carry the IN time: '/TIME 2140' (17), '/IN TIME0428' (18)
+      const inTime = IN_TIME_REGEX.exec(parts[3] ?? '');
+      const inTod = clockToTod(inTime?.[1]);
+      if (!isNaN(inTod)) {
+        ResultFormatter.in(decodeResult, inTod);
+      } else if (parts[3]) {
+        ResultFormatter.unknown(decodeResult, parts[3], '/');
+      }
     }
 
     if (parts.length === 7) {
@@ -59,7 +95,16 @@ export class Label_13Through18_Slash extends DecoderPlugin {
     }
 
     for (let i = 1; i < lines.length; i++) {
-      if (lines[i].startsWith('/LOC')) {
+      const flightTime = FLIGHT_TIME_REGEX.exec(lines[i]);
+      const tod = clockToTod(flightTime?.[2]);
+      if (flightTime && !isNaN(tod)) {
+        // '/M13 OUT TIME 221610'
+        if (flightTime[1] === 'OUT') ResultFormatter.out(decodeResult, tod);
+        else if (flightTime[1] === 'OFF')
+          ResultFormatter.off(decodeResult, tod);
+        else if (flightTime[1] === 'ON') ResultFormatter.on(decodeResult, tod);
+        else ResultFormatter.in(decodeResult, tod);
+      } else if (lines[i].startsWith('/LOC')) {
         const location = lines[i].substring(5).split(','); // strip off '/LOC'
         let position;
         if (location[0].startsWith('+') || location[0].startsWith('-')) {

@@ -111,4 +111,27 @@ describe('Label 83', () => {
     expect(decodeResult.formatted.description).toBe('Airline Defined');
     expect(decodeResult.formatted.items.length).toBe(0);
   });
+  test('decodes a SAS ETA report', () => {
+    // Production message, 2026-11-22
+    const decodeResult = plugin.decode({
+      label: '83',
+      text: 'V09CA033/ETA-30/0550/',
+    });
+
+    expect(decodeResult.decoded).toBe(true);
+    expect(decodeResult.decoder.decodeLevel).toBe('partial');
+    expect(decodeResult.formatted.description).toBe('ETA Report');
+    expect(decodeResult.raw.eta_time).toBe(21000);
+    expect(decodeResult.remaining.text).toBe('V09CA033/ETA-30');
+  });
+
+  test('is the plugin MessageDecoder picks for label 83', () => {
+    const result = new MessageDecoder().decode({
+      label: '83',
+      text: 'V09CA033/ETA-30/0550/',
+    });
+
+    expect(result.decoded).toBe(true);
+    expect(result.decoder.name).toBe('label-83');
+  });
 });
