@@ -257,6 +257,20 @@ describe('MessageDecoder', () => {
       expect(result.decoded).toBe(false);
     });
 
+    test('registerPlugin rejects a blank plugin name', () => {
+      const decoder = new MessageDecoder();
+      expect(() =>
+        decoder.registerPlugin(new StubPlugin(decoder, '  ', ['99'])),
+      ).toThrow('Decoder plugin name must be a non-empty string');
+    });
+
+    test('registerPlugin rejects a duplicate plugin name', () => {
+      const decoder = new MessageDecoder();
+      expect(() =>
+        decoder.registerPlugin(new StubPlugin(decoder, 'label-15', ['99'])),
+      ).toThrow('Duplicate decoder plugin name: label-15');
+    });
+
     test('registerPlugin adds to label index', () => {
       const decoder = new MessageDecoder();
       const stub = new StubPlugin(decoder, 'stub-99', ['99']);

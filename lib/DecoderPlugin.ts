@@ -18,7 +18,7 @@ export abstract class DecoderPlugin implements DecoderPluginInterface {
     return {
       decoded: false,
       decoder: {
-        name: 'unknown',
+        name: this.name,
         type: 'pattern-match',
         decodeLevel: 'none',
       },

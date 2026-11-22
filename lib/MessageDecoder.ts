@@ -124,6 +124,13 @@ export class MessageDecoder {
   }
 
   registerPlugin(plugin: DecoderPluginInterface): boolean {
+    const name = typeof plugin.name === 'string' ? plugin.name.trim() : '';
+    if (!name) {
+      throw new Error('Decoder plugin name must be a non-empty string');
+    }
+    if (this.plugins.some((existing) => existing.name === name)) {
+      throw new Error(`Duplicate decoder plugin name: ${name}`);
+    }
     this.plugins.push(plugin);
 
     const qualifiers = plugin.qualifiers();
