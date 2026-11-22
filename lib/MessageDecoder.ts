@@ -225,16 +225,41 @@ export class MessageDecoder {
       },
     };
 
+    // Plugins that threw on this message, reported in result.error when
+    // nothing else decodes it.
+    const pluginFailures: string[] = [];
+
     for (let i = 0; i < candidates.length; i++) {
       const entry = candidates[i];
       if (!this.matchesPreambles(text, entry.preambles)) {
         continue;
       }
-      const pluginResult = entry.plugin.decode(message, options);
-      if (pluginResult.decoded) {
+      let pluginResult: DecodeResult | undefined;
+      try {
+        pluginResult = entry.plugin.decode(message, options);
+      } catch (error) {
+        // Message text comes off the air and can be anything. A plugin that
+        // trips over an unexpected shape must not take the caller down with
+        // it: treat it as "not this plugin" and keep trying the others.
+        const name = entry.plugin.name || 'unknown';
+        const detail =
+          error instanceof Error
+            ? `${error.name}: ${error.message}`
+            : String(error);
+        pluginFailures.push(`${name} (${detail.slice(0, 200)})`);
+        if (options.debug) {
+          console.log(`Plugin ${name} threw`, error);
+        }
+        continue;
+      }
+      if (pluginResult?.decoded) {
         result = pluginResult;
         break;
       }
+    }
+
+    if (!result.decoded && pluginFailures.length > 0) {
+      result.error = `Decoder plugin failed: ${pluginFailures.join('; ')}`;
     }
 
     if (options.debug) {
