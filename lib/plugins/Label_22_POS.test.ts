@@ -45,8 +45,10 @@ describe('Label 22', () => {
   });
 
   test('decodes a real DDMMSS position', () => {
-    // Same message as the label 21 twin POSN 39.694W 75.344 sent by the
-    // aircraft at the same second (2026-10-26 14:07:06Z).
+    // N391FR / F91690, 2026-10-26 14:07:06Z. The same aircraft sent the
+    // position twice that second, packed here and in decimal on label 21:
+    // https://app.airframes.io/messages/7933456355 (label 22, DDMMSS)
+    // https://app.airframes.io/messages/7933455757 (label 21, 39.694W 75.344)
     message.text =
       'N 394138W 752038,-------,140706,11549, ,      , ,M  1,31175  14,  79,';
     const decodeResult = plugin.decode(message);

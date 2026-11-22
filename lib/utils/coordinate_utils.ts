@@ -72,6 +72,53 @@ export class CoordinateUtils {
         (lonDeg + lonMin / 60) * CoordinateUtils.getDirection(middleChar),
     };
   }
+  /**
+   * Decode coordinates written as packed degrees, minutes and seconds:
+   * N394138W752038 is 39°41′38″ N, 75°20′38″ W. The latitude is DDMMSS
+   * (6 digits), the longitude DDDMMSS (6 or 7 digits), and whitespace is
+   * allowed after each hemisphere letter.
+   *
+   * The digits are packed, not a decimal fraction (39.4138) and not
+   * DDMM.tenths — see decodeStringCoordinates and
+   * decodeStringCoordinatesDecimalMinutes for those two encodings.
+   *
+   * @param stringCoords - The string of coordinates to decode
+   *
+   * @returns An object with latitude and longitude properties, or undefined
+   * when the field is malformed or a value is out of range
+   */
+  public static decodeStringCoordinatesDegreesMinutesSeconds(
+    stringCoords: string,
+  ): { latitude: number; longitude: number } | undefined {
+    const m = /^([NS])\s*(\d{6})\s*([EW])\s*(\d{6,7})$/.exec(
+      stringCoords.trim(),
+    );
+    if (!m) {
+      return undefined;
+    }
+    const [, latDir, latDigits, lonDir, lonDigits] = m;
+    const lat = CoordinateUtils.packedDmsToDecimalDegrees(latDigits);
+    const lon = CoordinateUtils.packedDmsToDecimalDegrees(lonDigits);
+    if (lat === undefined || lon === undefined || lat > 90 || lon > 180) {
+      return undefined;
+    }
+    return {
+      latitude: lat * CoordinateUtils.getDirection(latDir),
+      longitude: lon * CoordinateUtils.getDirection(lonDir),
+    };
+  }
+
+  private static packedDmsToDecimalDegrees(digits: string): number | undefined {
+    const packed = Number(digits);
+    const degrees = Math.floor(packed / 10000);
+    const minutes = Math.floor((packed % 10000) / 100);
+    const seconds = packed % 100;
+    if (minutes >= 60 || seconds >= 60) {
+      return undefined;
+    }
+    return CoordinateUtils.dmsToDecimalDegrees(degrees, minutes, seconds);
+  }
+
   public static coordinateString(coords: {
     latitude: number;
     longitude: number;
