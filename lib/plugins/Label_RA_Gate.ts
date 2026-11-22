@@ -3,12 +3,14 @@ import { DecoderPlugin } from '../DecoderPlugin';
 import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
 import {
   addDeltaCrewGate,
+  addFinnairGate,
   addRouteGate,
   addUnreadLines,
-  cutMatch,
+  addWestJetGate,
   findRouteGate,
   GATE_STOP_LINE,
   GATE_TOKEN,
+  gateLines,
   UsedLines,
 } from '../utils/gate_report';
 import { ResultFormatter } from '../utils/result_formatter';
@@ -60,10 +62,20 @@ const TURKISH_PARKING = new RegExp(
 const PARKING_ASSIGNED = new RegExp(
   `^PARKING (?:PRE)?ASSIGNED:\\s*${GATE_TOKEN}\\s*$`,
 );
-// Finnair (QUHELASAY): "AY1074 22NOV26" then "ARRIVING STAND 131 ELDT
-// 12:53". Its connection lists give other flights' gates.
-const FINNAIR_FLIGHT = /^(AY\d{1,4})\s+(\d{2})[A-Z]{3}\d{2}$/;
-const FINNAIR_STAND = new RegExp(`^ARRIVING STAND\\s+${GATE_TOKEN}(?=\\s|$)`);
+// Qatar: "QR899 BNE - DOH ARR STAND - C6".
+const QATAR_STAND = new RegExp(
+  `^([A-Z0-9]{2}\\d{1,4}) ([A-Z]{3}) - ([A-Z]{3}) ARR STAND - ${GATE_TOKEN}\\s*$`,
+);
+// Free-standing arrival lines: "-PKG T21" (Air Europa handling), "ESTIMATED
+// PARK IS G09" (EVA), "PARK BAY: 21" and "ARR GATE IS 17R" (Qantas), "YOUR
+// GATE IS 9", "PLANNING GATE B37" (Ethiopian dispatch).
+const LOOSE_ARRIVAL = new RegExp(
+  `^(?:-PKG|ESTIMATED PARK IS|PARK BAY:|ARR GATE IS|YOUR GATE IS|PLANNING GATE)\\s*${GATE_TOKEN}\\s*$`,
+);
+// Avianca: "GATE J-12 MIA" (gate J12).
+const DASHED_AIRPORT = /^GATE ([A-Z])-(\d{1,3}[A-Z]?) ([A-Z]{3})$/;
+// Qantas: "GDAY QF0011 BAY 221".
+const QANTAS_BAY = new RegExp(`^GDAY (QF\\d{1,4}) BAY\\s+${GATE_TOKEN}\\s*$`);
 
 // United Express (Air Wisconsin): "FLT 4940 IAD GATE A4C".
 const FLT_AIRPORT_GATE = new RegExp(
@@ -73,11 +85,6 @@ const FLT_AIRPORT_GATE = new RegExp(
 const FRONTIER_FROM = /^FROM ([A-Z]{3}) OPS$/;
 const FRONTIER_GATE = new RegExp(`^GATE\\s+${GATE_TOKEN}$`);
 const FRONTIER_AVAIL = 'GATE AVAIL AT ARRIVAL';
-// WestJet: "WS 345 YXE-YYC" then "YYC GATE D80/OPS" (the gate's airport) or
-// "ARR GATE IS NOW C26/OPS" (at the destination).
-const WESTJET_ROUTE = /^(WS)\s+(\d{1,4})\s+([A-Z]{3})-([A-Z]{3})\b/;
-const WESTJET_GATE = new RegExp(`^([A-Z]{3}) GATE\\s+${GATE_TOKEN}/OPS`);
-const WESTJET_ARR_GATE = new RegExp(`^ARR GATE IS NOW\\s+${GATE_TOKEN}/OPS`);
 // Shandong and others: "CURRENT FLIGHT:", "SC8402 ARR:ZSJN", "GATE:10".
 const ARR_ICAO = /^([A-Z0-9]{2}\d{1,4}) ARR:([A-Z]{4})$/;
 const COLON_GATE = new RegExp(`^GATE:\\s*${GATE_TOKEN}\\s*$`);
@@ -92,7 +99,11 @@ const LATAM_PPOS = new RegExp(`^PPOS:\\s*${GATE_TOKEN}\\s*$`);
  * Wisconsin "FLT 4940 IAD GATE A4C", Frontier "FROM PHL OPS" ... "GATE E8",
  * WestJet "YYC GATE D80/OPS", "SC8402 ARR:ZSJN" + "GATE:10", LATAM
  * "GATE ASSIGNMENT" + "PPOS:602L", Delta crew P/F "ARR ATL GTE E15",
- * Turkish and other parking positions, and the Finnair arriving stand.
+ * Turkish and other parking positions, the Qatar arrival stand, Qantas
+ * bays, Avianca "GATE J-12 MIA", loose arrival lines ("-PKG T21",
+ * "ESTIMATED PARK IS G09", "PARK BAY: 21", "ARR GATE IS 17R", "YOUR GATE
+ * IS 9", "PLANNING GATE B37", "EAU ARRIVAL GATE 1"), and the Finnair
+ * arriving stand and boarding gate (a departure gate).
  *
  * Finnair connection lists are not read: they give the departure gates of
  * other flights.
@@ -107,9 +118,7 @@ export class Label_RA_Gate extends DecoderPlugin {
   }
 
   decode(message: Message, options: Options = {}): DecodeResult {
-    const lines = message.text
-      .split('\n')
-      .map((l) => l.replace(/\r/g, '').trim());
+    const lines = gateLines(message.text);
 
     const result =
       this.decodeUnited(message, lines) ??
@@ -334,14 +343,14 @@ export class Label_RA_Gate extends DecoderPlugin {
     const decodeResult = this.initResult(message, 'Arrival Gate');
     let used: UsedLines | undefined;
     if (lines[0].startsWith('QUHELASAY')) {
-      used = this.finnairStand(decodeResult, lines);
+      used = addFinnairGate(decodeResult, lines);
     } else if (!HANDLED_HEADER.test(lines[0])) {
       used =
         addDeltaCrewGate(decodeResult, lines) ??
-        this.parkingPosition(decodeResult, lines) ??
+        this.arrivalLine(decodeResult, lines) ??
         this.flightAirportGate(decodeResult, lines) ??
         this.frontier(decodeResult, lines) ??
-        this.westJet(decodeResult, lines) ??
+        addWestJetGate(decodeResult, lines) ??
         this.arrIcaoGate(decodeResult, lines) ??
         this.latam(decodeResult, lines) ??
         this.routeGate(decodeResult, lines);
@@ -354,53 +363,57 @@ export class Label_RA_Gate extends DecoderPlugin {
     return decodeResult;
   }
 
-  private parkingPosition(
+  /**
+   * Single lines that give the arrival gate: parking positions, the Qatar
+   * stand, loose arrival lines, Avianca, the Qantas bay and SkyWest's
+   * "EAU ARRIVAL GATE 1" without its header.
+   */
+  private arrivalLine(
     decodeResult: DecodeResult,
     lines: string[],
   ): UsedLines | undefined {
     for (let i = 0; i < lines.length; i++) {
-      if (GATE_STOP_LINE.test(lines[i])) {
+      const l = lines[i];
+      if (GATE_STOP_LINE.test(l)) {
         break;
       }
-      const m =
-        TURKISH_PARKING.exec(lines[i]) ?? PARKING_ASSIGNED.exec(lines[i]);
-      if (m) {
+      const p = TURKISH_PARKING.exec(l) ?? PARKING_ASSIGNED.exec(l);
+      if (p) {
         decodeResult.formatted.description = 'Parking Position';
-        ResultFormatter.arrivalGate(decodeResult, m[1]);
+        ResultFormatter.arrivalGate(decodeResult, p[1]);
         return new Map([[i, '']]);
       }
-    }
-    return undefined;
-  }
-
-  private finnairStand(
-    decodeResult: DecodeResult,
-    lines: string[],
-  ): UsedLines | undefined {
-    let flight: RegExpExecArray | null = null;
-    let flightIdx = -1;
-    for (let i = 0; i < lines.length; i++) {
-      // The connection lists name other flights' gates.
-      if (lines[i].startsWith('CONNECTION INFO')) {
-        return undefined;
-      }
-      const f = FINNAIR_FLIGHT.exec(lines[i]);
-      if (f) {
-        flight = f;
-        flightIdx = i;
-        continue;
-      }
-      const m = FINNAIR_STAND.exec(lines[i]);
-      if (m) {
+      const q = QATAR_STAND.exec(l);
+      if (q) {
         decodeResult.formatted.description = 'Arrival Stand';
-        const used: UsedLines = new Map([[i, cutMatch(lines[i], m)]]);
-        if (flight) {
-          ResultFormatter.flightNumber(decodeResult, flight[1]);
-          ResultFormatter.day(decodeResult, Number(flight[2]));
-          used.set(flightIdx, '');
-        }
-        ResultFormatter.arrivalGate(decodeResult, m[1]);
-        return used;
+        ResultFormatter.flightNumber(decodeResult, q[1]);
+        ResultFormatter.departureAirport(decodeResult, q[2], 'IATA');
+        ResultFormatter.arrivalAirport(decodeResult, q[3], 'IATA');
+        ResultFormatter.arrivalGate(decodeResult, q[4]);
+        return new Map([[i, '']]);
+      }
+      const loose = LOOSE_ARRIVAL.exec(l);
+      if (loose) {
+        ResultFormatter.arrivalGate(decodeResult, loose[1]);
+        return new Map([[i, '']]);
+      }
+      const d = DASHED_AIRPORT.exec(l);
+      if (d) {
+        ResultFormatter.arrivalAirport(decodeResult, d[3], 'IATA');
+        ResultFormatter.arrivalGate(decodeResult, d[1] + d[2]);
+        return new Map([[i, '']]);
+      }
+      const b = QANTAS_BAY.exec(l);
+      if (b) {
+        ResultFormatter.flightNumber(decodeResult, b[1]);
+        ResultFormatter.arrivalGate(decodeResult, b[2]);
+        return new Map([[i, '']]);
+      }
+      const s = SKYWEST_GATE.exec(l);
+      if (s) {
+        ResultFormatter.arrivalAirport(decodeResult, s[1], 'IATA');
+        ResultFormatter.arrivalGate(decodeResult, s[2]);
+        return new Map([[i, '']]);
       }
     }
     return undefined;
@@ -461,37 +474,6 @@ export class Label_RA_Gate extends DecoderPlugin {
     }
     addRouteGate(decodeResult, r);
     return r.used;
-  }
-
-  private westJet(
-    decodeResult: DecodeResult,
-    lines: string[],
-  ): UsedLines | undefined {
-    let route: RegExpExecArray | null = null;
-    let routeIdx = -1;
-    for (let i = 0; i < lines.length; i++) {
-      if (!route) {
-        route = WESTJET_ROUTE.exec(lines[i]);
-        routeIdx = i;
-        continue;
-      }
-      const g = WESTJET_GATE.exec(lines[i]);
-      const a = g ? null : WESTJET_ARR_GATE.exec(lines[i]);
-      if (!g && !a) {
-        continue;
-      }
-      ResultFormatter.flightNumber(decodeResult, route[1] + route[2]);
-      ResultFormatter.departureAirport(decodeResult, route[3], 'IATA');
-      // "YYC GATE D80/OPS" names the gate's airport; otherwise it is the
-      // destination.
-      ResultFormatter.arrivalAirport(decodeResult, g ? g[1] : route[4], 'IATA');
-      ResultFormatter.arrivalGate(decodeResult, g ? g[2] : a![1]);
-      return new Map([
-        [routeIdx, cutMatch(lines[routeIdx], route)],
-        [i, cutMatch(lines[i], (g ?? a)!)],
-      ]);
-    }
-    return undefined;
   }
 
   private arrIcaoGate(

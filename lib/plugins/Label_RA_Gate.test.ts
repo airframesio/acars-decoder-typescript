@@ -241,7 +241,7 @@ describe('Label RA gate', () => {
     expect(r.remaining.text).toBe('QUSTLAVG7~1GATE INFO');
   });
 
-  test('decodes Piedmont gate run into the route line', () => {
+  test('decodes Piedmont gate on the line after the route (bare CR)', () => {
     const r = plugin.decode({ label: 'RA', text: PIEDMONT });
     expect(r.raw.flight_number).toBe('5966');
     expect(r.raw.departure_iata).toBe('SYR');
@@ -360,5 +360,122 @@ describe('Label RA gate', () => {
 
     const f = decoder.decode({ label: 'RA', text: FINNAIR_CONNECTIONS });
     expect(f.raw.arrival_gate).toBeUndefined();
+  });
+});
+
+// Texts from production RA uplinks of 2026-11-19 (shortened, names removed).
+const FINNAIR_BOARDING =
+  'QUHELASAY~1\r\nCUSTOMER PAX AND BAG DETAILS FOR WEIGHT AND BALANCE              \r\nFLIGHT INFO  AT7       REG OH-ATO   70Y                     PW   \r\nAY230    19NOV  TKU STD0600             BOARD 0540 GATE 2   AO   \r\n';
+const QATAR =
+  '\r\nSTANDINFO\r\nQR899 BNE - DOH ARR STAND - C6\r\nALL DATES AND TIMES UTC\r\nA.N.R - QR283 AMS STD 11:55 221\r\n';
+const AIR_EUROPA =
+  'QUPMIANUX~1\r\nMESSAGE FROM HANDLING\r\n-OPS/GFH MAD(STAFF 1)\r-PKG T21\r-BELT 10\r-TTOS\r FLT      DEST  PAX    GATE\r';
+const EVA =
+  'QUSPLKPBR~1RA101191445\r\nBR75\r\nESTIMATED PARK IS G09\r\nFINAL WL B INFRM BY ATC\r\n';
+const QANTAS_PARK =
+  'QUADLKIQF~1\r\nHI\r\nPARK BAY: 21\r\nBAGGAGE CAROUSEL: 4 \r\n';
+const QANTAS_ARR_GATE =
+  '.AKLOSQF ~1 QANTAS AKL MSG\r\nGDAY QF153\r\nACARS ACK 03 WCHRS ON ARR\r\nARR GATE IS 17R\r\n';
+const QANTAS_BAY =
+  '.LAXOSQF ~1 QANTAS LAX MSG\r\n\tGDAY QF0011 BAY 221\r\n\tBAGGAGE CAROUSEL TBA UPON\r\n';
+// The line alone (no production sample kept).
+const YOUR_GATE = 'YOUR GATE IS 9\r\n';
+const ETHIOPIAN =
+  'QUJFKOWLX~1RA199190007\r\nHELLO ET516 CREW\r\nPLANNING GATE B37\r\nNO DELAYS\r\n';
+const AVIANCA =
+  'QUATLASAV~1GATE \r\nBUENOS DIAS\r\nGATE J-12 MIA\r\nBUEN VUELO\r\n';
+const SKYWEST_NO_HEADER = '579\r\n\r\nEAU ARRIVAL GATE 1\r\n\r\n*END-MSG\r\n';
+
+describe('Label RA gate, round 5 formats', () => {
+  let decoder: MessageDecoder;
+  let plugin: Label_RA_Gate;
+
+  beforeEach(() => {
+    decoder = new MessageDecoder();
+    plugin = new Label_RA_Gate(decoder);
+  });
+
+  test('decodes the Finnair boarding gate as the departure gate', () => {
+    const r = plugin.decode({ label: 'RA', text: FINNAIR_BOARDING });
+    expect(r.decoded).toBe(true);
+    expect(r.formatted.description).toBe('Departure Gate');
+    expect(r.raw.flight_number).toBe('AY230');
+    expect(r.raw.day).toBe(19);
+    expect(r.raw.departure_iata).toBe('TKU');
+    expect(r.raw.departure_gate).toBe('2');
+    expect(r.raw.arrival_gate).toBeUndefined();
+    expect(r.remaining.text).toContain('AO');
+  });
+
+  test('decodes the Qatar arrival stand', () => {
+    const r = plugin.decode({ label: 'RA', text: QATAR });
+    expect(r.decoded).toBe(true);
+    expect(r.formatted.description).toBe('Arrival Stand');
+    expect(r.raw.flight_number).toBe('QR899');
+    expect(r.raw.departure_iata).toBe('BNE');
+    expect(r.raw.arrival_iata).toBe('DOH');
+    expect(r.raw.arrival_gate).toBe('C6');
+    expect(r.remaining.text).toContain('A.N.R - QR283 AMS STD 11:55 221');
+  });
+
+  test('decodes Air Europa handling parking on bare CR lines', () => {
+    const r = plugin.decode({ label: 'RA', text: AIR_EUROPA });
+    expect(r.decoded).toBe(true);
+    expect(r.raw.arrival_gate).toBe('T21');
+    expect(r.remaining.text).toContain('-BELT 10');
+  });
+
+  test.each([
+    ['EVA estimated park', EVA, 'G09'],
+    ['Qantas park bay', QANTAS_PARK, '21'],
+    ['Qantas arrival gate', QANTAS_ARR_GATE, '17R'],
+    ['your gate is', YOUR_GATE, '9'],
+    ['Ethiopian planning gate', ETHIOPIAN, 'B37'],
+  ])('decodes the loose arrival line: %s', (_name, text, gate) => {
+    const r = plugin.decode({ label: 'RA', text });
+    expect(r.decoded).toBe(true);
+    expect(r.raw.arrival_gate).toBe(gate);
+  });
+
+  test('decodes the Qantas bay with the flight', () => {
+    const r = plugin.decode({ label: 'RA', text: QANTAS_BAY });
+    expect(r.raw.flight_number).toBe('QF0011');
+    expect(r.raw.arrival_gate).toBe('221');
+  });
+
+  test('decodes the Avianca dashed gate and its airport', () => {
+    const r = plugin.decode({ label: 'RA', text: AVIANCA });
+    expect(r.raw.arrival_iata).toBe('MIA');
+    expect(r.raw.arrival_gate).toBe('J12');
+  });
+
+  test('decodes a SkyWest arrival gate line without its header', () => {
+    const r = plugin.decode({ label: 'RA', text: SKYWEST_NO_HEADER });
+    expect(r.raw.arrival_iata).toBe('EAU');
+    expect(r.raw.arrival_gate).toBe('1');
+    expect(r.remaining.text).toBe('579\n*END-MSG');
+  });
+
+  test('still ignores Finnair connection lists', () => {
+    const r = plugin.decode({ label: 'RA', text: FINNAIR_CONNECTIONS });
+    expect(r.decoded).toBe(false);
+  });
+
+  test('is reached through MessageDecoder', () => {
+    for (const [text, gate] of [
+      [QATAR, 'C6'],
+      [AIR_EUROPA, 'T21'],
+      [EVA, 'G09'],
+      [QANTAS_BAY, '221'],
+      [AVIANCA, 'J12'],
+      [SKYWEST_NO_HEADER, '1'],
+    ]) {
+      const r = decoder.decode({ label: 'RA', text });
+      expect(r.decoder.name).toBe('label-ra-gate');
+      expect(r.raw.arrival_gate).toBe(gate);
+    }
+    const f = decoder.decode({ label: 'RA', text: FINNAIR_BOARDING });
+    expect(f.decoder.name).toBe('label-ra-gate');
+    expect(f.raw.departure_gate).toBe('2');
   });
 });
