@@ -400,6 +400,49 @@ describe('Label_13Through18_Slash', () => {
       expect(decodeResult.raw.message_timestamp).toBeUndefined();
       expect(decodeResult.raw.departure_icao).toBe('DGAA');
     });
+
+    test('treats a trailing space after the header as no clock', () => {
+      const decodeResult = plugin.decode({
+        label: '18',
+        text: '/18 FLT TIMES SECS / DGAA KIAD 20 ',
+      });
+
+      expect(decodeResult.raw.message_timestamp).toBeUndefined();
+    });
+
+    test('keeps a midnight header clock', () => {
+      const decodeResult = plugin.decode({
+        label: '18',
+        text: '/18 FLT TIMES SECS / DGAA KIAD 20 000000\n/M16 IN TIME 235959',
+      });
+
+      expect(decodeResult.raw.message_timestamp).toBe(0);
+      expect(decodeResult.raw.in_time).toBe(23 * 3600 + 59 * 60 + 59);
+      expect(decodeResult.decoder.decodeLevel).toBe('full');
+    });
+
+    test('keeps impossible clocks in remaining', () => {
+      const decodeResult = plugin.decode({
+        label: '18',
+        text: '/18 FLT TIMES SECS / DGAA KIAD 20 250000\n/M13 OUT TIME 126099',
+      });
+
+      expect(decodeResult.raw.message_timestamp).toBeUndefined();
+      expect(decodeResult.raw.out_time).toBeUndefined();
+      expect(decodeResult.remaining.text).toContain('250000');
+      expect(decodeResult.remaining.text).toContain('/M13 OUT TIME 126099');
+      expect(decodeResult.decoder.decodeLevel).toBe('partial');
+    });
+
+    test('keeps an impossible IN time in remaining', () => {
+      const decodeResult = plugin.decode({
+        label: '17',
+        text: '/17 POST RPT       / KIAD KSFO 12 034537/TIME 1260',
+      });
+
+      expect(decodeResult.raw.in_time).toBeUndefined();
+      expect(decodeResult.remaining.text).toContain('TIME 1260');
+    });
   });
 
   test('does not decode <invalid>', () => {
