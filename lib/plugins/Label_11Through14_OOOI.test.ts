@@ -186,6 +186,35 @@ describe('Labels 11-14 OOOI reports', () => {
     expect(result.decoder.name).toBe('label-10-14-oooi-day');
   });
 
+  test('decodes Iberia compact reports', () => {
+    const decoder = new MessageDecoder();
+    const out = decoder.decode({
+      label: '11',
+      text: 'OUT0118321827LSZH.FOB19560',
+    });
+    expect(out.decoded).toBe(true);
+    expect(out.decoder.name).toBe('label-11-14-oooi');
+    expect(out.raw.departure_icao).toBe('LSZH');
+    expect(out.raw.arrival_icao).toBeUndefined();
+    expect(out.raw.out_time).toBe(18 * 3600 + 32 * 60);
+    expect(out.raw.fuel_on_board).toBe(19560);
+    expect(out.remaining.text).toBe('1827');
+
+    const off = decoder.decode({ label: '12', text: 'OFF010652LSZHLEMD' });
+    expect(off.decoded).toBe(true);
+    expect(off.decoder.decodeLevel).toBe('full');
+    expect(off.raw.departure_icao).toBe('LSZH');
+    expect(off.raw.arrival_icao).toBe('LEMD');
+    expect(off.raw.off_time).toBe(6 * 3600 + 52 * 60);
+
+    const inn = decoder.decode({ label: '14', text: 'INN010817EGLL.FOB6920' });
+    expect(inn.decoded).toBe(true);
+    expect(inn.decoder.decodeLevel).toBe('full');
+    expect(inn.raw.arrival_icao).toBe('EGLL');
+    expect(inn.raw.in_time).toBe(8 * 3600 + 17 * 60);
+    expect(inn.raw.fuel_on_board).toBe(6920);
+  });
+
   test('does not decode an out-of-range time', () => {
     const result = plugin.decode({
       label: '11',

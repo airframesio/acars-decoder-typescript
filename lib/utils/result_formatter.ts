@@ -576,6 +576,32 @@ export class ResultFormatter {
     });
   }
 
+  static scheduledDeparture(decodeResult: DecodeResult, time: number) {
+    if (isNaN(time)) {
+      return;
+    }
+    decodeResult.raw.scheduled_departure_time = time;
+    decodeResult.formatted.items.push({
+      type: 'time',
+      code: 'STD',
+      label: 'Scheduled Departure Time',
+      value: DateTimeUtils.timestampToString(time),
+    });
+  }
+
+  static scheduledArrival(decodeResult: DecodeResult, time: number) {
+    if (isNaN(time)) {
+      return;
+    }
+    decodeResult.raw.scheduled_arrival_time = time;
+    decodeResult.formatted.items.push({
+      type: 'time',
+      code: 'STA',
+      label: 'Scheduled Arrival Time',
+      value: DateTimeUtils.timestampToString(time),
+    });
+  }
+
   static tail(decodeResult: DecodeResult, value: string) {
     decodeResult.raw.tail = value;
     decodeResult.formatted.items.push({

@@ -33,7 +33,7 @@ describe('Label 4T ETA', () => {
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.formatted.description).toBe('Position Report');
-    expect(decodeResult.formatted.items.length).toBe(8);
+    expect(decodeResult.formatted.items.length).toBe(10);
     expect(decodeResult.formatted.items[0].label).toBe('Flight Number');
     expect(decodeResult.formatted.items[0].value).toBe('AC0620');
     expect(decodeResult.formatted.items[1].label).toBe('Departure Day');
@@ -50,8 +50,15 @@ describe('Label 4T ETA', () => {
     expect(decodeResult.formatted.items[6].value).toBe('44.585 N, 70.277 W');
     expect(decodeResult.formatted.items[7].label).toBe('Altitude');
     expect(decodeResult.formatted.items[7].value).toBe('35000 feet');
+    expect(decodeResult.formatted.items[8].label).toBe('Out of Gate Time');
+    expect(decodeResult.formatted.items[8].value).toBe('02:40:00');
+    expect(decodeResult.formatted.items[9].label).toBe('Takeoff Time');
+    expect(decodeResult.formatted.items[9].value).toBe('02:53:00');
+    expect(decodeResult.raw.out_time).toBe(9600);
+    expect(decodeResult.raw.off_time).toBe(10380);
+    expect(decodeResult.raw.on_time).toBeUndefined();
     expect(decodeResult.remaining.text).toBe(
-      '453/ /0063/0035/ /281065/----/ /512/0240/0253/----/----',
+      '453/ /0063/0035/ /281065/----/ /512',
     );
   });
 
@@ -66,7 +73,7 @@ describe('Label 4T ETA', () => {
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.formatted.description).toBe('Position Report');
-    expect(decodeResult.formatted.items.length).toBe(8);
+    expect(decodeResult.formatted.items.length).toBe(10);
     expect(decodeResult.formatted.items[0].label).toBe('Flight Number');
     expect(decodeResult.formatted.items[0].value).toBe('AC0096');
     expect(decodeResult.formatted.items[1].label).toBe('Departure Day');
@@ -83,9 +90,54 @@ describe('Label 4T ETA', () => {
     expect(decodeResult.formatted.items[6].value).toBe('44.297 N, 71.457 W');
     expect(decodeResult.formatted.items[7].label).toBe('Altitude');
     expect(decodeResult.formatted.items[7].value).toBe('25400 feet');
+    expect(decodeResult.formatted.items[8].value).toBe('03:19:00');
+    expect(decodeResult.formatted.items[9].value).toBe('03:39:00');
     expect(decodeResult.remaining.text).toBe(
-      '833/CLIMB /0565/0033/-33/275049/0289/144/453/0319/0339/****/****',
+      '833/CLIMB /0565/0033/-33/275049/0289/144/453',
     );
+  });
+
+  test('decodes the ON time after landing', () => {
+    // Real message (2026-11-22), sent at rollout; ARV AC0856 LHR 0823Z came 40 s earlier.
+    message.text =
+      'AGFSR AC0856/21/22/YYZLHR/0823Z/733/5128.7N00028.0W/000/RL OUT/0118/0527/P08/085005/0111/090/106/0127/0150/0823/----';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoded).toBe(true);
+    expect(decodeResult.raw.out_time).toBe(5220);
+    expect(decodeResult.raw.off_time).toBe(6600);
+    expect(decodeResult.raw.on_time).toBe(30180);
+    expect(decodeResult.raw.in_time).toBeUndefined();
+    expect(decodeResult.remaining.text).toBe(
+      '733/RL OUT/0118/0527/P08/085005/0111/090/106',
+    );
+  });
+
+  test('decodes a phase with a slash', () => {
+    message.text =
+      'AGFSR AC2359/21/22/LAXYVR/0447Z/103/4912.1N12310.8W/262/TAXI/I/0033/0051/P4 /100004/0054/100/49 /0206/0223/0447/    ';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoded).toBe(true);
+    expect(decodeResult.raw.out_time).toBe(7560);
+    expect(decodeResult.raw.off_time).toBe(8580);
+    expect(decodeResult.raw.on_time).toBe(17220);
+    expect(decodeResult.remaining.text).toBe(
+      '103/TAXI/I/0033/0051/P4 /100004/0054/100/49 ',
+    );
+  });
+
+  test('decodes from MessageDecoder', () => {
+    const decoder = new MessageDecoder();
+    const decodeResult = decoder.decode({
+      label: '4T',
+      text: 'AGFSR AC0842/21/22/YYZFRA/0853Z/839/5146.5N00231.5W/389/CRUISE/0137/0342/M54/277016/0261/112/500/0242/0257/****/****',
+    });
+
+    expect(decodeResult.decoded).toBe(true);
+    expect(decodeResult.decoder.name).toBe('label-4t-agfsr');
+    expect(decodeResult.raw.out_time).toBe(9720);
+    expect(decodeResult.raw.off_time).toBe(10620);
   });
 
   test('decodes <invalid>', () => {

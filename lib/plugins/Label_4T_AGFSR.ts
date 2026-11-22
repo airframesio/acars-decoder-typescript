@@ -4,7 +4,12 @@ import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
 import { CoordinateUtils } from '../utils/coordinate_utils';
 import { ResultFormatter } from '../utils/result_formatter';
 
-// General Aviation Position Report
+const CLOCK_REGEX = /^([01]\d|2[0-3])[0-5]\d$/;
+const PLACEHOLDER_REGEX = /^(-{4}|\*{4}| {0,4})$/;
+
+// Air Canada flight status report: flight, departure day, report day,
+// route, report time, ..., position, flight level, phase, ..., and last the
+// OUT, OFF, ON and IN times ('----', '****' or blank until reached).
 export class Label_4T_AGFSR extends DecoderPlugin {
   name = 'label-4t-agfsr';
 
@@ -22,6 +27,10 @@ export class Label_4T_AGFSR extends DecoderPlugin {
     decodeResult.message = message;
 
     const data = message.text.substring(5).split('/');
+    // The phase can hold a '/' ('TAXI/I').
+    if (data.length === 21) {
+      data.splice(8, 2, `${data[8]}/${data[9]}`);
+    }
 
     if (!message.text.startsWith('AGFSR') || data.length !== 20) {
       if (options.debug) {
@@ -60,7 +69,21 @@ export class Label_4T_AGFSR extends DecoderPlugin {
     ResultFormatter.altitude(decodeResult, 100 * Number(data[7]));
     //  8 - phase of flight?
     // 11 - temperature?
-    ResultFormatter.unknownArr(decodeResult, data.slice(8), '/');
+    ResultFormatter.unknownArr(decodeResult, data.slice(8, 16), '/');
+    const times: [string, (r: DecodeResult, t: number) => void][] = [
+      [data[16], ResultFormatter.out.bind(ResultFormatter)],
+      [data[17], ResultFormatter.off.bind(ResultFormatter)],
+      [data[18], ResultFormatter.on.bind(ResultFormatter)],
+      [data[19], ResultFormatter.in.bind(ResultFormatter)],
+    ];
+    for (const [value, add] of times) {
+      const time = value.trim();
+      if (CLOCK_REGEX.test(time)) {
+        add(decodeResult, DateTimeUtils.convertHHMMSSToTod(time));
+      } else if (!PLACEHOLDER_REGEX.test(value)) {
+        ResultFormatter.unknown(decodeResult, value, '/');
+      }
+    }
 
     decodeResult.decoded = true;
     decodeResult.decoder.decodeLevel = 'partial';
