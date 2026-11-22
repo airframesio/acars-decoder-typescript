@@ -14,8 +14,8 @@ describe('Labels 11-14 CSV OOOI reports (Cathay Pacific)', () => {
     expect(plugin.decode).toBeDefined();
     expect(plugin.name).toBe('label-11-14-csv-oooi');
     expect(plugin.qualifiers()).toEqual({
-      labels: ['11', '12', '13', '14', '16'],
-      preambles: ['OUT,V', 'OFF,V', 'ONE,V', 'CAR,V'],
+      labels: ['11', '12', '13', '14', '16', '31'],
+      preambles: ['OUT,V', 'OFF,V', 'ONE,V', 'CAR,V', 'ETA,V'],
     });
   });
 
@@ -157,5 +157,34 @@ describe('Labels 11-14 CSV OOOI reports (Cathay Pacific)', () => {
     expect(result.decoded).toBe(true);
     expect(result.decoder.name).toBe('label-11-14-csv-oooi');
     expect(result.raw.on_time).toBe(1 * 3600 + 24 * 60);
+  });
+
+  test('decodes label 31 ETA report', () => {
+    const result = plugin.decode({
+      label: '31',
+      text: 'ETA,V01,CX 111 20261121 1,VHHH,YSSY,2009,  144',
+    });
+    expect(result.decoded).toBe(true);
+    expect(result.formatted.description).toBe('Arrival Estimate');
+    expect(result.raw.flight_number).toBe('CX111');
+    expect(result.raw.departure_icao).toBe('VHHH');
+    expect(result.raw.arrival_icao).toBe('YSSY');
+    expect(result.raw.eta_time).toBe(20 * 3600 + 9 * 60);
+    expect(result.raw.departure_day).toBe(21);
+    expect(result.decoder.decodeLevel).toBe('partial');
+    expect(result.remaining.text).toBe('V01,1,  144');
+  });
+
+  test('decodes label 31 ETA report through the message decoder', () => {
+    const result = new MessageDecoder().decode({
+      label: '31',
+      text: 'ETA,V01,CX 111 20261121 1,VHHH,YSSY,2009,  144',
+    });
+    expect(result.decoded).toBe(true);
+    expect(result.decoder.name).toBe('label-11-14-csv-oooi');
+    expect(result.raw.eta_time).toBe(20 * 3600 + 9 * 60);
+    expect(result.raw.departure_day).toBe(21);
+    expect(result.decoder.decodeLevel).toBe('partial');
+    expect(result.remaining.text).toBe('V01,1,  144');
   });
 });
