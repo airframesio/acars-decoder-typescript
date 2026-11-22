@@ -18,7 +18,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
-- `decode()` no longer throws when a plugin fails on malformed text; the error is reported in the result instead (#565).
+- `decode()` no longer throws when a plugin fails on malformed text; that plugin is treated as not matching and the next one is tried (#565).
 - Label 13-18 slash reports validate clock fields; impossible times now go to the unknown text instead of producing a bad time (#562).
 
 ### Fixed (output values change)
