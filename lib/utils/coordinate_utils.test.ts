@@ -106,13 +106,11 @@ describe('CoordinateUtils', () => {
     });
   });
 
-  describe('decodeStringCoordinatesDegreesMinutesSeconds', () => {
+  describe('decodeStringCoordinatesDMS', () => {
     test('decodes packed DDMMSS / DDDMMSS coordinates', () => {
       // 394138 = 39° 41' 38", 0752038 = 75° 20' 38"
       const result =
-        CoordinateUtils.decodeStringCoordinatesDegreesMinutesSeconds(
-          'N394138W0752038',
-        );
+        CoordinateUtils.decodeStringCoordinatesDMS('N394138W0752038');
       expect(result).toBeDefined();
       expect(result!.latitude).toBeCloseTo(39.69388888888889, 10);
       expect(result!.longitude).toBeCloseTo(-75.34388888888889, 10);
@@ -120,9 +118,7 @@ describe('CoordinateUtils', () => {
 
     test('accepts whitespace after each hemisphere letter', () => {
       const result =
-        CoordinateUtils.decodeStringCoordinatesDegreesMinutesSeconds(
-          'N 394138W 752038',
-        );
+        CoordinateUtils.decodeStringCoordinatesDMS('N 394138W 752038');
       expect(result).toBeDefined();
       expect(result!.latitude).toBeCloseTo(39.69388888888889, 10);
       expect(result!.longitude).toBeCloseTo(-75.34388888888889, 10);
@@ -131,9 +127,7 @@ describe('CoordinateUtils', () => {
     test('decodes S / E hemispheres', () => {
       // 035335 = 3° 53' 35", 0752038 = 75° 20' 38"
       const result =
-        CoordinateUtils.decodeStringCoordinatesDegreesMinutesSeconds(
-          'S035335E0752038',
-        );
+        CoordinateUtils.decodeStringCoordinatesDMS('S035335E0752038');
       expect(result).toBeDefined();
       expect(result!.latitude).toBeCloseTo(-3.8930555555555555, 10);
       expect(result!.longitude).toBeCloseTo(75.34388888888889, 10);
@@ -141,32 +135,22 @@ describe('CoordinateUtils', () => {
 
     test('returns undefined for impossible minutes or seconds', () => {
       expect(
-        CoordinateUtils.decodeStringCoordinatesDegreesMinutesSeconds(
-          'N396038W0752038',
-        ),
+        CoordinateUtils.decodeStringCoordinatesDMS('N396038W0752038'),
       ).toBeUndefined();
       expect(
-        CoordinateUtils.decodeStringCoordinatesDegreesMinutesSeconds(
-          'N394160W0752038',
-        ),
+        CoordinateUtils.decodeStringCoordinatesDMS('N394160W0752038'),
       ).toBeUndefined();
     });
 
     test('returns undefined for out-of-range or malformed fields', () => {
       expect(
-        CoordinateUtils.decodeStringCoordinatesDegreesMinutesSeconds(
-          'N910000W0752038',
-        ),
+        CoordinateUtils.decodeStringCoordinatesDMS('N910000W0752038'),
       ).toBeUndefined();
       expect(
-        CoordinateUtils.decodeStringCoordinatesDegreesMinutesSeconds(
-          'N39413W0752038',
-        ),
+        CoordinateUtils.decodeStringCoordinatesDMS('N39413W0752038'),
       ).toBeUndefined();
       expect(
-        CoordinateUtils.decodeStringCoordinatesDegreesMinutesSeconds(
-          'N394138W07520A8',
-        ),
+        CoordinateUtils.decodeStringCoordinatesDMS('N394138W07520A8'),
       ).toBeUndefined();
     });
   });

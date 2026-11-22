@@ -87,7 +87,7 @@ export class CoordinateUtils {
    * @returns An object with latitude and longitude properties, or undefined
    * when the field is malformed or a value is out of range
    */
-  public static decodeStringCoordinatesDegreesMinutesSeconds(
+  public static decodeStringCoordinatesDMS(
     stringCoords: string,
   ): { latitude: number; longitude: number } | undefined {
     const m = /^([NS])\s*(\d{6})\s*([EW])\s*(\d{6,7})$/.exec(

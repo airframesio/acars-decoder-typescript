@@ -33,7 +33,7 @@ export class Label_22_POS extends DecoderPlugin {
     // 39°41'38", not the decimal fraction 39.4138.
     ResultFormatter.position(
       decodeResult,
-      CoordinateUtils.decodeStringCoordinatesDegreesMinutesSeconds(fields[0]),
+      CoordinateUtils.decodeStringCoordinatesDMS(fields[0]),
     );
 
     ResultFormatter.timestamp(
