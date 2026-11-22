@@ -371,50 +371,78 @@ describe('MessageDecoder', () => {
 
 describe('MessageDecoder with malformed messages', () => {
   // Each of these used to throw a TypeError out of decode() (found by fuzzing
-  // the test corpus). decode() must return a result for any text.
-  const cases: [string, string][] = [
+  // the test corpus). decode() must return a result for any text, and say
+  // which plugin failed.
+  const cases: [string, string, string][] = [
     [
       '12',
       'POS082150, N 3885,W 7841,---,308,26922,  51,22290, 529,  19,-225,6',
+      'label-12-pos',
     ],
-    ['1M', '/Bogus Message/'],
-    ['13', '/EA1719/DSKSFO/SK23'],
-    ['5Z', '/B3 ATLI'],
-    ['5Z', '/ET EXP TIME A 20 122559/EON 1336 AUTO'],
+    ['1M', '/Bogus Message/', 'label-1m-slash'],
+    ['13', '/EA1719/DSKSFO/SK23', 'label-13-18-slash'],
+    ['5Z', '/B3 ATLI', 'label-5z-slash'],
+    ['5Z', '/ET EXP TIME A 20 122559/EON 1336 AUTO', 'label-5z-slash'],
     [
       '4T',
       'AGFSR AC0620/07/08/YYZYHZ/0340Z/453/.4W/350/ /0063/0035/ /281065/----/ /512/0240/0253/----/----',
+      'label-4t-agfsr',
     ],
-    [
-      '80',
-      "T02!<<,:/k.E`;FOV@!'s.16q6R+p(RK,|D2ujNJhRah?_qrNftWiI-V,@*RQs,tn,FYN$/V1!gNIc6CO;$D,1:.4?dF952",
-    ],
+    // Minimised from a fuzzed message: an empty CSV body.
+    ['80', ',,,,,,,,', 'label-80'],
   ];
 
-  test.each(cases)('label %s does not throw', (label, text) => {
-    const decoder = new MessageDecoder();
-    expect(() => decoder.decode({ label, text })).not.toThrow();
-    expect(decoder.decode({ label, text }).message.text).toBe(text);
-  });
+  test.each(cases)(
+    'label %s (%s) survives a failure in %s',
+    (label, text, pluginName) => {
+      const result = new MessageDecoder().decode({ label, text });
+      expect(result.decoded).toBe(false);
+      expect(result.decoder).toMatchObject({
+        name: 'none',
+        decodeLevel: 'none',
+      });
+      expect(result.message?.text).toBe(text);
+      expect(result.error).toContain(pluginName);
+    },
+  );
 
-  test('a plugin that throws is skipped and later plugins still run', () => {
+  test('a plugin that throws is skipped and a later plugin still decodes', () => {
     const decoder = new MessageDecoder();
+    let throwingCalls = 0;
+
     class Throwing extends StubPlugin {
       decode(): never {
+        throwingCalls += 1;
         throw new TypeError('boom');
       }
     }
     class Catching extends StubPlugin {
-      decode(message: { label: string; text: string }) {
-        const result = this.defaultResult();
-        result.decoded = true;
-        result.message = message;
+      decode(message: Message): DecodeResult {
+        const result = this.initResult(message, 'Caught');
+        this.setDecodeLevel(result, true, 'full');
         return result;
       }
     }
+
     decoder.registerPlugin(new Throwing(decoder, 'throwing', ['ZZ']));
     decoder.registerPlugin(new Catching(decoder, 'catching', ['ZZ']));
+
     const result = decoder.decode({ label: 'ZZ', text: 'anything' });
+    expect(throwingCalls).toBe(1);
     expect(result.decoded).toBe(true);
+    expect(result.decoder.name).toBe('catching');
+  });
+
+  test('a plugin that returns nothing does not throw out of decode()', () => {
+    const decoder = new MessageDecoder();
+    class Empty extends StubPlugin {
+      decode(): DecodeResult {
+        return undefined as unknown as DecodeResult;
+      }
+    }
+    decoder.registerPlugin(new Empty(decoder, 'empty', ['ZZ']));
+    expect(decoder.decode({ label: 'ZZ', text: 'anything' }).decoded).toBe(
+      false,
+    );
   });
 });
