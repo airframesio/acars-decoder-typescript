@@ -973,7 +973,7 @@ export class ResultFormatter {
       ['LILAW', 'Loaded Index at LAW', ls.li_law?.toString()],
       [
         'PAX',
-        'Passengers',
+        'Passengers (total, incl. infants)',
         ls.pax_total === undefined
           ? undefined
           : `${ls.pax_total}${ls.pax_breakdown && ls.pax_breakdown !== String(ls.pax_total) ? ` (${ls.pax_breakdown})` : ''}`,

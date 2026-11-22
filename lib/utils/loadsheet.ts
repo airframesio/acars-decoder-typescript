@@ -88,6 +88,8 @@ const NOT_HEADER =
   /END (?:OF )?(?:ACARS )?LOADSHEET|LOADSHEET END|AMENDMENTS|WILL FOLLOW|NO FINAL LOADSHEET|AWAITING|CANCELLED|CHECKS PERFORMED|ACCEPT|\bACK|RCVD|\bREQ\b|REQUEST/;
 const STATUS = /\b(FINAL|PRELIM)(?:INARY)?/;
 const EDITION = /\bED(?:NO?|N0)?\s*0*(\d{1,2})\b/;
+// EDNO H040098-KO/02: a reference, then the edition after the slash.
+const EDITION_REF = /\bEDNO\s+[A-Z0-9-]+\/0*(\d{1,2})\b/;
 const FLIGHT =
   /^([A-Z0-9]{2}[A-Z]?\d{1,4}[A-Z]?)(?:\/(\d{1,2}))?(?=[\s/]|$)(.*)$/;
 const DATE =
@@ -153,7 +155,23 @@ const WEIGHT_PATTERNS: [RegExp, WeightField, 'ZFW' | 'TOW' | 'LAW'][] = [
 ];
 // A bare weight on the last line, possibly cut at a message split.
 const CUT_WEIGHT =
-  /^(ZFW|TOW|LAW|LDW|LGW|LW|TOF|TIF|TF|BO|DOW|UNDLD)(?: ACTUAL)?:?\s+(\d+)$/;
+  /^(ZFW|TOW|LAW|LDW|LGW|LW|TOF|TIF|TF|BO|DOW|UNDLD|ULOAD|UNDERLOAD)(?: ACTUAL)?:?\s+(\d+)$/;
+// Weight and index in columns, maximum after them (freighter layout):
+//   DOW   184097   5,61
+//   ZFW   272172  17,42 286600 Max
+//   TOW   297997  36,27 312425 Op. Max
+//   ZFW MAC 21,8
+const COLUMN_INDEX: [RegExp, IndexField][] = [
+  [/^DOW\s+\d+\s+(-?\d+[.,]\d+)(?:\s|$)/, 'doi'],
+  [/^ZFW\s+\d+\s+(-?\d+[.,]\d+)(?:\s|$)/, 'li_zfw'],
+  [/^TOW\s+\d+\s+(-?\d+[.,]\d+)(?:\s|$)/, 'li_tow'],
+  [/^(?:LAW|LDW|LW)\s+\d+\s+(-?\d+[.,]\d+)(?:\s|$)/, 'li_law'],
+  [/^ZFW MAC:?\s+(\d+[.,]\d+)(?:\s|$)/, 'mac_zfw'],
+  [/^TOW MAC:?\s+(\d+[.,]\d+)(?:\s|$)/, 'mac_tow'],
+  [/^(?:LAW|LDW|LDG|LW) MAC:?\s+(\d+[.,]\d+)(?:\s|$)/, 'mac_law'],
+];
+const MAX_BEFORE = /\bM(?:AX)?\s*(\d+)/;
+const MAX_AFTER = /\b(\d+)\s+(?:Op\.\s+)?Max\b/i;
 
 /**
  * Cheap check: could this text hold a loadsheet? Substring scans (plus the LS
@@ -217,7 +235,7 @@ function parseHeader(ls: Loadsheet, header: string, next: string[]) {
   if (ls.edition === undefined) {
     // EDNO on one of the next lines (EI132/21 21NOV26 EDNO 001).
     for (const line of next.slice(0, 3)) {
-      const m = EDITION.exec(line);
+      const m = EDITION.exec(line) || EDITION_REF.exec(line);
       if (m) {
         ls.edition = Number(m[1]);
         break;
@@ -282,7 +300,11 @@ function parseWeights(ls: Loadsheet, line: string) {
     const m = re.exec(line);
     if (!m) continue;
     ls[field] = Number(m[1]);
-    const max = line.match(/\bM(?:AX)?\s*(\d+)/);
+    // MAX after the value only counts with its own number (TOW 105157 MAX
+    // sends no maximum).
+    const max =
+      MAX_BEFORE.exec(line) ||
+      MAX_AFTER.exec(line.slice(m.index + m[0].length));
     if (max) ls[`${field}_max`] = Number(max[1]);
     // The first limiting weight wins when several are marked.
     if (ls.limiting === undefined && /[\s\d]L$/.test(line)) ls.limiting = limit;
@@ -405,6 +427,11 @@ function parseBody(ls: Loadsheet, lines: string[]) {
       const im = re.exec(line);
       if (im) ls[field] = Number(im[1].replace(',', '.'));
     }
+    for (const [re, field] of COLUMN_INDEX) {
+      if (ls[field] !== undefined) continue;
+      const im = re.exec(line);
+      if (im) ls[field] = Number(im[1].replace(',', '.'));
+    }
     if (ls.notoc === undefined && (m = /NOTOC:?\s*(YES|NO)\b/.exec(line)))
       ls.notoc = m[1] === 'YES';
     if (
@@ -456,11 +483,12 @@ function parseAcceptance(text: string): Loadsheet | null {
     );
     if (flight) ls.flight_number = flight[1];
     // SECTOR: YPPH-OMDB first, then the pair after the flight
-    // (FOR QR274/21NOV AMS-DOH), then a pair at the start of a line.
+    // (FOR QR274/21NOV AMS-DOH, or 21NOV26), then a pair at the start of a
+    // line.
     const sector =
       text.match(/SECTOR:\s*([A-Z]{3,4})[-/]([A-Z]{3,4})\b/) ||
       text.match(
-        /\bFOR\s+[A-Z0-9]{2}[A-Z]?\d{1,4}[A-Z]?(?:\/\d{2}[A-Z]{3})?\s+([A-Z]{3,4})[-/]([A-Z]{3,4})\b/,
+        /\bFOR\s+[A-Z0-9]{2}[A-Z]?\d{1,4}[A-Z]?(?:\/\d{2}[A-Z]{3}(?:\d{2})?)?\s+([A-Z]{3,4})[-/]([A-Z]{3,4})\b/,
       ) ||
       text.match(/^([A-Z]{3,4})[-/]([A-Z]{3,4})(?:\s|$)/m);
     if (sector) {

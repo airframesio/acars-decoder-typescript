@@ -156,6 +156,7 @@ describe('Loadsheet', () => {
       kind: 'loadsheet',
       status: 'final',
       time: '2140',
+      edition: 2,
       flight_number: 'TK0053',
       flight_day: 21,
       departure: 'BKK',
@@ -406,11 +407,21 @@ describe('Loadsheet', () => {
       date: '2026-11-21',
       weight_unit: 'LB',
       dow: 184097,
+      doi: 5.61,
       zfw: 272172,
+      zfw_max: 286600,
+      li_zfw: 17.42,
       tof: 25825,
       tow: 297997,
+      tow_max: 312425,
+      li_tow: 36.27,
       tif: 8805,
       law: 289192,
+      law_max: 308650,
+      li_law: 40.73,
+      mac_zfw: 21.8,
+      mac_tow: 24.5,
+      mac_law: 25.1,
       underload: 14428,
     });
   });
@@ -697,6 +708,57 @@ describe('Loadsheet', () => {
       kind: 'request',
       departure: 'HKJK',
     });
+  });
+
+  test('decodes synthetic: ULOAD cut to two digits on the last line', () => {
+    const message = {
+      label: 'RA',
+      text: 'LOADSHEET FINAL 1200 EDNO1\nBA123/01 01JAN26\nLHR JFK G-TEST 2/4\nZFW 100000\nULOAD 12',
+    };
+    const result = decoder.decode(message);
+    expect(result.decoded).toBe(true);
+    expect(result.decoder.name).toBe('loadsheet');
+    expect(result.raw.loadsheet).toEqual({
+      kind: 'loadsheet',
+      status: 'final',
+      edition: 1,
+      time: '1200',
+      flight_number: 'BA123',
+      flight_day: 1,
+      date: '2026-01-01',
+      departure: 'LHR',
+      arrival: 'JFK',
+      registration: 'G-TEST',
+      crew: '2/4',
+      zfw: 100000,
+    });
+  });
+
+  test('decodes synthetic: acceptance with the year in the flight date', () => {
+    const message = {
+      label: 'RA',
+      text: 'LDSHT ACCEPT ACK FOR QR274/21NOV26 AMS-DOH',
+    };
+    const result = decoder.decode(message);
+    expect(result.decoded).toBe(true);
+    expect(result.decoder.name).toBe('loadsheet');
+    expect(result.formatted.description).toBe('Loadsheet Acceptance');
+    expect(result.raw.loadsheet).toEqual({
+      kind: 'acceptance',
+      flight_number: 'QR274',
+      departure: 'AMS',
+      arrival: 'DOH',
+    });
+  });
+
+  test('labels the passenger total as including infants', () => {
+    const result = decoder.decode({
+      label: 'RA',
+      text: 'LOADSHEET FINAL 1359 EDNO1\nAI160/21 21NOV26\nLGW AMD VT-ALP 3/15\nZFW 214843\nPAX/4/33/302 TTL 342\nPAX 339 PLUS 3',
+    });
+    const pax = result.formatted.items.find((i) => i.code === 'PAX');
+    expect(pax?.label).toBe('Passengers (total, incl. infants)');
+    expect(pax?.value).toBe('342 (4/33/302)');
   });
 
   test('a loadsheet is a partial decode', () => {
