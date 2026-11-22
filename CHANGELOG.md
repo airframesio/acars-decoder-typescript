@@ -4,7 +4,27 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
-- `DecoderPluginInterface.name` is now required, and `MessageDecoder.registerPlugin` throws on a blank or duplicate plugin name. Custom plugins passed to `registerPlugin` must set a unique `name`.
+## 1.10.0
+
+### Breaking
+
+- `DecoderPluginInterface.name` is now required, and `MessageDecoder.registerPlugin` throws on a blank or duplicate plugin name. Custom plugins passed to `registerPlugin` must set a unique `name` (#574, #575).
+
+### Added
+
+- OOOI (OUT/OFF/ON/IN) report decoding for many airline layouts, plus ETA/ETD estimates and scheduled times (#562, #564, #566, #567, #570).
+- Loadsheets (IATA AHM 517 FINAL/PRELIM), loadsheet acceptances and loadsheet requests on any label (#563).
+- Military AMC message fields: mission number, OOI, DIS, weather, wind and speed (#561).
+
+### Changed
+
+- `decode()` no longer throws when a plugin fails on malformed text; the error is reported in the result instead (#565).
+- Label 13-18 slash reports validate clock fields; impossible times now go to the unknown text instead of producing a bad time (#562).
+
+### Fixed (output values change)
+
+- Label 4T AGFSR: west and south positions now have a negative sign (#559).
+- Labels 16 and 80: `DDMM.m` positions are read as degrees plus decimal minutes (#560).
 
 ## 1.7.0
 
