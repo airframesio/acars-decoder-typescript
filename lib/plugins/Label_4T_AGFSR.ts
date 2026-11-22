@@ -61,11 +61,11 @@ export class Label_4T_AGFSR extends DecoderPlugin {
     const lon = data[6].substring(7, 15);
     ResultFormatter.position(decodeResult, {
       latitude:
-        CoordinateUtils.getDirection(lat[6]) * Number(lat.substring(0, 2)) +
-        Number(lat.substring(2, 6)) / 60,
+        CoordinateUtils.getDirection(lat[6]) *
+        (Number(lat.substring(0, 2)) + Number(lat.substring(2, 6)) / 60),
       longitude:
-        CoordinateUtils.getDirection(lon[7]) * Number(lon.substring(0, 3)) +
-        Number(lon.substring(3, 7)) / 60,
+        CoordinateUtils.getDirection(lon[7]) *
+        (Number(lon.substring(0, 3)) + Number(lon.substring(3, 7)) / 60),
     });
     ResultFormatter.altitude(decodeResult, 100 * Number(data[7]));
     //  8 - phase of flight?
