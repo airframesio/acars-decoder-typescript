@@ -25,24 +25,23 @@ export class Loadsheet extends DecoderPlugin {
   }
 
   decode(message: Message, options: Options = {}): DecodeResult {
-    const decodeResult = this.defaultResult();
-    decodeResult.decoder.name = this.name;
-    decodeResult.message = message;
-
     // Most messages never mention a loadsheet: bail out before any parsing.
-    const ls = mayBeLoadsheet(message.text)
-      ? parseLoadsheet(message.text)
-      : null;
+    const ls = parseLoadsheet(message.text);
+    const decodeResult = this.initResult(
+      message,
+      ls ? DESCRIPTIONS[ls.kind] : 'Unknown',
+    );
     if (!ls) {
-      if (options.debug && mayBeLoadsheet(message.text)) {
-        console.log(`Decoder: Unknown loadsheet message: ${message.text}`);
-      }
+      if (mayBeLoadsheet(message.text))
+        this.debug(options, `Unknown loadsheet message: ${message.text}`);
+      this.setDecodeLevel(decodeResult, false);
       return decodeResult;
     }
 
-    decodeResult.formatted.description = DESCRIPTIONS[ls.kind];
     if (ls.flight_number)
       ResultFormatter.flightNumber(decodeResult, ls.flight_number);
+    if (ls.flight_day !== undefined)
+      ResultFormatter.day(decodeResult, ls.flight_day);
     if (ls.registration) ResultFormatter.tail(decodeResult, ls.registration);
     if (ls.departure)
       ResultFormatter.departureAirport(
@@ -58,11 +57,17 @@ export class Loadsheet extends DecoderPlugin {
       );
     ResultFormatter.loadsheet(decodeResult, ls);
 
-    decodeResult.decoded = true;
-    // The full text carries more (compartment loads, trim, SI remarks) than
-    // the fields decoded, so a loadsheet is a partial decode.
-    decodeResult.decoder.decodeLevel =
-      ls.kind === 'loadsheet' ? 'partial' : 'full';
+    if (ls.kind === 'loadsheet') {
+      // The text carries more than the fields decoded (compartment loads,
+      // trim, SI remarks), so a loadsheet is always a partial decode.
+      this.setDecodeLevel(decodeResult, true, 'partial');
+    } else {
+      // A one-line acceptance or request is fully read; anything longer
+      // (acknowledgement boilerplate, crew codes) stays in remaining.
+      const lines = message.text.split(/\r?\n/).filter((l) => l.trim());
+      if (lines.length > 1) ResultFormatter.unknown(decodeResult, message.text);
+      this.setDecodeLevel(decodeResult, true);
+    }
     return decodeResult;
   }
 }

@@ -73,7 +73,7 @@ export interface Loadsheet {
   /** Passengers by class or zone as sent (4/33/302). */
   pax_breakdown?: string;
   pax_total?: number;
-  /** Infants (PAX 339 PLUS 3). */
+  /** Infants (PAX 339 PLUS 3), already counted in pax_total. */
   infants?: number;
   /** Total on board, crew included. */
   tob?: number;
@@ -84,7 +84,7 @@ const HEADER_WORD =
   /LOADSHEET|LOAD SHEET|L O A D S H E E T|\bLS\s+(?:FINAL|PRELIM)/;
 // Lines that mention a loadsheet without starting one.
 const NOT_HEADER =
-  /END (?:OF )?(?:ACARS )?LOADSHEET|LOADSHEET END|AMENDMENTS|WILL FOLLOW|NO FINAL LOADSHEET|AWAITING|CANCELLED|CHECKS PERFORMED|ACCEPT|\bACK|RCVD|\bREQ\b|REQUEST|,/;
+  /END (?:OF )?(?:ACARS )?LOADSHEET|LOADSHEET END|AMENDMENTS|WILL FOLLOW|NO FINAL LOADSHEET|AWAITING|CANCELLED|CHECKS PERFORMED|ACCEPT|\bACK|RCVD|\bREQ\b|REQUEST/;
 const STATUS = /\b(FINAL|PRELIM)(?:INARY)?/;
 const EDITION = /\bED(?:NO?|N0)?\s*0*(\d{1,2})\b/;
 const FLIGHT =
@@ -111,7 +111,17 @@ const MONTHS = [
 ];
 const ACCEPT_CSV =
   /,([A-Z]{3,4}),([A-Z]{3,4}),(\d{6}),(\d{4}),LOADSHEET (FINAL|PRELIM),EDNO\s*(\d+),ACCEPT/;
-const INDEX_KEYS: [string, keyof Loadsheet][] = [
+type IndexField =
+  | 'doi'
+  | 'bi'
+  | 'dli'
+  | 'li_zfw'
+  | 'li_tow'
+  | 'li_law'
+  | 'mac_zfw'
+  | 'mac_tow'
+  | 'mac_law';
+const INDEX_KEYS: [string, IndexField][] = [
   ['DOI', 'doi'],
   ['BI', 'bi'],
   ['DLI', 'dli'],
@@ -125,21 +135,38 @@ const INDEX_KEYS: [string, keyof Loadsheet][] = [
 const INDEX_PATTERNS = INDEX_KEYS.map(
   ([key, field]) =>
     [
-      // MACZFW 32.5, MAC ZFW: 30.58
+      // MACZFW 32.5, MAC ZFW: 30.58, DOI 5,61 (decimal comma)
       new RegExp(
-        `(?:^|\\s)${key.replace(/^(MAC|LI)/, '$1 ?')}:?\\s+(-?\\d+(?:\\.\\d+)?)(?!\\d)`,
+        `(?:^|\\s)${key.replace(/^(MAC|LI)/, '$1 ?')}:?\\s+(-?\\d+(?:[.,]\\d+)?)(?![\\d,])`,
       ),
       field,
-    ] as [RegExp, keyof Loadsheet],
+    ] as [RegExp, IndexField],
 );
+type WeightField = 'zfw' | 'tow' | 'law';
+const WEIGHT_PATTERNS: [RegExp, WeightField, 'ZFW' | 'TOW' | 'LAW'][] = [
+  [/^ZFW(?: ACTUAL)?:?\s+(\d+)(?![\d.])/, 'zfw', 'ZFW'],
+  [/^TOW(?: ACTUAL)?:?\s+(\d+)(?![\d.])/, 'tow', 'TOW'],
+  // LGW and LW are landing weight here only because the line starts with
+  // them and a number follows; the route line (LGW AMD VT-ALP) has no number.
+  [/^(?:LAW|LDW|LGW|LW)(?: ACTUAL)?:?\s+(\d+)(?![\d.])/, 'law', 'LAW'],
+];
+// A bare weight on the last line, possibly cut at a message split.
+const CUT_WEIGHT =
+  /^(ZFW|TOW|LAW|LDW|LGW|LW|TOF|TIF|TF|BO|DOW|UNDLD)(?: ACTUAL)?:?\s+(\d+)$/;
 
-/** Cheap check: could this text hold a loadsheet? */
+/**
+ * Cheap check: could this text hold a loadsheet? Plain substring scans that
+ * cover every HEADER_WORD alternative (so the parser never misses a header
+ * this check rejected) plus LDSHT, which only acceptances use.
+ */
 export function mayBeLoadsheet(text: string): boolean {
   return (
     text.includes('LOADSHEET') ||
     text.includes('LOAD SHEET') ||
-    text.includes('LDSHT') ||
-    text.includes('LS FINAL')
+    text.includes('L O A D S H E E T') ||
+    text.includes('LS FINAL') ||
+    text.includes('LS PRELIM') ||
+    text.includes('LDSHT')
   );
 }
 
@@ -248,22 +275,36 @@ function parseRouteLine(ls: Loadsheet, line: string): boolean {
   return true;
 }
 
-function parseWeight(
-  ls: Loadsheet,
-  line: string,
-  key: string,
-  field: 'zfw' | 'tow' | 'law',
-  limit: 'ZFW' | 'TOW' | 'LAW',
-) {
-  if (ls[field] !== undefined) return;
-  const m = new RegExp(`^${key}(?: ACTUAL)?:?\\s+(\\d+)(?![\\d.])`).exec(line);
-  if (!m) return;
-  ls[field] = Number(m[1]);
-  const max = line.match(/\bM(?:AX)?\s*(\d+)/);
-  if (max)
-    (ls as unknown as Record<string, number>)[`${field}_max`] = Number(max[1]);
-  // The first limiting weight wins when several are marked.
-  if (ls.limiting === undefined && /[\s\d]L$/.test(line)) ls.limiting = limit;
+function parseWeights(ls: Loadsheet, line: string) {
+  for (const [re, field, limit] of WEIGHT_PATTERNS) {
+    if (ls[field] !== undefined) continue;
+    const m = re.exec(line);
+    if (!m) continue;
+    ls[field] = Number(m[1]);
+    const max = line.match(/\bM(?:AX)?\s*(\d+)/);
+    if (max) ls[`${field}_max`] = Number(max[1]);
+    // The first limiting weight wins when several are marked.
+    if (ls.limiting === undefined && /[\s\d]L$/.test(line)) ls.limiting = limit;
+  }
+}
+
+/**
+ * Long loadsheets are split over several messages, and the split can fall
+ * inside a value ("TOW 2" for "TOW 288113"). A bare weight on the last line
+ * is taken as cut when it is two or more digits shorter than a ZFW, TOW or
+ * LAW already read (for those three keys), or when it has at most two
+ * digits.
+ */
+function isCutWeight(ls: Loadsheet, line: string): boolean {
+  const m = CUT_WEIGHT.exec(line);
+  if (!m) return false;
+  const digits = m[2].length;
+  if (digits <= 2) return true;
+  if (!/^(?:ZFW|TOW|LAW|LDW|LGW|LW)$/.test(m[1])) return false;
+  const known = [ls.zfw, ls.tow, ls.law].filter((v) => v !== undefined);
+  if (known.length === 0) return false;
+  const width = Math.max(...known.map((v) => String(v).length));
+  return digits < width - 1;
 }
 
 function parseBody(ls: Loadsheet, lines: string[]) {
@@ -275,17 +316,8 @@ function parseBody(ls: Loadsheet, lines: string[]) {
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
     if (!line) continue;
-    // Long loadsheets are split over several messages, and the split can
-    // fall inside a value ("TOW 2" for "TOW 288113"). A bare key and number
-    // on the last line is read only when it is about as long as the ZFW.
-    if (i === last && i > 0) {
-      const cut = /^[A-Z]+:?\s+(\d+)$/.exec(line);
-      if (
-        cut &&
-        (ls.zfw === undefined || cut[1].length < String(ls.zfw).length - 1)
-      )
-        continue;
-    }
+    // The line holds only the cut weight, so nothing else is skipped.
+    if (i === last && i > 0 && isCutWeight(ls, line)) continue;
     if (flightSeen) sinceFlight++;
     if (!flightSeen && i < 4 && parseFlightLine(ls, line)) {
       flightSeen = true;
@@ -302,7 +334,8 @@ function parseBody(ls: Loadsheet, lines: string[]) {
       continue;
     }
     if (ls.departure === undefined) {
-      // FLT  AMS-LHR  A306EAT / DAEAT, DTE  2026-11-21
+      // FLT  AMS-LHR  A306EAT / DAEAT, DTE  2026-11-21. The DHL freighter
+      // loadsheets pad the arrival with a zero (FLT AMS-0LHR), hence 0?.
       const flt = /^FLT\s+([A-Z]{3,4})-0?([A-Z]{3,4})\b/.exec(line);
       if (flt) {
         ls.departure = flt[1];
@@ -313,20 +346,21 @@ function parseBody(ls: Loadsheet, lines: string[]) {
       const dte = /^DTE\s+(\d{4}-\d{2}-\d{2})$/.exec(line);
       if (dte) ls.date = dte[1];
     }
-    parseWeight(ls, line, 'ZFW', 'zfw', 'ZFW');
-    parseWeight(ls, line, 'TOW', 'tow', 'TOW');
-    parseWeight(ls, line, '(?:LAW|LDW|LGW|LW)', 'law', 'LAW');
+    parseWeights(ls, line);
     let m: RegExpExecArray | null;
-    if (ls.tof === undefined && (m = /^TOF\s+(\d+)(?![\d.])/.exec(line)))
+    if (
+      ls.tof === undefined &&
+      (m = /^(?:TOF|TAKE ?OFF FUEL):?\s+(\d+)(?![\d.])/.exec(line))
+    )
       ls.tof = Number(m[1]);
     if (
       ls.tif === undefined &&
-      (m = /^(?:TIF|TF|BO)\s+(\d+)(?![\d.])/.exec(line))
+      (m = /^(?:TIF|TF|BO|TRIP(?: FUEL)?):?\s+(\d+)(?![\d.])/.exec(line))
     )
       ls.tif = Number(m[1]);
     if (
       ls.underload === undefined &&
-      (m = /^UNDLD\s+(\d+)(?![\d.])/.exec(line))
+      (m = /^(?:UNDLD|ULOAD|UNDERLOAD):?\s+(\d+)(?![\d.])/.exec(line))
     )
       ls.underload = Number(m[1]);
     if (ls.dow === undefined && (m = /(?:^|\s)DOW\s+(\d+)(?![\d.])/.exec(line)))
@@ -353,6 +387,14 @@ function parseBody(ls: Loadsheet, lines: string[]) {
       ls.pax_total = Number(m[2]);
     }
     if (
+      ls.pax_total === undefined &&
+      (m = /^PAX\s+(\d+)\s+(\d+(?:\/\d+)+)$/.exec(line))
+    ) {
+      // PAX 255 145/96/9/5: total first, then the breakdown.
+      ls.pax_total = Number(m[1]);
+      ls.pax_breakdown = m[2];
+    }
+    if (
       ls.infants === undefined &&
       (m = /^PAX\s+\d+\s+PLUS\s+(\d+)/.exec(line))
     )
@@ -360,7 +402,7 @@ function parseBody(ls: Loadsheet, lines: string[]) {
     for (const [re, field] of INDEX_PATTERNS) {
       if (ls[field] !== undefined) continue;
       const im = re.exec(line);
-      if (im) (ls as unknown as Record<string, number>)[field] = Number(im[1]);
+      if (im) ls[field] = Number(im[1].replace(',', '.'));
     }
     if (ls.notoc === undefined && (m = /NOTOC:?\s*(YES|NO)\b/.exec(line)))
       ls.notoc = m[1] === 'YES';
@@ -412,9 +454,14 @@ function parseAcceptance(text: string): Loadsheet | null {
       /(?:FLIGHT NUMBER:\s*|FOR\s+)([A-Z0-9]{2}[A-Z]?\d{1,4}[A-Z]?)\b/,
     );
     if (flight) ls.flight_number = flight[1];
+    // SECTOR: YPPH-OMDB first, then the pair after the flight
+    // (FOR QR274/21NOV AMS-DOH), then a pair at the start of a line.
     const sector =
-      text.match(/(?:SECTOR:\s*|\s)([A-Z]{3,4})[-/]([A-Z]{3,4})\b/) ||
-      text.match(/^([A-Z]{4})\/([A-Z]{4})\s/);
+      text.match(/SECTOR:\s*([A-Z]{3,4})[-/]([A-Z]{3,4})\b/) ||
+      text.match(
+        /\bFOR\s+[A-Z0-9]{2}[A-Z]?\d{1,4}[A-Z]?(?:\/\d{2}[A-Z]{3})?\s+([A-Z]{3,4})[-/]([A-Z]{3,4})\b/,
+      ) ||
+      text.match(/^([A-Z]{3,4})[-/]([A-Z]{3,4})(?:\s|$)/m);
     if (sector) {
       ls.departure = sector[1];
       ls.arrival = sector[2];
@@ -464,8 +511,9 @@ export function parseLoadsheet(text: string): Loadsheet | null {
   const accepted = parseAcceptance(text);
   if (accepted) return accepted;
 
+  // /ORIG on the same line or one of the next two (uplinks wrap).
   const req = text.match(
-    /\b(?:LOADSHEET|LDSHT|LOAD SHEET)\s+(?:REQ|REQUEST)\b(?:.*?\/ORIG\s+([A-Z]{3,4}))?/,
+    /\b(?:LOADSHEET|LDSHT|LOAD SHEET)\s+(?:REQ|REQUEST)\b(?:[^\n]*(?:\r?\n[^\n]*){0,2}?\/ORIG\s+([A-Z]{3,4}))?/,
   );
   if (req) {
     const ls: Loadsheet = { kind: 'request' };

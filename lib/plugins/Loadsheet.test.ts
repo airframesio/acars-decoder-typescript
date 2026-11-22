@@ -2,8 +2,9 @@ import { beforeEach, describe, expect, test } from '@jest/globals';
 import { MessageDecoder } from '../MessageDecoder';
 import { Loadsheet } from './Loadsheet';
 
-// Real loadsheet traffic from Airframes (November 2026), with crew and
-// staff names removed.
+// Generated from the shared loadsheet fixtures (real Airframes traffic from
+// November 2026 with crew and staff names removed, plus synthetic cases
+// from review). microservice-event-digger and xng test the same file.
 describe('Loadsheet', () => {
   let decoder: MessageDecoder;
   let plugin: Loadsheet;
@@ -65,7 +66,6 @@ describe('Loadsheet', () => {
       weight_unit: 'KG',
       bw: 165905,
     });
-    expect(result.raw.flight_number).toBe('AI160');
   });
 
   test('decodes final loadsheet in a C1 AGM uplink with star separators', () => {
@@ -105,7 +105,6 @@ describe('Loadsheet', () => {
       mac_tow: 30.2,
       notoc: false,
     });
-    expect(result.raw.flight_number).toBe('AS811');
   });
 
   test('decodes preliminary loadsheet with the TOW limit marked', () => {
@@ -142,7 +141,6 @@ describe('Loadsheet', () => {
       pax_total: 278,
       doi: 32.6,
     });
-    expect(result.raw.flight_number).toBe('AY061');
   });
 
   test('decodes Turkish ACARS LOADSHEET layout, route with slash, PAX before weights', () => {
@@ -184,7 +182,6 @@ describe('Loadsheet', () => {
       bw: 124792,
       bi: 89.8,
     });
-    expect(result.raw.flight_number).toBe('TK0053');
   });
 
   test('decodes Singapore layout: route on the flight line, weights spelled out', () => {
@@ -228,7 +225,6 @@ describe('Loadsheet', () => {
       underload: 12502,
       notoc: true,
     });
-    expect(result.raw.flight_number).toBe('SQ7394');
   });
 
   test('decodes edition as ED3, LW and TF aliases, weights in pounds', () => {
@@ -266,7 +262,6 @@ describe('Loadsheet', () => {
       mac_tow: 28,
       weight_unit: 'LB',
     });
-    expect(result.raw.flight_number).toBe('CI5032');
   });
 
   test('decodes bare LOADSHEET header, EDNO on the flight line', () => {
@@ -297,7 +292,6 @@ describe('Loadsheet', () => {
       tow_max: 233000,
       tif: 30754,
     });
-    expect(result.raw.flight_number).toBe('EI132');
   });
 
   test('decodes Emirates layout: FINAL01 before the flight number', () => {
@@ -332,7 +326,6 @@ describe('Loadsheet', () => {
       law_max: 207000,
       limiting: 'LAW',
     });
-    expect(result.raw.flight_number).toBe('EK024');
   });
 
   test('decodes airports written together, M before the maximum', () => {
@@ -366,10 +359,11 @@ describe('Loadsheet', () => {
       tif: 48000,
       law: 167493,
       law_max: 167600,
+      pax_total: 255,
+      pax_breakdown: '145/96/9/5',
       mac_zfw: 18.8,
       mac_tow: 18.4,
     });
-    expect(result.raw.flight_number).toBe('UU978');
   });
 
   test('decodes Aerolineas Argentinas release with sector on the flight line', () => {
@@ -391,8 +385,8 @@ describe('Loadsheet', () => {
       zfw: 140709,
       tow: 207177,
       mac_tow: 28.69,
+      tof: 66468,
     });
-    expect(result.raw.flight_number).toBe('AR1134');
   });
 
   test('decodes freighter loadsheet named by flight with REF, FLT and DTE lines', () => {
@@ -415,9 +409,10 @@ describe('Loadsheet', () => {
       zfw: 272172,
       tof: 25825,
       tow: 297997,
+      tif: 8805,
       law: 289192,
+      underload: 14428,
     });
-    expect(result.raw.flight_number).toBe('QY6731');
   });
 
   test('decodes loadsheet header without weights (signature notice)', () => {
@@ -441,16 +436,17 @@ describe('Loadsheet', () => {
       arrival: 'LOS',
       registration: 'FGSPO',
     });
-    expect(result.raw.flight_number).toBe('AF148');
   });
 
-  test('does not read a value cut off at the end of the message', () => {
+  test('decodes loadsheet cut off inside a value at the end of the message', () => {
     const message = {
-      label: 'RA',
+      label: '10',
       text: 'QUDOHEOQR~1DIS01010101\r\n\r\nLOADSHEET FINAL 1508 EDNO1\r\nQR274/21      21NOV26\r\nAMS DOH A7-BEA   2/15\r\n************************\r\nZFW 232413 MAX 237682  L\r\n************************\r\nTOF 55700\r\n************************\r\nTOW 2',
     };
     const result = decoder.decode(message);
     expect(result.decoded).toBe(true);
+    expect(result.decoder.name).toBe('loadsheet');
+    expect(result.formatted.description).toBe('Loadsheet');
     expect(result.raw.loadsheet).toEqual({
       kind: 'loadsheet',
       status: 'final',
@@ -489,7 +485,6 @@ describe('Loadsheet', () => {
       flight_number: 'QTR1336',
       date: '2026-11-21',
     });
-    expect(result.raw.flight_number).toBe('QTR1336');
   });
 
   test('decodes acceptance acknowledgement', () => {
@@ -509,11 +504,13 @@ describe('Loadsheet', () => {
       departure: 'YPPH',
       arrival: 'OMDB',
     });
-    expect(result.raw.flight_number).toBe('EK0421');
   });
 
   test('decodes loadsheet request', () => {
-    const message = { label: '14', text: 'LOADSHEET REQ /ORIG HKJK' };
+    const message = {
+      label: '14',
+      text: 'LOADSHEET REQ /ORIG HKJK',
+    };
     const result = decoder.decode(message);
     expect(result.decoded).toBe(true);
     expect(result.decoder.name).toBe('loadsheet');
@@ -524,20 +521,184 @@ describe('Loadsheet', () => {
     });
   });
 
-  test('does not decode a continuation block', () => {
+  test('does not decode continuation block', () => {
     const message = {
       label: 'RA',
       text: 'EX\r\nADD\r\nNIL\r\nDEDUCTIONS\r\nNIL\r\nEND OF LOADSHEET',
     };
     expect(plugin.decode(message).decoded).toBe(false);
+    expect(decoder.decode(message).decoder.name).not.toBe('loadsheet');
   });
 
-  test('does not decode a ZFW message announcing a later loadsheet', () => {
+  test('does not decode ZFW message announcing a later loadsheet', () => {
     const message = {
       label: '13',
       text: ':PAD12.LHRLDBA.ZFW\n\tAZF/GYMMJ/BA0248\n\t- PAX/234 INCLUDING 002 INF\n\t- CGO/008239\n\t- ZFW/176042\n\t- CRW/02/10\n\t- FWT/027981\n\t- OWT/173945\n\t- TTL/029553\n\t- TOW/203498\n\t- DEP/1635\n\t- SEC/EZE-GIG\n\tFLT STATUS:CLOSED\n\tSI ISSUED ON: 21NOV2026 15:36 UTC\n\tFOR INFO ONLY - USE TOW FOR PRELIM TOPL CALC. SEND MESSAGE TO .CLC IF\n\t ANY CHANGES TO CRW OR \n\tPOTABLE WATER. PRELIM LOADSHEET WILL FOLLOW AT ETD -25.\n\tSERVICE WEIGHT ADJUSTMENT WEIGHT/INDEX\n\tADD\n\tGIG POTABLE WATER 3/4           75 PCT       928    7.7\n\tGIG LINEN                                    105    0.7',
     };
     expect(plugin.decode(message).decoded).toBe(false);
+    expect(decoder.decode(message).decoder.name).not.toBe('loadsheet');
+  });
+
+  test('decodes synthetic: header line with a comma', () => {
+    const message = {
+      label: 'RA',
+      text: 'LOADSHEET FINAL, 1359 EDNO1\nBA123/01 01JAN26\nLHR JFK G-TEST 2/4\nZFW 100000\nTOW 120000',
+    };
+    const result = decoder.decode(message);
+    expect(result.decoded).toBe(true);
+    expect(result.decoder.name).toBe('loadsheet');
+    expect(result.formatted.description).toBe('Loadsheet');
+    expect(result.raw.loadsheet).toEqual({
+      kind: 'loadsheet',
+      status: 'final',
+      edition: 1,
+      time: '1359',
+      flight_number: 'BA123',
+      flight_day: 1,
+      date: '2026-01-01',
+      departure: 'LHR',
+      arrival: 'JFK',
+      registration: 'G-TEST',
+      crew: '2/4',
+      zfw: 100000,
+      tow: 120000,
+    });
+  });
+
+  test('decodes synthetic: LS PRELIM header', () => {
+    const message = {
+      label: 'RA',
+      text: 'LS PRELIM 1200\nBA123/01 01JAN26\nLHR JFK G-TEST 2/4\nZFW 100000\nTOW 120000',
+    };
+    const result = decoder.decode(message);
+    expect(result.decoded).toBe(true);
+    expect(result.decoder.name).toBe('loadsheet');
+    expect(result.formatted.description).toBe('Loadsheet');
+    expect(result.raw.loadsheet).toEqual({
+      kind: 'loadsheet',
+      status: 'prelim',
+      time: '1200',
+      flight_number: 'BA123',
+      flight_day: 1,
+      date: '2026-01-01',
+      departure: 'LHR',
+      arrival: 'JFK',
+      registration: 'G-TEST',
+      crew: '2/4',
+      zfw: 100000,
+      tow: 120000,
+    });
+  });
+
+  test('decodes synthetic: complete ZFW on the last line', () => {
+    const message = {
+      label: 'RA',
+      text: 'LOADSHEET FINAL 1200 EDNO1\nBA123/01 01JAN26\nLHR JFK N12345 2/4\nZFW 214843',
+    };
+    const result = decoder.decode(message);
+    expect(result.decoded).toBe(true);
+    expect(result.decoder.name).toBe('loadsheet');
+    expect(result.formatted.description).toBe('Loadsheet');
+    expect(result.raw.loadsheet).toEqual({
+      kind: 'loadsheet',
+      status: 'final',
+      edition: 1,
+      time: '1200',
+      flight_number: 'BA123',
+      flight_day: 1,
+      date: '2026-01-01',
+      departure: 'LHR',
+      arrival: 'JFK',
+      registration: 'N12345',
+      crew: '2/4',
+      zfw: 214843,
+    });
+  });
+
+  test('decodes synthetic: complete UNDLD on the last line', () => {
+    const message = {
+      label: 'RA',
+      text: 'LOADSHEET FINAL 1200 EDNO1\nTK53/21 21NOV26\nBKK IST TC-JJA 3/12\nZFW 160708 MAX 175000\nTOW 210000\nUNDLD 492',
+    };
+    const result = decoder.decode(message);
+    expect(result.decoded).toBe(true);
+    expect(result.decoder.name).toBe('loadsheet');
+    expect(result.formatted.description).toBe('Loadsheet');
+    expect(result.raw.loadsheet).toEqual({
+      kind: 'loadsheet',
+      status: 'final',
+      edition: 1,
+      time: '1200',
+      flight_number: 'TK53',
+      flight_day: 21,
+      date: '2026-11-21',
+      departure: 'BKK',
+      arrival: 'IST',
+      registration: 'TC-JJA',
+      crew: '3/12',
+      zfw: 160708,
+      zfw_max: 175000,
+      tow: 210000,
+      underload: 492,
+    });
+  });
+
+  test('decodes synthetic: acceptance with a route-like remark before SECTOR', () => {
+    const message = {
+      label: 'RA',
+      text: 'LDSHT ACCEPT ACK\nNOTE SEE ABC-DEF BEFORE\nSECTOR: YPPH-OMDB\nFLIGHT NUMBER: EK0421',
+    };
+    const result = decoder.decode(message);
+    expect(result.decoded).toBe(true);
+    expect(result.decoder.name).toBe('loadsheet');
+    expect(result.formatted.description).toBe('Loadsheet Acceptance');
+    expect(result.raw.loadsheet).toEqual({
+      kind: 'acceptance',
+      flight_number: 'EK0421',
+      departure: 'YPPH',
+      arrival: 'OMDB',
+    });
+  });
+
+  test('decodes synthetic: request with /ORIG on the next line', () => {
+    const message = {
+      label: 'RA',
+      text: 'LOADSHEET REQ\n/ORIG HKJK',
+    };
+    const result = decoder.decode(message);
+    expect(result.decoded).toBe(true);
+    expect(result.decoder.name).toBe('loadsheet');
+    expect(result.formatted.description).toBe('Loadsheet Request');
+    expect(result.raw.loadsheet).toEqual({
+      kind: 'request',
+      departure: 'HKJK',
+    });
+  });
+
+  test('a loadsheet is a partial decode', () => {
+    const result = decoder.decode({
+      label: 'RA',
+      text: 'LOADSHEET FINAL 1200 EDNO1\nBA123/01 01JAN26\nLHR JFK G-TEST 2/4\nZFW 100000\nTOW 120000',
+    });
+    expect(result.decoder.decodeLevel).toBe('partial');
+    expect(result.raw.day).toBe(1);
+  });
+
+  test('a one-line request is a full decode', () => {
+    const result = decoder.decode({
+      label: 'RA',
+      text: 'LOADSHEET REQ /ORIG HKJK',
+    });
+    expect(result.decoder.decodeLevel).toBe('full');
+    expect(result.remaining.text).toBeUndefined();
+  });
+
+  test('a multi-line acknowledgement keeps its text in remaining', () => {
+    const text =
+      'LDSHT ACCEPT ACK\nSECTOR: YPPH-OMDB\nFLIGHT NUMBER: EK0421\nAUTO RESPONSE';
+    const result = decoder.decode({ label: 'RA', text });
+    expect(result.decoder.decodeLevel).toBe('partial');
+    expect(result.remaining.text).toBe(text);
   });
 
   test('ignores text without a loadsheet', () => {

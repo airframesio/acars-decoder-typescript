@@ -965,6 +965,12 @@ export class ResultFormatter {
       ['UNDLD', 'Underload', weight(ls.underload)],
       ['DOW', 'Dry Operating Weight', weight(ls.dow)],
       ['DOI', 'Dry Operating Index', ls.doi?.toString()],
+      ['BW', 'Basic Weight', weight(ls.bw)],
+      ['BI', 'Basic Index', ls.bi?.toString()],
+      ['DLI', 'Dead Load Index', ls.dli?.toString()],
+      ['LIZFW', 'Loaded Index at ZFW', ls.li_zfw?.toString()],
+      ['LITOW', 'Loaded Index at TOW', ls.li_tow?.toString()],
+      ['LILAW', 'Loaded Index at LAW', ls.li_law?.toString()],
       [
         'PAX',
         'Passengers',
@@ -972,7 +978,8 @@ export class ResultFormatter {
           ? undefined
           : `${ls.pax_total}${ls.pax_breakdown && ls.pax_breakdown !== String(ls.pax_total) ? ` (${ls.pax_breakdown})` : ''}`,
       ],
-      ['INF', 'Infants', ls.infants?.toString()],
+      // Infants are already counted in the passenger total.
+      ['INF', 'Infants (in passenger total)', ls.infants?.toString()],
       ['TOB', 'Total On Board', ls.tob?.toString()],
       [
         'MACZFW',
