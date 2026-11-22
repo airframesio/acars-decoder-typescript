@@ -7,6 +7,18 @@ import { ResultFormatter } from '../utils/result_formatter';
 const POS_REGEX = /^(?<latd>[NS])(?<lat>.+)(?<lngd>[EW])(?<lng>.+)/;
 const WS_REGEX = /\s+/;
 const NEWLINE_REGEX = /\r?\n/;
+const OOOI_REPORT_REGEX = /\b(OUTRP|OFFRP|ONRP|INRP|SUMMRY)\b/;
+
+// The same airline-defined layout carries the OOOI reports on other labels
+// (e.g. 30 OUT, 31 OFF, 32 ON, 33 IN, 82 OUT, 8D IN), mixed with unrelated
+// messages, so on those labels only the OOOI report types are decoded.
+const OOOI_REPORT_DESCRIPTIONS: Record<string, string> = {
+  OUTRP: 'Out of Gate Report',
+  OFFRP: 'Takeoff Report',
+  ONRP: 'Landing Report',
+  INRP: 'In Gate Report',
+  SUMMRY: 'Flight Summary Report',
+};
 
 // Airline Defined
 // 3N01 POSRPT
@@ -15,7 +27,7 @@ export class Label_80 extends DecoderPlugin {
 
   qualifiers() {
     return {
-      labels: ['80'],
+      labels: ['80', '30', '31', '32', '33', '82', '8D'],
       preambles: [],
     };
   }
@@ -27,6 +39,14 @@ export class Label_80 extends DecoderPlugin {
     );
 
     const lines = message.text.split(NEWLINE_REGEX);
+    const reportType = OOOI_REPORT_REGEX.exec(lines[0])?.[1];
+    if (reportType) {
+      decodeResult.formatted.description = OOOI_REPORT_DESCRIPTIONS[reportType];
+    } else if (message.label !== '80') {
+      this.setDecodeLevel(decodeResult, false);
+      return decodeResult;
+    }
+
     if (lines.length === 1 && lines[0].includes(',')) {
       this.parseCsvFormat(lines[0], decodeResult);
     } else {
@@ -92,8 +112,10 @@ export class Label_80 extends DecoderPlugin {
       ResultFormatter.unknownArr(results, otherInfo2, ' ');
     }
 
-    if (fields.length > 3) {
-      ResultFormatter.unknownArr(results, fields.slice(3), '/');
+    // single-line reports carry their tags after the header,
+    // e.g. '1001 OUTRP 1925/21 KBOS/MMGL .XA-VSX/OUT 1245/FOB  171'
+    for (let i = 3; i < fields.length; i++) {
+      this.parseTags(fields[i].trim(), results);
     }
   }
 
@@ -123,6 +145,21 @@ export class Label_80 extends DecoderPlugin {
         ResultFormatter.position(results, position);
         break;
       }
+      case 'OUT':
+      case 'OFF':
+      case 'ON':
+      case 'IN': {
+        if (!/^\d{4}(\d{2})?$/.test(val)) {
+          ResultFormatter.unknown(results, part, '/');
+          break;
+        }
+        const tod = DateTimeUtils.convertHHMMSSToTod(val);
+        if (tag === 'OUT') ResultFormatter.out(results, tod);
+        else if (tag === 'OFF') ResultFormatter.off(results, tod);
+        else if (tag === 'ON') ResultFormatter.on(results, tod);
+        else ResultFormatter.in(results, tod);
+        break;
+      }
       case 'ALT':
         ResultFormatter.altitude(results, parseInt(val.replace('+', ''), 10));
         break;
@@ -144,13 +181,14 @@ export class Label_80 extends DecoderPlugin {
       case 'FB':
         // ignoring, assuming FOB and avoiding duplicates.
         break;
-      case 'FOB':
-        // Strip non-numeric like 'N' in 'N009414'
-        ResultFormatter.currentFuel(
-          results,
-          parseInt(val.replace(/\D/g, ''), 10),
-        );
+      case 'FOB': {
+        // Strip non-numeric like 'N' in 'N009414'; '----' means not reported
+        const fuel = parseInt(val.replace(/\D/g, ''), 10);
+        if (!isNaN(fuel)) {
+          ResultFormatter.currentFuel(results, fuel);
+        }
         break;
+      }
       case 'UTC':
         ResultFormatter.timestamp(
           results,

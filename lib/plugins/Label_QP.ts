@@ -22,11 +22,14 @@ export class Label_QP extends DecoderPlugin {
       message.text.substring(0, 4),
     );
     ResultFormatter.arrivalAirport(decodeResult, message.text.substring(4, 8));
-    ResultFormatter.out(
-      decodeResult,
-      DateTimeUtils.convertHHMMSSToTod(message.text.substring(8, 12)),
-    );
-    ResultFormatter.unknown(decodeResult, message.text.substring(12));
+    const time = message.text.substring(8, 12);
+    if (/^\d{4}$/.test(time)) {
+      ResultFormatter.out(decodeResult, DateTimeUtils.convertHHMMSSToTod(time));
+      ResultFormatter.unknown(decodeResult, message.text.substring(12));
+    } else {
+      // time not reported (e.g. 'KSEAKORD    0276')
+      ResultFormatter.unknown(decodeResult, message.text.substring(8));
+    }
 
     decodeResult.decoded = true;
     if (!decodeResult.remaining.text) decodeResult.decoder.decodeLevel = 'full';
