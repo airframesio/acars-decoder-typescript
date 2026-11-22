@@ -70,6 +70,7 @@ export interface RawFields {
   alternative_runways?: AlternativeRunway[];
 
   // Gates
+  departure_gate?: string;
   arrival_gate?: string;
 
   // Times (seconds since midnight or epoch)

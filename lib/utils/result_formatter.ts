@@ -580,6 +580,16 @@ export class ResultFormatter {
     });
   }
 
+  static departureGate(decodeResult: DecodeResult, value: string) {
+    decodeResult.raw.departure_gate = value;
+    decodeResult.formatted.items.push({
+      type: 'gate',
+      code: 'DGATE',
+      label: 'Departure Gate',
+      value: decodeResult.raw.departure_gate,
+    });
+  }
+
   static arrivalGate(decodeResult: DecodeResult, value: string) {
     decodeResult.raw.arrival_gate = value;
     decodeResult.formatted.items.push({

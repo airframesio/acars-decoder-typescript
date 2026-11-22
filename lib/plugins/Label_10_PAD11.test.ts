@@ -37,6 +37,42 @@ describe('Label 10 PAD11', () => {
     );
   });
 
+  test('decodes an arrival stand without the trailing //', () => {
+    const result = new MessageDecoder().decode({
+      label: '10',
+      text: ':PAD11\r\nUTC\r\nARRIVAL- GTNED BA1447  \r\nSTAND 503  ETA 1357\r\nON STAND- BA424   \r\nETD 1350\r\n\r\nCREW DEPT- FOR INFO ONLY\r\nGTNED BA1372  TO X\r\nSTAND 503\r\n',
+    });
+
+    expect(result.decoder.name).toBe('label-10-pad11');
+    expect(result.formatted.description).toBe('Arrival Uplink');
+    expect(result.raw.flight_number).toBe('BA1447');
+    expect(result.raw.arrival_gate).toBe('503');
+    expect(result.raw.eta_time).toBe(13 * 3600 + 57 * 60);
+    expect(result.remaining.text).toMatch(/^ON STAND- BA424/);
+  });
+
+  test('decodes an arrival stand with a letter suffix on label 11', () => {
+    const result = new MessageDecoder().decode({
+      label: '11',
+      text: ':PAD11\r\nUTC\r\nARRIVAL- GMEDK BA2661  \r\nSTAND 36M  ETA 1341 //\r\nON STAND- UNKNOWN //',
+    });
+
+    expect(result.decoder.name).toBe('label-10-pad11');
+    expect(result.raw.arrival_gate).toBe('36M');
+  });
+
+  test('does not take the crew departure stand as the arrival stand', () => {
+    const result = plugin.decode({
+      label: '10',
+      text: ':PAD11\r\nUTC\r\nARRIVAL- GTNEF BA1421  \r\nETA 1343\r\nCREW DEPT- FOR INFO ONLY\r\nSTAND 506\r\n',
+    });
+
+    expect(result.decoded).toBe(true);
+    expect(result.raw.flight_number).toBe('BA1421');
+    expect(result.raw.arrival_gate).toBeUndefined();
+    expect(result.remaining.text).toContain('STAND 506');
+  });
+
   test('decodes an arrival uplink without a stand', () => {
     const result = plugin.decode({
       label: '10',

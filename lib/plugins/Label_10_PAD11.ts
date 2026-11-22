@@ -8,6 +8,8 @@ import { ResultFormatter } from '../utils/result_formatter';
 // before them (ETA):
 //   ':PAD11\r\nUTC\r\nARRIVAL- GZBJI BA130  \r\nSTAND 563  ATA 0847 //\r\n...'
 //   ':PAD11\r\nUTC\r\nARRIVAL- GXWBB BA066  \r\nSTAND 305  ETA 0658 //\r\n...'
+// The " //" can be missing, and a STAND line after "ON STAND-" or "CREW
+// DEPT-" is another flight's, so it stays in remaining.
 // British Airways flight release, before departure:
 //   ':PAD11\r\n22NOV26 BA356    GEUUZ LHR-LYS\r\nETD 0700Z FLIGHT RELEASE OFP  5'
 // British Airways departure planning at Heathrow, the target (TOBT) or
@@ -19,7 +21,7 @@ import { ResultFormatter } from '../utils/result_formatter';
 // is counted from):
 //   '4PAD11/SLOT\n\tIB154 ECOOL\n\tSTD 0335 STA 1310\n\tATD 0357\n\tDLY 0022 93 ...'
 const ARRIVAL_REGEX =
-  /^:PAD11\r?\nUTC\r?\nARRIVAL- (?<tail>[A-Z0-9]{4,6}) +(?<flight>[A-Z0-9]{2}\d{1,4}) *\r?\n(?:STAND (?<stand>\S+) +)?(?<kind>ATA|ETA) (?<time>\d{4}) \/\/(?<rest>[\s\S]*)$/;
+  /^:PAD11\r?\nUTC\r?\nARRIVAL- (?<tail>[A-Z0-9]{4,6}) +(?<flight>[A-Z0-9]{2}\d{1,4}) *\r?\n(?:STAND (?<stand>\S+) +)?(?<kind>ATA|ETA) (?<time>\d{4})(?: \/\/)?(?=\s|$)(?<rest>[\s\S]*)$/;
 const RELEASE_REGEX =
   /^:PAD11\r?\n(?<date>\d{2}[A-Z]{3}\d{2}) +(?<flight>[A-Z0-9]{2}\d{1,4}) +(?<tail>[A-Z0-9]{4,6}) +(?<dep>[A-Z]{3})-(?<arr>[A-Z]{3})\r?\nETD (?<etd>\d{4})Z FLIGHT RELEASE(?<rest>[\s\S]*)$/;
 const CDM_REGEX =
