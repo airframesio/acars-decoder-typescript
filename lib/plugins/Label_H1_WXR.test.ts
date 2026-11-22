@@ -34,17 +34,18 @@ describe('Label_H1 WXR', () => {
     expect(result.raw.weather_report?.station).toBe('PAED');
   });
 
-  test('report text containing slashes is kept whole', () => {
+  test("'(' substitutions are kept as sent", () => {
+    // AMC free text cannot contain '/' or ','; both are sent as '('
     const result = decoder.decode({
       label: 'H1',
-      text: '- #MDWXR/ID99207A,RCH3269,AAM7886W2324/MR4,120/MTKADW,1200,KADW 211200Z 1/2SM FG OVC002 07/02 A3027192E',
+      text: '- #MDWXR/ID99207A,RCH3269,AAM7886W2324/MR4,120/MTKADW,1200,KADW 211200Z 1(2SM FG OVC002 07(02 A30271E97',
     });
 
     expect(result.decoded).toBe(true);
     expect(result.decoder.decodeLevel).toBe('full');
     expect(result.raw.weather_report?.type).toBe('METAR');
     expect(result.raw.weather_report?.report).toBe(
-      'KADW 211200Z 1/2SM FG OVC002 07/02 A3027',
+      'KADW 211200Z 1(2SM FG OVC002 07(02 A3027',
     );
   });
 
@@ -62,12 +63,12 @@ describe('Label_H1 WXR', () => {
   test('trailing fuel and version fields are not part of the report', () => {
     const result = decoder.decode({
       label: 'H1',
-      text: '- #MDWXR/ID99207A,RCH3269,AAM7886W2324/MR4,120/MTKADW,1200,KADW 211200Z 1/2SM FG/FB123/VR32E371',
+      text: '- #MDWXR/ID99207A,RCH3269,AAM7886W2324/MR4,120/MTKADW,1200,KADW 211200Z 1(2SM FG/FB123/VR329ADE',
     });
 
     expect(result.decoded).toBe(true);
     expect(result.decoder.decodeLevel).toBe('full');
-    expect(result.raw.weather_report?.report).toBe('KADW 211200Z 1/2SM FG');
+    expect(result.raw.weather_report?.report).toBe('KADW 211200Z 1(2SM FG');
     expect(result.raw.fuel_on_board).toBe(123);
   });
   test('invalid report time is not decoded', () => {

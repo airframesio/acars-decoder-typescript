@@ -97,7 +97,10 @@ export class Arinc702Helper {
           processETA(data, decodeResult, fields, i);
           break;
         case 'FB':
-          ResultFormatter.currentFuel(decodeResult, parseInt(data, 10));
+          // military OOI reports sometimes send an empty /FB
+          if (data !== '') {
+            ResultFormatter.currentFuel(decodeResult, parseInt(data, 10));
+          }
           break;
         case 'FN':
           decodeResult.raw.flight_number = data;
@@ -111,6 +114,9 @@ export class Arinc702Helper {
         case 'ID':
           processIdentification(decodeResult, data.split(','));
           break;
+        case 'IN':
+          processInEvent(decodeResult, data.split(','));
+          break;
         case 'LL':
           processLatLon(decodeResult, data);
           break;
@@ -120,24 +126,16 @@ export class Arinc702Helper {
         case 'MR':
           processMessageReference(decodeResult, data.split(','));
           break;
-        case 'MT': {
-          // The report is free text that can itself contain '/' (1/2SM, 07/02, R09/...), so
-          // it runs to the end of the message, except for trailing fuel (/FB) and version
-          // (/VR) fields, which are decoded as usual. /MT is the last field in every sample
-          // seen so far.
-          let end = fields.length;
-          while (end > i + 1 && /^(?:FB\d+|VR\d+)$/.test(fields[end - 1])) {
-            end--;
-          }
-          processWeatherReport(
-            decodeResult,
-            fields.slice(i, end).join('/').substring(2),
-          );
-          i = end - 1;
+        case 'MT':
+          // AMC free text never contains '/' (slashes and commas are sent as '('), so the
+          // report ends at the next field like any other
+          processWeatherReport(decodeResult, data);
           break;
-        }
         case 'OF':
           processOffEvent(decodeResult, data);
+          break;
+        case 'ON':
+          processOnEvent(decodeResult, data);
           break;
         case 'OT':
           processOutEvent(decodeResult, data.split(','));
@@ -188,10 +186,17 @@ export class Arinc702Helper {
           ResultFormatter.version(decodeResult, parseInt(data, 10) / 10);
           break;
         case 'WD':
+        case 'WM':
+        case 'WP':
+          // /WM and /WP close military flight plans sent with /RI and /RM the way /WD closes
+          // ones sent with /RP
           processWindData(decodeResult, data);
           break;
         case 'WQ':
           processWeatherQuery(decodeResult, data.split(':'));
+          break;
+        case 'WX':
+          processWeatherRequest(decodeResult, data.split(','));
           break;
         default:
           ResultFormatter.unknown(decodeResult, fields[i], '/');
@@ -486,11 +491,17 @@ function parseMessageType(
  * @returns
  */
 function processIMI(decodeResult: DecodeResult, type: string): boolean {
-  if (type === 'DIS') {
+  if (type === 'CRG') {
+    // only seen as REQCRG, a ground request carrying nothing but /MR
+    decodeResult.formatted.description = 'Cargo Report';
+  } else if (type === 'DIS') {
     // military (AMC) report carrying a lat/lon (/LL), /DR and fuel. What DIS stands for is
     // not publicly documented, so the name is left generic. Not the same message as the
     // label 4A DIS report (Label_4A_DIS).
     decodeResult.formatted.description = 'DIS Report';
+  } else if (type === 'ENG') {
+    // military (AMC) engine data in /EN; the values are not decoded
+    decodeResult.formatted.description = 'Engine Report';
   } else if (type === 'FPN') {
     decodeResult.formatted.description = 'Flight Plan';
   } else if (type === 'FTX') {
@@ -1064,6 +1075,56 @@ function processOffEvent(decodeResult: DecodeResult, data: string) {
   }
   ResultFormatter.day(decodeResult, off.day);
   ResultFormatter.off(decodeResult, off.tod);
+}
+
+/** /ON<DDHHMM>, the landing (wheels on) time */
+function processOnEvent(decodeResult: DecodeResult, data: string) {
+  const on = parseDayTime(data);
+  if (!on) {
+    ResultFormatter.unknown(decodeResult, 'ON' + data, '/');
+    return;
+  }
+  ResultFormatter.day(decodeResult, on.day);
+  ResultFormatter.on(decodeResult, on.tod);
+}
+
+/**
+ * /IN<DDHHMM>,<value>, the in-gate time. What the second value is (16 in one sample, empty in
+ * another) is not known, so it stays in the remaining text.
+ */
+function processInEvent(decodeResult: DecodeResult, data: string[]) {
+  const time = parseDayTime(data[0]);
+  if (!time) {
+    ResultFormatter.unknown(decodeResult, 'IN' + data.join(','), '/');
+    return;
+  }
+  ResultFormatter.day(decodeResult, time.day);
+  ResultFormatter.in(decodeResult, time.tod);
+  if (data.slice(1).some((v) => v !== '')) {
+    ResultFormatter.unknown(decodeResult, data.slice(1).join(','), '/IN');
+  }
+}
+
+/**
+ * /WX<DDHHMM>,<code>,<station>,,,,..., a military weather request (REQWXR). Only the station is
+ * decoded: the time and the code (2 in every sample) are left in the remaining text, as are any
+ * of the empty slots that are filled in.
+ */
+function processWeatherRequest(decodeResult: DecodeResult, data: string[]) {
+  const station = data[2] ?? '';
+  if (!/^[A-Z][A-Z0-9]{3}$/.test(station)) {
+    ResultFormatter.unknown(decodeResult, 'WX' + data.join(','), '/');
+    return;
+  }
+  ResultFormatter.raw(
+    decodeResult,
+    'weather_station',
+    'WX_STN',
+    'Weather Station',
+    station,
+  );
+  const rest = [data[0], data[1], ...data.slice(3).filter((v) => v !== '')];
+  ResultFormatter.unknown(decodeResult, 'WX' + rest.join(','), '/');
 }
 
 /**

@@ -91,3 +91,58 @@ describe('Label H1 preamble REQ', () => {
     expect(decodeResult.formatted.description).toBe('Request for Flight Plan');
   });
 });
+
+// Military (AMC-format) requests seen on Airframes, 2026-11-08 to 2026-11-21
+describe('Label H1 military REQ', () => {
+  const decoder = new MessageDecoder();
+
+  test('position request, /AU left undecoded', () => {
+    const result = decoder.decode({
+      label: 'H1',
+      text: '- #MDREQPOS/ID50104A,RCH563,JBZGDU80C321/MR1,/AU59A39',
+    });
+
+    expect(result.decoded).toBe(true);
+    expect(result.decoder.decodeLevel).toBe('partial');
+    expect(result.formatted.description).toBe('Request for Position Report');
+    expect(result.raw.flight_number).toBe('RCH563');
+    expect(result.remaining.text).toBe('AU5');
+  });
+
+  test('weather request', () => {
+    const result = decoder.decode({
+      label: 'H1',
+      text: 'REQWXR/ID16093S,RCH5070,DS8903461322/DC21112026,102803/MR18,/WX211915,2,KWRI,,,,,,,,,,,/FB1162/VR32B6AD',
+    });
+
+    expect(result.decoded).toBe(true);
+    expect(result.decoder.decodeLevel).toBe('partial');
+    expect(result.formatted.description).toBe('Request for Weather Report');
+    expect(result.raw.weather_station).toBe('KWRI');
+    expect(result.raw.fuel_on_board).toBe(1162);
+    expect(result.remaining.text).toBe('WX211915,2');
+  });
+
+  test('weather request without a station is not decoded', () => {
+    const result = decoder.decode({
+      label: 'H1',
+      text: 'REQWXR/ID16093S,RCH5070,DS8903461322/DC21112026,102803/MR18,/WX211915,2,,,,/FB1162/VR326817',
+    });
+
+    expect(result.decoded).toBe(true);
+    expect(result.raw.weather_station).toBeUndefined();
+    expect(result.remaining.text).toBe('WX211915,2,,,,');
+  });
+
+  test('cargo request', () => {
+    const result = decoder.decode({
+      label: 'H1',
+      text: '- #MDREQCRG/ID77174A,RCH341,AMZM2016C322/MR2,230F',
+    });
+
+    expect(result.decoded).toBe(true);
+    expect(result.decoder.decodeLevel).toBe('full');
+    expect(result.formatted.description).toBe('Request for Cargo Report');
+    expect(result.raw.flight_number).toBe('RCH341');
+  });
+});

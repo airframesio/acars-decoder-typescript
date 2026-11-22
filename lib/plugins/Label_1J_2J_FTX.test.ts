@@ -63,3 +63,26 @@ describe('Label 1J/2J FTX', () => {
     expect(decodeResult.message).toBe(message);
   });
 });
+
+// AMC free text never contains '/' or ','; the sender replaces them with '(' and the
+// decoder keeps the text as sent, since '(' can stand for either.
+// https://app.airframes.io/messages/7755431084
+describe('Label 1J military FTX with ( substitutions', () => {
+  test('keeps T(O as sent', () => {
+    const result = new MessageDecoder().decode({
+      label: '1J',
+      text: 'FTX/ID543615,CANNY52,202609300515/MR7,/FXTO ESP AND GIBAJF502 FLT FOR TOMORROW WILL BE ACTIVATED.ETD WILL BE 0100Z SO FAR.SO ASC HQ IS NOW REQUESTING TO CANX 4TH PERIOD TODAY.BTW CONFIRM T(O FUEL OF JF502 FROM RJOH IS 115K.0D88',
+    });
+
+    expect(result.decoded).toBe(true);
+    expect(result.decoder.decodeLevel).toBe('full');
+    expect(result.formatted.description).toBe('Free Text');
+    expect(result.raw.tail).toBe('543615');
+    expect(result.raw.flight_number).toBe('CANNY52');
+    expect(result.raw.text).toBe(
+      'TO ESP AND GIBAJF502 FLT FOR TOMORROW WILL BE ACTIVATED.ETD WILL BE 0100Z SO FAR.SO ASC HQ IS NOW REQUESTING TO CANX 4TH PERIOD TODAY.BTW CONFIRM T(O FUEL OF JF502 FROM RJOH IS 115K.',
+    );
+    // 202609300515 is not a mission number (day 515), so none is decoded
+    expect(result.raw.mission).toBeUndefined();
+  });
+});

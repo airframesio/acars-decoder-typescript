@@ -46,3 +46,45 @@ describe('Label_H1 OOI', () => {
     expect(result.remaining.text).toContain('OF219914');
   });
 });
+
+describe('Label_H1 OOI on and in events', () => {
+  const decoder = new MessageDecoder();
+
+  test('on event', () => {
+    const result = decoder.decode({
+      label: 'H1',
+      text: 'OOI/ID66015S,RAMEN95,CPZ595L5P323/DC19112026,192310/MR8,/ON191923/CG254,112,360/FB990/VR32F49A',
+    });
+
+    expect(result.decoded).toBe(true);
+    expect(result.decoder.decodeLevel).toBe('full');
+    expect(result.raw.day).toBe(19);
+    expect(result.raw.on_time).toBe(69780); // 19:23
+    expect(result.raw.fuel_on_board).toBe(990);
+  });
+
+  test('in event with an empty /FB', () => {
+    const result = decoder.decode({
+      label: 'H1',
+      text: 'OOI/ID50005B,RCH2151,PBC03810C314/DC16112026,121054/MR152,/IN161210,16/CG,,/FB/VR032AE97',
+    });
+
+    expect(result.decoded).toBe(true);
+    expect(result.decoder.decodeLevel).toBe('partial');
+    expect(result.raw.in_time).toBe(43800); // 12:10
+    expect(result.raw.fuel_on_board).toBeUndefined();
+    // the second /IN value is not known
+    expect(result.remaining.text).toBe('16');
+  });
+
+  test('invalid on time is not decoded', () => {
+    const result = decoder.decode({
+      label: 'H1',
+      text: 'OOI/ID66015S,RAMEN95,CPZ595L5P323/DC19112026,192310/MR8,/ON192523/CG254,112,360/FB990/VR320DAC',
+    });
+
+    expect(result.decoded).toBe(true);
+    expect(result.raw.on_time).toBeUndefined();
+    expect(result.remaining.text).toContain('ON192523');
+  });
+});

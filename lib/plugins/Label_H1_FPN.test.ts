@@ -326,7 +326,8 @@ describe('Label_H1 FPN', () => {
     const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
-    expect(decodeResult.decoder.decodeLevel).toBe('partial');
+    // /WP closes the plan like /WD does
+    expect(decodeResult.decoder.decodeLevel).toBe('full');
     expect(decodeResult.raw.tail).toBe('88194A');
     expect(decodeResult.raw.flight_number).toBe('RCH857');
     expect(decodeResult.raw.mission_number).toBe('PMZM107QP021');
@@ -371,5 +372,20 @@ describe('Label_H1 FPN', () => {
     expect(decodeResult.raw.checksum).toBe(0xc850);
     expect(decodeResult.formatted.description).toBe('Flight Plan');
     expect(decodeResult.formatted.items.length).toBe(10);
+  });
+});
+
+describe('Label H1 military FPN trailers', () => {
+  test('/WM closes a flight plan sent with /RI', () => {
+    const result = new MessageDecoder().decode({
+      label: 'H1',
+      text: '- #MDFPN/ID70044A,RCH655,XVZA2996C318/MR8,/RI:DA:KBGR:AA:KNKT:R:33O:F:BGR..ODIKE..ENE..COTEE..AVCAT.Q439..ZJAAY.Q97..SAWED.Q117..SUSSA..FEELY:V:ENE,257,AT3600,,/WM,,,,FFAC',
+    });
+
+    expect(result.decoded).toBe(true);
+    expect(result.raw.departure_icao).toBe('KBGR');
+    expect(result.raw.arrival_icao).toBe('KNKT');
+    // the :V: waypoint constraints are not decoded yet; /WM no longer shows up as unknown
+    expect(result.remaining.text).toBe(':V:ENE,257,AT3600,,');
   });
 });

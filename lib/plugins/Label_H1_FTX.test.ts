@@ -40,3 +40,22 @@ describe('Label_H1 FTX', () => {
     expect(decodeResult.message).toBe(message);
   });
 });
+
+// https://app.airframes.io/messages/7931914752: a METAR sent as free text, where '/' in the
+// report (15/06, /////KT) arrives as '('
+describe('Label H1 military FTX with ( substitutions', () => {
+  test('keeps the METAR text as sent', () => {
+    const result = new MessageDecoder().decode({
+      label: 'H1',
+      text: '- #MDFTX/ID80002A,BRK71,COLLINSAM123/MR2,/FXMETAR LIPA 260855Z 07009KT 9999 FEW080 15(06 Q1021 RMK FEW VIS MIN 9999 WIND THR05 (((((KT WIND THR23 (((((KT A3015 BLU15ED',
+    });
+
+    expect(result.decoded).toBe(true);
+    expect(result.decoder.decodeLevel).toBe('full');
+    expect(result.formatted.description).toBe('Free Text');
+    expect(result.raw.flight_number).toBe('BRK71');
+    expect(result.raw.text).toBe(
+      'METAR LIPA 260855Z 07009KT 9999 FEW080 15(06 Q1021 RMK FEW VIS MIN 9999 WIND THR05 (((((KT WIND THR23 (((((KT A3015 BLU',
+    );
+  });
+});
