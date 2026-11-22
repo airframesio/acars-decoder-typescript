@@ -146,7 +146,12 @@ export class MessageDecoder {
     if (!name) {
       throw new Error('Decoder plugin name must be a non-empty string');
     }
-    if (this.plugins.some((existing) => existing.name === name)) {
+    if (
+      this.plugins.some(
+        (existing) =>
+          typeof existing.name === 'string' && existing.name.trim() === name,
+      )
+    ) {
       throw new Error(`Duplicate decoder plugin name: ${name}`);
     }
     this.plugins.push(plugin);
@@ -249,10 +254,16 @@ export class MessageDecoder {
         // trips over an unexpected shape must not take the caller down with
         // it: treat it as "not this plugin" and keep trying the others.
         const name = entry.plugin.name || 'unknown';
-        const detail =
-          error instanceof Error
-            ? `${error.name}: ${error.message}`
-            : String(error);
+        let detail: string;
+        try {
+          detail =
+            error instanceof Error
+              ? `${error.name}: ${error.message}`
+              : String(error);
+        } catch {
+          // A thrown value whose toString (or message getter) throws too.
+          detail = 'unprintable error';
+        }
         pluginFailures.push(`${name} (${detail.slice(0, 200)})`);
         if (options.debug) {
           console.log(`Plugin ${name} threw`, error);
