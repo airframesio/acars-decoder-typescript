@@ -52,13 +52,15 @@ export class Label_16_TOD extends DecoderPlugin {
     } else if (posFields.length === 2) {
       ResultFormatter.position(decodeResult, {
         latitude:
-          (CoordinateUtils.getDirection(posFields[0][0]) *
-            Number(posFields[0].slice(1))) /
-          100,
+          CoordinateUtils.getDirection(posFields[0][0]) *
+          CoordinateUtils.decimalMinutesToDecimalDegrees(
+            Number(posFields[0].slice(1)),
+          ),
         longitude:
-          (CoordinateUtils.getDirection(posFields[1][0]) *
-            Number(posFields[1].slice(1))) /
-          100,
+          CoordinateUtils.getDirection(posFields[1][0]) *
+          CoordinateUtils.decimalMinutesToDecimalDegrees(
+            Number(posFields[1].slice(1)),
+          ),
       });
     } else {
       // Redacted

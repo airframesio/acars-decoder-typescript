@@ -97,4 +97,13 @@ export class CoordinateUtils {
   ): number {
     return degrees + minutes / 60 + seconds / 3600;
   }
+
+  // DDMM.mm or DDDMM.mm, e.g. 3835.95 is 38 degrees 35.95 minutes
+  public static decimalMinutesToDecimalDegrees(value: number): number {
+    return CoordinateUtils.dmsToDecimalDegrees(
+      Math.trunc(value / 100),
+      value % 100,
+      0,
+    );
+  }
 }

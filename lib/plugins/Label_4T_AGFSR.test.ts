@@ -47,7 +47,7 @@ describe('Label 4T ETA', () => {
     expect(decodeResult.formatted.items[5].label).toBe('Message Timestamp');
     expect(decodeResult.formatted.items[5].value).toBe('03:40:00');
     expect(decodeResult.formatted.items[6].label).toBe('Aircraft Position');
-    expect(decodeResult.formatted.items[6].value).toBe('44.585 N, 70.277 W');
+    expect(decodeResult.formatted.items[6].value).toBe('44.585 N, 71.723 W');
     expect(decodeResult.formatted.items[7].label).toBe('Altitude');
     expect(decodeResult.formatted.items[7].value).toBe('35000 feet');
     expect(decodeResult.formatted.items[8].label).toBe('Out of Gate Time');
@@ -87,7 +87,7 @@ describe('Label 4T ETA', () => {
     expect(decodeResult.formatted.items[5].label).toBe('Message Timestamp');
     expect(decodeResult.formatted.items[5].value).toBe('03:54:00');
     expect(decodeResult.formatted.items[6].label).toBe('Aircraft Position');
-    expect(decodeResult.formatted.items[6].value).toBe('44.297 N, 71.457 W');
+    expect(decodeResult.formatted.items[6].value).toBe('44.297 N, 72.543 W');
     expect(decodeResult.formatted.items[7].label).toBe('Altitude');
     expect(decodeResult.formatted.items[7].value).toBe('25400 feet');
     expect(decodeResult.formatted.items[8].value).toBe('03:19:00');
@@ -148,6 +148,16 @@ describe('Label 4T ETA', () => {
     expect(decodeResult.decoder.name).toBe('label-4t-agfsr');
     expect(decodeResult.raw.out_time).toBe(9720);
     expect(decodeResult.raw.off_time).toBe(10620);
+  });
+
+  test('decodes southern hemisphere position', () => {
+    message.text =
+      'AGFSR XX1234/05/06/SSAGRU/0354Z/833/3447.5S05832.4W/350/ / / / / / / / / / / /';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoded).toBe(true);
+    expect(decodeResult.formatted.items[6].label).toBe('Aircraft Position');
+    expect(decodeResult.formatted.items[6].value).toBe('34.792 S, 58.540 W');
   });
 
   test('decodes <invalid>', () => {

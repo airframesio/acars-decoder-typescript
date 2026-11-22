@@ -15,6 +15,7 @@ const pluginClasses = [
   Plugins.CBand, // first, for now, so it can wrap other plugins
   Plugins.LibAcars,
   Plugins.Arinc702,
+  Plugins.Loadsheet,
   Plugins.Label_ColonComma,
   Plugins.Label_5Z_Slash,
   Plugins.Label_10Through15_Delta_OOOI,
