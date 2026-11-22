@@ -34,11 +34,21 @@ describe('Label H1 Preamble EZF Load Sheet', () => {
     expect(decodeResult.raw.tail).toBe('EI-NEO');
     expect(decodeResult.raw.departure_iata).toBe('MXP');
     expect(decodeResult.raw.arrival_iata).toBe('ZNZ');
-    expect(decodeResult.raw.loadsheet['ZFW']).toBe('162075');
-    expect(decodeResult.raw.loadsheet['PAX']).toBe('305');
-    expect(decodeResult.raw.loadsheet['TOW']).toBe('213138');
-    expect(decodeResult.raw.loadsheet['FLT STATUS']).toBe('CLOSED');
-    expect(decodeResult.raw.loadsheet['UOM']).toBe('KG');
+    expect((decodeResult.raw.loadsheet as Record<string, string>)['ZFW']).toBe(
+      '162075',
+    );
+    expect((decodeResult.raw.loadsheet as Record<string, string>)['PAX']).toBe(
+      '305',
+    );
+    expect((decodeResult.raw.loadsheet as Record<string, string>)['TOW']).toBe(
+      '213138',
+    );
+    expect(
+      (decodeResult.raw.loadsheet as Record<string, string>)['FLT STATUS'],
+    ).toBe('CLOSED');
+    expect((decodeResult.raw.loadsheet as Record<string, string>)['UOM']).toBe(
+      'KG',
+    );
   });
 
   test('decodes minimal load sheet', () => {
@@ -51,8 +61,12 @@ describe('Label H1 Preamble EZF Load Sheet', () => {
     expect(decodeResult.raw.tail).toBe('D-ABCD');
     expect(decodeResult.raw.departure_iata).toBe('JFK');
     expect(decodeResult.raw.arrival_iata).toBe('LAX');
-    expect(decodeResult.raw.loadsheet['PAX']).toBe('180');
-    expect(decodeResult.raw.loadsheet['ZFW']).toBe('55000');
+    expect((decodeResult.raw.loadsheet as Record<string, string>)['PAX']).toBe(
+      '180',
+    );
+    expect((decodeResult.raw.loadsheet as Record<string, string>)['ZFW']).toBe(
+      '55000',
+    );
   });
 
   test('decodes with label 1M', () => {
