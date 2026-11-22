@@ -34,6 +34,12 @@ const JAZZ =
 const ALASKA =
   ',,1\r\nGATE UPDATE\r\nGATE CHANGE IN LAX\r\nAS1636\r\nNEW GATE: 210A\r\n\r\n';
 const PSA_ACK = '/ACKFLT GATE F1';
+const JAZZ_FLIGHT_DATA =
+  '.YHZITQK 220419\r\nAGM\r\nAN CGJUZ/MA 395I\r\n-  DFR FLT 8074\r\n----\r\nFIN 726/CGJUZ/CRA\r\nDEP YVR/06:20Z/GTE C40\r\nARR YYC/07:48Z/GTE A17\r\nPAX 46/PAD 8/FUEL \r\n';
+// The crew list that follows in production carries names: not kept here.
+const DELTA_25 =
+  '48   JFKB22\r\nCREW P/F        \r\nPART  1 OF  1 \r\nFLT 0028 - 22NOV1236 CREW P/F        \r\nARR JFK GTE B22\r\n';
+const VIRGIN_AUSTRALIA = 'VA1007, BAY: 45A\r\nGPU: NO\r\nPCA: \r\n';
 
 describe('Label gate report', () => {
   let decoder: MessageDecoder;
@@ -47,7 +53,7 @@ describe('Label gate report', () => {
   test('matches qualifiers', () => {
     expect(plugin.name).toBe('label-gate-report');
     expect(plugin.qualifiers()).toEqual({
-      labels: ['40', '41', '42', 'C1', '21', '3T', '5Z'],
+      labels: ['40', '41', '42', 'C1', '21', '3T', '5Z', '25', '3M'],
     });
   });
 
@@ -195,6 +201,34 @@ describe('Label gate report', () => {
     expect(r.raw.arrival_gate).toBe('F1');
   });
 
+  test('decodes Jazz flight data departure and arrival gates', () => {
+    const r = plugin.decode({ label: 'C1', text: JAZZ_FLIGHT_DATA });
+    expect(r.decoded).toBe(true);
+    expect(r.formatted.description).toBe('Flight Data');
+    expect(r.raw.tail).toBe('CGJUZ');
+    expect(r.raw.departure_iata).toBe('YVR');
+    expect(r.raw.departure_gate).toBe('C40');
+    expect(r.raw.arrival_iata).toBe('YYC');
+    expect(r.raw.arrival_gate).toBe('A17');
+    expect(r.remaining.text).toContain('PAX 46/PAD 8/FUEL');
+  });
+
+  test('decodes Delta crew P/F arrival gate on label 25', () => {
+    const r = plugin.decode({ label: '25', text: DELTA_25 });
+    expect(r.decoded).toBe(true);
+    expect(r.formatted.description).toBe('Crew P/F Report');
+    expect(r.raw.arrival_iata).toBe('JFK');
+    expect(r.raw.arrival_gate).toBe('B22');
+  });
+
+  test('decodes Virgin Australia bay on label 3M', () => {
+    const r = plugin.decode({ label: '3M', text: VIRGIN_AUSTRALIA });
+    expect(r.decoded).toBe(true);
+    expect(r.raw.flight_number).toBe('VA1007');
+    expect(r.raw.arrival_gate).toBe('45A');
+    expect(r.remaining.text).toBe('GPU: NO\nPCA:');
+  });
+
   test.each([
     [
       'gate status only, gate in the next flight block',
@@ -215,6 +249,7 @@ describe('Label gate report', () => {
     ['gate request downlink', '5Z', '/C3 GATE REQ       / KAUS KIAH\r\n'],
     ['Hawaiian format on another label', '40', HAWAIIAN_ARR],
     ['JetBlue format on another label', '40', JETBLUE],
+    ['Delta gate line outside a crew P/F message', '25', 'ARR JFK GTE B22\r\n'],
   ])('does not decode %s', (_name, label, text) => {
     const r = plugin.decode({ label, text });
     expect(r.decoded).toBe(false);
@@ -233,6 +268,9 @@ describe('Label gate report', () => {
       ['21', ALASKA, '210A'],
       ['3T', HAWAIIAN_ARR, '69A'],
       ['5Z', PSA_ACK, 'F1'],
+      ['C1', JAZZ_FLIGHT_DATA, 'A17'],
+      ['25', DELTA_25, 'B22'],
+      ['3M', VIRGIN_AUSTRALIA, '45A'],
     ]) {
       const r = decoder.decode({ label, text });
       expect(r.decoder.name).toBe('label-gate-report');

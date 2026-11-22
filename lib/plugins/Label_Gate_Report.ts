@@ -2,6 +2,7 @@ import { DecoderPlugin } from '../DecoderPlugin';
 import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
 import { splitAgmHeader } from '../utils/agm_header';
 import {
+  addDeltaCrewGate,
   addRouteGate,
   addUnreadLines,
   cutMatch,
@@ -45,6 +46,16 @@ const JAZZ_PLANNED = new RegExp(
 const JETSTAR_CHANGE_HEADER = 'GATE CHANGE MESSAGE - ARRIVAL';
 const JETSTAR_ROUTE =
   /^([A-Z0-9]{2}\d{1,4})\/(\d{2}) [A-Za-z]{3} ([A-Z]{3})-([A-Z]{3})\b/;
+// Jazz flight data, label C1: "DEP YVR/06:20Z/GTE C40" and
+// "ARR YYC/07:48Z/GTE A17", the departure and the arrival gate.
+const JAZZ_DEP = new RegExp(
+  `^DEP ([A-Z]{3})/[0-9:]+Z/GTE\\s+${GATE_TOKEN}\\s*$`,
+);
+const JAZZ_ARR = new RegExp(
+  `^ARR ([A-Z]{3})/[0-9:]+Z/GTE\\s+${GATE_TOKEN}\\s*$`,
+);
+// Virgin Australia, label 3M: "VA1007, BAY: 45A".
+const VIRGIN_BAY = new RegExp(`^(VA\\d{1,4}), BAY:\\s*${GATE_TOKEN}\\s*$`);
 // PSA crew acknowledgement, label 5Z, first line: "/ACKFLT GATE F1".
 const PSA_ACK = new RegExp(`^/ACKFLT GATE\\s+${GATE_TOKEN}\\s*$`);
 // Alaska, label 21: "GATE CHANGE IN LAX" / "AS1636" / "NEW GATE: 210A".
@@ -53,7 +64,8 @@ const ALASKA_FLIGHT = /^(AS\d{1,4})$/;
 const NEW_GATE = new RegExp(`^NEW GATE:\\s*${GATE_TOKEN}\\s*$`);
 
 /**
- * Arrival gates in airline messages on labels 40, 41, 42, C1, 21, 3T and 5Z:
+ * Arrival gates in airline messages on labels 40, 41, 42, C1, 21, 3T, 5Z,
+ * 25 and 3M:
  *
  * - "FLT 1658/22 AUS-DFW" then "GATE D21 ..." or "NEW ARRIVAL GATE NBR IS
  *   C33" (American, Envoy, PSA, GoJet, Piedmont; labels 40, 41, C1)
@@ -62,7 +74,11 @@ const NEW_GATE = new RegExp(`^NEW GATE:\\s*${GATE_TOKEN}\\s*$`);
  * - JetBlue in-range "INR,221156,  GATE:514" (41, 42)
  * - Jetstar "ARRIVAL GATE THIS FLT:43" and gate change "NEW GATE: 23" (C1)
  * - Jazz "JZA GATE DATA UPLINK" / "PLANNED ARRIVAL GATE IS C42" (C1)
+ * - Jazz flight data "DEP YVR/06:20Z/GTE C40" / "ARR YYC/07:48Z/GTE A17",
+ *   both gates (C1)
  * - PSA crew acknowledgement "/ACKFLT GATE F1" (5Z)
+ * - Delta crew P/F "ARR ATL GTE E15" (25)
+ * - Virgin Australia "VA1007, BAY: 45A" (3M)
  * - Alaska "GATE CHANGE IN LAX" / "NEW GATE: 210A" (21)
  *
  * Each format is read only on the labels it was seen on, and reading stops
@@ -75,7 +91,7 @@ export class Label_Gate_Report extends DecoderPlugin {
 
   qualifiers() {
     return {
-      labels: ['40', '41', '42', 'C1', '21', '3T', '5Z'],
+      labels: ['40', '41', '42', 'C1', '21', '3T', '5Z', '25', '3M'],
     };
   }
 
@@ -105,6 +121,7 @@ export class Label_Gate_Report extends DecoderPlugin {
         used =
           this.jetstar(decodeResult, lines) ??
           this.jazz(decodeResult, lines) ??
+          this.jazzFlightData(decodeResult, lines) ??
           this.jetstarChange(decodeResult, lines) ??
           this.routeGate(decodeResult, lines);
         break;
@@ -113,6 +130,12 @@ export class Label_Gate_Report extends DecoderPlugin {
         used = JETBLUE_INR.test(lines[0])
           ? this.jetBlue(decodeResult, lines)
           : this.routeGate(decodeResult, lines);
+        break;
+      case '25':
+        used = addDeltaCrewGate(decodeResult, lines);
+        break;
+      case '3M':
+        used = this.virginBay(decodeResult, lines);
         break;
       case '5Z':
         used = this.psaAck(decodeResult, lines);
@@ -241,6 +264,60 @@ export class Label_Gate_Report extends DecoderPlugin {
       const m = JETSTAR.exec(lines[i]);
       if (m) {
         ResultFormatter.arrivalGate(decodeResult, m[1]);
+        return new Map([[i, '']]);
+      }
+    }
+    return undefined;
+  }
+
+  private jazzFlightData(
+    decodeResult: DecodeResult,
+    lines: string[],
+  ): UsedLines | undefined {
+    let dep: RegExpExecArray | null = null;
+    let depIdx = -1;
+    for (let i = 0; i < lines.length; i++) {
+      if (GATE_STOP_LINE.test(lines[i])) {
+        break;
+      }
+      const d = JAZZ_DEP.exec(lines[i]);
+      if (d) {
+        dep = d;
+        depIdx = i;
+        continue;
+      }
+      const a = JAZZ_ARR.exec(lines[i]);
+      if (a) {
+        decodeResult.formatted.description = 'Flight Data';
+        const used: UsedLines = new Map([[i, '']]);
+        if (dep) {
+          ResultFormatter.departureAirport(decodeResult, dep[1], 'IATA');
+          ResultFormatter.departureGate(decodeResult, dep[2]);
+          used.set(depIdx, '');
+        }
+        ResultFormatter.arrivalAirport(decodeResult, a[1], 'IATA');
+        ResultFormatter.arrivalGate(decodeResult, a[2]);
+        return used;
+      }
+    }
+    if (dep) {
+      decodeResult.formatted.description = 'Flight Data';
+      ResultFormatter.departureAirport(decodeResult, dep[1], 'IATA');
+      ResultFormatter.departureGate(decodeResult, dep[2]);
+      return new Map([[depIdx, '']]);
+    }
+    return undefined;
+  }
+
+  private virginBay(
+    decodeResult: DecodeResult,
+    lines: string[],
+  ): UsedLines | undefined {
+    for (let i = 0; i < lines.length; i++) {
+      const m = VIRGIN_BAY.exec(lines[i]);
+      if (m) {
+        ResultFormatter.flightNumber(decodeResult, m[1]);
+        ResultFormatter.arrivalGate(decodeResult, m[2]);
         return new Map([[i, '']]);
       }
     }

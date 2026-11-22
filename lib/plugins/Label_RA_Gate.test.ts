@@ -42,6 +42,18 @@ const LATAM =
   'QUSCLASLA~1\r\n\r\nGATE ASSIGNMENT\r\n\r\n\r\n\r\nPPOS:602L\r\n\r\nBAG BELT:\r\n\r\nNEXT LEG: LA8142 GRU-AEP 22NOV 14:05Z';
 const LATAM_NO_POSITION =
   'QUSCLASLA~1\r\n\tGATE ASSIGNMENT\r\n\t\r\n\tPPOS:N/A\r\n\tBAG BELT:\r\n\tNEXT LEG: LA3091 FLN-CGH 22NOV 11:35Z';
+// The crew list that follows in production carries names: not kept here.
+const DELTA =
+  '48   ATLE15\r\nCREW P/F        \r\nPART  1 OF  1 \r\nFLT 1160 - 22NOV1213 CREW P/F        \r\nARR ATL GTE E15\r\nFLT 1941 PVR 1025L\r\n                     NXT  DEPT  DEPT    \r\n NAME                FLT  TIME  FROM GTE\r\n';
+const TURKISH =
+  'QUISTBITK~1\r\n- EXPECTED PARKING POSITION: F8R\r\n- NEXT FLIGHT INFO:IST/PRG TK1769 14:45Z\r\n';
+const FINNAIR_STAND =
+  'QUHELASAY~1\r\nAY1074 22NOV26\r\nARRIVING STAND 131 ELDT 12:53\r\nOHATR->AY1101 23NOV26 ETD - (STD 05:45)\r\n';
+const FINNAIR_DELAY =
+  'QUHELASAY~1\r\nDELAY SUMMARY\r\nAY818/21NOV2026 ARN-HEL\r\nSTD 20:05\r\nATD 21:19\r\n';
+const PARKING_PREASSIGNED =
+  'QUCANXMCZ~1RA221348\r\n\tB-309Y\r\n\tPARKING PREASSIGNED:138\r\n\tMETAR ZYTX 221330Z 19007MPS 9999 OVC040 04/M03 Q1020 NOSIG=\r\n';
+const PARKING_NA = 'QUCANXMCZ~1RA221348\r\n\tPARKING ASSIGNED:NA\r\n';
 
 describe('Label RA gate', () => {
   let decoder: MessageDecoder;
@@ -294,6 +306,51 @@ describe('Label RA gate', () => {
     const r = plugin.decode({ label: 'RA', text: LATAM_NO_POSITION });
     expect(r.decoded).toBe(false);
     expect(r.raw.arrival_gate).toBeUndefined();
+  });
+
+  test('decodes Delta crew P/F arrival gate', () => {
+    const r = plugin.decode({ label: 'RA', text: DELTA });
+    expect(r.decoded).toBe(true);
+    expect(r.formatted.description).toBe('Crew P/F Report');
+    expect(r.raw.arrival_iata).toBe('ATL');
+    expect(r.raw.arrival_gate).toBe('E15');
+    expect(r.remaining.text).toContain('FLT 1941 PVR 1025L');
+  });
+
+  test('decodes Turkish expected parking position', () => {
+    const r = plugin.decode({ label: 'RA', text: TURKISH });
+    expect(r.decoded).toBe(true);
+    expect(r.formatted.description).toBe('Parking Position');
+    expect(r.raw.arrival_gate).toBe('F8R');
+    expect(r.remaining.text).toContain('- NEXT FLIGHT INFO');
+  });
+
+  test('decodes preassigned parking', () => {
+    const r = plugin.decode({ label: 'RA', text: PARKING_PREASSIGNED });
+    expect(r.decoded).toBe(true);
+    expect(r.raw.arrival_gate).toBe('138');
+  });
+
+  test('does not decode parking that is not assigned', () => {
+    const r = plugin.decode({ label: 'RA', text: PARKING_NA });
+    expect(r.decoded).toBe(false);
+  });
+
+  test('decodes Finnair arriving stand', () => {
+    const r = plugin.decode({ label: 'RA', text: FINNAIR_STAND });
+    expect(r.decoded).toBe(true);
+    expect(r.formatted.description).toBe('Arrival Stand');
+    expect(r.raw.flight_number).toBe('AY1074');
+    expect(r.raw.day).toBe(22);
+    expect(r.raw.arrival_gate).toBe('131');
+    expect(r.remaining.text).toBe(
+      'QUHELASAY~1\nELDT 12:53\nOHATR->AY1101 23NOV26 ETD - (STD 05:45)',
+    );
+  });
+
+  test('does not decode a Finnair delay summary', () => {
+    const r = plugin.decode({ label: 'RA', text: FINNAIR_DELAY });
+    expect(r.decoded).toBe(false);
   });
 
   test('is reached through MessageDecoder', () => {

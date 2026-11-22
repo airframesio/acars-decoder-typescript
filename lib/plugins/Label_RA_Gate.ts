@@ -2,6 +2,7 @@ import { DateTimeUtils } from '../DateTimeUtils';
 import { DecoderPlugin } from '../DecoderPlugin';
 import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
 import {
+  addDeltaCrewGate,
   addRouteGate,
   addUnreadLines,
   cutMatch,
@@ -51,6 +52,19 @@ const SKYWEST_GATE = new RegExp(`^([A-Z]{3}) ARRIVAL GATE\\s+(${GATE})$`);
 // flights' departure gates): the other formats are not tried on them.
 const HANDLED_HEADER = /^(QUNDCULUA|QUHDQDDRP|QUHDQITOO|QUSILITOO|QUHELASAY)/;
 
+// Turkish: "- EXPECTED PARKING POSITION: F8R"; China Southern and others:
+// "PARKING PREASSIGNED:138" or "PARKING ASSIGNED:138" (NA when none).
+const TURKISH_PARKING = new RegExp(
+  `^- EXPECTED PARKING POSITION:\\s*${GATE_TOKEN}\\s*$`,
+);
+const PARKING_ASSIGNED = new RegExp(
+  `^PARKING (?:PRE)?ASSIGNED:\\s*${GATE_TOKEN}\\s*$`,
+);
+// Finnair (QUHELASAY): "AY1074 22NOV26" then "ARRIVING STAND 131 ELDT
+// 12:53". Its connection lists give other flights' gates.
+const FINNAIR_FLIGHT = /^(AY\d{1,4})\s+(\d{2})[A-Z]{3}\d{2}$/;
+const FINNAIR_STAND = new RegExp(`^ARRIVING STAND\\s+${GATE_TOKEN}(?=\\s|$)`);
+
 // United Express (Air Wisconsin): "FLT 4940 IAD GATE A4C".
 const FLT_AIRPORT_GATE = new RegExp(
   `^FLT\\s+(\\d{1,4})\\s+([A-Z]{3})\\s+GATE\\s+${GATE_TOKEN}\\s*$`,
@@ -76,11 +90,12 @@ const LATAM_PPOS = new RegExp(`^PPOS:\\s*${GATE_TOKEN}\\s*$`);
  * GATE ASSIGN / GATE CHANGE, Republic ARRIVAL GATE, SkyWest ARR GATE INFO,
  * "FLT 1658/22 AUS-DFW" + "GATE D21" (American, GoJet, Piedmont), Air
  * Wisconsin "FLT 4940 IAD GATE A4C", Frontier "FROM PHL OPS" ... "GATE E8",
- * WestJet "YYC GATE D80/OPS", "SC8402 ARR:ZSJN" + "GATE:10" and LATAM
- * "GATE ASSIGNMENT" + "PPOS:602L".
+ * WestJet "YYC GATE D80/OPS", "SC8402 ARR:ZSJN" + "GATE:10", LATAM
+ * "GATE ASSIGNMENT" + "PPOS:602L", Delta crew P/F "ARR ATL GTE E15",
+ * Turkish and other parking positions, and the Finnair arriving stand.
  *
- * Other airlines' RA messages that mention gates are not read here: Finnair
- * connection lists, for example, give the departure gates of other flights.
+ * Finnair connection lists are not read: they give the departure gates of
+ * other flights.
  */
 export class Label_RA_Gate extends DecoderPlugin {
   name = 'label-ra-gate';
@@ -316,23 +331,79 @@ export class Label_RA_Gate extends DecoderPlugin {
     message: Message,
     lines: string[],
   ): DecodeResult | undefined {
-    if (HANDLED_HEADER.test(lines[0])) {
-      return undefined;
-    }
     const decodeResult = this.initResult(message, 'Arrival Gate');
-    const used =
-      this.flightAirportGate(decodeResult, lines) ??
-      this.frontier(decodeResult, lines) ??
-      this.routeGate(decodeResult, lines) ??
-      this.westJet(decodeResult, lines) ??
-      this.arrIcaoGate(decodeResult, lines) ??
-      this.latam(decodeResult, lines);
+    let used: UsedLines | undefined;
+    if (lines[0].startsWith('QUHELASAY')) {
+      used = this.finnairStand(decodeResult, lines);
+    } else if (!HANDLED_HEADER.test(lines[0])) {
+      used =
+        addDeltaCrewGate(decodeResult, lines) ??
+        this.parkingPosition(decodeResult, lines) ??
+        this.flightAirportGate(decodeResult, lines) ??
+        this.frontier(decodeResult, lines) ??
+        this.westJet(decodeResult, lines) ??
+        this.arrIcaoGate(decodeResult, lines) ??
+        this.latam(decodeResult, lines) ??
+        this.routeGate(decodeResult, lines);
+    }
     if (!used) {
       return undefined;
     }
     addUnreadLines(decodeResult, lines, used);
     this.setDecodeLevel(decodeResult, true);
     return decodeResult;
+  }
+
+  private parkingPosition(
+    decodeResult: DecodeResult,
+    lines: string[],
+  ): UsedLines | undefined {
+    for (let i = 0; i < lines.length; i++) {
+      if (GATE_STOP_LINE.test(lines[i])) {
+        break;
+      }
+      const m =
+        TURKISH_PARKING.exec(lines[i]) ?? PARKING_ASSIGNED.exec(lines[i]);
+      if (m) {
+        decodeResult.formatted.description = 'Parking Position';
+        ResultFormatter.arrivalGate(decodeResult, m[1]);
+        return new Map([[i, '']]);
+      }
+    }
+    return undefined;
+  }
+
+  private finnairStand(
+    decodeResult: DecodeResult,
+    lines: string[],
+  ): UsedLines | undefined {
+    let flight: RegExpExecArray | null = null;
+    let flightIdx = -1;
+    for (let i = 0; i < lines.length; i++) {
+      // The connection lists name other flights' gates.
+      if (lines[i].startsWith('CONNECTION INFO')) {
+        return undefined;
+      }
+      const f = FINNAIR_FLIGHT.exec(lines[i]);
+      if (f) {
+        flight = f;
+        flightIdx = i;
+        continue;
+      }
+      const m = FINNAIR_STAND.exec(lines[i]);
+      if (m) {
+        decodeResult.formatted.description = 'Arrival Stand';
+        const used: UsedLines = new Map([[i, cutMatch(lines[i], m)]]);
+        if (flight) {
+          ResultFormatter.flightNumber(decodeResult, flight[1]);
+          ResultFormatter.day(decodeResult, Number(flight[2]));
+          used.set(flightIdx, '');
+        }
+        ResultFormatter.arrivalGate(decodeResult, m[1]);
+        return used;
+      }
+    }
+    return undefined;
   }
 
   private flightAirportGate(

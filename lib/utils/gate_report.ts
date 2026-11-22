@@ -16,7 +16,7 @@ export const GATE_TOKEN = '([A-Z]{0,3}\\d{1,4}[A-Z]?)';
  * next flight). Gate lines after it are not this flight's.
  */
 export const GATE_STOP_LINE =
-  /^(CREW CONNECTING|CONNECTING GATE|NEXT FLT|NEXT FLIGHT|NEXT LEG|NEXT SECTOR|TURN FLT|CREW CONNECTIONS|PAX CONNECTIONS|AC TURN|END$)/;
+  /^(CREW CONNECTING|CONNECTING GATE|NEXT FLT|NEXT FLIGHT|NEXT LEG|NEXT SECTOR|- NEXT FLIGHT|ON STAND-|CREW DEPT|TURN FLT|CREW CONNECTIONS|PAX CONNECTIONS|AC TURN|END$)/;
 
 /**
  * Lines that were read: the line's index and what is left of it ('' when
@@ -144,4 +144,30 @@ export function addRouteGate(
   ResultFormatter.departureAirport(decodeResult, r.departure, 'IATA');
   ResultFormatter.arrivalAirport(decodeResult, r.arrival, 'IATA');
   ResultFormatter.arrivalGate(decodeResult, r.gate);
+}
+
+// Delta crew P/F (labels RA and 25): "CREW P/F" or "PART  1 OF" lines, and
+// "ARR ATL GTE E15". The crew list after it is left unread.
+const DELTA_ARR = new RegExp(`^ARR ([A-Z]{3}) GTE\\s+${GATE_TOKEN}\\s*$`);
+
+/** Reads the arrival gate of a Delta crew P/F message. */
+export function addDeltaCrewGate(
+  decodeResult: DecodeResult,
+  lines: string[],
+): UsedLines | undefined {
+  if (
+    !lines.some((l) => l.startsWith('CREW P/F') || l.startsWith('PART  1 OF'))
+  ) {
+    return undefined;
+  }
+  for (let i = 0; i < lines.length; i++) {
+    const m = DELTA_ARR.exec(lines[i]);
+    if (m) {
+      decodeResult.formatted.description = 'Crew P/F Report';
+      ResultFormatter.arrivalAirport(decodeResult, m[1], 'IATA');
+      ResultFormatter.arrivalGate(decodeResult, m[2]);
+      return new Map([[i, '']]);
+    }
+  }
+  return undefined;
 }
