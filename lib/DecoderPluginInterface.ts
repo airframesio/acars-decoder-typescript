@@ -4,6 +4,7 @@ import { RunwayLandingData } from './types/runway_landing_data';
 import { Wind } from './types/wind';
 import type { WeatherReport } from './types/weather_report';
 import type { MissionNumber } from './utils/mission_number';
+import type { Loadsheet } from './utils/loadsheet';
 
 /**
  * Representation of a Message
@@ -134,6 +135,11 @@ export interface RawFields {
   // State & events
   state_change?: { from: string; to: string };
   door_event?: { door: string; state: string };
+
+  // Weight and balance. The Loadsheet plugin stores a typed Loadsheet (it
+  // has `kind`); Label_H1_EZF stores its older map of the sent tokens
+  // (ZFW, PAX, FLT STATUS, ...), which has no `kind`.
+  loadsheet?: Loadsheet | Record<string, string>;
 
   // Allow plugin-specific fields
   [key: string]: unknown;
