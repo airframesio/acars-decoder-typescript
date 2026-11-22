@@ -17,15 +17,18 @@ import { ResultFormatter } from '../utils/result_formatter';
 // The meanings were checked on flights that sent several of them: DL816
 // sent L15 0045, L14 0056 and L11 '0056 ... 0045'; NW783 sent L13 at 0550
 // and its L10 at 0603 repeats 0550 as the OUT.
+// Some aircraft leave the day, the airports and the flight blank:
+//   '  0313          6\r\n    033200740328    173165061208' (OUT 0332)
+//   '  0110 ---- ----6\r\n0000----0196------------01550155' (no OFF yet)
 const HEADER_REGEX =
-  /^(?<day>0[1-9]|[12]\d|3[01])(?:[01]\d|2[0-3])(?<label>1[0-5]) (?<origin>[A-Z0-9]{4}) (?<destination>[A-Z0-9]{4})\d\r?\n\t?/;
+  /^(?<day>0[1-9]|[12]\d|3[01]|  )(?:[01]\d|2[0-3])(?<label>1[0-5]) (?<origin>[A-Z0-9]{4}|-{4}| {4}) (?<destination>[A-Z0-9]{4}|-{4}| {4})\d\r?\n\t?/;
 
 const BODY_REGEX: Record<string, RegExp> = {
-  '13': /^(?<flight>\d{4})(?<out>\d{4})(?<fuel>\d{4})(?<rest>\d{8}[\s\S]*)$/,
-  '10': /^(?<flight>\d{4})(?<off>\d{4})(?<fuel>\d{4})(?<times>[\d ]{12})(?<out>\d{4})(?<out2>\d{4})(?<rest>[\s\S]*)$/,
-  '15': /^(?<flight>\d{4})(?<on>\d{4})(?<fuel>\d{4}) *(?<rest>(?:\r?\n[\s\S]*)?)$/,
-  '14': /^(?<flight>\d{4})(?<in>\d{4})(?<fuel>[\d ]{4})(?<rest>[\d ]{4} *)$/,
-  '11': /^(?<flight>\d{4})(?<in>\d{4})(?<fuel>[\d ]{4})(?<rest>\S[^\r\n]*?)(?<on>\d{4}|-{4})? *(?<tail>(?:\r?\n[\s\S]*)?)$/,
+  '13': /^(?<flight>\d{4}| {4})(?<out>\d{4})(?<fuel>\d{4})(?<rest>[\d-]{4}[\d -]{4}[\s\S]*)$/,
+  '10': /^(?<flight>\d{4}| {4})(?<off>\d{4}|-{4})(?<fuel>\d{4})(?<times>[\d -]{12})(?<out>[\d -]{4})(?<out2>[\d -]{4})(?<rest>[\s\S]*)$/,
+  '15': /^(?<flight>\d{4}| {4})(?<on>\d{4})(?<fuel>\d{4}) *(?<rest>(?:\r?\n[\s\S]*)?)$/,
+  '14': /^(?<flight>\d{4}| {4})(?<in>\d{4})(?<fuel>[\d ]{4})(?<rest>[\d ]{4} *)$/,
+  '11': /^(?<flight>\d{4}| {4})(?<in>\d{4})(?<fuel>[\d ]{4})(?<rest>\S[^\r\n]*?)(?<on>\d{4}|-{4})? *(?<tail>(?:\r?\n[\s\S]*)?)$/,
 };
 
 const CLOCK_REGEX = /^([01]\d|2[0-3])[0-5]\d$/;
@@ -67,23 +70,42 @@ export class Label_10Through15_Delta_OOOI extends DecoderPlugin {
     }
     // The field the label is named for has to be a real clock; the other
     // times are formatted only when they are clocks, else kept as unknown.
+    // A label 10 sent before takeoff has '----' for the OFF and only the OUT.
     const primary = body?.[PRIMARY[message.label]];
-    if (!header?.groups || !body || !primary || !CLOCK_REGEX.test(primary)) {
+    const primaryOk =
+      !!primary &&
+      (CLOCK_REGEX.test(primary) ||
+        (primary === '----' && CLOCK_REGEX.test(body?.out ?? '')));
+    if (!header?.groups || !body || !primaryOk) {
       this.debug(options, `Unknown Delta OOOI report: ${message.text}`);
       this.setDecodeLevel(decodeResult, false);
       return decodeResult;
     }
 
-    decodeResult.formatted.description = DESCRIPTIONS[message.label];
-    ResultFormatter.day(decodeResult, Number(header.groups.day));
-    ResultFormatter.departureAirport(decodeResult, header.groups.origin);
-    ResultFormatter.arrivalAirport(decodeResult, header.groups.destination);
-    ResultFormatter.flightNumber(decodeResult, String(Number(body.flight)));
+    // A label 10 sent before takeoff has only the OUT time.
+    decodeResult.formatted.description =
+      message.label === '10' && !CLOCK_REGEX.test(primary ?? '')
+        ? 'Out of Gate Report'
+        : DESCRIPTIONS[message.label];
+    const blank = (v: string) => v.trim() === '' || v === '----';
+    if (!blank(header.groups.day)) {
+      ResultFormatter.day(decodeResult, Number(header.groups.day));
+    }
+    if (!blank(header.groups.origin)) {
+      ResultFormatter.departureAirport(decodeResult, header.groups.origin);
+    }
+    if (!blank(header.groups.destination)) {
+      ResultFormatter.arrivalAirport(decodeResult, header.groups.destination);
+    }
+    // '0000' is an unfilled flight number, like four spaces.
+    if (!blank(body.flight) && !/^0+$/.test(body.flight)) {
+      ResultFormatter.flightNumber(decodeResult, String(Number(body.flight)));
+    }
 
     const unknown: string[] = [];
     const tod = (hhmm: string) => DateTimeUtils.convertHHMMSSToTod(hhmm);
     const clock = (value: string | undefined, format: (t: number) => void) => {
-      if (value === undefined || value === '----') {
+      if (value === undefined || value === '----' || value.trim() === '') {
         return;
       }
       if (CLOCK_REGEX.test(value)) {

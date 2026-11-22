@@ -13,12 +13,15 @@ const REPORT_REGEX =
 // 'OUT0105400525LSZHEGLL' event time, a second time, origin, destination
 // 'OFF010247DIA02KEWREGLL0859BAB7...' event time, origin, destination, ETA
 // 'ONN010223CYVR', 'INN010611EGLL 484 480  56  54', 'INN011053----'
+// Iberia leaves out the OUT destination and the OFF 'DIA' block and adds the
+// fuel on board: 'OUT0118321827LSZH.FOB19560', 'OFF010652LSZHLEMD',
+// 'INN010817EGLL.FOB6920'.
 const COMPACT_OUT_REGEX =
-  /^OUT01(?<time>\d{4})(?<time2>\d{4})(?<origin>[A-Z]{4})(?<destination>[A-Z]{4})(?<rest>[\s\S]*)$/;
+  /^OUT01(?<time>\d{4})(?<time2>\d{4})(?<origin>[A-Z]{4})(?<destination>[A-Z]{4})?(?:\.FOB(?<fob>\d+))?(?<rest>[\s\S]*)$/;
 const COMPACT_OFF_REGEX =
-  /^OFF01(?<time>\d{4})DIA(?<dia>\d{2})(?<origin>[A-Z]{4})(?<destination>[A-Z]{4})(?<eta>\d{4})?(?<rest>[\s\S]*)$/;
+  /^OFF01(?<time>\d{4})(?:DIA(?<dia>\d{2}))?(?<origin>[A-Z]{4})(?<destination>[A-Z]{4})(?<eta>\d{4})?(?<rest>[\s\S]*)$/;
 const COMPACT_ON_IN_REGEX =
-  /^(?<event>ONN|INN)01(?<time>\d{4})(?<destination>[A-Z]{4}|-{4})(?<rest>[\s\S]*)$/;
+  /^(?<event>ONN|INN)01(?<time>\d{4})(?<destination>[A-Z]{4}|-{4})(?:\.FOB(?<fob>\d+))?(?<rest>[\s\S]*)$/;
 
 const CLOCK_REGEX = /^([01]\d|2[0-3])[0-5]\d$/;
 
@@ -111,6 +114,14 @@ export class Label_11Through14_OOOI extends DecoderPlugin {
       return decodeResult;
     }
 
+    // British Airways always sends the OUT destination and Iberia the fuel;
+    // an OUT with neither was cut off.
+    if (event === 'OUT' && !groups.destination && !groups.fob) {
+      this.debug(options, `Unknown OOOI report: ${text}`);
+      this.setDecodeLevel(decodeResult, false);
+      return decodeResult;
+    }
+
     decodeResult.formatted.description = DESCRIPTIONS[event];
     if (groups.origin) {
       ResultFormatter.departureAirport(decodeResult, groups.origin);
@@ -126,8 +137,10 @@ export class Label_11Through14_OOOI extends DecoderPlugin {
         break;
       case 'OFF':
         ResultFormatter.off(decodeResult, tod);
-        // The two digits after DIA are not known yet.
-        ResultFormatter.unknown(decodeResult, groups.dia);
+        if (groups.dia) {
+          // The two digits after DIA are not known yet.
+          ResultFormatter.unknown(decodeResult, groups.dia);
+        }
         if (groups.eta && CLOCK_REGEX.test(groups.eta)) {
           ResultFormatter.eta(
             decodeResult,
@@ -143,6 +156,9 @@ export class Label_11Through14_OOOI extends DecoderPlugin {
       case 'INN':
         ResultFormatter.in(decodeResult, tod);
         break;
+    }
+    if (groups.fob) {
+      ResultFormatter.currentFuel(decodeResult, Number(groups.fob));
     }
     if (groups.rest.trim()) {
       ResultFormatter.unknown(decodeResult, groups.rest.trim());

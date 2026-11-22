@@ -202,6 +202,68 @@ describe('Labels 10-15 Delta OOOI reports', () => {
     expect(result.decoded).toBe(false);
   });
 
+  test('decodes reports with a blank header and flight', () => {
+    const out = plugin.decode({
+      label: '13',
+      text: '  0313          6\r\n    033200740328    173165061208',
+    });
+    expect(out.decoded).toBe(true);
+    expect(out.raw.out_time).toBe(3 * 3600 + 32 * 60);
+    expect(out.raw.day).toBeUndefined();
+    expect(out.raw.departure_icao).toBeUndefined();
+    expect(out.raw.flight_number).toBeUndefined();
+    expect(out.raw.flight_number).toBeUndefined();
+
+    const off = plugin.decode({
+      label: '10',
+      text: '  1410          6\r\n    14440344----            1444083617028547',
+    });
+    expect(off.decoded).toBe(true);
+    expect(off.raw.off_time).toBe(14 * 3600 + 44 * 60);
+
+    const summary = plugin.decode({
+      label: '11',
+      text: '  2311          6\r\n    23290109003163                      2322\r\n\r\n',
+    });
+    expect(summary.decoded).toBe(true);
+    expect(summary.raw.in_time).toBe(23 * 3600 + 29 * 60);
+    expect(summary.raw.on_time).toBe(23 * 3600 + 22 * 60);
+
+    const inn = plugin.decode({
+      label: '14',
+      text: '  2314          6\r\n    23290109    ',
+    });
+    expect(inn.decoded).toBe(true);
+    expect(inn.raw.in_time).toBe(23 * 3600 + 29 * 60);
+  });
+
+  test('decodes dashed airports and a label 10 before takeoff', () => {
+    const out = plugin.decode({
+      label: '13',
+      text: '  0113 ---- ----6\r\n000001550198--------            ',
+    });
+    expect(out.decoded).toBe(true);
+    expect(out.raw.out_time).toBe(1 * 3600 + 55 * 60);
+    expect(out.raw.departure_icao).toBeUndefined();
+
+    const off = plugin.decode({
+      label: '10',
+      text: '  0110 ---- ----6\r\n0000----0196------------01550155            ',
+    });
+    expect(off.decoded).toBe(true);
+    expect(off.raw.off_time).toBeUndefined();
+    expect(off.raw.out_time).toBe(1 * 3600 + 55 * 60);
+    expect(off.formatted.description).toBe('Out of Gate Report');
+
+    const decoded = new MessageDecoder().decode({
+      label: '10',
+      text: '  0110 ---- ----6\r\n0000----0196------------01550155            ',
+    });
+    expect(decoded.decoded).toBe(true);
+    expect(decoded.decoder.name).toBe('label-10-15-delta-oooi');
+    expect(decoded.raw.flight_number).toBeUndefined();
+  });
+
   test('does not decode a delay remark', () => {
     const result = plugin.decode({
       label: '11',
