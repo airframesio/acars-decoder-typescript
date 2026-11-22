@@ -6,9 +6,11 @@ import { ResultFormatter } from '../utils/result_formatter';
 // Air Canada departure and arrival reports:
 //   'ATD AC0128/22/22 YVR 0740Z' - sent at pushback (the PSHBK time), OUT
 //   'ARV AC0856/21/22 LHR 0823Z' - sent at touchdown (the next AGFSR's ON time)
+//   'ETA AC0842/21/22 FRA 1010Z' - arrival estimate, about 1.5 h out
+//   'EAA AC0856/21/22 LHR 0831Z' - updated arrival estimate, about 20 min out
 //   flight, departure day, report day, station, time
 const REPORT_REGEX =
-  /^(?<kind>ATD|ARV) (?<flight>[A-Z0-9]{3,8})\/(?<departureDay>0[1-9]|[12]\d|3[01])\/(?<day>0[1-9]|[12]\d|3[01]) (?<station>[A-Z]{3}) (?<time>\d{4})Z\s*$/;
+  /^(?<kind>ATD|ARV|ETA|EAA) (?<flight>[A-Z0-9]{3,8})\/(?<departureDay>0[1-9]|[12]\d|3[01])\/(?<day>0[1-9]|[12]\d|3[01]) (?<station>[A-Z]{3}) (?<time>\d{4})Z\s*$/;
 
 const CLOCK_REGEX = /^([01]\d|2[0-3])[0-5]\d$/;
 
@@ -18,7 +20,7 @@ export class Label_4T_ATD_ARV extends DecoderPlugin {
   qualifiers() {
     return {
       labels: ['4T'],
-      preambles: ['ATD', 'ARV'],
+      preambles: ['ATD', 'ARV', 'ETA', 'EAA'],
     };
   }
 
@@ -40,10 +42,14 @@ export class Label_4T_ATD_ARV extends DecoderPlugin {
       decodeResult.formatted.description = 'Departure Report';
       ResultFormatter.departureAirport(decodeResult, groups.station, 'IATA');
       ResultFormatter.out(decodeResult, time);
-    } else {
+    } else if (groups.kind === 'ARV') {
       decodeResult.formatted.description = 'Arrival Report';
       ResultFormatter.arrivalAirport(decodeResult, groups.station, 'IATA');
       ResultFormatter.on(decodeResult, time);
+    } else {
+      decodeResult.formatted.description = 'Arrival Estimate';
+      ResultFormatter.arrivalAirport(decodeResult, groups.station, 'IATA');
+      ResultFormatter.eta(decodeResult, time);
     }
 
     this.setDecodeLevel(decodeResult, true);

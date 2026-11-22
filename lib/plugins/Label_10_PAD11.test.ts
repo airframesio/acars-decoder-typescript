@@ -76,4 +76,59 @@ describe('Label 10 PAD11', () => {
       expect(plugin.decode({ label: '10', text }).decoded).toBe(false);
     }
   });
+
+  test('decodes an arrival uplink with the ETA before on-blocks', () => {
+    const result = plugin.decode({
+      label: '11',
+      text: ':PAD11\r\nUTC\r\nARRIVAL- GXWBB BA066  \r\nSTAND 305  ETA 0658 //\r\nON STAND- UNKNOWN //',
+    });
+    expect(result.decoded).toBe(true);
+    expect(result.formatted.description).toBe('Arrival Uplink');
+    expect(result.raw.tail).toBe('GXWBB');
+    expect(result.raw.flight_number).toBe('BA066');
+    expect(result.raw.arrival_gate).toBe('305');
+    expect(result.raw.eta_time).toBe(6 * 3600 + 58 * 60);
+    expect(result.raw.in_time).toBeUndefined();
+  });
+
+  test('decodes a British Airways flight release as the ETD', () => {
+    const result = plugin.decode({
+      label: '10',
+      text: ':PAD11\r\n22NOV26 BA356    GEUUZ LHR-LYS\r\nETD 0700Z FLIGHT RELEASE OFP  5',
+    });
+    expect(result.decoded).toBe(true);
+    expect(result.formatted.description).toBe('Flight Release Uplink');
+    expect(result.raw.flight_number).toBe('BA356');
+    expect(result.raw.tail).toBe('GEUUZ');
+    expect(result.raw.departure_iata).toBe('LHR');
+    expect(result.raw.arrival_iata).toBe('LYS');
+    expect(result.raw.etd_time).toBe(7 * 3600);
+    expect(result.remaining.text).toBe('OFP  5');
+  });
+
+  test('decodes a departure planning uplink (TOBT) as the ETD', () => {
+    const result = plugin.decode({
+      label: '10',
+      text: ':PAD11CDM CHANGE\r\n396   LHR - CAI\r\nTOBT 0855\r\nTSAT 0855\r\nTTOT 0915',
+    });
+    expect(result.decoded).toBe(true);
+    expect(result.formatted.description).toBe('Departure Planning Uplink');
+    expect(result.raw.flight_number).toBe('396');
+    expect(result.raw.departure_iata).toBe('LHR');
+    expect(result.raw.arrival_iata).toBe('CAI');
+    expect(result.raw.etd_time).toBe(8 * 3600 + 55 * 60);
+    expect(result.remaining.text).toBe('TSAT 0855\r\nTTOT 0915');
+  });
+
+  test('decodes a slot change uplink (EOBT) as the ETD', () => {
+    const result = plugin.decode({
+      label: '10',
+      text: ':PAD11\r\nSLOT CHANGE\r\n396  LHR - CAI\r\nFP RLS: 9\r\nCTOT: 0915 //\r\nTTO: PTID TSL\r\nTO 1148  FL F350\r\nEOBT: 0855\r\nDELAY: AX/000\r\nTAXITIME: 26',
+    });
+    expect(result.decoded).toBe(true);
+    expect(result.decoder.decodeLevel).toBe('partial');
+    expect(result.formatted.description).toBe('Slot Change Uplink');
+    expect(result.raw.flight_number).toBe('396');
+    expect(result.raw.etd_time).toBe(8 * 3600 + 55 * 60);
+  });
 });

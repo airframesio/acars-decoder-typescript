@@ -74,6 +74,7 @@ export interface RawFields {
   // Times (seconds since midnight or epoch)
   message_timestamp?: number;
   eta_time?: number;
+  etd_time?: number;
   scheduled_departure_time?: number;
   scheduled_arrival_time?: number;
   out_time?: number;

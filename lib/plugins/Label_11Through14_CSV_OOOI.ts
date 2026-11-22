@@ -7,11 +7,12 @@ import { ResultFormatter } from '../utils/result_formatter';
 //   'OUT,V02,CX 837 20261121 1,CYVR,VHHH,2044,2036,----, 1179' (label 11)
 //   'OFF,V02,CX 837 20261121 1,CYVR,VHHH,2044,2104,1004, 1175' (label 12)
 //   'ONE,V02,CX 105 20261122 1,VHHH,YMML,0124,   96'           (label 13)
+//   'ETA,V01,CX 111 20261121 1,VHHH,YSSY,2009,  144'           (label 31)
 // event, version, flight and date, origin, destination, event time, ...
 // OFF gives the OUT time first, then OFF, ETA (V03: 'CX') and fuel.
 // INC (sent before departure) has another layout and no OOOI time.
 const REPORT_REGEX =
-  /^(?<event>OUT|OFF|ONE),(?<version>V\d{2}),(?:(?<airline>[A-Z0-9]{2}) ?(?<number>\d{1,4}) *(?<date>\d{8}) (?<seq>\d)|-+),(?<origin>[A-Z0-9]{4}|-{4}),(?<destination>[A-Z0-9]{4}|-{4}),(?<time>\d{4})(?<rest>[\s\S]*)$/;
+  /^(?<event>OUT|OFF|ONE|ETA),(?<version>V\d{2}),(?:(?<airline>[A-Z0-9]{2}) ?(?<number>\d{1,4}) *(?<date>\d{8}) (?<seq>\d)|-+),(?<origin>[A-Z0-9]{4}|-{4}),(?<destination>[A-Z0-9]{4}|-{4}),(?<time>\d{4})(?<rest>[\s\S]*)$/;
 
 // End of flight summary, label 16: OUT, OFF, ON, IN on the second line.
 //   'CAR,V03,CX 181 20261122 1,CX0181,22NOV26,VHHH,YSSY,01,Y\r\n1655,1721,0151,0157,1655,0829,---,...'
@@ -25,8 +26,8 @@ export class Label_11Through14_CSV_OOOI extends DecoderPlugin {
 
   qualifiers() {
     return {
-      labels: ['11', '12', '13', '14', '16'],
-      preambles: ['OUT,V', 'OFF,V', 'ONE,V', 'CAR,V'],
+      labels: ['11', '12', '13', '14', '16', '31'],
+      preambles: ['OUT,V', 'OFF,V', 'ONE,V', 'CAR,V', 'ETA,V'],
     };
   }
 
@@ -87,6 +88,9 @@ export class Label_11Through14_CSV_OOOI extends DecoderPlugin {
         );
         rest = eta.more;
       }
+    } else if (groups.event === 'ETA') {
+      decodeResult.formatted.description = 'Arrival Estimate';
+      ResultFormatter.eta(decodeResult, tod);
     } else {
       decodeResult.formatted.description = 'Landing Report';
       ResultFormatter.on(decodeResult, tod);

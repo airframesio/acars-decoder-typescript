@@ -206,6 +206,19 @@ export class ResultFormatter {
     });
   }
 
+  static etd(decodeResult: DecodeResult, time: number) {
+    if (isNaN(time)) {
+      return;
+    }
+    decodeResult.raw.etd_time = time;
+    decodeResult.formatted.items.push({
+      type: 'time',
+      code: 'ETD',
+      label: 'Estimated Time of Departure',
+      value: DateTimeUtils.timestampToString(time),
+    });
+  }
+
   static arrivalRunway(decodeResult: DecodeResult, value: string) {
     decodeResult.raw.arrival_runway = value;
     decodeResult.formatted.items.push({
