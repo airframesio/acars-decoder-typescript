@@ -349,6 +349,7 @@ describe('Loadsheet', () => {
       arrival: 'DZA',
       registration: 'F-OLRB',
       crew: '3/9',
+      underload: 107,
       dow: 119930,
       doi: 51.7,
       zfw: 152493,
@@ -746,8 +747,49 @@ describe('Loadsheet', () => {
     expect(result.raw.loadsheet).toEqual({
       kind: 'acceptance',
       flight_number: 'QR274',
+      date: '2026-11-21',
       departure: 'AMS',
       arrival: 'DOH',
+    });
+  });
+
+  test('does not decode synthetic: cut weight as the only body line', () => {
+    const result = decoder.decode({
+      label: 'RA',
+      text: 'LOADSHEET FINAL\nTOW 2',
+    });
+    expect(result.decoded).toBe(false);
+  });
+
+  test('decodes synthetic: comma-separated acceptance', () => {
+    const result = decoder.decode({
+      label: 'RA',
+      text: 'LOADSHEET FINAL,EDNO 01,ACCEPT',
+    });
+    expect(result.decoded).toBe(true);
+    expect(result.formatted.description).toBe('Loadsheet Acceptance');
+    expect(result.raw.loadsheet).toEqual({
+      kind: 'acceptance',
+      status: 'final',
+      edition: 1,
+    });
+  });
+
+  test('decodes synthetic: MAC ZFW index line is not read as a route', () => {
+    const result = decoder.decode({
+      label: 'RA',
+      text: 'LOADSHEET FINAL\nAI160/21 21NOV26\nMAC ZFW 32.5\nZFW 214843 MAX 237682',
+    });
+    expect(result.decoded).toBe(true);
+    expect(result.raw.loadsheet).toEqual({
+      kind: 'loadsheet',
+      status: 'final',
+      flight_number: 'AI160',
+      flight_day: 21,
+      date: '2026-11-21',
+      mac_zfw: 32.5,
+      zfw: 214843,
+      zfw_max: 237682,
     });
   });
 

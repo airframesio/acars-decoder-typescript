@@ -98,6 +98,9 @@ const ROUTE =
   /^([A-Z]{3,4})(?:\s+|\/|-)([A-Z]{3,4})(?:\s+([A-Z0-9]{1,2}-?[A-Z0-9]{2,6}))?(?:\s+(\d{1,2}\/\d{1,2}(?:\/\d{1,2})?))?(?=\s|$)/;
 const ROUTE_JOINED =
   /^([A-Z]{3})([A-Z]{3})\s+([A-Z0-9]{1,2}-?[A-Z0-9]{2,6})(?:\s+(\d{1,2}\/\d{1,2}(?:\/\d{1,2})?))?(?=\s|$)/;
+// Loadsheet keys that look like airport codes on an index or weight line.
+const FIELD_KEY =
+  /^(?:MAC|ZFW|TOW|LAW|LDW|LGW|DOW|DOI|DLI|TOF|TIF|PAX|TTL|TOB|CREW|ULOAD|UNDLD)$/;
 const MONTHS = [
   'JAN',
   'FEB',
@@ -287,6 +290,8 @@ function parseRouteLine(ls: Loadsheet, line: string): boolean {
   // CDGDZA F-OLRB 3/9: airports written together.
   const m = ROUTE.exec(line) || ROUTE_JOINED.exec(line);
   if (!m) return false;
+  // MAC ZFW 32.5 is an index line, not a route.
+  if (FIELD_KEY.test(m[1]) && FIELD_KEY.test(m[2])) return false;
   ls.departure = m[1];
   ls.arrival = m[2];
   if (m[3]) ls.registration = m[3];
@@ -340,7 +345,7 @@ function parseBody(ls: Loadsheet, lines: string[]) {
     const line = lines[i].trim();
     if (!line) continue;
     // The line holds only the cut weight, so nothing else is skipped.
-    if (i === last && i > 0 && isCutWeight(ls, line)) continue;
+    if (i === last && isCutWeight(ls, line)) continue;
     if (flightSeen) sinceFlight++;
     if (!flightSeen && i < 4 && parseFlightLine(ls, line)) {
       flightSeen = true;
@@ -383,7 +388,7 @@ function parseBody(ls: Loadsheet, lines: string[]) {
       ls.tif = Number(m[1]);
     if (
       ls.underload === undefined &&
-      (m = /^(?:UNDLD|ULOAD|UNDERLOAD):?\s+(\d+)(?![\d.])/.exec(line))
+      (m = /(?:^|\s)(?:UNDLD|ULOAD|UNDERLOAD):?\s+(\d+)(?![\d.])/.exec(line))
     )
       ls.underload = Number(m[1]);
     if (ls.dow === undefined && (m = /(?:^|\s)DOW\s+(\d+)(?![\d.])/.exec(line)))
@@ -467,6 +472,10 @@ function parseAcceptance(text: string): Loadsheet | null {
       text,
     ) ||
     /\bACK LOADSHEET/.test(text) ||
+    // LOADSHEET FINAL,EDNO 01,ACCEPT
+    /\b(?:LOADSHEET|LDSHT|LOAD SHEET)\s+(?:FINAL|PRELIM),\s*EDNO\s*\d+,\s*ACCEPT/.test(
+      text,
+    ) ||
     /(?:ACKNOWLEDGEMENT|ACCEPTANCE) OF (?:THE )?(?:FINAL|PRELIM) LOADSHEET/.test(
       text,
     )
@@ -482,6 +491,14 @@ function parseAcceptance(text: string): Loadsheet | null {
       /(?:FLIGHT NUMBER:\s*|FOR\s+)([A-Z0-9]{2}[A-Z]?\d{1,4}[A-Z]?)\b/,
     );
     if (flight) ls.flight_number = flight[1];
+    // FOR QR274/21NOV26: the flight date, when the year is given.
+    const forDate = text.match(
+      /\bFOR\s+[A-Z0-9]{2}[A-Z]?\d{1,4}[A-Z]?\/(\d{2})([A-Z]{3})(\d{2})\b/,
+    );
+    if (forDate) {
+      const date = flightDate(forDate[1], forDate[2], forDate[3]);
+      if (date) ls.date = date;
+    }
     // SECTOR: YPPH-OMDB first, then the pair after the flight
     // (FOR QR274/21NOV AMS-DOH, or 21NOV26), then a pair at the start of a
     // line.
