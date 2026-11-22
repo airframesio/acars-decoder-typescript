@@ -87,4 +87,17 @@ describe('Label QE/QF/QC/QD text OOOI reports', () => {
     expect(result.decoded).toBe(false);
     expect(result.decoder.decodeLevel).toBe('none');
   });
+
+  test('decodes QD INNRPT report', () => {
+    const result = plugin.decode({
+      label: 'QD',
+      text: 'M55AZH9110------------INNRPT\n\tDES ZGSZ,N 22380E113495,IN 165807,FOB ,DEP ZBAA',
+    });
+
+    expect(result.decoded).toBe(true);
+    expect(result.formatted.description).toBe('IN Report');
+    expect(result.raw.departure_icao).toBe('ZBAA');
+    expect(result.raw.arrival_icao).toBe('ZGSZ');
+    expect(result.raw.in_time).toBe(16 * 3600 + 58 * 60 + 7);
+  });
 });

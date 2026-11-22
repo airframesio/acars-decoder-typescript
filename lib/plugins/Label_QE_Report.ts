@@ -4,9 +4,10 @@ import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
 import { ResultFormatter } from '../utils/result_formatter';
 
 // '-------------------OUT REPORT\r\nDEP RCKU,OUT 1118,FOB 106'
+// or 'M55AZH9110------------INNRPT\n\tDES ZGSZ,...',
 // optionally preceded by a multi-block header such as 'M77ASC4873'
 const REPORT_REGEX =
-  /^(?<prefix>M\d{2}A[A-Z0-9]{6})?-*(?<event>OUT|OFF|ON|IN) REPORT[\r\n,]+(?<body>[\s\S]*)$/;
+  /^(?<prefix>M\d{2}A[A-Z0-9]{6})?-*(?<event>OUT|OFF|ONN?|INN?) ?(?:REPORT|RPT)[\s,]+(?<body>[\s\S]*)$/;
 const TIME_REGEX = /^\d{4}(\d{2})?$/;
 
 const DESCRIPTIONS: Record<string, string> = {
@@ -37,7 +38,8 @@ export class Label_QE_Report extends DecoderPlugin {
       return decodeResult;
     }
 
-    decodeResult.formatted.description = DESCRIPTIONS[match.groups.event];
+    decodeResult.formatted.description =
+      DESCRIPTIONS[match.groups.event.replace(/NN$/, 'N')];
     if (match.groups.prefix) {
       ResultFormatter.unknown(decodeResult, match.groups.prefix);
     }

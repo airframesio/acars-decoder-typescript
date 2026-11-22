@@ -87,6 +87,7 @@ const pluginClasses = [
   Plugins.Label_MA,
   Plugins.Label_SQ,
   Plugins.Label_QE_Report,
+  Plugins.Label_QE_Station,
   Plugins.Label_QP,
   Plugins.Label_QQ,
   Plugins.Label_QR,

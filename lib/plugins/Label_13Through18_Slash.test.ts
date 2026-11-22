@@ -372,7 +372,7 @@ describe('Label_13Through18_Slash', () => {
       expect(decodeResult.raw.off_time).toBe(22 * 3600 + 35 * 60 + 52);
       expect(decodeResult.raw.on_time).toBe(9 * 3600 + 38 * 60 + 24);
       expect(decodeResult.raw.in_time).toBe(9 * 3600 + 46 * 60 + 35);
-      expect(decodeResult.raw.position.latitude).toBe(38.9452);
+      expect(decodeResult.raw.position?.latitude).toBe(38.9452);
     });
   });
 

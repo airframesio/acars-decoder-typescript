@@ -74,6 +74,7 @@ export * from './Label_MA';
 export * from './Label_SQ';
 export * from './Label_QR';
 export * from './Label_QE_Report';
+export * from './Label_QE_Station';
 export * from './Label_QP';
 export * from './Label_QS';
 export * from './Label_QQ';
