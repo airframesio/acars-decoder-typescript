@@ -15,7 +15,7 @@ describe('Label 4T ATD/ARV', () => {
     expect(plugin.name).toBe('label-4t-atd-arv');
     expect(plugin.qualifiers()).toEqual({
       labels: ['4T'],
-      preambles: ['ATD', 'ARV', 'ETA', 'EAA'],
+      preambles: ['ATD', 'ARV', 'EAA'],
     });
   });
 
@@ -72,32 +72,37 @@ describe('Label 4T ATD/ARV', () => {
     expect(result.raw.on_time).toBe(8 * 3600 + 42 * 60);
   });
 
-  test('decodes arrival estimates as the ETA', () => {
-    let result = plugin.decode({
-      label: '4T',
-      text: 'ETA AC0842/21/22 FRA 1010Z',
-    });
-    expect(result.decoded).toBe(true);
-    expect(result.decoder.decodeLevel).toBe('full');
-    expect(result.formatted.description).toBe('Arrival Estimate');
-    expect(result.raw.flight_number).toBe('AC0842');
-    expect(result.raw.arrival_iata).toBe('FRA');
-    expect(result.raw.eta_time).toBe(10 * 3600 + 10 * 60);
-    expect(result.raw.on_time).toBeUndefined();
-
-    // EAA: the updated estimate about 20 minutes out (ARV came at 0823).
-    result = plugin.decode({
+  test('decodes an updated arrival estimate (EAA) as the ETA', () => {
+    // About 20 minutes out; ARV came at 0823.
+    const result = plugin.decode({
       label: '4T',
       text: 'EAA AC0856/21/22 LHR 0831Z',
     });
     expect(result.decoded).toBe(true);
+    expect(result.decoder.decodeLevel).toBe('full');
+    expect(result.formatted.description).toBe('Arrival Estimate');
+    expect(result.raw.flight_number).toBe('AC0856');
     expect(result.raw.arrival_iata).toBe('LHR');
     expect(result.raw.eta_time).toBe(8 * 3600 + 31 * 60);
+    expect(result.raw.on_time).toBeUndefined();
+  });
+
+  test('leaves ETA to the 4T ETA plugin', () => {
+    expect(
+      plugin.decode({ label: '4T', text: 'ETA AC0842/21/22 FRA 1010Z' })
+        .decoded,
+    ).toBe(false);
+    const result = new MessageDecoder().decode({
+      label: '4T',
+      text: 'ETA AC0842/21/22 FRA 1010Z',
+    });
+    expect(result.decoder.name).toBe('label-4t-eta');
+    expect(result.raw.eta_time).toBe(10 * 3600 + 10 * 60);
   });
 
   test('does not decode an impossible estimate', () => {
     expect(
-      plugin.decode({ label: '4T', text: 'ETA AC0404/21/21 YUL 2510Z' })
+      plugin.decode({ label: '4T', text: 'EAA AC0404/21/21 YUL 2510Z' })
         .decoded,
     ).toBe(false);
   });
