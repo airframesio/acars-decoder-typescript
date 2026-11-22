@@ -16,7 +16,7 @@ const REPORT_REGEX =
 const COMPACT_OUT_REGEX =
   /^OUT01(?<time>\d{4})(?<time2>\d{4})(?<origin>[A-Z]{4})(?<destination>[A-Z]{4})(?<rest>[\s\S]*)$/;
 const COMPACT_OFF_REGEX =
-  /^OFF01(?<time>\d{4})DIA\d{2}(?<origin>[A-Z]{4})(?<destination>[A-Z]{4})(?<eta>\d{4})?(?<rest>[\s\S]*)$/;
+  /^OFF01(?<time>\d{4})DIA(?<dia>\d{2})(?<origin>[A-Z]{4})(?<destination>[A-Z]{4})(?<eta>\d{4})?(?<rest>[\s\S]*)$/;
 const COMPACT_ON_IN_REGEX =
   /^(?<event>ONN|INN)01(?<time>\d{4})(?<destination>[A-Z]{4}|-{4})(?<rest>[\s\S]*)$/;
 
@@ -126,11 +126,15 @@ export class Label_11Through14_OOOI extends DecoderPlugin {
         break;
       case 'OFF':
         ResultFormatter.off(decodeResult, tod);
+        // The two digits after DIA are not known yet.
+        ResultFormatter.unknown(decodeResult, groups.dia);
         if (groups.eta && CLOCK_REGEX.test(groups.eta)) {
           ResultFormatter.eta(
             decodeResult,
             DateTimeUtils.convertHHMMSSToTod(groups.eta),
           );
+        } else if (groups.eta) {
+          ResultFormatter.unknown(decodeResult, groups.eta);
         }
         break;
       case 'ONN':

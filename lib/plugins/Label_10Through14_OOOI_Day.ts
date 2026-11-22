@@ -9,7 +9,7 @@ import { ResultFormatter } from '../utils/result_formatter';
 //   'ONN04A21200226YSSY2002'       ON and IN name the arrival airport
 //   'OFF01A21070436RJSSRJCC070421' (ANA) origin, destination, HHMMSS
 const REPORT_REGEX =
-  /^(?<event>OUT|OFF|ONN|INN)(?<version>\d{2})A(?<day>\d{2})(?<time>\d{6})(?<airport>[A-Z]{4})(?:(?<airport2>[A-Z]{4})(?<time2>\d{6})|(?<hhmm>\d{4})(?<airport3>[A-Z]{4})?)(?<rest>[\s\S]*)$/;
+  /^(?<event>OUT|OFF|ONN|INN)(?<version>\d{2})A(?<day>0[1-9]|[12]\d|3[01])(?<time>\d{6})(?<airport>[A-Z]{4})(?:(?<airport2>[A-Z]{4})(?<time2>\d{6})|(?<hhmm>\d{4})(?<airport3>[A-Z]{4})?)(?<rest>[\s\S]*)$/;
 
 const CLOCK_REGEX = /^([01]\d|2[0-3])[0-5]\d([0-5]\d)?$/;
 
@@ -68,9 +68,13 @@ export class Label_10Through14_OOOI_Day extends DecoderPlugin {
         break;
     }
 
-    // The second time repeats the event time (HHMM), or for an IN report
-    // is another time whose meaning is not known.
+    // The second time is not always the event time again: JAL OUT
+    // '204409 ... 2044' repeats it, ANA OFF '070436 ... 070421' does not.
     const unknown = [groups.version, groups.time2 ?? groups.hhmm];
+    // Which airport an ON/IN report names second is not known.
+    if (groups.airport3 && groups.event !== 'OUT' && groups.event !== 'OFF') {
+      unknown.push(groups.airport3);
+    }
     if (groups.rest.trim()) {
       unknown.push(groups.rest.trim());
     }

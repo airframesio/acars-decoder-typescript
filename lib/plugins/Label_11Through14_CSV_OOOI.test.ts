@@ -15,7 +15,7 @@ describe('Labels 11-14 CSV OOOI reports (Cathay Pacific)', () => {
     expect(plugin.name).toBe('label-11-14-csv-oooi');
     expect(plugin.qualifiers()).toEqual({
       labels: ['11', '12', '13', '14'],
-      preambles: ['OUT,V', 'OFF,V', 'ON', 'IN'],
+      preambles: ['OUT,V', 'ONE,V'],
     });
   });
 
@@ -33,7 +33,7 @@ describe('Labels 11-14 CSV OOOI reports (Cathay Pacific)', () => {
     expect(result.raw.departure_icao).toBe('CYVR');
     expect(result.raw.arrival_icao).toBe('VHHH');
     expect(result.raw.out_time).toBe(20 * 3600 + 44 * 60);
-    expect(result.remaining.text).toBe('V02,2036,----, 1179');
+    expect(result.remaining.text).toBe('V02,1,2036,----, 1179');
   });
 
   test('decodes label 13 ON report', () => {
@@ -57,5 +57,28 @@ describe('Labels 11-14 CSV OOOI reports (Cathay Pacific)', () => {
 
     expect(result.decoded).toBe(false);
     expect(result.decoder.decodeLevel).toBe('none');
+  });
+
+  test('does not decode other event codes in the OUT layout', () => {
+    for (const text of [
+      'INC,V02,CX 140 20261122 1,YPPH,VHHH,1556',
+      'ONA,V02,CX 105 20261122 1,VHHH,YMML,0124',
+    ]) {
+      const result = new MessageDecoder().decode({ label: '13', text });
+      expect(result.decoder.name).not.toBe('label-11-14-csv-oooi');
+      expect(result.raw.in_time).toBeUndefined();
+      expect(result.raw.on_time).toBeUndefined();
+    }
+  });
+
+  test('is used by the decoder', () => {
+    const result = new MessageDecoder().decode({
+      label: '13',
+      text: 'ONE,V02,CX 105 20261122 1,VHHH,YMML,0124,   96',
+    });
+
+    expect(result.decoded).toBe(true);
+    expect(result.decoder.name).toBe('label-11-14-csv-oooi');
+    expect(result.raw.on_time).toBe(1 * 3600 + 24 * 60);
   });
 });

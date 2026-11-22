@@ -127,6 +127,61 @@ describe('Labels 10-15 Delta OOOI reports', () => {
     expect(result.decoder.name).toBe('c-band-label-10-15-delta-oooi');
     expect(result.raw.arrival_icao).toBe('NZAA');
     expect(result.raw.on_time).toBe(19 * 3600 + 47 * 60);
+    expect(result.raw.flight_number).toBe('DL65');
+    expect(
+      result.formatted.items.filter((i) => i.type === 'flight_number'),
+    ).toHaveLength(1);
+  });
+
+  test('decodes label 11 with a blank ON time', () => {
+    const result = new MessageDecoder().decode({
+      label: '11',
+      text: '210511 KSLC KBOS8\r\n07020454    111200  0                   ----',
+    });
+
+    expect(result.decoded).toBe(true);
+    expect(result.decoder.name).toBe('label-10-15-delta-oooi');
+    expect(result.raw.in_time).toBe(4 * 3600 + 54 * 60);
+    expect(result.raw.on_time).toBeUndefined();
+  });
+
+  test('does not decode label 11 with an invalid IN time', () => {
+    const result = plugin.decode({
+      label: '11',
+      text: '210511 KSLC KBOS8\r\n07029999    111200  0      0449',
+    });
+
+    expect(result.decoded).toBe(false);
+  });
+
+  test('keeps an invalid OFF time out of the label 10 result', () => {
+    const result = new MessageDecoder().decode({
+      label: '10',
+      text: '210610 KLAX KATL6\r\n07839999037905520549054205500550',
+    });
+
+    expect(result.decoded).toBe(false);
+    expect(result.raw.off_time).toBeUndefined();
+  });
+
+  test('keeps a second OUT copy that differs', () => {
+    const result = plugin.decode({
+      label: '10',
+      text: '210610 KLAX KATL6\r\n07830603037905520549054205500999',
+    });
+
+    expect(result.decoded).toBe(true);
+    expect(result.raw.out_time).toBe(5 * 3600 + 50 * 60);
+    expect(result.remaining.text).toBe('0379,055205490542,0999');
+  });
+
+  test('does not decode a header with an invalid day or hour', () => {
+    for (const text of [
+      '992513 KLAX KATL6\r\n07830550038005490542',
+      '219913 KLAX KATL6\r\n07830550038005490542',
+    ]) {
+      expect(plugin.decode({ label: '13', text }).decoded).toBe(false);
+    }
   });
 
   test('is used by the decoder ahead of other label 10 plugins', () => {

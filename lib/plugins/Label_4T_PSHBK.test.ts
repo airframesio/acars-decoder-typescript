@@ -45,4 +45,23 @@ describe('Label 4T PSHBK', () => {
     expect(result.decoded).toBe(false);
     expect(result.decoder.decodeLevel).toBe('none');
   });
+
+  test('does not decode an invalid day', () => {
+    const result = plugin.decode({
+      label: '4T',
+      text: 'PSHBK AC0281/99/00 YVR 0000Z/    Z/    Z/0605Z',
+    });
+
+    expect(result.decoded).toBe(false);
+  });
+
+  test('is used by the decoder', () => {
+    const result = new MessageDecoder().decode({
+      label: '4T',
+      text: 'PSHBK AC0281/21/22 YVR 0603Z/    Z/    Z/0605Z',
+    });
+
+    expect(result.decoder.name).toBe('label-4t-pshbk');
+    expect(result.raw.out_time).toBe(6 * 3600 + 3 * 60);
+  });
 });

@@ -118,4 +118,24 @@ describe('Labels 10-14 OOOI reports with day and HHMMSS (JAL, ANA)', () => {
 
     expect(result.decoded).toBe(false);
   });
+
+  test('keeps the second airport of an IN report', () => {
+    const result = plugin.decode({
+      label: '10',
+      text: 'INN04A21201154YSSY2006RJTT',
+    });
+
+    expect(result.decoded).toBe(true);
+    expect(result.raw.arrival_icao).toBe('YSSY');
+    expect(result.remaining.text).toBe('04,2006,RJTT');
+  });
+
+  test('does not decode an invalid day', () => {
+    const result = plugin.decode({
+      label: '10',
+      text: 'OUT04A99204409KSFO2044RJTT',
+    });
+
+    expect(result.decoded).toBe(false);
+  });
 });

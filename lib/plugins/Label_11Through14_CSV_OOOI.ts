@@ -7,8 +7,9 @@ import { ResultFormatter } from '../utils/result_formatter';
 //   'OUT,V02,CX 837 20261121 1,CYVR,VHHH,2044,2036,----, 1179' (label 11)
 //   'ONE,V02,CX 105 20261122 1,VHHH,YMML,0124,   96'           (label 13)
 // event, version, flight and date, origin, destination, event time, ...
+// Only the OUT and ONE codes have been seen; INC has another layout.
 const REPORT_REGEX =
-  /^(?<event>OUT|OFF|ON[A-Z]?|IN[A-Z]?),(?<version>V\d{2}),(?:(?<airline>[A-Z0-9]{2}) ?(?<number>\d{1,4}) (?<date>\d{8}) \d|-+),(?<origin>[A-Z0-9]{4}|-{4}),(?<destination>[A-Z0-9]{4}|-{4}),(?<time>\d{4})(?<rest>[\s\S]*)$/;
+  /^(?<event>OUT|ONE),(?<version>V\d{2}),(?:(?<airline>[A-Z0-9]{2}) ?(?<number>\d{1,4}) (?<date>\d{8}) (?<seq>\d)|-+),(?<origin>[A-Z0-9]{4}|-{4}),(?<destination>[A-Z0-9]{4}|-{4}),(?<time>\d{4})(?<rest>[\s\S]*)$/;
 
 const CLOCK_REGEX = /^([01]\d|2[0-3])[0-5]\d$/;
 
@@ -18,7 +19,7 @@ export class Label_11Through14_CSV_OOOI extends DecoderPlugin {
   qualifiers() {
     return {
       labels: ['11', '12', '13', '14'],
-      preambles: ['OUT,V', 'OFF,V', 'ON', 'IN'],
+      preambles: ['OUT,V', 'ONE,V'],
     };
   }
 
@@ -53,18 +54,16 @@ export class Label_11Through14_CSV_OOOI extends DecoderPlugin {
     if (groups.event === 'OUT') {
       decodeResult.formatted.description = 'Out of Gate Report';
       ResultFormatter.out(decodeResult, tod);
-    } else if (groups.event === 'OFF') {
-      decodeResult.formatted.description = 'Takeoff Report';
-      ResultFormatter.off(decodeResult, tod);
-    } else if (groups.event.startsWith('ON')) {
+    } else {
       decodeResult.formatted.description = 'Landing Report';
       ResultFormatter.on(decodeResult, tod);
-    } else {
-      decodeResult.formatted.description = 'In Gate Report';
-      ResultFormatter.in(decodeResult, tod);
     }
 
     ResultFormatter.unknown(decodeResult, groups.version);
+    if (groups.seq) {
+      // The digit after the date is not known yet.
+      ResultFormatter.unknown(decodeResult, groups.seq);
+    }
     if (groups.rest.replace(/^,/, '').trim()) {
       ResultFormatter.unknown(decodeResult, groups.rest.replace(/^,/, ''));
     }

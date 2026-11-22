@@ -18,17 +18,26 @@ import { ResultFormatter } from '../utils/result_formatter';
 // sent L15 0045, L14 0056 and L11 '0056 ... 0045'; NW783 sent L13 at 0550
 // and its L10 at 0603 repeats 0550 as the OUT.
 const HEADER_REGEX =
-  /^(?<day>\d{2})(?<hour>\d{2})(?<label>1[0-5]) (?<origin>[A-Z0-9]{4}) (?<destination>[A-Z0-9]{4})\d\r?\n\t?/;
+  /^(?<day>0[1-9]|[12]\d|3[01])(?:[01]\d|2[0-3])(?<label>1[0-5]) (?<origin>[A-Z0-9]{4}) (?<destination>[A-Z0-9]{4})\d\r?\n\t?/;
 
 const BODY_REGEX: Record<string, RegExp> = {
   '13': /^(?<flight>\d{4})(?<out>\d{4})(?<fuel>\d{4})(?<rest>\d{8}[\s\S]*)$/,
-  '10': /^(?<flight>\d{4})(?<off>\d{4})(?<fuel>\d{4})(?<times>[\d ]{12})(?<out>\d{4})\d{4}(?<rest>[\s\S]*)$/,
+  '10': /^(?<flight>\d{4})(?<off>\d{4})(?<fuel>\d{4})(?<times>[\d ]{12})(?<out>\d{4})(?<out2>\d{4})(?<rest>[\s\S]*)$/,
   '15': /^(?<flight>\d{4})(?<on>\d{4})(?<fuel>\d{4}) *(?<rest>(?:\r?\n[\s\S]*)?)$/,
   '14': /^(?<flight>\d{4})(?<in>\d{4})(?<fuel>[\d ]{4})(?<rest>[\d ]{4} *)$/,
   '11': /^(?<flight>\d{4})(?<in>\d{4})(?<fuel>[\d ]{4})(?<rest>\S[^\r\n]*?)(?<on>\d{4}|-{4})? *(?<tail>(?:\r?\n[\s\S]*)?)$/,
 };
 
 const CLOCK_REGEX = /^([01]\d|2[0-3])[0-5]\d$/;
+
+// The time each label is named for.
+const PRIMARY: Record<string, string> = {
+  '10': 'off',
+  '11': 'in',
+  '13': 'out',
+  '14': 'in',
+  '15': 'on',
+};
 
 const DESCRIPTIONS: Record<string, string> = {
   '10': 'Takeoff Report',
@@ -56,8 +65,10 @@ export class Label_10Through15_Delta_OOOI extends DecoderPlugin {
       const rest = message.text.substring(header[0].length);
       body = BODY_REGEX[message.label]?.exec(rest)?.groups;
     }
-    const time = body?.out ?? body?.off ?? body?.on ?? body?.in;
-    if (!header?.groups || !body || !time || !CLOCK_REGEX.test(time)) {
+    // The field the label is named for has to be a real clock; the other
+    // times are formatted only when they are clocks, else kept as unknown.
+    const primary = body?.[PRIMARY[message.label]];
+    if (!header?.groups || !body || !primary || !CLOCK_REGEX.test(primary)) {
       this.debug(options, `Unknown Delta OOOI report: ${message.text}`);
       this.setDecodeLevel(decodeResult, false);
       return decodeResult;
@@ -69,26 +80,33 @@ export class Label_10Through15_Delta_OOOI extends DecoderPlugin {
     ResultFormatter.arrivalAirport(decodeResult, header.groups.destination);
     ResultFormatter.flightNumber(decodeResult, String(Number(body.flight)));
 
+    const unknown: string[] = [];
     const tod = (hhmm: string) => DateTimeUtils.convertHHMMSSToTod(hhmm);
-    if (body.out && CLOCK_REGEX.test(body.out)) {
-      ResultFormatter.out(decodeResult, tod(body.out));
-    }
-    if (body.off) {
-      ResultFormatter.off(decodeResult, tod(body.off));
-    }
-    if (body.on && CLOCK_REGEX.test(body.on)) {
-      ResultFormatter.on(decodeResult, tod(body.on));
-    }
-    if (body.in) {
-      ResultFormatter.in(decodeResult, tod(body.in));
-    }
+    const clock = (value: string | undefined, format: (t: number) => void) => {
+      if (value === undefined || value === '----') {
+        return;
+      }
+      if (CLOCK_REGEX.test(value)) {
+        format(tod(value));
+      } else {
+        unknown.push(value);
+      }
+    };
+    clock(body.out, (t) => ResultFormatter.out(decodeResult, t));
+    clock(body.off, (t) => ResultFormatter.off(decodeResult, t));
+    clock(body.on, (t) => ResultFormatter.on(decodeResult, t));
+    clock(body.in, (t) => ResultFormatter.in(decodeResult, t));
 
     // The fuel field is in hundreds of pounds on the samples seen, but that
     // is not confirmed, so it stays undecoded with the other fields.
-    const unknown = [body.fuel, body.times, body.rest, body.tail]
-      .filter((v) => v !== undefined)
-      .map((v) => v.trim())
-      .filter((v) => v !== '');
+    // The label 10 report repeats the OUT time; a copy that differs is kept.
+    const out2 = body.out2 !== body.out ? body.out2 : undefined;
+    unknown.push(
+      ...[body.fuel, body.times, out2, body.rest, body.tail]
+        .filter((v) => v !== undefined)
+        .map((v) => v.trim())
+        .filter((v) => v !== ''),
+    );
     if (unknown.length > 0) {
       ResultFormatter.unknownArr(decodeResult, unknown);
     }

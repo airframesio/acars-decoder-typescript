@@ -112,7 +112,7 @@ describe('Labels 11-14 OOOI reports', () => {
     expect(result.raw.arrival_icao).toBe('EGLL');
     expect(result.raw.off_time).toBe(2 * 3600 + 47 * 60);
     expect(result.raw.eta_time).toBe(8 * 3600 + 59 * 60);
-    expect(result.remaining.text).toBe('BAB7080926130450READY');
+    expect(result.remaining.text).toBe('02,BAB7080926130450READY');
   });
 
   test('decodes BA label 13 ON report', () => {
@@ -157,6 +157,33 @@ describe('Labels 11-14 OOOI reports', () => {
     expect(result.raw.departure_icao).toBe('EDDM');
     expect(result.raw.arrival_icao).toBe('RJTT');
     expect(result.raw.in_time).toBe(21 * 3600 + 24 * 60);
+    expect(result.raw.flight_number).toBe('ANA218');
+    expect(
+      result.formatted.items.filter((i) => i.type === 'flight_number'),
+    ).toHaveLength(1);
+  });
+
+  test('keeps unknown BA OFF fields in remaining', () => {
+    const result = plugin.decode({
+      label: '12',
+      text: 'OFF010247DIA02KEWREGLL9999',
+    });
+
+    expect(result.decoded).toBe(true);
+    expect(result.decoder.decodeLevel).toBe('partial');
+    expect(result.raw.off_time).toBe(2 * 3600 + 47 * 60);
+    expect(result.raw.eta_time).toBeUndefined();
+    expect(result.remaining.text).toBe('02,9999');
+  });
+
+  test('leaves the ANA OFF01A report to the day plugin', () => {
+    const result = new MessageDecoder().decode({
+      label: '11',
+      text: 'OFF01A21070436RJSSRJCC070421',
+    });
+
+    expect(result.decoded).toBe(true);
+    expect(result.decoder.name).toBe('label-10-14-oooi-day');
   });
 
   test('does not decode an out-of-range time', () => {

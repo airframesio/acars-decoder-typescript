@@ -7,7 +7,7 @@ import { ResultFormatter } from '../utils/result_formatter';
 //   'PSHBK AC0281/21/22 YVR 0603Z/    Z/    Z/0605Z'
 //   flight, departure day, report day, station, pushback (OUT) time, ...
 const REPORT_REGEX =
-  /^PSHBK (?<flight>[A-Z0-9]{3,8})\/(?<departureDay>\d{2})\/(?<day>\d{2}) (?<station>[A-Z]{3}) (?<time>\d{4})Z(?<rest>[\s\S]*)$/;
+  /^PSHBK (?<flight>[A-Z0-9]{3,8})\/(?<departureDay>0[1-9]|[12]\d|3[01])\/(?<day>0[1-9]|[12]\d|3[01]) (?<station>[A-Z]{3}) (?<time>\d{4})Z(?<rest>[\s\S]*)$/;
 
 const CLOCK_REGEX = /^([01]\d|2[0-3])[0-5]\d$/;
 
