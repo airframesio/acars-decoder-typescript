@@ -86,3 +86,21 @@ describe('Label 1J military FTX with ( substitutions', () => {
     expect(result.raw.mission).toBeUndefined();
   });
 });
+
+// https://app.airframes.io/messages/7655317188: a relayed SIGMET full of '(' for '/'. The body
+// is verbatim; the header and checksum were rebuilt around it, since only the text was copied.
+describe('Label 1J military FTX SIGMET relay', () => {
+  test('keeps the SIGMET text as sent', () => {
+    const body =
+      'CZQX SIGMET F2 VALID 231520(231920 CWUL-CZQX GANDER OCEANIC FIR(CTA SEV TURB OBS AT 1509Z WI 180NM WID LINEBTN (N5630W03900( - (N6130 W03200( FL310(360 MOV WNW 10KT WKN';
+    const result = new MessageDecoder().decode({
+      label: '1J',
+      text: `FTX/ID80002A,BRK71,COLLINSAM123/MR2,/FX${body}2B23`,
+    });
+
+    expect(result.decoded).toBe(true);
+    expect(result.decoder.decodeLevel).toBe('full');
+    expect(result.formatted.description).toBe('Free Text');
+    expect(result.raw.text).toBe(body);
+  });
+});
