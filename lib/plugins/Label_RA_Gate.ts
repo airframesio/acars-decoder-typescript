@@ -1,6 +1,15 @@
 import { DateTimeUtils } from '../DateTimeUtils';
 import { DecoderPlugin } from '../DecoderPlugin';
 import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
+import {
+  addRouteGate,
+  addUnreadLines,
+  cutMatch,
+  findRouteGate,
+  GATE_STOP_LINE,
+  GATE_TOKEN,
+  UsedLines,
+} from '../utils/gate_report';
 import { ResultFormatter } from '../utils/result_formatter';
 
 // A gate always has a digit (B47, 43, D10B, 164A, V166). This tells it apart
@@ -38,9 +47,37 @@ const REPUBLIC_GATE = new RegExp(
 const SKYWEST_HEADER = /^[A-Z0-9~.]+?ARR GATE INFO\b\s*(.*)$/;
 const SKYWEST_GATE = new RegExp(`^([A-Z]{3}) ARRIVAL GATE\\s+(${GATE})$`);
 
+// Headers of the formats above, and of Finnair connection lists (other
+// flights' departure gates): the other formats are not tried on them.
+const HANDLED_HEADER = /^(QUNDCULUA|QUHDQDDRP|QUHDQITOO|QUSILITOO|QUHELASAY)/;
+
+// United Express (Air Wisconsin): "FLT 4940 IAD GATE A4C".
+const FLT_AIRPORT_GATE = new RegExp(
+  `^FLT\\s+(\\d{1,4})\\s+([A-Z]{3})\\s+GATE\\s+${GATE_TOKEN}\\s*$`,
+);
+// Frontier: "FROM PHL OPS", ..., "GATE  E8", "GATE AVAIL AT ARRIVAL  Y".
+const FRONTIER_FROM = /^FROM ([A-Z]{3}) OPS$/;
+const FRONTIER_GATE = new RegExp(`^GATE\\s+${GATE_TOKEN}$`);
+const FRONTIER_AVAIL = 'GATE AVAIL AT ARRIVAL';
+// WestJet: "WS 345 YXE-YYC" then "YYC GATE D80/OPS" (the gate's airport) or
+// "ARR GATE IS NOW C26/OPS" (at the destination).
+const WESTJET_ROUTE = /^(WS)\s+(\d{1,4})\s+([A-Z]{3})-([A-Z]{3})\b/;
+const WESTJET_GATE = new RegExp(`^([A-Z]{3}) GATE\\s+${GATE_TOKEN}/OPS`);
+const WESTJET_ARR_GATE = new RegExp(`^ARR GATE IS NOW\\s+${GATE_TOKEN}/OPS`);
+// Shandong and others: "CURRENT FLIGHT:", "SC8402 ARR:ZSJN", "GATE:10".
+const ARR_ICAO = /^([A-Z0-9]{2}\d{1,4}) ARR:([A-Z]{4})$/;
+const COLON_GATE = new RegExp(`^GATE:\\s*${GATE_TOKEN}\\s*$`);
+// LATAM: "GATE ASSIGNMENT", then "PPOS:602L" (parking position).
+const LATAM_HEADER = 'GATE ASSIGNMENT';
+const LATAM_PPOS = new RegExp(`^PPOS:\\s*${GATE_TOKEN}\\s*$`);
+
 /**
- * Label RA gate uplinks that name the gate at the arrival airport: United
- * GATE ASSIGN / GATE CHANGE, Republic ARRIVAL GATE and SkyWest ARR GATE INFO.
+ * Label RA uplinks that name the gate at the arrival airport: United
+ * GATE ASSIGN / GATE CHANGE, Republic ARRIVAL GATE, SkyWest ARR GATE INFO,
+ * "FLT 1658/22 AUS-DFW" + "GATE D21" (American, GoJet, Piedmont), Air
+ * Wisconsin "FLT 4940 IAD GATE A4C", Frontier "FROM PHL OPS" ... "GATE E8",
+ * WestJet "YYC GATE D80/OPS", "SC8402 ARR:ZSJN" + "GATE:10" and LATAM
+ * "GATE ASSIGNMENT" + "PPOS:602L".
  *
  * Other airlines' RA messages that mention gates are not read here: Finnair
  * connection lists, for example, give the departure gates of other flights.
@@ -62,7 +99,8 @@ export class Label_RA_Gate extends DecoderPlugin {
     const result =
       this.decodeUnited(message, lines) ??
       this.decodeRepublic(message, lines) ??
-      this.decodeSkyWest(message, lines);
+      this.decodeSkyWest(message, lines) ??
+      this.decodeOther(message, lines);
     if (result) {
       return result;
     }
@@ -271,6 +309,174 @@ export class Label_RA_Gate extends DecoderPlugin {
     ResultFormatter.arrivalAirport(decodeResult, m[1], 'IATA');
     ResultFormatter.arrivalGate(decodeResult, m[2]);
     return this.finish(decodeResult, lines, new Set<number>([0, idx]));
+  }
+
+  /** The formats of other airlines, tried in turn. */
+  private decodeOther(
+    message: Message,
+    lines: string[],
+  ): DecodeResult | undefined {
+    if (HANDLED_HEADER.test(lines[0])) {
+      return undefined;
+    }
+    const decodeResult = this.initResult(message, 'Arrival Gate');
+    const used =
+      this.flightAirportGate(decodeResult, lines) ??
+      this.frontier(decodeResult, lines) ??
+      this.routeGate(decodeResult, lines) ??
+      this.westJet(decodeResult, lines) ??
+      this.arrIcaoGate(decodeResult, lines) ??
+      this.latam(decodeResult, lines);
+    if (!used) {
+      return undefined;
+    }
+    addUnreadLines(decodeResult, lines, used);
+    this.setDecodeLevel(decodeResult, true);
+    return decodeResult;
+  }
+
+  private flightAirportGate(
+    decodeResult: DecodeResult,
+    lines: string[],
+  ): UsedLines | undefined {
+    for (let i = 0; i < lines.length; i++) {
+      const m = FLT_AIRPORT_GATE.exec(lines[i]);
+      if (m) {
+        ResultFormatter.flightNumber(decodeResult, m[1]);
+        ResultFormatter.arrivalAirport(decodeResult, m[2], 'IATA');
+        ResultFormatter.arrivalGate(decodeResult, m[3]);
+        return new Map([[i, '']]);
+      }
+    }
+    return undefined;
+  }
+
+  private frontier(
+    decodeResult: DecodeResult,
+    lines: string[],
+  ): UsedLines | undefined {
+    const from = lines.findIndex((l) => FRONTIER_FROM.test(l));
+    if (from < 0 || !lines.some((l) => l.startsWith(FRONTIER_AVAIL))) {
+      return undefined;
+    }
+    for (let i = 0; i < lines.length; i++) {
+      if (GATE_STOP_LINE.test(lines[i])) {
+        break;
+      }
+      const m = FRONTIER_GATE.exec(lines[i]);
+      if (m) {
+        const airport = FRONTIER_FROM.exec(lines[from])![1];
+        ResultFormatter.arrivalAirport(decodeResult, airport, 'IATA');
+        ResultFormatter.arrivalGate(decodeResult, m[1]);
+        return new Map([
+          [from, ''],
+          [i, ''],
+        ]);
+      }
+    }
+    return undefined;
+  }
+
+  private routeGate(
+    decodeResult: DecodeResult,
+    lines: string[],
+  ): UsedLines | undefined {
+    const r = findRouteGate(lines);
+    if (!r) {
+      return undefined;
+    }
+    if (r.changed) {
+      decodeResult.formatted.description = 'Arrival Gate Change';
+    }
+    addRouteGate(decodeResult, r);
+    return r.used;
+  }
+
+  private westJet(
+    decodeResult: DecodeResult,
+    lines: string[],
+  ): UsedLines | undefined {
+    let route: RegExpExecArray | null = null;
+    let routeIdx = -1;
+    for (let i = 0; i < lines.length; i++) {
+      if (!route) {
+        route = WESTJET_ROUTE.exec(lines[i]);
+        routeIdx = i;
+        continue;
+      }
+      const g = WESTJET_GATE.exec(lines[i]);
+      const a = g ? null : WESTJET_ARR_GATE.exec(lines[i]);
+      if (!g && !a) {
+        continue;
+      }
+      ResultFormatter.flightNumber(decodeResult, route[1] + route[2]);
+      ResultFormatter.departureAirport(decodeResult, route[3], 'IATA');
+      // "YYC GATE D80/OPS" names the gate's airport; otherwise it is the
+      // destination.
+      ResultFormatter.arrivalAirport(decodeResult, g ? g[1] : route[4], 'IATA');
+      ResultFormatter.arrivalGate(decodeResult, g ? g[2] : a![1]);
+      return new Map([
+        [routeIdx, cutMatch(lines[routeIdx], route)],
+        [i, cutMatch(lines[i], (g ?? a)!)],
+      ]);
+    }
+    return undefined;
+  }
+
+  private arrIcaoGate(
+    decodeResult: DecodeResult,
+    lines: string[],
+  ): UsedLines | undefined {
+    for (let i = 0; i < lines.length; i++) {
+      const m = ARR_ICAO.exec(lines[i]);
+      if (!m) {
+        continue;
+      }
+      for (let j = i + 1; j < lines.length; j++) {
+        if (GATE_STOP_LINE.test(lines[j])) {
+          break;
+        }
+        const g = COLON_GATE.exec(lines[j]);
+        if (g) {
+          ResultFormatter.flightNumber(decodeResult, m[1]);
+          ResultFormatter.arrivalAirport(decodeResult, m[2]);
+          ResultFormatter.arrivalGate(decodeResult, g[1]);
+          const used: UsedLines = new Map([
+            [i, ''],
+            [j, ''],
+          ]);
+          if (lines[i - 1] === 'CURRENT FLIGHT:') used.set(i - 1, '');
+          return used;
+        }
+      }
+      return undefined;
+    }
+    return undefined;
+  }
+
+  private latam(
+    decodeResult: DecodeResult,
+    lines: string[],
+  ): UsedLines | undefined {
+    const header = lines.findIndex((l) => l.startsWith(LATAM_HEADER));
+    if (header < 0) {
+      return undefined;
+    }
+    for (let i = 0; i < lines.length; i++) {
+      if (GATE_STOP_LINE.test(lines[i])) {
+        break;
+      }
+      const m = LATAM_PPOS.exec(lines[i]);
+      if (m) {
+        decodeResult.formatted.description = 'Gate Assignment';
+        ResultFormatter.arrivalGate(decodeResult, m[1]);
+        return new Map([
+          [header, ''],
+          [i, ''],
+        ]);
+      }
+    }
+    return undefined;
   }
 
   /** Leaves the lines not read in remaining and sets the decode level. */

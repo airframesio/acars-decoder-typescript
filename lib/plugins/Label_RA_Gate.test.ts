@@ -25,6 +25,23 @@ const SKYWEST_NO_GATE =
   'QUHDQITOO.1ARR GATE INFO   \r\nSGU ARRIVAL GATE \r\nNEXT FLIGHT INFORMATION-\r\n** ALL TIMES LOCAL **\r\nAC N961SW\r\n N-A 5050 SGU-SLC 220600\r\n';
 const FINNAIR_CONNECTIONS =
   'QUHELASAY~1\r\nCURRENT FLIGHT\r\nFLIGHT  ESTIMATED ARRIVAL TIME\r\nAY1014   EIBT  UTC  \r\n\r\nCONNECTION INFO\r\nFLIGHT DATE     TIME  TO  GATE \r\nAY0957 20261122 09:35 CPH 31\r\n\r\nDECISION          CLASS PAX BAGS\r\nPENDING           Y     3   2      \r\n';
+const AMERICAN =
+  'QUTULYVAA010170FTM\n\tFLT 0170/22 HND-LAX\n\tGATE 153 AVAILABILITY PLN ETA 0534\n\tGATE OPEN\n\tNEXT FLT 0027 ACFT 8LM SKD 0950 HND';
+const GOJET = 'QUSTLAVG7~1GATE INFO\r\nFLT 4542 PWM-IAD\r\nGATE C22\r\n';
+const PIEDMONT =
+  'QUSBYDDPT~1FLT 5966 SYR-PHL\rGATE F37 ETA 707L\rTURN\r\nFLT 5799 ORF DEP 840L MOGT\r\n';
+const AIR_WISCONSIN = 'FLT 4940 IAD GATE A4C\r\n';
+const FRONTIER =
+  'QUANPOCF9~1\r\nFROM PHL OPS\r\n\r\nETA 1233\r\nWHEELCHAIRS 2\r\nGATE  E8\r\nGATE AVAIL AT ARRIVAL  Y\r\nGND PWR  Y\r\nNEXT FLIGHT  2507\r\nNEXT DEST  MCO\r\n';
+const WESTJET = 'WS 345 YXE-YYC\r\n\r\nYYC GATE D80/OPS';
+const WESTJET_CHANGE =
+  '///GATECHANGE///\r\n\r\nWS 736 YVR-YYZ\r\n\r\nARR GATE IS NOW C26/OPS';
+const SHANDONG =
+  'QUTAOUOSC~10000\r\n\tCURRENT FLIGHT:\r\n\tSC8402 ARR:ZSJN\r\n\tGATE:10\r\n\tWEATHER:\r\n';
+const LATAM =
+  'QUSCLASLA~1\r\n\r\nGATE ASSIGNMENT\r\n\r\n\r\n\r\nPPOS:602L\r\n\r\nBAG BELT:\r\n\r\nNEXT LEG: LA8142 GRU-AEP 22NOV 14:05Z';
+const LATAM_NO_POSITION =
+  'QUSCLASLA~1\r\n\tGATE ASSIGNMENT\r\n\t\r\n\tPPOS:N/A\r\n\tBAG BELT:\r\n\tNEXT LEG: LA3091 FLN-CGH 22NOV 11:35Z';
 
 describe('Label RA gate', () => {
   let decoder: MessageDecoder;
@@ -186,6 +203,95 @@ describe('Label RA gate', () => {
 
   test('does not read Finnair connection gates as an arrival gate', () => {
     const r = plugin.decode({ label: 'RA', text: FINNAIR_CONNECTIONS });
+    expect(r.decoded).toBe(false);
+    expect(r.raw.arrival_gate).toBeUndefined();
+  });
+
+  test('decodes American route and gate, tab indented', () => {
+    const r = plugin.decode({ label: 'RA', text: AMERICAN });
+    expect(r.decoded).toBe(true);
+    expect(r.formatted.description).toBe('Arrival Gate');
+    expect(r.raw.flight_number).toBe('0170');
+    expect(r.raw.day).toBe(22);
+    expect(r.raw.departure_iata).toBe('HND');
+    expect(r.raw.arrival_iata).toBe('LAX');
+    expect(r.raw.arrival_gate).toBe('153');
+    expect(r.remaining.text).toBe(
+      'QUTULYVAA010170FTM\nAVAILABILITY PLN ETA 0534\nGATE OPEN\nNEXT FLT 0027 ACFT 8LM SKD 0950 HND',
+    );
+  });
+
+  test('decodes GoJet route and gate after a header line', () => {
+    const r = plugin.decode({ label: 'RA', text: GOJET });
+    expect(r.raw.flight_number).toBe('4542');
+    expect(r.raw.arrival_iata).toBe('IAD');
+    expect(r.raw.arrival_gate).toBe('C22');
+    expect(r.remaining.text).toBe('QUSTLAVG7~1GATE INFO');
+  });
+
+  test('decodes Piedmont gate run into the route line', () => {
+    const r = plugin.decode({ label: 'RA', text: PIEDMONT });
+    expect(r.raw.flight_number).toBe('5966');
+    expect(r.raw.departure_iata).toBe('SYR');
+    expect(r.raw.arrival_iata).toBe('PHL');
+    expect(r.raw.arrival_gate).toBe('F37');
+    expect(r.remaining.text).toContain('FLT 5799 ORF DEP 840L MOGT');
+  });
+
+  test('decodes Air Wisconsin flight, airport and gate', () => {
+    const r = plugin.decode({ label: 'RA', text: AIR_WISCONSIN });
+    expect(r.decoded).toBe(true);
+    expect(r.decoder.decodeLevel).toBe('full');
+    expect(r.raw.flight_number).toBe('4940');
+    expect(r.raw.arrival_iata).toBe('IAD');
+    expect(r.raw.arrival_gate).toBe('A4C');
+  });
+
+  test('decodes Frontier ops gate, not the next flight', () => {
+    const r = plugin.decode({ label: 'RA', text: FRONTIER });
+    expect(r.decoded).toBe(true);
+    expect(r.raw.arrival_iata).toBe('PHL');
+    expect(r.raw.arrival_gate).toBe('E8');
+    expect(r.remaining.text).toContain('GATE AVAIL AT ARRIVAL  Y');
+    expect(r.remaining.text).toContain('NEXT FLIGHT  2507');
+  });
+
+  test('decodes WestJet ops gate', () => {
+    const r = plugin.decode({ label: 'RA', text: WESTJET });
+    expect(r.decoded).toBe(true);
+    expect(r.raw.flight_number).toBe('WS345');
+    expect(r.raw.departure_iata).toBe('YXE');
+    expect(r.raw.arrival_iata).toBe('YYC');
+    expect(r.raw.arrival_gate).toBe('D80');
+  });
+
+  test('decodes WestJet arrival gate change at the destination', () => {
+    const r = plugin.decode({ label: 'RA', text: WESTJET_CHANGE });
+    expect(r.raw.flight_number).toBe('WS736');
+    expect(r.raw.arrival_iata).toBe('YYZ');
+    expect(r.raw.arrival_gate).toBe('C26');
+    expect(r.remaining.text).toBe('///GATECHANGE///');
+  });
+
+  test('decodes current flight ICAO arrival and gate', () => {
+    const r = plugin.decode({ label: 'RA', text: SHANDONG });
+    expect(r.decoded).toBe(true);
+    expect(r.raw.flight_number).toBe('SC8402');
+    expect(r.raw.arrival_icao).toBe('ZSJN');
+    expect(r.raw.arrival_gate).toBe('10');
+    expect(r.remaining.text).toBe('QUTAOUOSC~10000\nWEATHER:');
+  });
+
+  test('decodes LATAM parking position, not the next leg', () => {
+    const r = plugin.decode({ label: 'RA', text: LATAM });
+    expect(r.decoded).toBe(true);
+    expect(r.formatted.description).toBe('Gate Assignment');
+    expect(r.raw.arrival_gate).toBe('602L');
+    expect(r.remaining.text).toContain('NEXT LEG: LA8142 GRU-AEP');
+  });
+
+  test('does not decode LATAM gate assignment without a position', () => {
+    const r = plugin.decode({ label: 'RA', text: LATAM_NO_POSITION });
     expect(r.decoded).toBe(false);
     expect(r.raw.arrival_gate).toBeUndefined();
   });
