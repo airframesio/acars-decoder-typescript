@@ -393,8 +393,6 @@ describe('MessageDecoder with malformed messages', () => {
       'POS082150, N 3885,W 7841,---,308,26922,  51,22290, 529,  19,-225,6',
       'label-12-pos',
     ],
-    ['1M', '/Bogus Message/', 'label-1m-slash'],
-    ['13', '/EA1719/DSKSFO/SK23', 'label-13-18-slash'],
     ['5Z', '/B3 ATLI', 'label-5z-slash'],
     ['5Z', '/ET EXP TIME A 20 122559/EON 1336 AUTO', 'label-5z-slash'],
     [

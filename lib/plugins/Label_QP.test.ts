@@ -50,4 +50,25 @@ describe('Label QP', () => {
     expect(result.decoder.name).toBe('label-qp');
     expect(result.raw.out_time).toBe(9 * 3600);
   });
+
+  test('does not invent a time when none is reported', () => {
+    // https://app.airframes.io/messages/8192986509
+    message.text = 'KSEAKORD    0276     ';
+    const result = plugin.decode(message);
+
+    expect(result.decoded).toBe(true);
+    expect(result.decoder.decodeLevel).toBe('partial');
+    expect(result.raw.departure_icao).toBe('KSEA');
+    expect(result.raw.arrival_icao).toBe('KORD');
+    expect(result.raw.out_time).toBeUndefined();
+  });
+
+  test('decodes an OUT report with door times', () => {
+    // https://app.airframes.io/messages/8187562743
+    message.text = 'KMSNKDFW1304 205     /DC 1304/PB 1304/CC 1304/PC 1253';
+    const result = plugin.decode(message);
+
+    expect(result.decoded).toBe(true);
+    expect(result.raw.out_time).toBe(13 * 3600 + 4 * 60);
+  });
 });

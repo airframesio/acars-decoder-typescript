@@ -60,9 +60,22 @@ export class CBand extends DecoderPlugin {
       decodeResult.decoded = true;
       decodeResult.decoder.decodeLevel = decoded.decoder.decodeLevel;
       decodeResult.decoder.name = this.name + '-' + decoded.decoder.name;
+      // Keep one flight id: the header's when the inner one is only the
+      // number, the inner one when it names its own carrier.
+      const headerFlight = decodeResult.raw.flight_number;
+      const innerFlight = decoded.raw.flight_number;
+      let items = decoded.formatted.items;
       decodeResult.raw = { ...decodeResult.raw, ...decoded.raw };
+      if (innerFlight !== undefined && /^\d+$/.test(String(innerFlight))) {
+        decodeResult.raw.flight_number = headerFlight;
+        items = items.filter((item) => item.type !== 'flight_number');
+      } else if (innerFlight !== undefined) {
+        decodeResult.formatted.items = decodeResult.formatted.items.filter(
+          (item) => item.type !== 'flight_number',
+        );
+      }
       decodeResult.formatted.description = decoded.formatted.description;
-      decodeResult.formatted.items.push(...decoded.formatted.items);
+      decodeResult.formatted.items.push(...items);
       decodeResult.remaining = decoded.remaining;
     }
     return decodeResult;

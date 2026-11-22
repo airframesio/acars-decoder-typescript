@@ -15,7 +15,7 @@ describe('Label 80', () => {
     expect(plugin.name).toBe('label-80');
     expect(plugin.qualifiers).toBeDefined();
     expect(plugin.qualifiers()).toEqual({
-      labels: ['80'],
+      labels: ['80', '30', '31', '32', '33', '82', '8D', '28', '83'],
       preambles: [],
     });
   });
@@ -54,8 +54,8 @@ describe('Label 80', () => {
     expect(decodeResult.formatted.description).toBe(
       'Airline Defined Position Report',
     );
-    expect(decodeResult.raw.position.latitude).toBe(35.391999999999996); // FIXME?: 35.392
-    expect(decodeResult.raw.position.longitude).toBe(-79.372);
+    expect(decodeResult.raw.position.latitude).toBeCloseTo(35.653, 3);
+    expect(decodeResult.raw.position.longitude).toBeCloseTo(-79.62, 3);
     expect(decodeResult.raw.departure_icao).toBe('KIAD');
     expect(decodeResult.raw.arrival_icao).toBe('MSLP');
     expect(decodeResult.raw.tail).toBe('N962AV');
@@ -89,14 +89,24 @@ describe('Label 80', () => {
     expect(decodeResult.raw.departure_icao).toBe('KBOS');
     expect(decodeResult.raw.tail).toBe('N3275J');
     expect(decodeResult.raw.message_timestamp).toBe(52565);
-    expect(decodeResult.raw.position.latitude).toBe(39.501);
-    expect(decodeResult.raw.position.longitude).toBe(-75.483);
+    expect(decodeResult.raw.position.latitude).toBeCloseTo(39.835, 3);
+    expect(decodeResult.raw.position.longitude).toBeCloseTo(-75.805, 3);
     expect(decodeResult.raw.altitude).toBe(38007);
     expect(decodeResult.raw.groundspeed).toBe(334);
     expect(decodeResult.raw.fuel_on_board).toBe(105);
     expect(decodeResult.raw.eta_time).toBe(58920);
     expect(decodeResult.formatted.items.length).toBe(11);
     expect(decodeResult.remaining.text).toBe('N3950.1/W07548.3 3P01 POSRPT//');
+  });
+
+  test('decodes POSRPT with zero tenths of a minute', () => {
+    message.text =
+      '3P01 POSRPT  0267/20 KBOS/KCHS .N3275J\n/POS N3950.0 W07548.3/ALT 38007';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoded).toBe(true);
+    expect(decodeResult.raw.position.latitude).toBeCloseTo(39.833, 3);
+    expect(decodeResult.raw.position.longitude).toBeCloseTo(-75.805, 3);
   });
 
   test('decodes POS variant 1', () => {
@@ -169,5 +179,298 @@ describe('Label 80', () => {
       'Airline Defined Position Report',
     );
     expect(decodeResult.formatted.items.length).toBe(0);
+  });
+  describe('OOOI reports', () => {
+    test('decodes OFFRP with OUT and OFF times', () => {
+      // https://app.airframes.io/messages/8187680733
+      const decodeResult = plugin.decode({
+        label: '80',
+        text: '1101 OFFRP  0001/21 KDCA/KSEA .N535AS\r\n/OUT 1258/OFF 1318/FOB 0391/ETA 1822/CAB 1254/OIL 1304/AFT     /CARGO 1255/SRVC     ',
+      });
+
+      expect(decodeResult.decoded).toBe(true);
+      expect(decodeResult.decoder.decodeLevel).toBe('partial');
+      expect(decodeResult.formatted.description).toBe('Takeoff Report');
+      expect(decodeResult.raw.departure_icao).toBe('KDCA');
+      expect(decodeResult.raw.arrival_icao).toBe('KSEA');
+      expect(decodeResult.raw.tail).toBe('N535AS');
+      expect(decodeResult.raw.out_time).toBe(46680);
+      expect(decodeResult.raw.off_time).toBe(47880);
+      expect(decodeResult.raw.fuel_on_board).toBe(391);
+      expect(decodeResult.raw.eta_time).toBe(66120);
+    });
+
+    test('decodes single-line OUTRP', () => {
+      // https://app.airframes.io/messages/8187398021
+      const decodeResult = plugin.decode({
+        label: '80',
+        text: '1001 OUTRP 1925/21 KBOS/MMGL .XA-VSX/OUT 1245/FOB  171',
+      });
+
+      expect(decodeResult.decoded).toBe(true);
+      expect(decodeResult.formatted.description).toBe('Out of Gate Report');
+      expect(decodeResult.raw.out_time).toBe(45900);
+      expect(decodeResult.raw.fuel_on_board).toBe(171);
+    });
+
+    test('decodes SUMMRY with all four times', () => {
+      // https://app.airframes.io/messages/8184569399
+      const decodeResult = plugin.decode({
+        label: '80',
+        text: '3501 SUMMRY 3390/20 KPHX/KILN .N337AZ\r\n/OUT 1600/FOB 0541\r\n/OFF 1615/FOB ----\r\n/ON  1930/FOB ----\r\n/IN  1937/FOB 0224',
+      });
+
+      expect(decodeResult.decoded).toBe(true);
+      expect(decodeResult.formatted.description).toBe('Flight Summary Report');
+      expect(decodeResult.raw.out_time).toBe(57600);
+      expect(decodeResult.raw.off_time).toBe(58500);
+      expect(decodeResult.raw.on_time).toBe(70200);
+      expect(decodeResult.raw.in_time).toBe(70620);
+      expect(decodeResult.raw.fuel_on_board).toBe(224);
+      const fuelItems = decodeResult.formatted.items.filter(
+        (item) => item.code === 'FOB',
+      );
+      expect(fuelItems.map((item) => item.value)).toEqual(['224']);
+    });
+
+    test('decodes label 30 OUTRP with briefing prefix', () => {
+      // https://app.airframes.io/messages/8193558431
+      const decodeResult = plugin.decode({
+        label: '30',
+        text: '/FB 0123/AD KDTW/N4222.1,W07101.1,1001 OUTRP  1837/22 KBOS/KDTW .N3115J\r\n/OUT 0325/FOB 0123',
+      });
+
+      expect(decodeResult.decoded).toBe(true);
+      expect(decodeResult.formatted.description).toBe('Out of Gate Report');
+      expect(decodeResult.raw.flight_number).toBe('1837');
+      expect(decodeResult.raw.departure_icao).toBe('KBOS');
+      expect(decodeResult.raw.arrival_icao).toBe('KDTW');
+      expect(decodeResult.raw.out_time).toBe(12300);
+      // degrees and decimal minutes: 42°22.1' N, 71°01.1' W
+      expect(decodeResult.raw.position?.latitude).toBe(42.3683);
+      expect(decodeResult.raw.position?.longitude).toBe(-71.0183);
+      expect(decodeResult.remaining.text).not.toContain('N4222');
+    });
+
+    test('decodes label 30 OUTRP through MessageDecoder', () => {
+      const decodeResult = new MessageDecoder().decode({
+        label: '30',
+        text: '/FB 0123/AD KDTW/N4222.1,W07101.1,1001 OUTRP  1837/22 KBOS/KDTW .N3115J\r\n/OUT 0325/FOB 0123',
+      });
+
+      expect(decodeResult.decoder.name).toBe('label-80');
+      expect(decodeResult.raw.out_time).toBe(12300);
+    });
+
+    test('decodes single-line label 30 OUTRP with briefing prefix', () => {
+      const decodeResult = plugin.decode({
+        label: '30',
+        text: '/FB 0123/AD KDTW/N4222.1,W07101.1,1001 OUTRP 1837/22 KBOS/KDTW .N3115J/OUT 0325/FOB 0123',
+      });
+
+      expect(decodeResult.decoded).toBe(true);
+      expect(decodeResult.raw.departure_icao).toBe('KBOS');
+      expect(decodeResult.raw.out_time).toBe(12300);
+      expect(decodeResult.raw.position?.latitude).toBe(42.3683);
+    });
+
+    test('decodes label 32 ONRP with seconds', () => {
+      // https://app.airframes.io/messages/8193536291
+      const decodeResult = plugin.decode({
+        label: '32',
+        text: ' /FB 0092/AD KBOS/N 42.331,W 71.042,1201 ONRP   0266/22 KRSW/KBOS .N956JT\r\n/ON  031924/FOB 0092',
+      });
+
+      expect(decodeResult.decoded).toBe(true);
+      expect(decodeResult.formatted.description).toBe('Landing Report');
+      expect(decodeResult.raw.on_time).toBe(11964);
+      // decimal degrees
+      expect(decodeResult.raw.position?.latitude).toBe(42.331);
+      expect(decodeResult.raw.position?.longitude).toBe(-71.042);
+    });
+
+    test('decodes label 33 INRP', () => {
+      const decodeResult = plugin.decode({
+        label: '33',
+        text: ' /FB 0080/AD KBOS/N 42.371,W 71.006,1301 INRP   2166/21 KRSW/KBOS .N558JB\r\n/ON  1547/IN  1552/FOB 0080',
+      });
+
+      expect(decodeResult.decoded).toBe(true);
+      expect(decodeResult.formatted.description).toBe('In Gate Report');
+      expect(decodeResult.raw.on_time).toBe(56820);
+      expect(decodeResult.raw.in_time).toBe(57120);
+    });
+
+    test('decodes label 8D INRP', () => {
+      const decodeResult = plugin.decode({
+        label: '8D',
+        text: '13H3 INRP   2513/21 EKCH/EGPH .OY-KBR\r\n/ON 1825/IN 1828',
+      });
+
+      expect(decodeResult.decoded).toBe(true);
+      expect(decodeResult.raw.departure_icao).toBe('EKCH');
+      expect(decodeResult.raw.arrival_icao).toBe('EGPH');
+      expect(decodeResult.raw.on_time).toBe(66300);
+      expect(decodeResult.raw.in_time).toBe(66480);
+    });
+
+    test('does not decode other formats on labels other than 80', () => {
+      const decodeResult = plugin.decode({
+        label: '31',
+        text: '-P1326  10114360/05G--  729.88122 3993REY UMBALIN 8662149172115.525.114.2129.326.0 1',
+      });
+
+      expect(decodeResult.decoded).toBe(false);
+      expect(decodeResult.decoder.decodeLevel).toBe('none');
+    });
+
+    test('ignores a blank OOOI time', () => {
+      const decodeResult = plugin.decode({
+        label: '80',
+        text: '1101 OFFRP  0549/21 YPPH/WADD .PK-AZF\r\n/OUT 2241/OFF ----/FOB 0152/ETA     ',
+      });
+
+      expect(decodeResult.decoded).toBe(true);
+      expect(decodeResult.raw.out_time).toBe(81660);
+      expect(decodeResult.raw.off_time).toBeUndefined();
+    });
+
+    test('ignores an out-of-range OOOI time', () => {
+      const decodeResult = plugin.decode({
+        label: '80',
+        text: '1101 OFFRP  0549/21 YPPH/WADD .PK-AZF\r\n/OUT 2241/OFF 1260',
+      });
+
+      expect(decodeResult.raw.out_time).toBe(81660);
+      expect(decodeResult.raw.off_time).toBeUndefined();
+      expect(decodeResult.remaining.text).toContain('OFF 1260');
+    });
+  });
+  // Production messages, 2026-11-22
+  describe('round 5 layouts', () => {
+    test('decodes an Emirates POSRPT with a padded flight and DMS position', () => {
+      const decodeResult = plugin.decode({
+        label: '80',
+        text: '3N01 POSRPT UAE709    /22 OMDB/FIMP .A6-EXO\r\nPOS N224617E0553655/ALT 319/MCH 001/FOB 0406\r\nTME 0438/WND -110 8/OAT -39/TAS 506/ETA 0959',
+      });
+
+      expect(decodeResult.decoded).toBe(true);
+      expect(decodeResult.raw.flight_number).toBe('UAE709');
+      expect(decodeResult.raw.departure_icao).toBe('OMDB');
+      expect(decodeResult.raw.arrival_icao).toBe('FIMP');
+      expect(decodeResult.raw.position).toEqual({
+        latitude: 22.7714,
+        longitude: 55.6153,
+      });
+      expect(decodeResult.raw.eta_time).toBe(35940);
+      // flight level 319 next to TAS 506
+      expect(decodeResult.raw.altitude).toBe(31900);
+      expect(decodeResult.raw.fuel_on_board).toBe(406);
+      // 'MCH 001' is not a Mach number
+      expect(decodeResult.raw.mach).toBeUndefined();
+      expect(decodeResult.remaining.text).toContain('MCH 001');
+    });
+
+    test('decodes a POSRPT with ORGDATE and ETA without a space', () => {
+      const decodeResult = plugin.decode({
+        label: '80',
+        text: '3N01 POSRPT/1665/ORGDATE0437/15 LTAJ/EDDL .TC-CPD\r\n/POS -----/N49368/-/ETA0551/FOB 14240',
+      });
+
+      expect(decodeResult.decoded).toBe(true);
+      expect(decodeResult.raw.flight_number).toBe('1665');
+      expect(decodeResult.raw.departure_icao).toBe('LTAJ');
+      expect(decodeResult.raw.arrival_icao).toBe('EDDL');
+      expect(decodeResult.raw.tail).toBe('TC-CPD');
+      expect(decodeResult.raw.eta_time).toBe(21060);
+      expect(decodeResult.remaining.text).toContain('ORGDATE0437');
+      expect(decodeResult.remaining.text).toContain('POS -----');
+    });
+
+    test('keeps impossible ETAs and positions in remaining', () => {
+      const decodeResult = plugin.decode({
+        label: '80',
+        text: '3N01 POSRPT 1943/22 RCNN/VVNB .VN-A655\r\n/POS N226099E0550000/ETA2560/ETA 1260',
+      });
+
+      expect(decodeResult.raw.eta_time).toBeUndefined();
+      expect(decodeResult.raw.position).toBeUndefined();
+      expect(decodeResult.remaining.text).toContain('POS N226099E0550000');
+      expect(decodeResult.remaining.text).toContain('ETA2560');
+      expect(decodeResult.remaining.text).toContain('ETA 1260');
+    });
+
+    test('decodes an Avianca label 83 POSRPT without the day', () => {
+      const decodeResult = plugin.decode({
+        label: '83',
+        text: '3N01 POSRPT 0054/SKBO/LFPG .N786AV/03A04:38\r\n/WPY ANG  /NWYP TEMTO /HDG  76.81/MCH    .86\r\n/POS N47218 W001503/FL 40001/TAS 495/SAT - 52\r\n/SWND    39/DWND - 117/FOB 10100/ETA 0510',
+      });
+
+      expect(decodeResult.decoded).toBe(true);
+      expect(decodeResult.raw.departure_icao).toBe('SKBO');
+      expect(decodeResult.raw.arrival_icao).toBe('LFPG');
+      expect(decodeResult.raw.altitude).toBe(40001);
+      expect(decodeResult.raw.outside_air_temperature).toBe(-52);
+      expect(decodeResult.raw.mach).toBe(0.86);
+      expect(decodeResult.raw.heading).toBe(76.81);
+      expect(decodeResult.raw.eta_time).toBe(18600);
+    });
+
+    test('decodes a Horizon label 28 INRANG', () => {
+      const decodeResult = plugin.decode({
+        label: '28',
+        text: '3702 INRANG 2223/22 KSEA/KPDX  N622QX /ETA 0515/EFD 063',
+      });
+
+      expect(decodeResult.decoded).toBe(true);
+      expect(decodeResult.formatted.description).toBe('In Range Report');
+      expect(decodeResult.raw.arrival_icao).toBe('KPDX');
+      expect(decodeResult.raw.tail).toBe('N622QX');
+      expect(decodeResult.raw.eta_time).toBe(18900);
+    });
+
+    test('decodes a DEPDLY', () => {
+      const decodeResult = plugin.decode({
+        label: '80',
+        text: '3001 DEPDLY 0187/22 KORD/MMMX .XA-VXZ\r\nATD 0713/ETD 0705/ETO 0733/FOB 13297\r\n35A/0008',
+      });
+
+      expect(decodeResult.decoded).toBe(true);
+      expect(decodeResult.formatted.description).toBe('Departure Delay Report');
+      expect(decodeResult.raw.out_time).toBe(25980);
+      expect(decodeResult.raw.etd_time).toBe(25500);
+      expect(decodeResult.raw.fuel_on_board).toBe(13297);
+      expect(decodeResult.remaining.text).toContain('ETO 0733');
+    });
+
+    test('decodes a GOL label 33 ETA RPT', () => {
+      const decodeResult = plugin.decode({
+        label: '33',
+        text: 'ETA RPT\r\nETA 0912',
+      });
+
+      expect(decodeResult.decoded).toBe(true);
+      expect(decodeResult.raw.eta_time).toBe(33120);
+    });
+
+    test('leaves other label 28 and 83 messages alone', () => {
+      for (const [label, text] of [
+        ['28', '3702 POSRPT 2223/22 KSEA/KPDX  N622QX /ETA 0515'],
+        ['83', 'V09CA033/ETA-30/0550/'],
+      ]) {
+        const decodeResult = plugin.decode({ label, text });
+        expect(decodeResult.decoded).toBe(false);
+      }
+    });
+  });
+
+  test('is the plugin MessageDecoder picks for label 33', () => {
+    const result = new MessageDecoder().decode({
+      label: '33',
+      text: 'ETA RPT\r\nETA 0912',
+    });
+
+    expect(result.decoded).toBe(true);
+    expect(result.decoder.name).toBe('label-80');
   });
 });
