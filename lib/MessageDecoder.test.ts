@@ -257,6 +257,28 @@ describe('MessageDecoder', () => {
       expect(result.decoded).toBe(false);
     });
 
+    test('registerPlugin rejects a blank plugin name', () => {
+      const decoder = new MessageDecoder();
+      expect(() =>
+        decoder.registerPlugin(new StubPlugin(decoder, '  ', ['99'])),
+      ).toThrow('Decoder plugin name must be a non-empty string');
+    });
+
+    test('registerPlugin rejects a duplicate plugin name', () => {
+      const decoder = new MessageDecoder();
+      expect(() =>
+        decoder.registerPlugin(new StubPlugin(decoder, 'label-15', ['99'])),
+      ).toThrow('Duplicate decoder plugin name: label-15');
+    });
+
+    test('registerPlugin rejects a whitespace-padded duplicate name', () => {
+      const decoder = new MessageDecoder();
+      decoder.registerPlugin(new StubPlugin(decoder, ' stub-pad ', ['99']));
+      expect(() =>
+        decoder.registerPlugin(new StubPlugin(decoder, 'stub-pad', ['98'])),
+      ).toThrow('Duplicate decoder plugin name: stub-pad');
+    });
+
     test('registerPlugin adds to label index', () => {
       const decoder = new MessageDecoder();
       const stub = new StubPlugin(decoder, 'stub-99', ['99']);
@@ -366,5 +388,98 @@ describe('MessageDecoder', () => {
 
       expect(probe.receivedOptions).toBe(opts);
     });
+  });
+});
+
+describe('MessageDecoder with malformed messages', () => {
+  // Each of these used to throw a TypeError out of decode() (found by fuzzing
+  // the test corpus). decode() must return a result for any text, and say
+  // which plugin failed.
+  const cases: [string, string, string][] = [
+    [
+      '12',
+      'POS082150, N 3885,W 7841,---,308,26922,  51,22290, 529,  19,-225,6',
+      'label-12-pos',
+    ],
+    ['5Z', '/B3 ATLI', 'label-5z-slash'],
+    ['5Z', '/ET EXP TIME A 20 122559/EON 1336 AUTO', 'label-5z-slash'],
+    [
+      '4T',
+      'AGFSR AC0620/07/08/YYZYHZ/0340Z/453/.4W/350/ /0063/0035/ /281065/----/ /512/0240/0253/----/----',
+      'label-4t-agfsr',
+    ],
+    // Minimised from a fuzzed message: an empty CSV body.
+    ['80', ',,,,,,,,', 'label-80'],
+  ];
+
+  test.each(cases)(
+    'label %s (%s) survives a failure in %s',
+    (label, text, pluginName) => {
+      const result = new MessageDecoder().decode({ label, text });
+      expect(result.decoded).toBe(false);
+      expect(result.decoder).toMatchObject({
+        name: 'none',
+        decodeLevel: 'none',
+      });
+      expect(result.message?.text).toBe(text);
+      expect(result.error).toContain(pluginName);
+    },
+  );
+
+  test('a plugin that throws is skipped and a later plugin still decodes', () => {
+    const decoder = new MessageDecoder();
+    let throwingCalls = 0;
+
+    class Throwing extends StubPlugin {
+      decode(): never {
+        throwingCalls += 1;
+        throw new TypeError('boom');
+      }
+    }
+    class Catching extends StubPlugin {
+      decode(message: Message): DecodeResult {
+        const result = this.initResult(message, 'Caught');
+        this.setDecodeLevel(result, true, 'full');
+        return result;
+      }
+    }
+
+    decoder.registerPlugin(new Throwing(decoder, 'throwing', ['ZZ']));
+    decoder.registerPlugin(new Catching(decoder, 'catching', ['ZZ']));
+
+    const result = decoder.decode({ label: 'ZZ', text: 'anything' });
+    expect(throwingCalls).toBe(1);
+    expect(result.decoded).toBe(true);
+    expect(result.decoder.name).toBe('catching');
+  });
+
+  test('a thrown value that cannot be printed does not escape decode()', () => {
+    const decoder = new MessageDecoder();
+    class Unprintable extends StubPlugin {
+      decode(): never {
+        throw {
+          toString() {
+            throw new Error('no string for you');
+          },
+        };
+      }
+    }
+    decoder.registerPlugin(new Unprintable(decoder, 'unprintable', ['ZZ']));
+    const result = decoder.decode({ label: 'ZZ', text: 'anything' });
+    expect(result.decoded).toBe(false);
+    expect(result.error).toContain('unprintable (unprintable error)');
+  });
+
+  test('a plugin that returns nothing does not throw out of decode()', () => {
+    const decoder = new MessageDecoder();
+    class Empty extends StubPlugin {
+      decode(): DecodeResult {
+        return undefined as unknown as DecodeResult;
+      }
+    }
+    decoder.registerPlugin(new Empty(decoder, 'empty', ['ZZ']));
+    expect(decoder.decode({ label: 'ZZ', text: 'anything' }).decoded).toBe(
+      false,
+    );
   });
 });

@@ -207,6 +207,19 @@ export class ResultFormatter {
     });
   }
 
+  static etd(decodeResult: DecodeResult, time: number) {
+    if (isNaN(time)) {
+      return;
+    }
+    decodeResult.raw.etd_time = time;
+    decodeResult.formatted.items.push({
+      type: 'time',
+      code: 'ETD',
+      label: 'Estimated Time of Departure',
+      value: DateTimeUtils.timestampToString(time),
+    });
+  }
+
   static arrivalRunway(decodeResult: DecodeResult, value: string) {
     decodeResult.raw.arrival_runway = value;
     decodeResult.formatted.items.push({
@@ -567,6 +580,16 @@ export class ResultFormatter {
     });
   }
 
+  static departureGate(decodeResult: DecodeResult, value: string) {
+    decodeResult.raw.departure_gate = value;
+    decodeResult.formatted.items.push({
+      type: 'gate',
+      code: 'DGATE',
+      label: 'Departure Gate',
+      value: decodeResult.raw.departure_gate,
+    });
+  }
+
   static arrivalGate(decodeResult: DecodeResult, value: string) {
     decodeResult.raw.arrival_gate = value;
     decodeResult.formatted.items.push({
@@ -574,6 +597,32 @@ export class ResultFormatter {
       code: 'AGATE',
       label: 'Arrival Gate',
       value: decodeResult.raw.arrival_gate,
+    });
+  }
+
+  static scheduledDeparture(decodeResult: DecodeResult, time: number) {
+    if (isNaN(time)) {
+      return;
+    }
+    decodeResult.raw.scheduled_departure_time = time;
+    decodeResult.formatted.items.push({
+      type: 'time',
+      code: 'STD',
+      label: 'Scheduled Departure Time',
+      value: DateTimeUtils.timestampToString(time),
+    });
+  }
+
+  static scheduledArrival(decodeResult: DecodeResult, time: number) {
+    if (isNaN(time)) {
+      return;
+    }
+    decodeResult.raw.scheduled_arrival_time = time;
+    decodeResult.formatted.items.push({
+      type: 'time',
+      code: 'STA',
+      label: 'Scheduled Arrival Time',
+      value: DateTimeUtils.timestampToString(time),
     });
   }
 

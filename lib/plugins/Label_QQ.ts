@@ -51,11 +51,16 @@ export class Label_QQ extends DecoderPlugin {
       }
       ResultFormatter.unknown(decodeResult, message.text.substring(48));
     } else {
-      ResultFormatter.off(
-        decodeResult,
-        DateTimeUtils.convertHHMMSSToTod(message.text.substring(8, 12) + '00'),
-      );
-      ResultFormatter.unknown(decodeResult, message.text.substring(12));
+      const time = message.text.substring(8, 12);
+      if (/^\d{4}$/.test(time)) {
+        ResultFormatter.off(
+          decodeResult,
+          DateTimeUtils.convertHHMMSSToTod(time + '00'),
+        );
+        ResultFormatter.unknown(decodeResult, message.text.substring(12));
+      } else {
+        ResultFormatter.unknown(decodeResult, message.text.substring(8));
+      }
     }
 
     decodeResult.decoded = true;

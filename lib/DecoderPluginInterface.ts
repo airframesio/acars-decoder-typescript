@@ -70,11 +70,15 @@ export interface RawFields {
   alternative_runways?: AlternativeRunway[];
 
   // Gates
+  departure_gate?: string;
   arrival_gate?: string;
 
   // Times (seconds since midnight or epoch)
   message_timestamp?: number;
   eta_time?: number;
+  etd_time?: number;
+  scheduled_departure_time?: number;
+  scheduled_arrival_time?: number;
   out_time?: number;
   off_time?: number;
   on_time?: number;
@@ -178,6 +182,8 @@ export interface Qualifiers {
 }
 
 export interface DecoderPluginInterface {
+  /** Plugin id, as reported in DecodeResult.decoder.name. */
+  name: string;
   decode(message: Message, options?: Options): DecodeResult;
   meetsStateRequirements(): boolean;
   // onRegister(store: Store<any>) : void;
