@@ -53,7 +53,22 @@ describe('Label gate report', () => {
   test('matches qualifiers', () => {
     expect(plugin.name).toBe('label-gate-report');
     expect(plugin.qualifiers()).toEqual({
-      labels: ['40', '41', '42', 'C1', '21', '3T', '5Z', '25', '3M'],
+      labels: [
+        '40',
+        '41',
+        '42',
+        'C1',
+        '21',
+        '3T',
+        '5Z',
+        '25',
+        '3M',
+        '3E',
+        'HX',
+        '32',
+        '33',
+        '48',
+      ],
     });
   });
 
@@ -282,5 +297,194 @@ describe('Label gate report', () => {
       text: 'FLT 1658/22 AUS-DFW\r\nGATE D21\r\n',
     });
     expect(h1.raw.arrival_gate).toBeUndefined();
+  });
+});
+
+// Texts from production messages of 2026-11-19 (shortened, names removed).
+const FINNAIR_3E = 'AY1074 22NOV26\r\nARRIVING STAND 131 ELDT 12:53\r\n';
+// The crew list that follows in production carries names: not kept here.
+const DELTA_HX =
+  'RA IV3 48   DTWA67\r\nCREW P/F        \r\nPART  1 OF  1 \r\nFLT 1849 - 19NOV0102 CREW P/F        \r\nARR DTW GTE A67\r\n';
+const WESTJET_ENCORE = 'FTX01,WS 3564 YVR-YLW\r\nYLW GATE 9/OPS';
+const ALASKA_ETA_ACK =
+  ',,\r\nETA ACK\r\nFROM:LAX OPS\r\nAS1831\r\nETA:0057\r\nARRIVAL GATE:65B \r\nEXT ELECT AVAIL W/INTERLOCK\r\nNEXT FLT:1397 PDX \r\n';
+const SAS =
+  '.HDQBQSK 191354\r\n\tAGM\r\n\tAN LN-RKS/FI SK932/MA 767I\r\n\tATT SK0932  ETA: 1414  GATE: C33   TERM: 3    BC: \r\n\tCONNECTIONS\r\n\t -VIE SK1693 0755  B9   3   Vienna\r\n';
+const EDELWEISS =
+  'STA/ETA  1135LT\r\nARR TERM 2 BY BUS\r\nARR GATE GRZ\r\nARR POS  D12\r\nBAG BELT 21\r\nCONNECTING GATE INFO 19NOV1004Z\r\n       1220 B10 LX1270 Copenhagen\r\n';
+const SWISS = 'ARR GATE A52\r\nARR POS  A52\r\n';
+const VIRGIN_ARR_BAY = 'VA1007, ARR BAY: 45A\r\n';
+// Not this flight's gate, or not a gate.
+const JAZZ_NEXT_FLIGHT =
+  '.YHZITQK 190005\r\nAGM\r\nAN CFCJZ/MA 988I\r\n-  NEXT FLIGHT INFORMATION\r\nFLT: 8908\r\nDES: YYZ\r\nGATE:E02\r\n';
+const AIR_CANADA_4C = '-GTE C001  C47 \r\n';
+const CREW_FREE_TEXT =
+  'FTX01.OPC\r\nHI STAND PLANNING. WE\r\nHAVE STAND 515 BUT A/C\r\n';
+
+describe('Label gate report, round 5 formats', () => {
+  let decoder: MessageDecoder;
+  let plugin: Label_Gate_Report;
+
+  beforeEach(() => {
+    decoder = new MessageDecoder();
+    plugin = new Label_Gate_Report(decoder);
+  });
+
+  test('decodes the Finnair arriving stand on label 3E', () => {
+    const r = plugin.decode({ label: '3E', text: FINNAIR_3E });
+    expect(r.decoded).toBe(true);
+    expect(r.formatted.description).toBe('Arrival Stand');
+    expect(r.raw.flight_number).toBe('AY1074');
+    expect(r.raw.day).toBe(22);
+    expect(r.raw.arrival_gate).toBe('131');
+    expect(r.remaining.text).toBe('ELDT 12:53');
+  });
+
+  test('decodes Delta crew P/F arrival gate on label HX', () => {
+    const r = plugin.decode({ label: 'HX', text: DELTA_HX });
+    expect(r.decoded).toBe(true);
+    expect(r.formatted.description).toBe('Crew P/F Report');
+    expect(r.raw.arrival_iata).toBe('DTW');
+    expect(r.raw.arrival_gate).toBe('A67');
+  });
+
+  test('decodes WestJet Encore on label 41', () => {
+    const r = plugin.decode({ label: '41', text: WESTJET_ENCORE });
+    expect(r.decoded).toBe(true);
+    expect(r.decoder.decodeLevel).toBe('full');
+    expect(r.raw.flight_number).toBe('WS3564');
+    expect(r.raw.departure_iata).toBe('YVR');
+    expect(r.raw.arrival_iata).toBe('YLW');
+    expect(r.raw.arrival_gate).toBe('9');
+  });
+
+  test('decodes the Alaska ETA acknowledgement, not the next flight', () => {
+    const r = plugin.decode({ label: '21', text: ALASKA_ETA_ACK });
+    expect(r.decoded).toBe(true);
+    expect(r.formatted.description).toBe('ETA Acknowledgement');
+    expect(r.raw.flight_number).toBe('AS1831');
+    expect(r.raw.arrival_iata).toBe('LAX');
+    expect(r.raw.arrival_gate).toBe('65B');
+    expect(r.remaining.text).toContain('NEXT FLT:1397 PDX');
+  });
+
+  test('decodes SAS passenger info', () => {
+    const r = plugin.decode({ label: 'C1', text: SAS });
+    expect(r.decoded).toBe(true);
+    expect(r.formatted.description).toBe('Passenger Information');
+    expect(r.raw.arrival_gate).toBe('C33');
+    expect(r.remaining.text).toContain('-VIE SK1693 0755  B9   3   Vienna');
+  });
+
+  test('decodes the Edelweiss arrival position when the gate is a bus', () => {
+    const r = plugin.decode({ label: '32', text: EDELWEISS });
+    expect(r.decoded).toBe(true);
+    expect(r.raw.arrival_gate).toBe('D12');
+    expect(r.remaining.text).toContain('1220 B10 LX1270 Copenhagen');
+  });
+
+  test('decodes the Swiss arrival gate before the position', () => {
+    const r = plugin.decode({ label: '32', text: SWISS });
+    expect(r.raw.arrival_gate).toBe('A52');
+    expect(r.remaining.text).toBe('ARR POS  A52');
+  });
+
+  test('decodes the Virgin Australia arrival bay', () => {
+    const r = plugin.decode({ label: '3M', text: VIRGIN_ARR_BAY });
+    expect(r.raw.flight_number).toBe('VA1007');
+    expect(r.raw.arrival_gate).toBe('45A');
+  });
+
+  test('does not read the Jazz next flight gate', () => {
+    const r = plugin.decode({ label: 'C1', text: JAZZ_NEXT_FLIGHT });
+    expect(r.decoded).toBe(false);
+  });
+
+  test('does not read other formats', () => {
+    for (const [label, text] of [
+      ['4C', AIR_CANADA_4C],
+      ['10', CREW_FREE_TEXT],
+    ]) {
+      const r = decoder.decode({ label, text });
+      expect(r.raw.arrival_gate).toBeUndefined();
+      expect(r.raw.departure_gate).toBeUndefined();
+    }
+    const j = decoder.decode({ label: 'C1', text: JAZZ_NEXT_FLIGHT });
+    expect(j.raw.arrival_gate).toBeUndefined();
+  });
+
+  test('is reached through MessageDecoder after the other plugins', () => {
+    for (const [label, text, gate] of [
+      ['3E', FINNAIR_3E, '131'],
+      ['HX', DELTA_HX, 'A67'],
+      ['41', WESTJET_ENCORE, '9'],
+      ['21', ALASKA_ETA_ACK, '65B'],
+      ['C1', SAS, 'C33'],
+      ['32', EDELWEISS, 'D12'],
+      ['32', SWISS, 'A52'],
+      ['3M', VIRGIN_ARR_BAY, '45A'],
+    ]) {
+      const r = decoder.decode({ label, text });
+      expect(r.decoder.name).toBe('label-gate-report');
+      expect(r.raw.arrival_gate).toBe(gate);
+    }
+  });
+});
+
+// Texts from production messages of 2026-11-17 (shortened, names removed).
+const KLM =
+  'P64AMSKWKL170542\r\nCONNECTION INFO.\r\nKL 1750 \r\nALL TIMES LOCAL\r\nGATE  A04  POS  A62 \r\nSCHED 0715 ETA  0715\r\nNXM   KL 1771  17NOV 0805  B30 A62\r\n';
+const KLM_NEXT_FLIGHT_ONLY =
+  'P64AMSKWKL170542\r\nCONNECTION INFO.\r\nKL 1750 \r\nNXM   KL 1771  17NOV 0805  B30 A62\r\nGATE  B30  POS  A62\r\n';
+const KOREAN = 'SPOT NO : 606\r\n';
+const AER_LINGUS =
+  'FLIGHT NUMBER = EI0122\r\n\tDATE = 17 NOV\r\n\tTIME = 0334\r\n\tTAIL = EI-FNH\r\n\tSTAND INFO = 400C\r\n';
+
+describe('Label gate report, round 6 formats', () => {
+  let decoder: MessageDecoder;
+  let plugin: Label_Gate_Report;
+
+  beforeEach(() => {
+    decoder = new MessageDecoder();
+    plugin = new Label_Gate_Report(decoder);
+  });
+
+  test('decodes KLM connection info gate at AMS', () => {
+    const r = plugin.decode({ label: '32', text: KLM });
+    expect(r.decoded).toBe(true);
+    expect(r.raw.flight_number).toBe('KL1750');
+    expect(r.raw.arrival_iata).toBe('AMS');
+    expect(r.raw.arrival_gate).toBe('A04');
+    expect(r.remaining.text).toContain('POS A62');
+    expect(r.remaining.text).toContain('NXM   KL 1771  17NOV 0805  B30 A62');
+  });
+
+  test('does not read the KLM next flight gate', () => {
+    const r = plugin.decode({ label: '32', text: KLM_NEXT_FLIGHT_ONLY });
+    expect(r.decoded).toBe(false);
+  });
+
+  test('decodes the Korean Air spot on label 33', () => {
+    const r = plugin.decode({ label: '33', text: KOREAN });
+    expect(r.raw.arrival_gate).toBe('606');
+  });
+
+  test('decodes the Aer Lingus stand on label 48', () => {
+    const r = plugin.decode({ label: '48', text: AER_LINGUS });
+    expect(r.raw.arrival_gate).toBe('400C');
+  });
+
+  test('is reached through MessageDecoder after the other plugins', () => {
+    for (const [label, text, gate] of [
+      ['32', KLM, 'A04'],
+      ['33', KOREAN, '606'],
+      ['48', AER_LINGUS, '400C'],
+    ]) {
+      const r = decoder.decode({ label, text });
+      expect(r.decoder.name).toBe('label-gate-report');
+      expect(r.raw.arrival_gate).toBe(gate);
+    }
+    const n = decoder.decode({ label: '32', text: KLM_NEXT_FLIGHT_ONLY });
+    expect(n.raw.arrival_gate).toBeUndefined();
   });
 });
