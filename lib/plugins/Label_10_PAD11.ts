@@ -11,24 +11,27 @@ import { ResultFormatter } from '../utils/result_formatter';
 // British Airways flight release, before departure:
 //   ':PAD11\r\n22NOV26 BA356    GEUUZ LHR-LYS\r\nETD 0700Z FLIGHT RELEASE OFP  5'
 // British Airways departure planning at Heathrow, the target (TOBT) or
-// estimated (EOBT) off-block time; flight number without the airline:
+// estimated (EOBT) off-block time. These two carry the numeric flight only
+// ('396', no airline code), so flight_number is stored as sent:
 //   ':PAD11CDM CHANGE\r\n396   LHR - CAI\r\nTOBT 0855\r\nTSAT 0855\r\nTTOT 0915'
 //   ':PAD11\r\nSLOT CHANGE\r\n396  LHR - CAI\r\nFP RLS: 9\r\nCTOT: 0915 //\r\n...EOBT: 0855'
 // Iberia slot message, after departure (ATD is the off-block time the delay
 // is counted from):
 //   '4PAD11/SLOT\n\tIB154 ECOOL\n\tSTD 0335 STA 1310\n\tATD 0357\n\tDLY 0022 93 ...'
 const ARRIVAL_REGEX =
-  /^:PAD11\r?\nUTC\r?\nARRIVAL- (?<tail>[A-Z0-9]{4,6}) +(?<flight>[A-Z0-9]{2}\d{1,4}) *\r?\n(?:STAND (?<stand>\S+) +)?(?<kind>ATA|ETA) (?<ata>\d{4}) \/\/(?<rest>[\s\S]*)$/;
+  /^:PAD11\r?\nUTC\r?\nARRIVAL- (?<tail>[A-Z0-9]{4,6}) +(?<flight>[A-Z0-9]{2}\d{1,4}) *\r?\n(?:STAND (?<stand>\S+) +)?(?<kind>ATA|ETA) (?<time>\d{4}) \/\/(?<rest>[\s\S]*)$/;
 const RELEASE_REGEX =
   /^:PAD11\r?\n(?<date>\d{2}[A-Z]{3}\d{2}) +(?<flight>[A-Z0-9]{2}\d{1,4}) +(?<tail>[A-Z0-9]{4,6}) +(?<dep>[A-Z]{3})-(?<arr>[A-Z]{3})\r?\nETD (?<etd>\d{4})Z FLIGHT RELEASE(?<rest>[\s\S]*)$/;
 const CDM_REGEX =
   /^:PAD11CDM CHANGE\r?\n(?<flight>\d{1,4}) +(?<dep>[A-Z]{3}) - (?<arr>[A-Z]{3})\r?\nTOBT (?<tobt>\d{4})\b(?<rest>[\s\S]*)$/;
 const SLOT_CHANGE_REGEX =
-  /^:PAD11\r?\nSLOT CHANGE\r?\n(?<flight>\d{1,4}) +(?<dep>[A-Z]{3}) - (?<arr>[A-Z]{3})\r?\n[\s\S]*?^EOBT: (?<eobt>\d{4})\b/m;
+  /^:PAD11\r?\nSLOT CHANGE\r?\n(?<flight>\d{1,4}) +(?<dep>[A-Z]{3}) - (?<arr>[A-Z]{3})\r?\n(?<before>[\s\S]*?)^EOBT: (?<eobt>\d{4})\b(?<after>[\s\S]*)$/m;
 const SLOT_REGEX =
   /^4PAD11\/SLOT\r?\n\t?(?<flight>[A-Z0-9]{2}\d{1,4}) (?<tail>[A-Z0-9]{4,6})\r?\n\t?STD (?<std>\d{4}) STA (?<sta>\d{4})\r?\n\t?ATD (?<atd>\d{4})\b(?<rest>[\s\S]*)$/;
 
 const CLOCK_REGEX = /^([01]\d|2[0-3])[0-5]\d$/;
+const RELEASE_DATE_REGEX = /^(?<day>\d{2})(?<month>[A-Z]{3})(?<year>\d{2})$/;
+const MONTHS = 'JANFEBMARAPRMAYJUNJULAUGSEPOCTNOVDEC';
 
 export class Label_10_PAD11 extends DecoderPlugin {
   name = 'label-10-pad11';
@@ -45,7 +48,7 @@ export class Label_10_PAD11 extends DecoderPlugin {
     const tod = (hhmm: string) => DateTimeUtils.convertHHMMSSToTod(hhmm);
 
     const arrival = ARRIVAL_REGEX.exec(message.text)?.groups;
-    if (arrival && CLOCK_REGEX.test(arrival.ata)) {
+    if (arrival && CLOCK_REGEX.test(arrival.time)) {
       decodeResult.formatted.description = 'Arrival Uplink';
       ResultFormatter.tail(decodeResult, arrival.tail);
       ResultFormatter.flightNumber(decodeResult, arrival.flight);
@@ -53,9 +56,9 @@ export class Label_10_PAD11 extends DecoderPlugin {
         ResultFormatter.arrivalGate(decodeResult, arrival.stand);
       }
       if (arrival.kind === 'ATA') {
-        ResultFormatter.in(decodeResult, tod(arrival.ata));
+        ResultFormatter.in(decodeResult, tod(arrival.time));
       } else {
-        ResultFormatter.eta(decodeResult, tod(arrival.ata));
+        ResultFormatter.eta(decodeResult, tod(arrival.time));
       }
       if (arrival.rest.trim()) {
         ResultFormatter.unknown(decodeResult, arrival.rest.trim());
@@ -92,6 +95,17 @@ export class Label_10_PAD11 extends DecoderPlugin {
       ResultFormatter.departureAirport(decodeResult, release.dep, 'IATA');
       ResultFormatter.arrivalAirport(decodeResult, release.arr, 'IATA');
       ResultFormatter.etd(decodeResult, tod(release.etd));
+      const date = RELEASE_DATE_REGEX.exec(release.date)?.groups;
+      const month = date ? MONTHS.indexOf(date.month) : -1;
+      const day = date ? Number(date.day) : NaN;
+      if (date && month >= 0 && month % 3 === 0 && day >= 1 && day <= 31) {
+        ResultFormatter.departureDay(decodeResult, day);
+        ResultFormatter.month(decodeResult, month / 3 + 1);
+        // No year field.
+        ResultFormatter.unknown(decodeResult, date.year);
+      } else {
+        ResultFormatter.unknown(decodeResult, release.date);
+      }
       if (release.rest.trim()) {
         ResultFormatter.unknown(decodeResult, release.rest.trim());
       }
@@ -120,7 +134,15 @@ export class Label_10_PAD11 extends DecoderPlugin {
       ResultFormatter.departureAirport(decodeResult, slotChange.dep, 'IATA');
       ResultFormatter.arrivalAirport(decodeResult, slotChange.arr, 'IATA');
       ResultFormatter.etd(decodeResult, tod(slotChange.eobt));
-      this.setDecodeLevel(decodeResult, true, 'partial');
+      // CTOT (the take-off slot) and the rest stay in remaining.
+      const skipped = [slotChange.before, slotChange.after]
+        .map((part) => part.trim())
+        .filter((part) => part.length > 0)
+        .join('\n');
+      if (skipped) {
+        ResultFormatter.unknown(decodeResult, skipped);
+      }
+      this.setDecodeLevel(decodeResult, true);
       return decodeResult;
     }
 

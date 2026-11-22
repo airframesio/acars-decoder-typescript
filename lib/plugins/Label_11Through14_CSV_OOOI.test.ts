@@ -170,6 +170,9 @@ describe('Labels 11-14 CSV OOOI reports (Cathay Pacific)', () => {
     expect(result.raw.departure_icao).toBe('VHHH');
     expect(result.raw.arrival_icao).toBe('YSSY');
     expect(result.raw.eta_time).toBe(20 * 3600 + 9 * 60);
+    expect(result.raw.departure_day).toBe(21);
+    expect(result.decoder.decodeLevel).toBe('partial');
+    expect(result.remaining.text).toBe('V01,1,  144');
   });
 
   test('decodes label 31 ETA report through the message decoder', () => {
@@ -179,5 +182,9 @@ describe('Labels 11-14 CSV OOOI reports (Cathay Pacific)', () => {
     });
     expect(result.decoded).toBe(true);
     expect(result.decoder.name).toBe('label-11-14-csv-oooi');
+    expect(result.raw.eta_time).toBe(20 * 3600 + 9 * 60);
+    expect(result.raw.departure_day).toBe(21);
+    expect(result.decoder.decodeLevel).toBe('partial');
+    expect(result.remaining.text).toBe('V01,1,  144');
   });
 });

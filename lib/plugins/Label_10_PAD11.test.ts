@@ -85,6 +85,8 @@ describe('Label 10 PAD11', () => {
     for (const text of [
       ':PAD11\r\nPDC/ASAT RECEIVED',
       ':PAD11\r\nSLOT CHANGE\r\n396  LHR - CAI\r\nFP RLS: 9\r\nCTOT: 0915 //',
+      ':PAD11\r\nSLOT CHANGE\r\n396  LHR - CAI\r\nCTOT: 0915 //\r\nEOBT: 2560',
+      ':PAD11\r\nUTC\r\nARRIVAL- GXWBB BA066  \r\nSTAND 305  ETA 2560 //',
       '4PAD11/SLOT\n\tIB154 ECOOL\n\tSTD 0335 STA 1310\n\tATD 2599\n\t',
     ]) {
       expect(plugin.decode({ label: '10', text }).decoded).toBe(false);
@@ -103,6 +105,8 @@ describe('Label 10 PAD11', () => {
     expect(result.raw.arrival_gate).toBe('305');
     expect(result.raw.eta_time).toBe(6 * 3600 + 58 * 60);
     expect(result.raw.in_time).toBeUndefined();
+    expect(result.decoder.decodeLevel).toBe('partial');
+    expect(result.remaining.text).toBe('ON STAND- UNKNOWN //');
   });
 
   test('decodes a British Airways flight release as the ETD', () => {
@@ -117,7 +121,18 @@ describe('Label 10 PAD11', () => {
     expect(result.raw.departure_iata).toBe('LHR');
     expect(result.raw.arrival_iata).toBe('LYS');
     expect(result.raw.etd_time).toBe(7 * 3600);
-    expect(result.remaining.text).toBe('OFP  5');
+    expect(result.raw.departure_day).toBe(22);
+    expect(result.raw.month).toBe(11);
+    expect(result.decoder.decodeLevel).toBe('partial');
+    expect(result.remaining.text).toBe('26,OFP  5');
+
+    // Without the OFP tail the year still keeps it partial.
+    const short = plugin.decode({
+      label: '10',
+      text: ':PAD11\r\n22NOV26 BA356    GEUUZ LHR-LYS\r\nETD 0700Z FLIGHT RELEASE',
+    });
+    expect(short.decoder.decodeLevel).toBe('partial');
+    expect(short.remaining.text).toBe('26');
   });
 
   test('decodes a departure planning uplink (TOBT) as the ETD', () => {
@@ -143,6 +158,46 @@ describe('Label 10 PAD11', () => {
     expect(result.decoder.decodeLevel).toBe('partial');
     expect(result.formatted.description).toBe('Slot Change Uplink');
     expect(result.raw.flight_number).toBe('396');
+    expect(result.raw.departure_iata).toBe('LHR');
+    expect(result.raw.arrival_iata).toBe('CAI');
     expect(result.raw.etd_time).toBe(8 * 3600 + 55 * 60);
+    expect(result.remaining.text).toContain('CTOT: 0915');
+    expect(result.remaining.text).toContain('DELAY: AX/000');
+    expect(result.remaining.text).toContain('TAXITIME: 26');
+  });
+
+  test('decodes the new PAD11 uplinks through the message decoder', () => {
+    const decoder = new MessageDecoder();
+    const cases: [string, string, string, number][] = [
+      [
+        '11',
+        ':PAD11\r\nUTC\r\nARRIVAL- GXWBB BA066  \r\nSTAND 305  ETA 0658 //\r\nON STAND- UNKNOWN //',
+        'eta_time',
+        6 * 3600 + 58 * 60,
+      ],
+      [
+        '10',
+        ':PAD11\r\n22NOV26 BA356    GEUUZ LHR-LYS\r\nETD 0700Z FLIGHT RELEASE OFP  5',
+        'etd_time',
+        7 * 3600,
+      ],
+      [
+        '10',
+        ':PAD11CDM CHANGE\r\n396   LHR - CAI\r\nTOBT 0855\r\nTSAT 0855\r\nTTOT 0915',
+        'etd_time',
+        8 * 3600 + 55 * 60,
+      ],
+      [
+        '10',
+        ':PAD11\r\nSLOT CHANGE\r\n396  LHR - CAI\r\nCTOT: 0915 //\r\nEOBT: 0855\r\nTAXITIME: 26',
+        'etd_time',
+        8 * 3600 + 55 * 60,
+      ],
+    ];
+    for (const [label, text, field, value] of cases) {
+      const result = decoder.decode({ label, text });
+      expect(result.decoder.name).toBe('label-10-pad11');
+      expect((result.raw as Record<string, unknown>)[field]).toBe(value);
+    }
   });
 });

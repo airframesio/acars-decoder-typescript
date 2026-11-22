@@ -85,6 +85,15 @@ describe('Label 4T ATD/ARV', () => {
     expect(result.raw.arrival_iata).toBe('LHR');
     expect(result.raw.eta_time).toBe(8 * 3600 + 31 * 60);
     expect(result.raw.on_time).toBeUndefined();
+    expect(result.raw.departure_day).toBe(21);
+    expect(result.raw.day).toBe(22);
+
+    const decoded = new MessageDecoder().decode({
+      label: '4T',
+      text: 'EAA AC0856/21/22 LHR 0831Z',
+    });
+    expect(decoded.decoder.name).toBe('label-4t-atd-arv');
+    expect(decoded.raw.eta_time).toBe(8 * 3600 + 31 * 60);
   });
 
   test('leaves ETA to the 4T ETA plugin', () => {
