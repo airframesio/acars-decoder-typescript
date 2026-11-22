@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+### Fixes
+
+- `Label_22_POS`: decode the position field as DDMMSS (degrees, minutes,
+  seconds) instead of dividing it by 10000, which placed aircraft about 18 nm
+  off while still reporting a successful partial decode.
+
 ## 1.7.0
 
 - Node.js support and CI:

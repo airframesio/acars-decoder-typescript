@@ -27,13 +27,14 @@ describe('Label 22', () => {
     const decodeResult = plugin.decode(message);
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
-    expect(decodeResult.raw.position.latitude).toBe(37.0824);
-    expect(decodeResult.raw.position.longitude).toBe(-76.001);
+    // 370824 = 37°08'24", 760010 = 76°00'10" (DDMMSS, not a fraction)
+    expect(decodeResult.raw.position.latitude).toBeCloseTo(37.14, 6);
+    expect(decodeResult.raw.position.longitude).toBeCloseTo(-76.002778, 5);
     expect(decodeResult.raw.message_timestamp).toBe(71376);
     expect(decodeResult.raw.altitude).toBe(30418);
     expect(decodeResult.formatted.items.length).toBe(3);
     expect(decodeResult.formatted.items[0].label).toBe('Aircraft Position');
-    expect(decodeResult.formatted.items[0].value).toBe('37.082 N, 76.001 W');
+    expect(decodeResult.formatted.items[0].value).toBe('37.140 N, 76.003 W');
     expect(decodeResult.formatted.items[1].label).toBe('Message Timestamp');
     expect(decodeResult.formatted.items[1].value).toBe('19:49:36');
     expect(decodeResult.formatted.items[2].label).toBe('Altitude');
@@ -41,6 +42,19 @@ describe('Label 22', () => {
     expect(decodeResult.remaining.text).toBe(
       '-------, ,      , ,M 42,27335  42, 107,',
     );
+  });
+
+  test('decodes a real DDMMSS position', () => {
+    // Same message as the label 21 twin POSN 39.694W 75.344 sent by the
+    // aircraft at the same second (2026-10-26 14:07:06Z).
+    message.text =
+      'N 394138W 752038,-------,140706,11549, ,      , ,M  1,31175  14,  79,';
+    const decodeResult = plugin.decode(message);
+    expect(decodeResult.decoded).toBe(true);
+    expect(decodeResult.raw.position.latitude).toBeCloseTo(39.693889, 5);
+    expect(decodeResult.raw.position.longitude).toBeCloseTo(-75.343889, 5);
+    expect(decodeResult.raw.altitude).toBe(11549);
+    expect(decodeResult.formatted.items[0].value).toBe('39.694 N, 75.344 W');
   });
 
   test('does not decode invalid', () => {
