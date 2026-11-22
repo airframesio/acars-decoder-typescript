@@ -91,4 +91,13 @@ describe('Labels 11-14 OOOI reports', () => {
     expect(result.decoded).toBe(false);
     expect(result.decoder.decodeLevel).toBe('none');
   });
+
+  test('does not decode an out-of-range time', () => {
+    const result = plugin.decode({
+      label: '11',
+      text: 'OUT01    ETH309/22220151HKJKHAAB\r\n1260 16510600',
+    });
+
+    expect(result.decoded).toBe(false);
+  });
 });

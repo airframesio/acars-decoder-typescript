@@ -4,11 +4,11 @@ import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
 import { ResultFormatter } from '../utils/result_formatter';
 
 // '-------------------OUT REPORT\r\nDEP RCKU,OUT 1118,FOB 106'
-// or 'M55AZH9110------------INNRPT\n\tDES ZGSZ,...',
-// optionally preceded by a multi-block header such as 'M77ASC4873'
+// or '------------INNRPT\n\tDES ZGSZ,...'. A leading 'M77ASC4873' header
+// is the C-Band flight header, which the CBand plugin strips before this.
 const REPORT_REGEX =
-  /^(?<prefix>M\d{2}A[A-Z0-9]{6})?-*(?<event>OUT|OFF|ONN?|INN?) ?(?:REPORT|RPT)[\s,]+(?<body>[\s\S]*)$/;
-const TIME_REGEX = /^\d{4}(\d{2})?$/;
+  /^-*(?<event>OUT|OFF|ONN?|INN?) ?(?:REPORT|RPT)[\s,]+(?<body>[\s\S]*)$/;
+const TIME_REGEX = /^([01]\d|2[0-3])[0-5]\d([0-5]\d)?$/;
 
 const DESCRIPTIONS: Record<string, string> = {
   OUT: 'OUT Report',
@@ -40,9 +40,6 @@ export class Label_QE_Report extends DecoderPlugin {
 
     decodeResult.formatted.description =
       DESCRIPTIONS[match.groups.event.replace(/NN$/, 'N')];
-    if (match.groups.prefix) {
-      ResultFormatter.unknown(decodeResult, match.groups.prefix);
-    }
 
     for (const field of match.groups.body.split(',')) {
       this.parseField(decodeResult, field.trim());

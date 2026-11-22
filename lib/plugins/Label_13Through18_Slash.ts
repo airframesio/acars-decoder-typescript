@@ -22,7 +22,7 @@ export class Label_13Through18_Slash extends DecoderPlugin {
     decodeResult.decoder.name = this.name;
     decodeResult.message = message;
 
-    const lines = message.text.split('\r\n');
+    const lines = message.text.split(/\r?\n/);
     const parts = lines[0].split('/');
     const labelNumber = Number(parts[1].substring(0, 2));
     decodeResult.formatted.description = getMsgType(labelNumber);
@@ -51,7 +51,9 @@ export class Label_13Through18_Slash extends DecoderPlugin {
     ResultFormatter.departureAirport(decodeResult, data[1]);
     ResultFormatter.arrivalAirport(decodeResult, data[2]);
     decodeResult.raw.day = Number(data[3]);
-    const time = DateTimeUtils.convertHHMMSSToTod(data[4]);
+    // the 3-part FLT TIMES header may end before the clock
+    const time =
+      data[4] === undefined ? NaN : DateTimeUtils.convertHHMMSSToTod(data[4]);
     if (labelNumber === 13) {
       ResultFormatter.out(decodeResult, time);
     } else if (labelNumber === 14) {
@@ -60,6 +62,9 @@ export class Label_13Through18_Slash extends DecoderPlugin {
       ResultFormatter.on(decodeResult, time);
     } else if (labelNumber === 16) {
       ResultFormatter.in(decodeResult, time);
+    } else {
+      // labels 17 and 18 report the event times separately
+      ResultFormatter.timestamp(decodeResult, time);
     }
 
     if (labelNumber === 17 || labelNumber === 18) {

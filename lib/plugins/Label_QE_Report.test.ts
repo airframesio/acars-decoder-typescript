@@ -68,17 +68,28 @@ describe('Label QE/QF/QC/QD text OOOI reports', () => {
     expect(result.raw.in_time).toBe(8 * 3600 + 49 * 60);
   });
 
-  test('decodes report behind a multi-block header', () => {
-    const result = plugin.decode({
+  test('decodes report behind a C-Band header', () => {
+    // CBand strips the flight header (Shandong 4873) before this plugin runs
+    const result = new MessageDecoder().decode({
       label: 'QE',
       text: 'M77ASC4873-------------------OUT REPORT,DEP ZSQD,OUT 2350,FOB 110',
     });
 
     expect(result.decoded).toBe(true);
-    expect(result.decoder.decodeLevel).toBe('partial');
+    expect(result.decoder.name).toBe('c-band-label-qe-report');
+    expect(result.decoder.decodeLevel).toBe('full');
+    expect(result.raw.flight_number).toBe('SC4873');
     expect(result.raw.departure_icao).toBe('ZSQD');
     expect(result.raw.out_time).toBe(23 * 3600 + 50 * 60);
-    expect(result.remaining.text).toBe('M77ASC4873');
+  });
+
+  test('leaves an out-of-range time undecoded', () => {
+    const result = plugin.decode({
+      label: 'QE',
+      text: '-------------------OUT REPORT\r\nDEP RCKU,OUT 1260,FOB 106',
+    });
+
+    expect(result.decoded).toBe(false);
   });
 
   test('does not decode other formats', () => {
@@ -89,7 +100,7 @@ describe('Label QE/QF/QC/QD text OOOI reports', () => {
   });
 
   test('decodes QD INNRPT report', () => {
-    const result = plugin.decode({
+    const result = new MessageDecoder().decode({
       label: 'QD',
       text: 'M55AZH9110------------INNRPT\n\tDES ZGSZ,N 22380E113495,IN 165807,FOB ,DEP ZBAA',
     });
@@ -99,5 +110,6 @@ describe('Label QE/QF/QC/QD text OOOI reports', () => {
     expect(result.raw.departure_icao).toBe('ZBAA');
     expect(result.raw.arrival_icao).toBe('ZGSZ');
     expect(result.raw.in_time).toBe(16 * 3600 + 58 * 60 + 7);
+    expect(result.raw.flight_number).toBe('ZH9110');
   });
 });

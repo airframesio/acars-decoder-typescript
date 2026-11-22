@@ -252,13 +252,14 @@ describe('Label_13Through18_Slash', () => {
       expect(decodeResult.decoder.decodeLevel).toBe('partial');
       expect(decodeResult.raw.day).toBe(12);
       expect(decodeResult.formatted.description).toBe('Post Report');
-      expect(decodeResult.formatted.items.length).toBe(3);
+      expect(decodeResult.formatted.items.length).toBe(4);
       expect(decodeResult.formatted.items[0].label).toBe('Origin');
       expect(decodeResult.formatted.items[0].value).toBe('KIAD');
       expect(decodeResult.formatted.items[1].label).toBe('Destination');
       expect(decodeResult.formatted.items[1].value).toBe('KSFO');
-      expect(decodeResult.formatted.items[2].label).toBe('In Gate Time');
-      expect(decodeResult.formatted.items[2].value).toBe('03:43:00');
+      expect(decodeResult.formatted.items[2].label).toBe('Message Timestamp');
+      expect(decodeResult.formatted.items[3].label).toBe('In Gate Time');
+      expect(decodeResult.formatted.items[3].value).toBe('03:43:00');
       expect(decodeResult.remaining.text).toBe(
         '/FOB 0215/LP U246680/OP        /CAT NR\r\n/AL NN/SUC  /SAV  /BR ACT NO REPORT/RWY 28R /PDOOR 0343 -----/CDOOR 0343/BR SET 0341',
       );
@@ -281,15 +282,16 @@ describe('Label_13Through18_Slash', () => {
       expect(decodeResult.decoder.decodeLevel).toBe('partial');
       expect(decodeResult.raw.day).toBe(12);
       expect(decodeResult.formatted.description).toBe('Post Report');
-      expect(decodeResult.formatted.items.length).toBe(4);
+      expect(decodeResult.formatted.items.length).toBe(5);
       expect(decodeResult.formatted.items[0].label).toBe('Origin');
       expect(decodeResult.formatted.items[0].value).toBe('KLAX');
       expect(decodeResult.formatted.items[1].label).toBe('Destination');
       expect(decodeResult.formatted.items[1].value).toBe('KSEA');
-      expect(decodeResult.formatted.items[2].label).toBe('In Gate Time');
-      expect(decodeResult.formatted.items[2].value).toBe('05:30:00');
-      expect(decodeResult.formatted.items[3].label).toBe('Aircraft Position');
-      expect(decodeResult.formatted.items[3].value).toBe('10.179 S, 153.107 W');
+      expect(decodeResult.formatted.items[2].label).toBe('Message Timestamp');
+      expect(decodeResult.formatted.items[3].label).toBe('In Gate Time');
+      expect(decodeResult.formatted.items[3].value).toBe('05:30:00');
+      expect(decodeResult.formatted.items[4].label).toBe('Aircraft Position');
+      expect(decodeResult.formatted.items[4].value).toBe('10.179 S, 153.107 W');
       expect(decodeResult.remaining.text).toBe(
         '/FOB 0074/LP U423108/MP U332185/CAT NR\r\n/AL N-/SUC -/SAV -/BR ACT NO REPORT/RWY ---\r\n/PDOOR 0533 MCD1 /CDOOR 0530/BR SET 0529',
       );
@@ -310,15 +312,16 @@ describe('Label_13Through18_Slash', () => {
       expect(decodeResult.decoder.decodeLevel).toBe('partial');
       expect(decodeResult.raw.day).toBe(12);
       expect(decodeResult.formatted.description).toBe('Post Times Report');
-      expect(decodeResult.formatted.items.length).toBe(4);
+      expect(decodeResult.formatted.items.length).toBe(5);
       expect(decodeResult.formatted.items[0].label).toBe('Origin');
       expect(decodeResult.formatted.items[0].value).toBe('KLAX');
       expect(decodeResult.formatted.items[1].label).toBe('Destination');
       expect(decodeResult.formatted.items[1].value).toBe('KSEA');
-      expect(decodeResult.formatted.items[2].label).toBe('In Gate Time');
-      expect(decodeResult.formatted.items[2].value).toBe('05:30:00');
-      expect(decodeResult.formatted.items[3].label).toBe('Aircraft Position');
-      expect(decodeResult.formatted.items[3].value).toBe('10.179 S, 153.107 W');
+      expect(decodeResult.formatted.items[2].label).toBe('Message Timestamp');
+      expect(decodeResult.formatted.items[3].label).toBe('In Gate Time');
+      expect(decodeResult.formatted.items[3].value).toBe('05:30:00');
+      expect(decodeResult.formatted.items[4].label).toBe('Aircraft Position');
+      expect(decodeResult.formatted.items[4].value).toBe('10.179 S, 153.107 W');
       expect(decodeResult.remaining.text).toBe(
         'PDOOR 053340/CDOOR 053024/BR SET 052942',
       );
@@ -335,13 +338,14 @@ describe('Label_13Through18_Slash', () => {
       expect(decodeResult.decoder.decodeLevel).toBe('partial');
       expect(decodeResult.raw.day).toBe(12);
       expect(decodeResult.formatted.description).toBe('Post Times Report');
-      expect(decodeResult.formatted.items.length).toBe(3);
+      expect(decodeResult.formatted.items.length).toBe(4);
       expect(decodeResult.formatted.items[0].label).toBe('Origin');
       expect(decodeResult.formatted.items[0].value).toBe('KSFO');
       expect(decodeResult.formatted.items[1].label).toBe('Destination');
       expect(decodeResult.formatted.items[1].value).toBe('CYVR');
-      expect(decodeResult.formatted.items[2].label).toBe('In Gate Time');
-      expect(decodeResult.formatted.items[2].value).toBe('03:53:00');
+      expect(decodeResult.formatted.items[2].label).toBe('Message Timestamp');
+      expect(decodeResult.formatted.items[3].label).toBe('In Gate Time');
+      expect(decodeResult.formatted.items[3].value).toBe('03:53:00');
       expect(decodeResult.remaining.text).toBe(
         'PDOOR 035414/CDOOR 035315/BR SET 035223',
       );
@@ -373,6 +377,28 @@ describe('Label_13Through18_Slash', () => {
       expect(decodeResult.raw.on_time).toBe(9 * 3600 + 38 * 60 + 24);
       expect(decodeResult.raw.in_time).toBe(9 * 3600 + 46 * 60 + 35);
       expect(decodeResult.raw.position?.latitude).toBe(38.9452);
+      expect(decodeResult.raw.message_timestamp).toBe(9 * 3600 + 47 * 60 + 35);
+    });
+
+    test('decodes flight times separated by newlines only', () => {
+      const decodeResult = plugin.decode({
+        label: '18',
+        text: '/18 FLT TIMES SECS / DGAA KIAD 20 094735\n/M13 OUT TIME 221610\n/M14 OFF TIME 223552\n/M15 ON TIME 093824\n/M16 IN TIME 094635',
+      });
+
+      expect(decodeResult.decoded).toBe(true);
+      expect(decodeResult.raw.out_time).toBe(22 * 3600 + 16 * 60 + 10);
+      expect(decodeResult.raw.in_time).toBe(9 * 3600 + 46 * 60 + 35);
+    });
+
+    test('does not throw on a flight times header without a clock', () => {
+      const decodeResult = plugin.decode({
+        label: '18',
+        text: '/18 FLT TIMES SECS / DGAA KIAD 20',
+      });
+
+      expect(decodeResult.raw.message_timestamp).toBeUndefined();
+      expect(decodeResult.raw.departure_icao).toBe('DGAA');
     });
   });
 

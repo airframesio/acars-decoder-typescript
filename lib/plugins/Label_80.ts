@@ -8,6 +8,12 @@ const POS_REGEX = /^(?<latd>[NS])(?<lat>.+)(?<lngd>[EW])(?<lng>.+)/;
 const WS_REGEX = /\s+/;
 const NEWLINE_REGEX = /\r?\n/;
 const OOOI_REPORT_REGEX = /\b(OUTRP|OFFRP|ONRP|INRP|SUMMRY)\b/;
+const CLOCK_REGEX = /^([01]\d|2[0-3])[0-5]\d([0-5]\d)?$/;
+// JetBlue prefixes the header with '/FB 0123/AD KDTW/<position>,' where the
+// position is 'N4222.1,W07101.1' (degrees and decimal minutes) or
+// 'N 42.371,W 71.006' (decimal degrees)
+const PREFIX_POSITION_REGEX =
+  /^(?<tags>.*\/)(?<latd>[NS]) ?(?<lat>\d+\.\d+),(?<lngd>[EW]) ?(?<lng>\d+\.\d+),(?<header>.*)$/;
 
 // The same airline-defined layout carries the OOOI reports on other labels
 // (e.g. 30 OUT, 31 OFF, 32 ON, 33 IN, 82 OUT, 8D IN), mixed with unrelated
@@ -47,10 +53,25 @@ export class Label_80 extends DecoderPlugin {
       return decodeResult;
     }
 
-    if (lines.length === 1 && lines[0].includes(',')) {
+    if (!reportType && lines.length === 1 && lines[0].includes(',')) {
       this.parseCsvFormat(lines[0], decodeResult);
     } else {
-      const header = lines[0].trim();
+      let header = lines[0].trim();
+      const prefix = reportType
+        ? PREFIX_POSITION_REGEX.exec(header)?.groups
+        : undefined;
+      if (prefix) {
+        for (const tag of prefix.tags.split('/')) {
+          if (tag.trim()) this.parseTags(tag.trim(), decodeResult);
+        }
+        ResultFormatter.position(decodeResult, {
+          latitude:
+            (prefix.latd === 'S' ? -1 : 1) * this.prefixCoordinate(prefix.lat),
+          longitude:
+            (prefix.lngd === 'W' ? -1 : 1) * this.prefixCoordinate(prefix.lng),
+        });
+        header = prefix.header.trim();
+      }
       const headerParts = header.split(',');
       for (let i = 0; i < headerParts.length - 1; i++) {
         const moreFields = headerParts[i].split('/');
@@ -149,7 +170,7 @@ export class Label_80 extends DecoderPlugin {
       case 'OFF':
       case 'ON':
       case 'IN': {
-        if (!/^\d{4}(\d{2})?$/.test(val)) {
+        if (!CLOCK_REGEX.test(val)) {
           ResultFormatter.unknown(results, part, '/');
           break;
         }
@@ -185,6 +206,12 @@ export class Label_80 extends DecoderPlugin {
         // Strip non-numeric like 'N' in 'N009414'; '----' means not reported
         const fuel = parseInt(val.replace(/\D/g, ''), 10);
         if (!isNaN(fuel)) {
+          // a SUMMRY carries one figure per event; keep the last one only
+          if (results.raw.fuel_on_board !== undefined) {
+            results.formatted.items = results.formatted.items.filter(
+              (item) => item.code !== 'FOB',
+            );
+          }
           ResultFormatter.currentFuel(results, fuel);
         }
         break;
@@ -221,6 +248,18 @@ export class Label_80 extends DecoderPlugin {
         ResultFormatter.unknown(results, part, '/');
     }
   }
+  // 'DDMM.m' / 'DDDMM.m' when the whole part has 4 or more digits,
+  // decimal degrees otherwise
+  private prefixCoordinate(value: string): number {
+    const whole = value.split('.')[0];
+    const n = Number(value);
+    if (whole.length < 4) {
+      return n;
+    }
+    const degrees = Math.floor(n / 100);
+    return Number((degrees + (n - degrees * 100) / 60).toFixed(4));
+  }
+
   private parseCsvFormat(text: string, results: DecodeResult) {
     const csvParts = text.split(',');
     if (csvParts.length !== 9) {

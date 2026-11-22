@@ -217,6 +217,10 @@ describe('Label 80', () => {
       expect(decodeResult.raw.on_time).toBe(70200);
       expect(decodeResult.raw.in_time).toBe(70620);
       expect(decodeResult.raw.fuel_on_board).toBe(224);
+      const fuelItems = decodeResult.formatted.items.filter(
+        (item) => item.code === 'FOB',
+      );
+      expect(fuelItems.map((item) => item.value)).toEqual(['224']);
     });
 
     test('decodes label 30 OUTRP with briefing prefix', () => {
@@ -232,6 +236,32 @@ describe('Label 80', () => {
       expect(decodeResult.raw.departure_icao).toBe('KBOS');
       expect(decodeResult.raw.arrival_icao).toBe('KDTW');
       expect(decodeResult.raw.out_time).toBe(12300);
+      // degrees and decimal minutes: 42°22.1' N, 71°01.1' W
+      expect(decodeResult.raw.position?.latitude).toBe(42.3683);
+      expect(decodeResult.raw.position?.longitude).toBe(-71.0183);
+      expect(decodeResult.remaining.text).not.toContain('N4222');
+    });
+
+    test('decodes label 30 OUTRP through MessageDecoder', () => {
+      const decodeResult = new MessageDecoder().decode({
+        label: '30',
+        text: '/FB 0123/AD KDTW/N4222.1,W07101.1,1001 OUTRP  1837/22 KBOS/KDTW .N3115J\r\n/OUT 0325/FOB 0123',
+      });
+
+      expect(decodeResult.decoder.name).toBe('label-80');
+      expect(decodeResult.raw.out_time).toBe(12300);
+    });
+
+    test('decodes single-line label 30 OUTRP with briefing prefix', () => {
+      const decodeResult = plugin.decode({
+        label: '30',
+        text: '/FB 0123/AD KDTW/N4222.1,W07101.1,1001 OUTRP 1837/22 KBOS/KDTW .N3115J/OUT 0325/FOB 0123',
+      });
+
+      expect(decodeResult.decoded).toBe(true);
+      expect(decodeResult.raw.departure_icao).toBe('KBOS');
+      expect(decodeResult.raw.out_time).toBe(12300);
+      expect(decodeResult.raw.position?.latitude).toBe(42.3683);
     });
 
     test('decodes label 32 ONRP with seconds', () => {
@@ -244,6 +274,9 @@ describe('Label 80', () => {
       expect(decodeResult.decoded).toBe(true);
       expect(decodeResult.formatted.description).toBe('Landing Report');
       expect(decodeResult.raw.on_time).toBe(11964);
+      // decimal degrees
+      expect(decodeResult.raw.position?.latitude).toBe(42.331);
+      expect(decodeResult.raw.position?.longitude).toBe(-71.042);
     });
 
     test('decodes label 33 INRP', () => {
@@ -290,6 +323,17 @@ describe('Label 80', () => {
       expect(decodeResult.decoded).toBe(true);
       expect(decodeResult.raw.out_time).toBe(81660);
       expect(decodeResult.raw.off_time).toBeUndefined();
+    });
+
+    test('ignores an out-of-range OOOI time', () => {
+      const decodeResult = plugin.decode({
+        label: '80',
+        text: '1101 OFFRP  0549/21 YPPH/WADD .PK-AZF\r\n/OUT 2241/OFF 1260',
+      });
+
+      expect(decodeResult.raw.out_time).toBe(81660);
+      expect(decodeResult.raw.off_time).toBeUndefined();
+      expect(decodeResult.remaining.text).toContain('OFF 1260');
     });
   });
 });
