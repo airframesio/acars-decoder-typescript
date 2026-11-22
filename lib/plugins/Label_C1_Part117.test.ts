@@ -54,4 +54,27 @@ describe('Label_C1_Part117', () => {
     expect(decodeResult.decoded).toBe(false);
     expect(decodeResult.formatted.items).toEqual([]);
   });
+
+  test('keeps the flight named in the header', () => {
+    const decodeResult = plugin.decode({
+      label: 'C1',
+      text: '.NDCULUA 220440\r\nAGM\r\nAN N496UA/FI UA2464\r\n-  FLT# 2464-21    KSFO     04:40\r\nPART 117        RLS 1   ACT DEP 0439\r\n',
+    });
+
+    expect(decodeResult.raw.flight_number).toBe('UA2464');
+    expect(
+      decodeResult.formatted.items.filter((i) => i.code === 'FLIGHT').length,
+    ).toBe(1);
+    expect(decodeResult.remaining.text).toContain('2464');
+  });
+
+  test('is the plugin MessageDecoder picks for label C1', () => {
+    const result = new MessageDecoder().decode({
+      label: 'C1',
+      text: '.NDCULUA 220440\r\nAGM\r\nAN N496UA\r\n-  FLT# 2464-21    KSFO     04:40\r\nPART 117        RLS 1   ACT DEP 0439\r\n',
+    });
+
+    expect(result.decoded).toBe(true);
+    expect(result.decoder.name).toBe('label-c1-part117');
+  });
 });

@@ -45,6 +45,18 @@ const ETA_NO_SPACE_REGEX = /^ETA(\d{4})$/;
 const ORGDATE_HEADER_REGEX =
   /^(\S+ [A-Z]+)\/([A-Z0-9]+)\/(ORGDATE\d{4})\/(.*)$/;
 const ICAO_REGEX = /^[A-Z][A-Z0-9]{3}$/;
+// degrees 0-90 / 0-180, minutes and seconds 0-59
+function validDms(m: RegExpExecArray): boolean {
+  const n = m.slice(2).map(Number);
+  return (
+    n[0] <= 90 &&
+    n[1] < 60 &&
+    n[2] < 60 &&
+    n[4] <= 180 &&
+    n[5] < 60 &&
+    n[6] < 60
+  );
+}
 const DMS_POS_REGEX =
   /^([NS])(\d{2})(\d{2})(\d{2})([EW])(\d{3})(\d{2})(\d{2})$/;
 
@@ -180,10 +192,14 @@ export class Label_80 extends DecoderPlugin {
   private parseTags(part: string, results: DecodeResult) {
     const etaNoSpace = ETA_NO_SPACE_REGEX.exec(part);
     if (etaNoSpace) {
-      ResultFormatter.eta(
-        results,
-        DateTimeUtils.convertHHMMSSToTod(etaNoSpace[1]),
-      );
+      if (CLOCK_REGEX.test(etaNoSpace[1])) {
+        ResultFormatter.eta(
+          results,
+          DateTimeUtils.convertHHMMSSToTod(etaNoSpace[1]),
+        );
+      } else {
+        ResultFormatter.unknown(results, part, '/');
+      }
       return;
     }
     const kvPair = part.split(WS_REGEX);
@@ -198,6 +214,10 @@ export class Label_80 extends DecoderPlugin {
       case 'POS': {
         // Emirates sends degrees, minutes and seconds: 'N224617E0553655'
         const dms = DMS_POS_REGEX.exec(val);
+        if (dms && !validDms(dms)) {
+          ResultFormatter.unknown(results, part, '/');
+          break;
+        }
         if (dms) {
           const deg = (d: string, m: string, sec: string) =>
             Number(
@@ -217,6 +237,11 @@ export class Label_80 extends DecoderPlugin {
         const lon =
           Number(posResult?.groups?.lng) *
           (posResult?.groups?.lngd === 'W' ? -1 : 1);
+        if (!posResult || isNaN(lat) || isNaN(lon)) {
+          // Pegasus 'POS -----': not reported
+          ResultFormatter.unknown(results, part, '/');
+          break;
+        }
         const position = {
           latitude: Number.isInteger(lat) ? lat / 1000 : lat / 100,
           longitude: Number.isInteger(lon) ? lon / 1000 : lon / 100,
@@ -254,9 +279,17 @@ export class Label_80 extends DecoderPlugin {
         }
         ResultFormatter.etd(results, DateTimeUtils.convertHHMMSSToTod(val));
         break;
-      case 'ALT':
-        ResultFormatter.altitude(results, parseInt(val.replace('+', ''), 10));
+      case 'ALT': {
+        // feet ('ALT +35001', 'ALT 01386'), or a flight level when under
+        // 1000 like FL below (Emirates 'ALT 319' next to 'TAS 506')
+        if (!/^[+-]?\d+$/.test(val)) {
+          ResultFormatter.unknown(results, part, '/');
+          break;
+        }
+        const alt = parseInt(val.replace('+', ''), 10);
+        ResultFormatter.altitude(results, alt >= 1000 ? alt : alt * 100);
         break;
+      }
       case 'FL': {
         // "FL 360", or feet: Avianca "FL 40001"
         const fl = parseInt(val, 10);
@@ -264,7 +297,16 @@ export class Label_80 extends DecoderPlugin {
         break;
       }
       case 'MCH':
-        ResultFormatter.mach(results, parseInt(val, 10) / 1000);
+        if (/^\.\d{2,3}$/.test(val)) {
+          // Avianca 'MCH    .86'
+          ResultFormatter.mach(results, Number(val));
+        } else if (/^\d{3}$/.test(val) && Number(val) >= 100) {
+          // 'MCH 782' is Mach 0.782
+          ResultFormatter.mach(results, Number(val) / 1000);
+        } else {
+          // Emirates 'MCH 001' is not a Mach number
+          ResultFormatter.unknown(results, part, '/');
+        }
         break;
       case 'SPD':
         ResultFormatter.groundspeed(results, parseInt(val, 10));
@@ -301,11 +343,20 @@ export class Label_80 extends DecoderPlugin {
         break;
       case 'ETA': {
         const hhmm = val.split('.')[0].replace(':', '');
+        if (!CLOCK_REGEX.test(hhmm)) {
+          ResultFormatter.unknown(results, part, '/');
+          break;
+        }
         ResultFormatter.eta(results, DateTimeUtils.convertHHMMSSToTod(hhmm));
         break;
       }
       case 'HDG':
-        ResultFormatter.heading(results, parseInt(val, 10));
+        if (!/^\d+(\.\d+)?$/.test(val)) {
+          ResultFormatter.unknown(results, part, '/');
+          break;
+        }
+        // Avianca 'HDG  76.81'
+        ResultFormatter.heading(results, Number(val));
         break;
       case 'NWYP':
         results.raw.next_waypoint = val;

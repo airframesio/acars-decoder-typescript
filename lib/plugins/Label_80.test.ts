@@ -353,6 +353,12 @@ describe('Label 80', () => {
         longitude: 55.6153,
       });
       expect(decodeResult.raw.eta_time).toBe(35940);
+      // flight level 319 next to TAS 506
+      expect(decodeResult.raw.altitude).toBe(31900);
+      expect(decodeResult.raw.fuel_on_board).toBe(406);
+      // 'MCH 001' is not a Mach number
+      expect(decodeResult.raw.mach).toBeUndefined();
+      expect(decodeResult.remaining.text).toContain('MCH 001');
     });
 
     test('decodes a POSRPT with ORGDATE and ETA without a space', () => {
@@ -368,6 +374,20 @@ describe('Label 80', () => {
       expect(decodeResult.raw.tail).toBe('TC-CPD');
       expect(decodeResult.raw.eta_time).toBe(21060);
       expect(decodeResult.remaining.text).toContain('ORGDATE0437');
+      expect(decodeResult.remaining.text).toContain('POS -----');
+    });
+
+    test('keeps impossible ETAs and positions in remaining', () => {
+      const decodeResult = plugin.decode({
+        label: '80',
+        text: '3N01 POSRPT 1943/22 RCNN/VVNB .VN-A655\r\n/POS N226099E0550000/ETA2560/ETA 1260',
+      });
+
+      expect(decodeResult.raw.eta_time).toBeUndefined();
+      expect(decodeResult.raw.position).toBeUndefined();
+      expect(decodeResult.remaining.text).toContain('POS N226099E0550000');
+      expect(decodeResult.remaining.text).toContain('ETA2560');
+      expect(decodeResult.remaining.text).toContain('ETA 1260');
     });
 
     test('decodes an Avianca label 83 POSRPT without the day', () => {
@@ -381,6 +401,8 @@ describe('Label 80', () => {
       expect(decodeResult.raw.arrival_icao).toBe('LFPG');
       expect(decodeResult.raw.altitude).toBe(40001);
       expect(decodeResult.raw.outside_air_temperature).toBe(-52);
+      expect(decodeResult.raw.mach).toBe(0.86);
+      expect(decodeResult.raw.heading).toBe(76.81);
       expect(decodeResult.raw.eta_time).toBe(18600);
     });
 
@@ -430,5 +452,15 @@ describe('Label 80', () => {
         expect(decodeResult.decoded).toBe(false);
       }
     });
+  });
+
+  test('is the plugin MessageDecoder picks for label 33', () => {
+    const result = new MessageDecoder().decode({
+      label: '33',
+      text: 'ETA RPT\r\nETA 0912',
+    });
+
+    expect(result.decoded).toBe(true);
+    expect(result.decoder.name).toBe('label-80');
   });
 });

@@ -41,7 +41,12 @@ export class Label_C1_Part117 extends DecoderPlugin {
       return decodeResult;
     }
 
-    ResultFormatter.flightNumber(decodeResult, flt[1]);
+    if (decodeResult.raw.flight_number === undefined) {
+      ResultFormatter.flightNumber(decodeResult, flt[1]);
+    } else {
+      // the header already named the flight ('FI UA2464')
+      ResultFormatter.unknown(decodeResult, flt[1], ' ');
+    }
     ResultFormatter.departureDay(decodeResult, Number(flt[2]));
     ResultFormatter.departureAirport(decodeResult, flt[3]);
     ResultFormatter.unknown(decodeResult, flt[4], ' ');

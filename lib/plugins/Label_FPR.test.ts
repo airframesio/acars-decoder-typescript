@@ -61,4 +61,14 @@ describe('Label_FPR', () => {
       expect(decodeResult.formatted.items).toEqual([]);
     }
   });
+
+  test('is the plugin MessageDecoder picks for label 40', () => {
+    const result = new MessageDecoder().decode({
+      label: '40',
+      text: 'FPR\r\n. FLT 1407 PHX-DFW SKD ARR 2355L\r\n  OUT  0421             0219  TOT / CTR\r\n',
+    });
+
+    expect(result.decoded).toBe(true);
+    expect(result.decoder.name).toBe('label-fpr');
+  });
 });

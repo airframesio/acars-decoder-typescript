@@ -57,6 +57,7 @@ describe('Label 1M Slash', () => {
     expect(decodeResult.formatted.items[4].label).toBe(
       'Estimated Time of Arrival',
     );
+    // 230822 is 23 Aug 2022 (DDMMYY); the old YYMMDD rearrangement was wrong
     expect(decodeResult.formatted.items[4].value).toBe('2022-08-23T19:40:00Z');
   });
   test('reads the date as DDMMYY', () => {
@@ -67,5 +68,13 @@ describe('Label 1M Slash', () => {
 
     expect(decodeResult.raw.arrival_icao).toBe('EFRO');
     expect(decodeResult.formatted.items[4].value).toBe('2026-11-22T06:26:00Z');
+  });
+
+  test('does not decode a short body', () => {
+    message.text = '/AY0531/ETA01/221126/EFHK';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoded).toBe(false);
+    expect(decodeResult.decoder.decodeLevel).toBe('none');
   });
 });

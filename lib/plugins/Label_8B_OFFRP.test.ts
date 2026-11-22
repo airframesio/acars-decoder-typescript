@@ -43,4 +43,26 @@ describe('Label_8B_OFFRP', () => {
       expect(decodeResult.decoder.decodeLevel).toBe('none');
     }
   });
+
+  test('keeps a bad ETA in remaining', () => {
+    const decodeResult = plugin.decode({
+      label: '8B',
+      text: 'V09CA032/OFFRP/ESSA/EKCH/22/0505/ETA2560/',
+    });
+
+    expect(decodeResult.decoded).toBe(true);
+    expect(decodeResult.raw.off_time).toBe(18300);
+    expect(decodeResult.raw.eta_time).toBeUndefined();
+    expect(decodeResult.remaining.text).toBe('V09CA032/ETA2560');
+  });
+
+  test('reads an ETA at the end of the text', () => {
+    const decodeResult = plugin.decode({
+      label: '8B',
+      text: 'V09CA032/OFFRP/ESSA/EKCH/22/0505/ETA0602',
+    });
+
+    expect(decodeResult.raw.eta_time).toBe(21720);
+    expect(decodeResult.remaining.text).toBe('V09CA032');
+  });
 });

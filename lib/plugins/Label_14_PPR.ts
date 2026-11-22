@@ -33,13 +33,14 @@ export class Label_14_PPR extends DecoderPlugin {
 
     let lat: number | undefined;
     let lon: number | undefined;
+    const coordFields: string[] = [];
     for (const field of lines.slice(1).join(',').split(',')) {
       const [tag, ...rest] = field.trim().split(' ');
       const val = rest.join(' ');
       const coord = COORD_REGEX.exec(val);
       switch (tag) {
         case 'DMY':
-          if (/^\d{6}$/.test(val)) {
+          if (/^(0[1-9]|[12]\d|3[01])(0[1-9]|1[0-2])\d{2}$/.test(val)) {
             ResultFormatter.day(decodeResult, Number(val.substring(0, 2)));
             ResultFormatter.month(decodeResult, Number(val.substring(2, 4)));
             ResultFormatter.unknown(decodeResult, val.substring(4), ',');
@@ -54,22 +55,32 @@ export class Label_14_PPR extends DecoderPlugin {
           } else ResultFormatter.unknown(decodeResult, field, ',');
           break;
         case 'LAT':
-          if (coord) lat = (coord[1] === 'S' ? -1 : 1) * Number(coord[2]);
-          else ResultFormatter.unknown(decodeResult, field, ',');
+          if (coord) {
+            lat = (coord[1] === 'S' ? -1 : 1) * Number(coord[2]);
+            coordFields.push(field.trim());
+          } else ResultFormatter.unknown(decodeResult, field, ',');
           break;
         case 'LON':
-          if (coord) lon = (coord[1] === 'W' ? -1 : 1) * Number(coord[2]);
-          else ResultFormatter.unknown(decodeResult, field, ',');
+          if (coord) {
+            lon = (coord[1] === 'W' ? -1 : 1) * Number(coord[2]);
+            coordFields.push(field.trim());
+          } else ResultFormatter.unknown(decodeResult, field, ',');
           break;
         case 'CAS':
-          ResultFormatter.indicatedAirspeed(decodeResult, Number(val));
+          if (/^\d+$/.test(val)) {
+            ResultFormatter.indicatedAirspeed(decodeResult, Number(val));
+          } else ResultFormatter.unknown(decodeResult, field, ',');
           break;
         case 'ALT':
-          // flight level
-          ResultFormatter.altitude(decodeResult, Number(val) * 100);
+          // flight level ('ALT 350'), like the label 80 FL cutoff
+          if (/^\d{1,3}$/.test(val)) {
+            ResultFormatter.altitude(decodeResult, Number(val) * 100);
+          } else ResultFormatter.unknown(decodeResult, field, ',');
           break;
         case 'FOB':
-          ResultFormatter.currentFuel(decodeResult, Number(val));
+          if (/^\d+$/.test(val)) {
+            ResultFormatter.currentFuel(decodeResult, Number(val));
+          } else ResultFormatter.unknown(decodeResult, field, ',');
           break;
         case 'ETA':
           if (CLOCK_REGEX.test(val)) {
@@ -87,6 +98,10 @@ export class Label_14_PPR extends DecoderPlugin {
     }
     if (lat !== undefined && lon !== undefined) {
       ResultFormatter.position(decodeResult, { latitude: lat, longitude: lon });
+    } else {
+      // only one coordinate was readable
+      for (const f of coordFields)
+        ResultFormatter.unknown(decodeResult, f, ',');
     }
     this.setDecodeLevel(decodeResult, true);
     return decodeResult;

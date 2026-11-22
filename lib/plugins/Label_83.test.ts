@@ -124,4 +124,14 @@ describe('Label 83', () => {
     expect(decodeResult.raw.eta_time).toBe(21000);
     expect(decodeResult.remaining.text).toBe('V09CA033/ETA-30');
   });
+
+  test('is the plugin MessageDecoder picks for label 83', () => {
+    const result = new MessageDecoder().decode({
+      label: '83',
+      text: 'V09CA033/ETA-30/0550/',
+    });
+
+    expect(result.decoded).toBe(true);
+    expect(result.decoder.name).toBe('label-83');
+  });
 });

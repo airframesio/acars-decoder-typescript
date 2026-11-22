@@ -34,26 +34,35 @@ export class Label_3A_ETA extends DecoderPlugin {
     ResultFormatter.eta(decodeResult, DateTimeUtils.convertHHMMSSToTod(eta));
     let lat: number | undefined;
     let lon: number | undefined;
+    const coordFields: string[] = [];
     for (const field of fields.slice(1)) {
       const tag = field.substring(0, field.indexOf(' '));
       const val = field.substring(field.indexOf(' ') + 1).trim();
       const coord = COORD_REGEX.exec(val);
       if (tag === 'LAT' && coord) {
         lat = (coord[1] === 'S' ? -1 : 1) * Number(coord[2]);
+        coordFields.push(field);
       } else if (tag === 'LON' && coord) {
         lon = (coord[1] === 'W' ? -1 : 1) * Number(coord[2]);
+        coordFields.push(field);
       } else if (tag === 'ALT' && /^\d+$/.test(val)) {
         ResultFormatter.altitude(decodeResult, Number(val));
       } else if (tag === 'FB' && /^\d+$/.test(val)) {
+        // fuel on board in hundreds of kg: 70, 62, 56, 49 on successive
+        // reports half an hour apart
         ResultFormatter.currentFuel(decodeResult, Number(val));
-      } else if (tag === 'LAT' || tag === 'LON' || tag === 'FB') {
-        // '----.---' or blank: not reported
       } else {
+        // includes 'LAT ----.---' and a blank 'FB ': not reported
         ResultFormatter.unknown(decodeResult, field, '/');
       }
     }
     if (lat !== undefined && lon !== undefined) {
       ResultFormatter.position(decodeResult, { latitude: lat, longitude: lon });
+    } else {
+      // only one coordinate was readable
+      for (const field of coordFields) {
+        ResultFormatter.unknown(decodeResult, field, '/');
+      }
     }
     this.setDecodeLevel(decodeResult, true);
     return decodeResult;

@@ -45,6 +45,8 @@ describe('Label_3A_ETA', () => {
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.raw.eta_time).toBe(32520);
     expect(decodeResult.raw.position).toBeUndefined();
+    expect(decodeResult.decoder.decodeLevel).toBe('partial');
+    expect(decodeResult.remaining.text).toBe('LAT ----.---/LON ----.---/FB ');
   });
 
   test('does not decode other messages', () => {
@@ -53,5 +55,15 @@ describe('Label_3A_ETA', () => {
       text: '/ETA 2599/LAT N 49.194',
     });
     expect(decodeResult.decoded).toBe(false);
+  });
+
+  test('keeps a lone coordinate in remaining', () => {
+    const decodeResult = plugin.decode({
+      label: '3A',
+      text: '/ETA 0905/LAT N 49.194/LON ----.---/ALT 29999/FB 70',
+    });
+
+    expect(decodeResult.raw.position).toBeUndefined();
+    expect(decodeResult.remaining.text).toBe('LON ----.---/LAT N 49.194');
   });
 });
