@@ -82,7 +82,11 @@ export class Label_10Through15_Delta_OOOI extends DecoderPlugin {
       return decodeResult;
     }
 
-    decodeResult.formatted.description = DESCRIPTIONS[message.label];
+    // A label 10 sent before takeoff has only the OUT time.
+    decodeResult.formatted.description =
+      message.label === '10' && !CLOCK_REGEX.test(primary ?? '')
+        ? 'Out of Gate Report'
+        : DESCRIPTIONS[message.label];
     const blank = (v: string) => v.trim() === '' || v === '----';
     if (!blank(header.groups.day)) {
       ResultFormatter.day(decodeResult, Number(header.groups.day));
@@ -93,7 +97,8 @@ export class Label_10Through15_Delta_OOOI extends DecoderPlugin {
     if (!blank(header.groups.destination)) {
       ResultFormatter.arrivalAirport(decodeResult, header.groups.destination);
     }
-    if (!blank(body.flight)) {
+    // '0000' is an unfilled flight number, like four spaces.
+    if (!blank(body.flight) && !/^0+$/.test(body.flight)) {
       ResultFormatter.flightNumber(decodeResult, String(Number(body.flight)));
     }
 

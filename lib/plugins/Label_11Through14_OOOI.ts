@@ -114,6 +114,14 @@ export class Label_11Through14_OOOI extends DecoderPlugin {
       return decodeResult;
     }
 
+    // British Airways always sends the OUT destination and Iberia the fuel;
+    // an OUT with neither was cut off.
+    if (event === 'OUT' && !groups.destination && !groups.fob) {
+      this.debug(options, `Unknown OOOI report: ${text}`);
+      this.setDecodeLevel(decodeResult, false);
+      return decodeResult;
+    }
+
     decodeResult.formatted.description = DESCRIPTIONS[event];
     if (groups.origin) {
       ResultFormatter.departureAirport(decodeResult, groups.origin);

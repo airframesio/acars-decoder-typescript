@@ -83,6 +83,13 @@ describe('Labels 11-14 CSV OOOI reports (Cathay Pacific)', () => {
     expect(v01.raw.flight_number).toBe('CX3142');
     expect(v01.raw.departure_day).toBe(21);
     expect(v01.raw.off_time).toBe(10 * 3600 + 29 * 60);
+
+    const decoded = new MessageDecoder().decode({
+      label: '12',
+      text: 'OFF,V02,CX 837 20261121 1,CYVR,VHHH,2044,2104,1004, 1175',
+    });
+    expect(decoded.decoder.name).toBe('label-11-14-csv-oooi');
+    expect(decoded.raw.off_time).toBe(21 * 3600 + 4 * 60);
   });
 
   test('decodes the CAR end of flight summary', () => {
@@ -101,6 +108,22 @@ describe('Labels 11-14 CSV OOOI reports (Cathay Pacific)', () => {
     expect(result.raw.off_time).toBe(17 * 3600 + 21 * 60);
     expect(result.raw.on_time).toBe(1 * 3600 + 51 * 60);
     expect(result.raw.in_time).toBe(1 * 3600 + 57 * 60);
+    expect(result.remaining.text).toBe(
+      'V03,1,01,Y,1655,0829,---,--------,--------,',
+    );
+  });
+
+  test('keeps CAR fields it cannot read', () => {
+    const result = plugin.decode({
+      label: '16',
+      text: 'CAR,V03,CX 181 20261122 1,CX0180,21NOV26,VHHH,YSSY,01,Y\r\n1655,2560,0151,----,1655, ',
+    });
+    expect(result.decoded).toBe(true);
+    expect(result.decoder.decodeLevel).toBe('partial');
+    expect(result.raw.out_time).toBe(16 * 3600 + 55 * 60);
+    expect(result.raw.off_time).toBeUndefined();
+    expect(result.raw.in_time).toBeUndefined();
+    expect(result.remaining.text).toBe('V03,1,21NOV26,CX0180,01,Y,2560,1655,');
   });
 
   test('does not decode an INC report', () => {

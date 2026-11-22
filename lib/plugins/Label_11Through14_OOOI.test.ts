@@ -215,6 +215,11 @@ describe('Labels 11-14 OOOI reports', () => {
     expect(inn.raw.fuel_on_board).toBe(6920);
   });
 
+  test('does not decode a compact OUT cut off after the origin', () => {
+    const result = plugin.decode({ label: '11', text: 'OUT0105400525LSZH' });
+    expect(result.decoded).toBe(false);
+  });
+
   test('does not decode an out-of-range time', () => {
     const result = plugin.decode({
       label: '11',
