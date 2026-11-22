@@ -7,6 +7,7 @@ import { Route } from '../types/route';
 import { RunwayLandingData } from '../types/runway_landing_data';
 import { TrackPoint } from '../types/track_point';
 import { Wind } from '../types/wind';
+import { Loadsheet } from './loadsheet';
 
 /**
  * Class to format the results of common fields
@@ -924,6 +925,85 @@ export class ResultFormatter {
       label: 'Sequence Response',
       value: decodeResult.raw.sequence_response.toString(),
     });
+  }
+
+  /**
+   * A parsed loadsheet: stored whole in `raw.loadsheet`, with one item per
+   * field that was sent.
+   */
+  static loadsheet(decodeResult: DecodeResult, ls: Loadsheet) {
+    decodeResult.raw.loadsheet = ls;
+    const unit = ls.weight_unit ? ` ${ls.weight_unit}` : '';
+    const weight = (v?: number, max?: number, limiting?: boolean) =>
+      v === undefined
+        ? undefined
+        : `${v}${unit}${max !== undefined ? ` (max ${max}${unit})` : ''}${limiting ? ', limiting' : ''}`;
+    const items: [string, string, string | undefined][] = [
+      ['LSSTAT', 'Loadsheet Status', ls.status?.toUpperCase()],
+      ['EDNO', 'Edition', ls.edition?.toString()],
+      ['LSTIME', 'Issued', ls.time],
+      ['DATE', 'Flight Date', ls.date],
+      ['CREW', 'Crew', ls.crew],
+      ['ACTYPE', 'Aircraft Type', ls.aircraft_type],
+      [
+        'ZFW',
+        'Zero Fuel Weight',
+        weight(ls.zfw, ls.zfw_max, ls.limiting === 'ZFW'),
+      ],
+      ['TOF', 'Takeoff Fuel', weight(ls.tof)],
+      [
+        'TOW',
+        'Takeoff Weight',
+        weight(ls.tow, ls.tow_max, ls.limiting === 'TOW'),
+      ],
+      ['TIF', 'Trip Fuel', weight(ls.tif)],
+      [
+        'LAW',
+        'Landing Weight',
+        weight(ls.law, ls.law_max, ls.limiting === 'LAW'),
+      ],
+      ['UNDLD', 'Underload', weight(ls.underload)],
+      ['DOW', 'Dry Operating Weight', weight(ls.dow)],
+      ['DOI', 'Dry Operating Index', ls.doi?.toString()],
+      [
+        'PAX',
+        'Passengers',
+        ls.pax_total === undefined
+          ? undefined
+          : `${ls.pax_total}${ls.pax_breakdown && ls.pax_breakdown !== String(ls.pax_total) ? ` (${ls.pax_breakdown})` : ''}`,
+      ],
+      ['INF', 'Infants', ls.infants?.toString()],
+      ['TOB', 'Total On Board', ls.tob?.toString()],
+      [
+        'MACZFW',
+        'MAC at ZFW',
+        ls.mac_zfw === undefined ? undefined : `${ls.mac_zfw}%`,
+      ],
+      [
+        'MACTOW',
+        'MAC at TOW',
+        ls.mac_tow === undefined ? undefined : `${ls.mac_tow}%`,
+      ],
+      [
+        'MACLAW',
+        'MAC at LAW',
+        ls.mac_law === undefined ? undefined : `${ls.mac_law}%`,
+      ],
+      [
+        'NOTOC',
+        'Special Load (NOTOC)',
+        ls.notoc === undefined ? undefined : ls.notoc ? 'YES' : 'NO',
+      ],
+    ];
+    for (const [code, label, value] of items) {
+      if (value === undefined) continue;
+      decodeResult.formatted.items.push({
+        type: 'loadsheet',
+        code,
+        label,
+        value,
+      });
+    }
   }
 
   /**
