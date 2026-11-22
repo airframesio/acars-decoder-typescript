@@ -173,7 +173,7 @@ export interface Qualifiers {
 
 export interface DecoderPluginInterface {
   /** Plugin id, as reported in DecodeResult.decoder.name. */
-  name?: string;
+  name: string;
   decode(message: Message, options?: Options): DecodeResult;
   meetsStateRequirements(): boolean;
   // onRegister(store: Store<any>) : void;
