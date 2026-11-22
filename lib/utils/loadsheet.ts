@@ -216,7 +216,8 @@ function parseHeader(ls: Loadsheet, header: string, next: string[]) {
   const status = STATUS.exec(header) || STATUS.exec(next[0] ?? '');
   if (status) ls.status = status[1] === 'FINAL' ? 'final' : 'prelim';
   const rest = header.slice(header.search(HEADER_WORD));
-  const edition = EDITION.exec(rest);
+  // EDNO 01, or a reference with the edition after the slash.
+  const edition = EDITION.exec(rest) || EDITION_REF.exec(rest);
   if (edition) ls.edition = Number(edition[1]);
   for (const t of rest
     .replace(EDITION, ' ')

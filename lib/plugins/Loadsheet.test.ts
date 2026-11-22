@@ -814,6 +814,16 @@ describe('Loadsheet', () => {
     });
   });
 
+  test('decodes synthetic: EDNO reference on the header line', () => {
+    const result = decoder.decode({
+      label: 'RA',
+      text: 'LOADSHEET FINAL 2140 EDNO H040098-KO/02\nTK0053/21 21NOV26\nBKK IST TC-JJA 3/12\nZFW 160708 MAX 175000',
+    });
+    expect(result.decoded).toBe(true);
+    expect(result.raw.loadsheet.edition).toBe(2);
+    expect(result.raw.loadsheet.time).toBe('2140');
+  });
+
   test('labels the passenger total as including infants', () => {
     const result = decoder.decode({
       label: 'RA',
