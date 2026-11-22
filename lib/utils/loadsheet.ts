@@ -270,9 +270,22 @@ function parseBody(ls: Loadsheet, lines: string[]) {
   let flightSeen = false;
   let routeSeen = false;
   let sinceFlight = 0;
+  let last = lines.length - 1;
+  while (last >= 0 && !lines[last].trim()) last--;
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
     if (!line) continue;
+    // Long loadsheets are split over several messages, and the split can
+    // fall inside a value ("TOW 2" for "TOW 288113"). A bare key and number
+    // on the last line is read only when it is about as long as the ZFW.
+    if (i === last && i > 0) {
+      const cut = /^[A-Z]+:?\s+(\d+)$/.exec(line);
+      if (
+        cut &&
+        (ls.zfw === undefined || cut[1].length < String(ls.zfw).length - 1)
+      )
+        continue;
+    }
     if (flightSeen) sinceFlight++;
     if (!flightSeen && i < 4 && parseFlightLine(ls, line)) {
       flightSeen = true;

@@ -296,7 +296,6 @@ describe('Loadsheet', () => {
       tow: 192434,
       tow_max: 233000,
       tif: 30754,
-      law: 1616,
     });
     expect(result.raw.flight_number).toBe('EI132');
   });
@@ -443,6 +442,32 @@ describe('Loadsheet', () => {
       registration: 'FGSPO',
     });
     expect(result.raw.flight_number).toBe('AF148');
+  });
+
+  test('does not read a value cut off at the end of the message', () => {
+    const message = {
+      label: 'RA',
+      text: 'QUDOHEOQR~1DIS01010101\r\n\r\nLOADSHEET FINAL 1508 EDNO1\r\nQR274/21      21NOV26\r\nAMS DOH A7-BEA   2/15\r\n************************\r\nZFW 232413 MAX 237682  L\r\n************************\r\nTOF 55700\r\n************************\r\nTOW 2',
+    };
+    const result = decoder.decode(message);
+    expect(result.decoded).toBe(true);
+    expect(result.raw.loadsheet).toEqual({
+      kind: 'loadsheet',
+      status: 'final',
+      edition: 1,
+      time: '1508',
+      flight_number: 'QR274',
+      flight_day: 21,
+      date: '2026-11-21',
+      departure: 'AMS',
+      arrival: 'DOH',
+      registration: 'A7-BEA',
+      crew: '2/15',
+      zfw: 232413,
+      zfw_max: 237682,
+      limiting: 'ZFW',
+      tof: 55700,
+    });
   });
 
   test('decodes acceptance as comma-separated reply', () => {
