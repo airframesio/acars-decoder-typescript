@@ -33,6 +33,30 @@ describe('RawFields type', () => {
     expect(raw.fuel_remaining).toBe(30000);
   });
 
+  test('military mission and weather fields are typed', () => {
+    const raw: RawFields = {};
+
+    raw.mission_number = 'AJM363201271';
+    raw.mission = {
+      value: 'AJM363201271',
+      prefix: 'AJM',
+      basic: '3632',
+      suffix: '01',
+      day_of_year: 271,
+    };
+    raw.weather_report = {
+      station: 'KADW',
+      time: '1200',
+      type: 'METAR',
+      report: 'KADW 211200Z VRB06KT 9999 SCT250',
+    };
+
+    expect(raw.mission.prefix).toBe('AJM');
+    expect(raw.mission.day_of_year).toBe(271);
+    expect(raw.weather_report.station).toBe('KADW');
+    expect(raw.weather_report.type).toBe('METAR');
+  });
+
   test('allows plugin-specific fields via index signature', () => {
     const raw: RawFields = {};
 

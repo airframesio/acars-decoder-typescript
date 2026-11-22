@@ -1,5 +1,6 @@
 import { DecodeResult } from '../DecoderPluginInterface';
 import { CoordinateUtils } from './coordinate_utils';
+import { MissionNumber, MissionNumberUtils } from './mission_number';
 import { DateTimeUtils } from '../DateTimeUtils';
 import { RouteUtils } from './route_utils';
 import { Route } from '../types/route';
@@ -89,6 +90,17 @@ export class ResultFormatter {
       code: 'FLIGHT',
       label: 'Flight Number',
       value: decodeResult.raw.flight_number,
+    });
+  }
+
+  /** AMC mission number from a military /ID field */
+  static missionNumber(decodeResult: DecodeResult, mission: MissionNumber) {
+    decodeResult.raw.mission = mission;
+    decodeResult.formatted.items.push({
+      type: 'mission_number',
+      code: 'MSN',
+      label: 'Mission Number',
+      value: MissionNumberUtils.format(mission),
     });
   }
 

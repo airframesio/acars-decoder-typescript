@@ -2,6 +2,8 @@ import { AlternativeRunway } from './types/alternative_runway';
 import { Route } from './types/route';
 import { RunwayLandingData } from './types/runway_landing_data';
 import { Wind } from './types/wind';
+import type { WeatherReport } from './types/weather_report';
+import type { MissionNumber } from './utils/mission_number';
 
 /**
  * Representation of a Message
@@ -40,6 +42,14 @@ export interface RawFields {
 
   // Flight identification
   flight_number?: string;
+  /** Military (AMC) mission number exactly as received in /ID */
+  mission_number?: string;
+  /** The mission number broken into its parts, when it is a valid one */
+  mission?: MissionNumber;
+  /** Weather text sent in answer to a weather request */
+  weather_report?: WeatherReport;
+  /** ICAO code of the station a weather report is for (same as weather_report.station) */
+  weather_station?: string;
   callsign?: string;
   tail?: string;
 

@@ -18,7 +18,7 @@ describe('Label 4J POS', () => {
     const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
-    expect(decodeResult.decoder.decodeLevel).toBe('partial');
+    expect(decodeResult.decoder.decodeLevel).toBe('full');
     // Raw field checks
     expect(decodeResult.raw.message_timestamp).toBe(1709476093);
     expect(decodeResult.raw.sequence_number).toBe(64);
@@ -39,8 +39,11 @@ describe('Label 4J POS', () => {
     expect(decodeResult.raw.fuel_on_board).toBe(732);
     expect(decodeResult.raw.version).toBe(3.2);
     expect(decodeResult.formatted.description).toBe('Position Report');
-    expect(decodeResult.formatted.items.length).toBe(16);
-    expect(decodeResult.remaining.text).toBe('27619,MT370');
+    expect(decodeResult.raw.wind_direction).toBe(276);
+    expect(decodeResult.raw.wind_speed).toBe(19);
+    expect(decodeResult.raw.airspeed).toBe(370);
+    expect(decodeResult.formatted.items.length).toBe(18);
+    expect(decodeResult.remaining.text).toBe('');
   });
 
   test('decodes <invalid>', () => {
@@ -51,5 +54,40 @@ describe('Label 4J POS', () => {
     expect(decodeResult.decoder.decodeLevel).toBe('none');
     expect(decodeResult.formatted.description).toBe('Unknown');
     expect(decodeResult.formatted.items.length).toBe(0);
+  });
+});
+
+// Military (AMC-format) POS reports seen on Airframes, 2026-11-19 to 2026-11-21
+describe('Label 4J military POS', () => {
+  const decoder = new MessageDecoder();
+
+  test('without callsign or mission (southern hemisphere)', () => {
+    const result = decoder.decode({
+      label: '4J',
+      text: 'POS/IDA97464,TROJ05,/DC19112026,231643/MR14,/ET200003/PSS30525E152131,231643,210,VEG01,192334,VONDO,M15,263020,T223/CG,,/FB308/VR327DD5',
+    });
+
+    expect(result.decoded).toBe(true);
+    expect(result.decoder.decodeLevel).toBe('full');
+    expect(result.raw.mission_number).toBe('');
+    expect(result.raw.mission).toBeUndefined();
+    expect(result.raw.position?.latitude).toBeLessThan(0);
+    expect(result.raw.wind_direction).toBe(263);
+    expect(result.raw.wind_speed).toBe(20);
+    expect(result.raw.airspeed).toBe(223);
+  });
+
+  test('MT speed and 4 digit wind', () => {
+    const result = decoder.decode({
+      label: '4J',
+      text: 'POS/ID23571S,,/DC19112026,234005/MR56,/ET192342/PSN64458W147121,234000,25,RW14,192342,EIL,P9,1138,MT150/CG271,180,350/FB332/VR323709',
+    });
+
+    expect(result.decoded).toBe(true);
+    expect(result.decoder.decodeLevel).toBe('full');
+    expect(result.raw.wind_direction).toBe(113);
+    expect(result.raw.wind_speed).toBe(8);
+    expect(result.raw.airspeed).toBe(150);
+    expect(result.raw.mach).toBeUndefined();
   });
 });

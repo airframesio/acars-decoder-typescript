@@ -68,7 +68,7 @@ describe('LibACARS plugin', () => {
     expect(decodeResult.raw.planned_departure_time).toBe('011535');
     expect(decodeResult.raw.estimated_departure_time).toBe('1535');
     expect(decodeResult.raw.checksum).toBe(0xee66);
-    expect(decodeResult.formatted.items.length).toBe(9);
+    expect(decodeResult.formatted.items.length).toBe(10);
     expect(decodeResult.formatted.description).toBe('Initial Report');
   });
 

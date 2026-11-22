@@ -26,7 +26,7 @@ describe('Label 1J/2J FTX', () => {
     expect(decodeResult.raw.text).toBe('4 QTR PHILLY UP 37-6');
     expect(decodeResult.raw.checksum).toBe(0x307a);
     expect(decodeResult.formatted.description).toBe('Free Text');
-    expect(decodeResult.formatted.items.length).toBe(5);
+    expect(decodeResult.formatted.items.length).toBe(6);
   });
 
   // Disabled due to checksum mismatch. Possibly copy-paste issue due to non-ascii characters in message?
@@ -49,7 +49,7 @@ describe('Label 1J/2J FTX', () => {
     );
     expect(decodeResult.raw.version).toBe(3.2);
     expect(decodeResult.raw.checksum).toBe(0x8d70);
-    expect(decodeResult.formatted.items.length).toBe(7);
+    expect(decodeResult.formatted.items.length).toBe(8);
     expect(decodeResult.remaining.text).toBe('M74/');
   });
 
@@ -61,5 +61,46 @@ describe('Label 1J/2J FTX', () => {
     expect(decodeResult.decoder.decodeLevel).toBe('none');
     expect(decodeResult.formatted.description).toBe('Unknown');
     expect(decodeResult.message).toBe(message);
+  });
+});
+
+// AMC free text never contains '/' or ','; the sender replaces them with '(' and the
+// decoder keeps the text as sent, since '(' can stand for either.
+// https://app.airframes.io/messages/7755431084
+describe('Label 1J military FTX with ( substitutions', () => {
+  test('keeps T(O as sent', () => {
+    const result = new MessageDecoder().decode({
+      label: '1J',
+      text: 'FTX/ID543615,CANNY52,202609300515/MR7,/FXTO ESP AND GIBAJF502 FLT FOR TOMORROW WILL BE ACTIVATED.ETD WILL BE 0100Z SO FAR.SO ASC HQ IS NOW REQUESTING TO CANX 4TH PERIOD TODAY.BTW CONFIRM T(O FUEL OF JF502 FROM RJOH IS 115K.0D88',
+    });
+
+    expect(result.decoded).toBe(true);
+    expect(result.decoder.decodeLevel).toBe('full');
+    expect(result.formatted.description).toBe('Free Text');
+    expect(result.raw.tail).toBe('543615');
+    expect(result.raw.flight_number).toBe('CANNY52');
+    expect(result.raw.text).toBe(
+      'TO ESP AND GIBAJF502 FLT FOR TOMORROW WILL BE ACTIVATED.ETD WILL BE 0100Z SO FAR.SO ASC HQ IS NOW REQUESTING TO CANX 4TH PERIOD TODAY.BTW CONFIRM T(O FUEL OF JF502 FROM RJOH IS 115K.',
+    );
+    // 202609300515 is not a mission number (day 515), so none is decoded
+    expect(result.raw.mission).toBeUndefined();
+  });
+});
+
+// https://app.airframes.io/messages/7655317188: a relayed SIGMET full of '(' for '/'. The body
+// is verbatim; the header and checksum were rebuilt around it, since only the text was copied.
+describe('Label 1J military FTX SIGMET relay', () => {
+  test('keeps the SIGMET text as sent', () => {
+    const body =
+      'CZQX SIGMET F2 VALID 231520(231920 CWUL-CZQX GANDER OCEANIC FIR(CTA SEV TURB OBS AT 1509Z WI 180NM WID LINEBTN (N5630W03900( - (N6130 W03200( FL310(360 MOV WNW 10KT WKN';
+    const result = new MessageDecoder().decode({
+      label: '1J',
+      text: `FTX/ID80002A,BRK71,COLLINSAM123/MR2,/FX${body}2B23`,
+    });
+
+    expect(result.decoded).toBe(true);
+    expect(result.decoder.decodeLevel).toBe('full');
+    expect(result.formatted.description).toBe('Free Text');
+    expect(result.raw.text).toBe(body);
   });
 });

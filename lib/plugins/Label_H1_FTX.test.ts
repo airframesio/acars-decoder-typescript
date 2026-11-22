@@ -26,7 +26,7 @@ describe('Label_H1 FTX', () => {
       'FYI .. TAF KSUX 021720Z 0218 0318 20017G28KT P6SM SKC FM022200 22012G18KT P6SM SKC .. PUTS YOUR CXWIND AT 26KT ON RWY 13 .. REDUCES TO 18KT AT 22Z',
     );
     expect(decodeResult.raw.checksum).toBe(0x4fef);
-    expect(decodeResult.formatted.items.length).toBe(5);
+    expect(decodeResult.formatted.items.length).toBe(6);
     expect(decodeResult.formatted.description).toBeDefined();
   });
 
@@ -38,5 +38,24 @@ describe('Label_H1 FTX', () => {
     expect(decodeResult.decoder.decodeLevel).toBe('none');
     expect(decodeResult.formatted.description).toBe('Unknown');
     expect(decodeResult.message).toBe(message);
+  });
+});
+
+// https://app.airframes.io/messages/7931914752: a METAR sent as free text, where '/' in the
+// report (15/06, /////KT) arrives as '('
+describe('Label H1 military FTX with ( substitutions', () => {
+  test('keeps the METAR text as sent', () => {
+    const result = new MessageDecoder().decode({
+      label: 'H1',
+      text: '- #MDFTX/ID80002A,BRK71,COLLINSAM123/MR2,/FXMETAR LIPA 260855Z 07009KT 9999 FEW080 15(06 Q1021 RMK FEW VIS MIN 9999 WIND THR05 (((((KT WIND THR23 (((((KT A3015 BLU15ED',
+    });
+
+    expect(result.decoded).toBe(true);
+    expect(result.decoder.decodeLevel).toBe('full');
+    expect(result.formatted.description).toBe('Free Text');
+    expect(result.raw.flight_number).toBe('BRK71');
+    expect(result.raw.text).toBe(
+      'METAR LIPA 260855Z 07009KT 9999 FEW080 15(06 Q1021 RMK FEW VIS MIN 9999 WIND THR05 (((((KT WIND THR23 (((((KT A3015 BLU',
+    );
   });
 });
