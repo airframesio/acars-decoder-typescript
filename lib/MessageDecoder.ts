@@ -88,6 +88,7 @@ const pluginClasses = [
   Plugins.Label_SQ,
   Plugins.Label_QP,
   Plugins.Label_QQ,
+  Plugins.Label_RA_Gate,
   Plugins.Label_QR,
   Plugins.Label_QS,
 ];

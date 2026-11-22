@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+- Decode label RA arrival gate uplinks (`label-ra-gate`): United GATE ASSIGN / GATE CHANGE, Republic ARRIVAL GATE and SkyWest ARR GATE INFO, into `arrival_gate` with the flight, route and times they carry
+
 ## 1.7.0
 
 - Node.js support and CI:
