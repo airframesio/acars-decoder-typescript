@@ -80,6 +80,7 @@ export interface Loadsheet {
   notoc?: boolean;
 }
 
+const LS_HEADER = /\bLS\s+(?:FINAL|PRELIM)/;
 const HEADER_WORD =
   /LOADSHEET|LOAD SHEET|L O A D S H E E T|\bLS\s+(?:FINAL|PRELIM)/;
 // Lines that mention a loadsheet without starting one.
@@ -155,17 +156,17 @@ const CUT_WEIGHT =
   /^(ZFW|TOW|LAW|LDW|LGW|LW|TOF|TIF|TF|BO|DOW|UNDLD)(?: ACTUAL)?:?\s+(\d+)$/;
 
 /**
- * Cheap check: could this text hold a loadsheet? Plain substring scans that
- * cover every HEADER_WORD alternative (so the parser never misses a header
- * this check rejected) plus LDSHT, which only acceptances use.
+ * Cheap check: could this text hold a loadsheet? Substring scans (plus the LS
+ * header regex, run only when "LS" occurs, so "LS  PRELIM" with any spacing
+ * passes) that cover every HEADER_WORD alternative, so the parser never misses
+ * a header this check rejected, plus LDSHT, which only acceptances use.
  */
 export function mayBeLoadsheet(text: string): boolean {
   return (
     text.includes('LOADSHEET') ||
     text.includes('LOAD SHEET') ||
     text.includes('L O A D S H E E T') ||
-    text.includes('LS FINAL') ||
-    text.includes('LS PRELIM') ||
+    (text.includes('LS') && LS_HEADER.test(text)) ||
     text.includes('LDSHT')
   );
 }

@@ -590,6 +590,30 @@ describe('Loadsheet', () => {
     });
   });
 
+  test('decodes synthetic: LS  PRELIM header with two spaces', () => {
+    const message = {
+      label: 'RA',
+      text: 'LS  PRELIM 1200\nBA123/01 01JAN26\nLHR JFK G-TEST 2/4\nZFW 100000\nTOW 120000',
+    };
+    const result = decoder.decode(message);
+    expect(result.decoded).toBe(true);
+    expect(result.decoder.name).toBe('loadsheet');
+    expect(result.raw.loadsheet).toEqual({
+      kind: 'loadsheet',
+      status: 'prelim',
+      time: '1200',
+      flight_number: 'BA123',
+      flight_day: 1,
+      date: '2026-01-01',
+      departure: 'LHR',
+      arrival: 'JFK',
+      registration: 'G-TEST',
+      crew: '2/4',
+      zfw: 100000,
+      tow: 120000,
+    });
+  });
+
   test('decodes synthetic: complete ZFW on the last line', () => {
     const message = {
       label: 'RA',
