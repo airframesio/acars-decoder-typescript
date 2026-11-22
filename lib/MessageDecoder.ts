@@ -108,8 +108,8 @@ const pluginClasses = [
   Plugins.Label_QR,
   Plugins.Label_QS,
   Plugins.Label_RA_Gate,
-  // Last on the gate labels (40, 41, 42, C1, 21, 3T, 5Z, 25, 3M, 3E, HX, 32):
-  // richer plugins first.
+  // Last on the gate labels (40, 41, 42, C1, 21, 3T, 5Z, 25, 3M, 3E, HX, 32,
+  // 33, 48): richer plugins first.
   Plugins.Label_B3_PDC,
   Plugins.Label_Gate_Report,
 ];

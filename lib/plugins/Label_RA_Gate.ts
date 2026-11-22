@@ -7,6 +7,7 @@ import {
   addRouteGate,
   addUnreadLines,
   addWestJetGate,
+  cutMatch,
   findRouteGate,
   GATE_STOP_LINE,
   GATE_TOKEN,
@@ -50,9 +51,10 @@ const REPUBLIC_GATE = new RegExp(
 const SKYWEST_HEADER = /^[A-Z0-9~.]+?ARR GATE INFO\b\s*(.*)$/;
 const SKYWEST_GATE = new RegExp(`^([A-Z]{3}) ARRIVAL GATE\\s+(${GATE})$`);
 
-// Headers of the formats above, and of Finnair connection lists (other
+// Headers of the formats above (Republic's other messages are read by the
+// formats below once its ARRIVAL GATE reader has passed), and of Finnair connection lists (other
 // flights' departure gates): the other formats are not tried on them.
-const HANDLED_HEADER = /^(QUNDCULUA|QUHDQDDRP|QUHDQITOO|QUSILITOO|QUHELASAY)/;
+const HANDLED_HEADER = /^(QUNDCULUA|QUHDQITOO|QUSILITOO|QUHELASAY)/;
 
 // Turkish: "- EXPECTED PARKING POSITION: F8R"; China Southern and others:
 // "PARKING PREASSIGNED:138" or "PARKING ASSIGNED:138" (NA when none).
@@ -68,10 +70,18 @@ const QATAR_STAND = new RegExp(
 );
 // Free-standing arrival lines: "-PKG T21" (Air Europa handling), "ESTIMATED
 // PARK IS G09" (EVA), "PARK BAY: 21" and "ARR GATE IS 17R" (Qantas), "YOUR
-// GATE IS 9", "PLANNING GATE B37" (Ethiopian dispatch).
+// GATE IS 9", "PLANNING GATE B37" and "ARR GATE B44 ASSIGNED" (Ethiopian
+// dispatch).
 const LOOSE_ARRIVAL = new RegExp(
-  `^(?:-PKG|ESTIMATED PARK IS|PARK BAY:|ARR GATE IS|YOUR GATE IS|PLANNING GATE)\\s*${GATE_TOKEN}\\s*$`,
+  `^(?:-PKG|ESTIMATED PARK IS|PARK BAY:|ARR GATE IS|YOUR GATE IS|PLANNING GATE|ARR GATE)\\s*${GATE_TOKEN}(?:\\s+ASSIGNED)?\\s*$`,
 );
+// Avianca dispatch (QUATLASAV), read until the "FROM:" line: "GATE E12",
+// "GATE 13 EN SAL." (at SAL), "E7 PARK EN BOG".
+const AVIANCA_HEADER = 'QUATLASAV';
+const AVIANCA_GATE = new RegExp(
+  `^GATE\\s+${GATE_TOKEN}(?:\\s+EN\\s+([A-Z]{3}))?(?=[\\s.]|$)`,
+);
+const AVIANCA_PARK = new RegExp(`^${GATE_TOKEN}\\s+PARK EN ([A-Z]{3})\\b`);
 // Avianca: "GATE J-12 MIA" (gate J12).
 const DASHED_AIRPORT = /^GATE ([A-Z])-(\d{1,3}[A-Z]?) ([A-Z]{3})$/;
 // Qantas: "GDAY QF0011 BAY 221".
@@ -103,7 +113,9 @@ const LATAM_PPOS = new RegExp(`^PPOS:\\s*${GATE_TOKEN}\\s*$`);
  * bays, Avianca "GATE J-12 MIA", loose arrival lines ("-PKG T21",
  * "ESTIMATED PARK IS G09", "PARK BAY: 21", "ARR GATE IS 17R", "YOUR GATE
  * IS 9", "PLANNING GATE B37", "EAU ARRIVAL GATE 1"), and the Finnair
- * arriving stand and boarding gate (a departure gate).
+ * arriving stand and boarding gate (a departure gate), Avianca dispatch
+ * "GATE 13 EN SAL" / "E7 PARK EN BOG", and Republic messages other than
+ * ARRIVAL GATE ("FLT YX4704 RDU-LGA" / "GATE 29").
  *
  * Finnair connection lists are not read: they give the departure gates of
  * other flights.
@@ -346,6 +358,7 @@ export class Label_RA_Gate extends DecoderPlugin {
       used = addFinnairGate(decodeResult, lines);
     } else if (!HANDLED_HEADER.test(lines[0])) {
       used =
+        this.aviancaDispatch(decodeResult, lines) ??
         addDeltaCrewGate(decodeResult, lines) ??
         this.arrivalLine(decodeResult, lines) ??
         this.flightAirportGate(decodeResult, lines) ??
@@ -361,6 +374,29 @@ export class Label_RA_Gate extends DecoderPlugin {
     addUnreadLines(decodeResult, lines, used);
     this.setDecodeLevel(decodeResult, true);
     return decodeResult;
+  }
+
+  private aviancaDispatch(
+    decodeResult: DecodeResult,
+    lines: string[],
+  ): UsedLines | undefined {
+    if (!lines[0].startsWith(AVIANCA_HEADER)) {
+      return undefined;
+    }
+    for (let i = 0; i < lines.length; i++) {
+      if (lines[i].startsWith('FROM:')) {
+        break;
+      }
+      const m = AVIANCA_GATE.exec(lines[i]) ?? AVIANCA_PARK.exec(lines[i]);
+      if (m) {
+        if (m[2]) {
+          ResultFormatter.arrivalAirport(decodeResult, m[2], 'IATA');
+        }
+        ResultFormatter.arrivalGate(decodeResult, m[1]);
+        return new Map([[i, cutMatch(lines[i], m)]]);
+      }
+    }
+    return undefined;
   }
 
   /**

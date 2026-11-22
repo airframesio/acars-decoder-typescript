@@ -479,3 +479,70 @@ describe('Label RA gate, round 5 formats', () => {
     expect(f.raw.departure_gate).toBe('2');
   });
 });
+
+// Texts from production RA uplinks of 2026-11-17 (shortened, names removed).
+const REPUBLIC_RAH =
+  'QUHDQDDRP~1RAH MESSAGE\r\nAN N423YX\r\nFLT YX4704 RDU-LGA\r\nGATE 29 ETA 2213L \r\nTERMINATING FLIGHT\r\n';
+const AVIANCA_DISPATCH_GATE =
+  'QUATLASAV~1.\r\nBUENOS DIAS\r\nGATE 13 EN SAL. SLDS.\r\n\r\n------------\r\nFROM: DISP_X\r\n';
+const AVIANCA_DISPATCH_PARK =
+  'QUATLASAV~1PARK\n\tBN DIA CREW\n\tE7 PARK EN BOG\n\tSALU2 BN VLO\n\t\n\t------------\n\tFROM: DISP_X\n';
+const ETHIOPIAN_ASSIGNED =
+  'QUJFKOWLX~1\r\nSWR DSP JFK\r\nGD MORNING ET500 CREW\r\nARR GATE B44 ASSIGNED\r\nHAPPY LANDING\r\n';
+
+describe('Label RA gate, round 6 formats', () => {
+  let decoder: MessageDecoder;
+  let plugin: Label_RA_Gate;
+
+  beforeEach(() => {
+    decoder = new MessageDecoder();
+    plugin = new Label_RA_Gate(decoder);
+  });
+
+  test('decodes a Republic message other than ARRIVAL GATE', () => {
+    const r = plugin.decode({ label: 'RA', text: REPUBLIC_RAH });
+    expect(r.decoded).toBe(true);
+    expect(r.raw.flight_number).toBe('YX4704');
+    expect(r.raw.departure_iata).toBe('RDU');
+    expect(r.raw.arrival_iata).toBe('LGA');
+    expect(r.raw.arrival_gate).toBe('29');
+  });
+
+  test('still decodes the Republic ARRIVAL GATE uplink with its reader', () => {
+    const r = plugin.decode({ label: 'RA', text: REPUBLIC });
+    expect(r.raw.tail).toBe('N401YX');
+    expect(r.raw.arrival_gate).toBe('16');
+  });
+
+  test('decodes the Avianca dispatch gate and its airport', () => {
+    const r = plugin.decode({ label: 'RA', text: AVIANCA_DISPATCH_GATE });
+    expect(r.decoded).toBe(true);
+    expect(r.raw.arrival_iata).toBe('SAL');
+    expect(r.raw.arrival_gate).toBe('13');
+    expect(r.remaining.text).toContain('SLDS.');
+  });
+
+  test('decodes the Avianca dispatch park position', () => {
+    const r = plugin.decode({ label: 'RA', text: AVIANCA_DISPATCH_PARK });
+    expect(r.raw.arrival_iata).toBe('BOG');
+    expect(r.raw.arrival_gate).toBe('E7');
+  });
+
+  test('decodes an assigned arrival gate', () => {
+    const r = plugin.decode({ label: 'RA', text: ETHIOPIAN_ASSIGNED });
+    expect(r.raw.arrival_gate).toBe('B44');
+  });
+
+  test('is reached through MessageDecoder', () => {
+    for (const [text, gate] of [
+      [REPUBLIC_RAH, '29'],
+      [AVIANCA_DISPATCH_GATE, '13'],
+      [AVIANCA_DISPATCH_PARK, 'E7'],
+      [ETHIOPIAN_ASSIGNED, 'B44'],
+    ]) {
+      const r = decoder.decode({ label: 'RA', text });
+      expect(r.decoder.name).toBe('label-ra-gate');
+      expect(r.raw.arrival_gate).toBe(gate);
+    }
+  });
+});

@@ -66,6 +66,8 @@ describe('Label gate report', () => {
         '3E',
         'HX',
         '32',
+        '33',
+        '48',
       ],
     });
   });
@@ -426,5 +428,63 @@ describe('Label gate report, round 5 formats', () => {
       expect(r.decoder.name).toBe('label-gate-report');
       expect(r.raw.arrival_gate).toBe(gate);
     }
+  });
+});
+
+// Texts from production messages of 2026-11-17 (shortened, names removed).
+const KLM =
+  'P64AMSKWKL170542\r\nCONNECTION INFO.\r\nKL 1750 \r\nALL TIMES LOCAL\r\nGATE  A04  POS  A62 \r\nSCHED 0715 ETA  0715\r\nNXM   KL 1771  17NOV 0805  B30 A62\r\n';
+const KLM_NEXT_FLIGHT_ONLY =
+  'P64AMSKWKL170542\r\nCONNECTION INFO.\r\nKL 1750 \r\nNXM   KL 1771  17NOV 0805  B30 A62\r\nGATE  B30  POS  A62\r\n';
+const KOREAN = 'SPOT NO : 606\r\n';
+const AER_LINGUS =
+  'FLIGHT NUMBER = EI0122\r\n\tDATE = 17 NOV\r\n\tTIME = 0334\r\n\tTAIL = EI-FNH\r\n\tSTAND INFO = 400C\r\n';
+
+describe('Label gate report, round 6 formats', () => {
+  let decoder: MessageDecoder;
+  let plugin: Label_Gate_Report;
+
+  beforeEach(() => {
+    decoder = new MessageDecoder();
+    plugin = new Label_Gate_Report(decoder);
+  });
+
+  test('decodes KLM connection info gate at AMS', () => {
+    const r = plugin.decode({ label: '32', text: KLM });
+    expect(r.decoded).toBe(true);
+    expect(r.raw.flight_number).toBe('KL1750');
+    expect(r.raw.arrival_iata).toBe('AMS');
+    expect(r.raw.arrival_gate).toBe('A04');
+    expect(r.remaining.text).toContain('POS A62');
+    expect(r.remaining.text).toContain('NXM   KL 1771  17NOV 0805  B30 A62');
+  });
+
+  test('does not read the KLM next flight gate', () => {
+    const r = plugin.decode({ label: '32', text: KLM_NEXT_FLIGHT_ONLY });
+    expect(r.decoded).toBe(false);
+  });
+
+  test('decodes the Korean Air spot on label 33', () => {
+    const r = plugin.decode({ label: '33', text: KOREAN });
+    expect(r.raw.arrival_gate).toBe('606');
+  });
+
+  test('decodes the Aer Lingus stand on label 48', () => {
+    const r = plugin.decode({ label: '48', text: AER_LINGUS });
+    expect(r.raw.arrival_gate).toBe('400C');
+  });
+
+  test('is reached through MessageDecoder after the other plugins', () => {
+    for (const [label, text, gate] of [
+      ['32', KLM, 'A04'],
+      ['33', KOREAN, '606'],
+      ['48', AER_LINGUS, '400C'],
+    ]) {
+      const r = decoder.decode({ label, text });
+      expect(r.decoder.name).toBe('label-gate-report');
+      expect(r.raw.arrival_gate).toBe(gate);
+    }
+    const n = decoder.decode({ label: '32', text: KLM_NEXT_FLIGHT_ONLY });
+    expect(n.raw.arrival_gate).toBeUndefined();
   });
 });

@@ -16,7 +16,7 @@ export const GATE_TOKEN = '([A-Z]{0,3}\\d{1,4}[A-Z]?)';
  * next flight). Gate lines after it are not this flight's.
  */
 export const GATE_STOP_LINE =
-  /^(CREW CONNECTING|CONNECTING GATE|NEXT FLT|NEXT FLIGHT|NEXT LEG|NEXT SECTOR|- NEXT FLIGHT|ON STAND-|CREW DEPT|TURN FLT|CREW CONNECTIONS|PAX CONNECTIONS|AC TURN|END$)/;
+  /^(CREW CONNECTING|CONNECTING GATE|NEXT FLT|NEXT FLIGHT|NEXT LEG|NEXT SECTOR|NXM\b|- NEXT FLIGHT|ON STAND-|CREW DEPT|TURN FLT|CREW CONNECTIONS|PAX CONNECTIONS|AC TURN|END$)/;
 
 /**
  * Lines that were read: the line's index and what is left of it ('' when
@@ -63,9 +63,10 @@ export function addUnreadLines(
 // FLT 1658/22 AUS-DFW (American, Envoy, PSA, GoJet, Piedmont). The line can
 // follow an RA header or a dash ("QUSBYDDPT~1FLT 5966 SYR-PHL",
 // "- FLT 0174 RDU-LHR"), and Piedmont runs the gate into the route line:
-// "FLT 5966 SYR-PHLGATE F37 ETA 707L".
+// "FLT 5966 SYR-PHLGATE F37 ETA 707L". The flight can carry the airline
+// (Republic "FLT YX4704 RDU-LGA").
 const ROUTE_LINE =
-  /^(-\s*|[A-Z0-9]{9}[~.]\d)?FLT\s+(\d{1,4})(?:\/(\d{2}))?\s+([A-Z]{3})-([A-Z]{3})/;
+  /^(-\s*|[A-Z0-9]{9}[~.]\d)?FLT\s+((?:[A-Z]{2}|[A-Z]\d|\d[A-Z])?\d{1,4})(?:\/(\d{2}))?\s+([A-Z]{3})-([A-Z]{3})/;
 const INLINE_GATE = new RegExp(`GATE\\s+${GATE_TOKEN}(?=\\s|$)`);
 // GATE D21 AVAILABILITY PLN ETA 0721, GATE D43APCA Y ELEC Y, GATE 9
 const LEADING_GATE = new RegExp(`^GATE\\s+${GATE_TOKEN}(?=\\s|PCA|$)`);

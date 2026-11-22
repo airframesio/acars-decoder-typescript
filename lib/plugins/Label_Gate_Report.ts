@@ -78,10 +78,21 @@ const SAS_INFO = new RegExp(
 // the gate is a bus).
 const ARR_GATE_LINE = new RegExp(`^ARR GATE\\s+${GATE_TOKEN}\\s*$`);
 const ARR_POS_LINE = new RegExp(`^ARR POS\\s+${GATE_TOKEN}\\s*$`);
+// KLM connection info, label 32: "P64AMSKWKL170542", "KL 1750", "GATE  A04
+// POS  A62" (the gate, at AMS). "NXM" starts the next flight.
+const KLM_HEADER = /^P\d{2}AMSKWKL\d{6}/;
+const KLM_FLIGHT = /^KL\s+(\d{1,4})$/;
+const KLM_GATE = new RegExp(
+  `^GATE\\s+${GATE_TOKEN}\\s+POS\\s+${GATE_TOKEN}\\s*$`,
+);
+// Korean Air, label 33: "SPOT NO : 606".
+const KOREAN_SPOT = new RegExp(`^SPOT NO\\s*:\\s*${GATE_TOKEN}\\s*$`);
+// Aer Lingus, label 48: "STAND INFO = 400C".
+const AER_LINGUS_STAND = new RegExp(`^STAND INFO\\s*=\\s*${GATE_TOKEN}\\s*$`);
 
 /**
  * Gates in airline messages on labels 40, 41, 42, C1, 21, 3T, 5Z, 25, 3M,
- * 3E, HX and 32:
+ * 3E, HX, 32, 33 and 48:
  *
  * - "FLT 1658/22 AUS-DFW" then "GATE D21 ..." or "NEW ARRIVAL GATE NBR IS
  *   C33" (American, Envoy, PSA, GoJet, Piedmont; labels 40, 41, C1)
@@ -102,6 +113,8 @@ const ARR_POS_LINE = new RegExp(`^ARR POS\\s+${GATE_TOKEN}\\s*$`);
  * - Finnair "ARRIVING STAND 131" and boarding gate "AY230 19NOV TKU
  *   STD0600 BOARD 0540 GATE 2", a departure gate (3E)
  * - Swiss/Edelweiss "ARR GATE A52", else "ARR POS D12" (32)
+ * - KLM connection info "KL 1750" / "GATE  A04  POS  A62", at AMS (32)
+ * - Korean Air "SPOT NO : 606" (33) and Aer Lingus "STAND INFO = 400C" (48)
  *
  * Each format is read only on the labels it was seen on, and reading stops
  * where the message moves on to connections or the next flight, whose gates
@@ -126,6 +139,8 @@ export class Label_Gate_Report extends DecoderPlugin {
         '3E',
         'HX',
         '32',
+        '33',
+        '48',
       ],
     };
   }
@@ -174,7 +189,17 @@ export class Label_Gate_Report extends DecoderPlugin {
       case '3E':
         used = addFinnairGate(decodeResult, lines);
         break;
+      case '33':
+        used = this.firstLine(decodeResult, lines, KOREAN_SPOT);
+        break;
+      case '48':
+        used = this.firstLine(decodeResult, lines, AER_LINGUS_STAND);
+        break;
       case '32':
+        if (KLM_HEADER.test(lines[0])) {
+          used = this.klm(decodeResult, lines);
+          break;
+        }
         used =
           this.firstLine(decodeResult, lines, ARR_GATE_LINE) ??
           this.firstLine(decodeResult, lines, ARR_POS_LINE);
@@ -503,6 +528,36 @@ export class Label_Gate_Report extends DecoderPlugin {
       if (m) {
         ResultFormatter.arrivalGate(decodeResult, m[1]);
         return new Map([[i, '']]);
+      }
+    }
+    return undefined;
+  }
+
+  private klm(
+    decodeResult: DecodeResult,
+    lines: string[],
+  ): UsedLines | undefined {
+    let flight: string | undefined;
+    const used: UsedLines = new Map();
+    for (let i = 0; i < lines.length; i++) {
+      if (GATE_STOP_LINE.test(lines[i])) {
+        break;
+      }
+      const f = KLM_FLIGHT.exec(lines[i]);
+      if (f) {
+        flight = f[1];
+        used.set(i, '');
+        continue;
+      }
+      const g = KLM_GATE.exec(lines[i]);
+      if (g) {
+        // The parking position stays unread.
+        used.set(i, `POS ${g[2]}`);
+        decodeResult.formatted.description = 'Connection Information';
+        if (flight) ResultFormatter.flightNumber(decodeResult, 'KL' + flight);
+        ResultFormatter.arrivalAirport(decodeResult, 'AMS', 'IATA');
+        ResultFormatter.arrivalGate(decodeResult, g[1]);
+        return used;
       }
     }
     return undefined;
