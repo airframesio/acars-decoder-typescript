@@ -2,6 +2,7 @@ import { DecoderPlugin } from '../DecoderPlugin';
 import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
 import { DateTimeUtils } from '../DateTimeUtils';
 import { ResultFormatter } from '../utils/result_formatter';
+import { RouteUtils } from '../utils/route_utils';
 
 // Segment codes observed in label 49. The airborne ones (TO, IC, CL, ER, DC,
 // AP) are documented by airframesio/acars-message-documentation; GA and the
@@ -127,7 +128,7 @@ export class Label_49 extends DecoderPlugin {
     if (isPair) {
       result.raw.previous_segment = previous;
       result.raw.next_segment = next;
-      ResultFormatter.state_change(result, previous, next);
+      this.formatStateChange(result, previous, next);
     } else {
       result.raw.event = isSwap ? 'SWAPINITIALIZE' : reportCode;
       if (isSwap) {
@@ -164,6 +165,24 @@ export class Label_49 extends DecoderPlugin {
 
     this.debug(options, reportCode, previous, next, body);
     return result;
+  }
+
+  private formatStateChange(
+    result: DecodeResult,
+    previous: string,
+    next: string,
+  ): void {
+    result.raw.state_change = { from: previous, to: next };
+    // GA is inferred from the APGA sequence and is kept local: the shared
+    // RouteUtils map only carries states that are documented.
+    const label = (segment: string): string =>
+      segment === 'GA' ? 'Go-Around' : RouteUtils.formatFlightState(segment);
+    result.formatted.items.push({
+      type: 'state_change',
+      code: 'STATE_CHANGE',
+      label: 'State Change',
+      value: `${label(previous)} -> ${label(next)}`,
+    });
   }
 
   private parseBody(body: string): BodyFields | undefined {
