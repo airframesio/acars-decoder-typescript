@@ -629,37 +629,50 @@ function processIMI(decodeResult: DecodeResult, type: string): boolean {
  * - 11 fields: a 12-field report with its last field (usually derate) missing;
  *   the surviving fields keep their 12-field positions;
  * - 12 fields (AA): 0 gross weight, 1 CG, 2 cruise altitude, 3 fuel on board,
- *   5 cost index, 6 taxi fuel, 7 wind, 8 cruise temperature, 9 transition
- *   altitude, 10 assumed temperature, 11 derate;
- * - 18 fields (AA/B6): 0 gross weight, 1 CG, 2 cruise altitude, 3 fuel on
- *   board, 5 cost index, 6 taxi fuel, 8 cruise temperature, 9 transition
- *   altitude, 12 assumed temperature, 13 derate, 14 block fuel, 16 ZFW,
- *   17 ZFW CG;
- * - 19 fields (LATAM/SV/UP): 0 gross weight, 1 CG, 2 cruise altitude, 3 fuel
- *   on board, 5 cost index, 6 taxi fuel, 9 transition altitude, 10 assumed
- *   temperature, 11 derate, 18 cruise temperature.
+ *   4 plan or block fuel, 5 reserve fuel, 6 cost index, 7 wind,
+ *   8 cruise temperature, 9 transition altitude, 10 assumed temperature,
+ *   11 derate;
+ * - 18 fields (AA/B6): same 0-11, plus 12 assumed temperature, 13 derate,
+ *   14 block fuel, 15 taxi fuel, 16 ZFW, 17 ZFW CG;
+ * - 19 fields (LATAM/SV/UP): same as 12 but the cruise temperature moves to
+ *   field 18.
  *
- * Units: gross weight, fuel on board and ZFW are hundreds of pounds (x100);
- * CG and ZFW CG are 0.1 % MAC; taxi fuel is ten-pound units (x10 lb); block
- * fuel is pounds; altitude and transition altitude are hundreds of feet;
- * temperatures are degrees Celsius (`M` = negative); assumed temperature is
- * degrees Celsius (accepted 0-100); derate is the probable companion value
- * (accepted -100 to 100, P0 on most reports). Field 7 is stored as a cruise
- * wind, separately from the wind at the aircraft (case 7): the `DDDSSS` format
- * is confirmed, while "cruise altitude" is inferred from the report's purpose.
+ * The element names and default order follow ARINC Characteristic 702A-5,
+ * Attachment 7 "FMC/Datalink Interface" §7 (PR downlink, 19 fixed-order
+ * elements: gross weight, cruise CG, cruise altitude, fuel remaining, plan or
+ * block fuel, reserve fuel, cost index, cruise wind, TOC/cruise temperature,
+ * climb transition altitude, fuel flow factor, drag factor, perf factor,
+ * idle factor, tropopause altitude, taxi fuel, ZFW, ZFW CG, minimum fuel
+ * temperature). Airline AOC databases customize the layouts actually seen on the wire:
+ * field 14 is block fuel (not tropopause altitude) in the observed 18-field
+ * layout, and the 12/19 layouts drop fields 12-17.
+ *
+ * Units: gross weight, fuel on board, reserve fuel, taxi fuel and ZFW are
+ * hundreds of pounds (x100); CG and ZFW CG are 0.1 % MAC; block fuel is
+ * pounds; altitude and transition altitude are hundreds of feet; temperatures
+ * are degrees Celsius (`M` = negative); assumed temperature is degrees Celsius
+ * (accepted 0-100); derate is the probable companion value (accepted -100 to
+ * 100, P0 on most reports). Field 7 is stored as a cruise wind, separately
+ * from the wind at the aircraft (case 7): the `DDDSSS` format is confirmed,
+ * while "cruise altitude" is inferred from the report's purpose.
  *
  * Evidence: the CG matches the A02 CE/CN field on same-flight pairs; ZFW and
- * ZFW CG match the loadsheet; block fuel is fixed by weight conservation;
- * taxi fuel matches the taxi-out time and TPS TXI FUEL; assumed temperature is
- * labelled `AT/Pxx` in AERODATA/TPS uplinks. The exact condition of the
- * assumed temperature (selected vs maximum at MTOW) depends on the AOC host,
- * so it is named but not further interpreted.
+ * ZFW CG match the loadsheet (NTSB DCA10IA001: /PR ...1231,334 = ZFW 123.1,
+ * ZFW CG 33.4); block fuel is fixed by weight conservation; fields 5/6/15
+ * match the REQPER/PQ request of the same flight at the ARINC positions
+ * (reserve, cost index, taxi fuel). Fields 10-13 (Pxx/Pyy) are named assumed
+ * temperature / derate from the `AT/Pxx` AERODATA and TPS labels; the ARINC
+ * default names for those positions are perf factor / idle factor. The exact
+ * condition of the assumed temperature (selected vs maximum at MTOW) depends
+ * on the AOC host, so it is named but not further interpreted.
  *
  * Field 3 is left in the remaining text unless it matches an existing
  * fuel_on_board, since /DT also shows a figure as fuel on board and the two
- * would clash. Fields 4 and 15 are not decoded and stay in the remaining text.
- * Field counts other than 11, 12, 18 and 19 are not decoded either: their
- * field positions are undocumented, so they stay in the remaining text.
+ * would clash. Field 4 (plan or block fuel) keeps its raw number: the unit is
+ * not documented, observed values are consistent with hundreds of pounds on
+ * LS/SV routes. Field counts other than 11, 12, 18 and 19 are not decoded
+ * either: their field positions are undocumented, so they stay in the
+ * remaining text.
  */
 function processPerformanceData(decodeResult: DecodeResult, data: string[]) {
   if (data.length < 3) {
@@ -809,7 +822,42 @@ function decodePerformanceField(
         hundreds !== undefined &&
         decodeResult.raw.fuel_on_board === hundreds
       );
+    case 4: {
+      // PLAN OR BLOCK FUEL: ARINC Characteristic 702A-5, Attachment 7 §7
+      // (PR element 5). Rare on the wire (17/244 816 messages); unit not
+      // documented, so the raw number is kept without a unit assertion.
+      if (!supportedLayout || !/^\d{1,5}$/.test(value)) {
+        return false;
+      }
+      ResultFormatter.raw(
+        decodeResult,
+        'plan_or_block_fuel',
+        'PLAN_BLOCK_FUEL',
+        'Plan or Block Fuel (unit per AOC host)',
+        `${value}`,
+        Number(value),
+      );
+      return true;
+    }
     case 5: {
+      // RESERVE FUEL: ARINC 702A-5 Att. 7 §7 (PR element 6); hundreds of
+      // pounds, matching the REQPER/PQ reserve of the same flight.
+      if (!supportedLayout || !/^\d{1,3}$/.test(value)) {
+        return false;
+      }
+      const reserve = Number(value) * 100;
+      ResultFormatter.raw(
+        decodeResult,
+        'reserve_fuel',
+        'RESERVE',
+        'Reserve Fuel',
+        `${reserve} pounds`,
+        reserve,
+      );
+      return true;
+    }
+    case 6: {
+      // COST INDEX: ARINC 702A-5 Att. 7 §7 (PR element 7); unitless 0-999.
       if (!supportedLayout || !/^\d{1,3}$/.test(value)) {
         return false;
       }
@@ -821,24 +869,6 @@ function decodePerformanceField(
         'Cost Index',
         `${costIndex}`,
         costIndex,
-      );
-      return true;
-    }
-    case 6: {
-      if (!supportedLayout || !/^\d{1,4}$/.test(value)) {
-        return false;
-      }
-      const pounds = Number(value) * 10;
-      if (pounds > 10000) {
-        return false;
-      }
-      ResultFormatter.raw(
-        decodeResult,
-        'taxi_fuel',
-        'TAXI',
-        'Taxi Fuel',
-        `${pounds} pounds`,
-        pounds,
       );
       return true;
     }
@@ -898,6 +928,26 @@ function decodePerformanceField(
         'Block Fuel',
         `${blockFuel} pounds`,
         blockFuel,
+      );
+      return true;
+    }
+    case 15: {
+      // TAXI FUEL: ARINC 702A-5 Att. 7 §7 (PR element 16), 18-field layout;
+      // hundreds of pounds, echoed from the REQPER/PQ request of the flight.
+      if (length !== 18 || !/^\d{1,3}$/.test(value)) {
+        return false;
+      }
+      const taxi = Number(value) * 100;
+      if (taxi > 36100) {
+        return false;
+      }
+      ResultFormatter.raw(
+        decodeResult,
+        'taxi_fuel',
+        'TAXI',
+        'Taxi Fuel',
+        `${taxi} pounds`,
+        taxi,
       );
       return true;
     }

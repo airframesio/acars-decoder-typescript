@@ -7,13 +7,20 @@ All notable changes to this project will be documented in this file.
 ### Added
 
 - `Arinc702` performance reports (`/PR`): decode the 12-, 18- and 19-field
-  layouts — current CG, cost index, taxi fuel, cruise wind, block fuel, zero
-  fuel weight, zero fuel CG, assumed temperature (`Pxx`) and probable derate
-  (`Pyy`). The `/PR` wind is reported as `cruise_wind_direction` /
-  `cruise_wind_speed` so it no longer overwrites the wind at the aircraft.
+  layouts — current CG, reserve fuel, cost index, cruise wind, block fuel,
+  taxi fuel, zero fuel weight, zero fuel CG, plan or block fuel (idx4),
+  assumed temperature (`Pxx`) and probable derate (`Pyy`). The `/PR` wind is
+  reported as `cruise_wind_direction` / `cruise_wind_speed` so it no longer
+  overwrites the wind at the aircraft.
 
 ### Changed
 
+- `/PR` fields 5 and 6 follow the ARINC Characteristic 702A-5 Attachment 7
+  default element order: field 5 is now `reserve_fuel` (hundreds of pounds)
+  and field 6 is `cost_index`; `taxi_fuel` (hundreds of pounds) moves to field
+  15 of the 18-field layout. Field 4 is decoded as `plan_or_block_fuel` (raw
+  number, unit per AOC host). Same-flight `REQPER/PQ` requests confirm the
+  mapping.
 - `Arinc702` position reports: the field after the temperature is decoded as
   wind (`DDDSSS`, leading zeros dropped), the next field as fuel remaining on
   board (NTSB ACARS legend, hundreds of pounds), and the long variant decodes

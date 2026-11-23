@@ -232,10 +232,10 @@ describe('Label_H1 POS', () => {
     expect(decodeResult.formatted.items[5].value).toBe('23.1 % MAC');
     expect(decodeResult.formatted.items[6].label).toBe('Cruise Altitude');
     expect(decodeResult.formatted.items[6].value).toBe('35000 feet');
-    expect(decodeResult.formatted.items[7].label).toBe('Cost Index');
-    expect(decodeResult.formatted.items[7].value).toBe('0');
-    expect(decodeResult.formatted.items[8].label).toBe('Taxi Fuel');
-    expect(decodeResult.formatted.items[8].value).toBe('0 pounds');
+    expect(decodeResult.formatted.items[7].label).toBe('Reserve Fuel');
+    expect(decodeResult.formatted.items[7].value).toBe('0 pounds');
+    expect(decodeResult.formatted.items[8].label).toBe('Cost Index');
+    expect(decodeResult.formatted.items[8].value).toBe('0');
     expect(decodeResult.formatted.items[9].label).toBe(
       'Cruise Temperature (C)',
     );
@@ -375,10 +375,10 @@ describe('Label_H1 POS', () => {
     expect(decodeResult.formatted.items[10].value).toBe('15.0 % MAC');
     expect(decodeResult.formatted.items[11].label).toBe('Cruise Altitude');
     expect(decodeResult.formatted.items[11].value).toBe('37000 feet');
-    expect(decodeResult.formatted.items[12].label).toBe('Cost Index');
-    expect(decodeResult.formatted.items[12].value).toBe('55');
-    expect(decodeResult.formatted.items[13].label).toBe('Taxi Fuel');
-    expect(decodeResult.formatted.items[13].value).toBe('100 pounds');
+    expect(decodeResult.formatted.items[12].label).toBe('Reserve Fuel');
+    expect(decodeResult.formatted.items[12].value).toBe('5500 pounds');
+    expect(decodeResult.formatted.items[13].label).toBe('Cost Index');
+    expect(decodeResult.formatted.items[13].value).toBe('10');
     expect(decodeResult.formatted.items[14].label).toBe('Cruise Wind');
     expect(decodeResult.formatted.items[14].value).toBe(
       '248 degrees at 28 knots',
@@ -526,8 +526,9 @@ describe('Label_H1 POS', () => {
     expect(decodeResult.raw.cruise_temperature).toBe(-51);
     expect(decodeResult.raw.transition_altitude).toBe(18000);
     expect(decodeResult.raw.center_of_gravity).toBe(23.8);
-    expect(decodeResult.raw.cost_index).toBe(44);
-    expect(decodeResult.raw.taxi_fuel).toBe(90);
+    expect(decodeResult.raw.reserve_fuel).toBe(4400);
+    expect(decodeResult.raw.cost_index).toBe(9);
+    expect(decodeResult.raw.taxi_fuel).toBeUndefined();
     expect(decodeResult.raw.cruise_wind_direction).toBe(287);
     expect(decodeResult.raw.cruise_wind_speed).toBe(60);
     expect(decodeResult.raw.assumed_temperature).toBe(0);
@@ -548,8 +549,9 @@ describe('Label_H1 POS', () => {
     expect(decodeResult.raw.gross_weight).toBe(127100);
     expect(decodeResult.raw.cruise_altitude).toBe(26000);
     expect(decodeResult.raw.center_of_gravity).toBe(22.2);
-    expect(decodeResult.raw.cost_index).toBe(63);
-    expect(decodeResult.raw.taxi_fuel).toBe(800);
+    expect(decodeResult.raw.reserve_fuel).toBe(6300);
+    expect(decodeResult.raw.cost_index).toBe(80);
+    expect(decodeResult.raw.taxi_fuel).toBeUndefined();
     expect(decodeResult.raw.wind_direction).toBe(270);
     expect(decodeResult.raw.wind_speed).toBe(24);
     expect(decodeResult.raw.cruise_wind_direction).toBe(275);
@@ -574,8 +576,9 @@ describe('Label_H1 POS', () => {
     expect(decodeResult.raw.airspeed).toBe(389);
     expect(decodeResult.raw.destination_fuel).toBe(13300);
     expect(decodeResult.raw.center_of_gravity).toBe(22.2);
-    expect(decodeResult.raw.cost_index).toBe(80);
-    expect(decodeResult.raw.taxi_fuel).toBe(410);
+    expect(decodeResult.raw.reserve_fuel).toBe(8000);
+    expect(decodeResult.raw.cost_index).toBe(41);
+    expect(decodeResult.raw.taxi_fuel).toBeUndefined();
     expect(decodeResult.raw.wind_direction).toBe(182);
     expect(decodeResult.raw.wind_speed).toBe(16);
     expect(decodeResult.raw.cruise_wind_direction).toBe(76);
@@ -621,8 +624,9 @@ describe('Label_H1 POS', () => {
     expect(decodeResult.raw.fuel_on_board).toBe(37000);
     expect(decodeResult.raw.center_of_gravity).toBe(23.8);
     expect(decodeResult.raw.cruise_altitude).toBe(34000);
-    expect(decodeResult.raw.cost_index).toBe(44);
-    expect(decodeResult.raw.taxi_fuel).toBe(90);
+    expect(decodeResult.raw.reserve_fuel).toBe(4400);
+    expect(decodeResult.raw.cost_index).toBe(9);
+    expect(decodeResult.raw.taxi_fuel).toBeUndefined();
     expect(decodeResult.raw.cruise_wind_direction).toBe(287);
     expect(decodeResult.raw.cruise_wind_speed).toBe(60);
     expect(decodeResult.raw.cruise_temperature).toBe(-51);

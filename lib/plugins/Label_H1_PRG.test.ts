@@ -76,10 +76,10 @@ describe('Label H1 Preamble PRG', () => {
     expect(decodeResult.formatted.items[5].value).toBe('28.6 % MAC');
     expect(decodeResult.formatted.items[6].label).toBe('Cruise Altitude');
     expect(decodeResult.formatted.items[6].value).toBe('35000 feet');
-    expect(decodeResult.formatted.items[7].label).toBe('Cost Index');
-    expect(decodeResult.formatted.items[7].value).toBe('0');
-    expect(decodeResult.formatted.items[8].label).toBe('Taxi Fuel');
-    expect(decodeResult.formatted.items[8].value).toBe('660 pounds');
+    expect(decodeResult.formatted.items[7].label).toBe('Reserve Fuel');
+    expect(decodeResult.formatted.items[7].value).toBe('0 pounds');
+    expect(decodeResult.formatted.items[8].label).toBe('Cost Index');
+    expect(decodeResult.formatted.items[8].value).toBe('66');
     // Berlin's transition altitude is 5,000 feet
     expect(decodeResult.formatted.items[9].label).toBe('Transition Altitude');
     expect(decodeResult.formatted.items[9].value).toBe('5000 feet');

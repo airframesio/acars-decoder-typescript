@@ -140,8 +140,8 @@ describe('Label_H1 FPN', () => {
     expect(decodeResult.formatted.items[6].value).toBe('34.4 % MAC');
     expect(decodeResult.formatted.items[7].label).toBe('Cruise Altitude');
     expect(decodeResult.formatted.items[7].value).toBe('36000 feet');
-    expect(decodeResult.formatted.items[8].label).toBe('Taxi Fuel');
-    expect(decodeResult.formatted.items[8].value).toBe('130 pounds');
+    expect(decodeResult.formatted.items[8].label).toBe('Cost Index');
+    expect(decodeResult.formatted.items[8].value).toBe('13');
     // Amsterdam's transition altitude is 3,000 feet
     expect(decodeResult.formatted.items[9].label).toBe('Transition Altitude');
     expect(decodeResult.formatted.items[9].value).toBe('3000 feet');
@@ -312,20 +312,23 @@ describe('Label_H1 FPN', () => {
     expect(decodeResult.raw.eta_time).toBe(85448);
     expect(decodeResult.raw.checksum).toBe(0x47c0);
     expect(decodeResult.formatted.description).toBe('Flight Plan');
-    expect(decodeResult.formatted.items.length).toBe(21);
+    expect(decodeResult.formatted.items.length).toBe(23);
+    // the embedded /PR block carries idx4 = 183 (PLAN OR BLOCK FUEL)
+    expect(decodeResult.raw.plan_or_block_fuel).toBe(183);
     // a flight plan sent before departure: 11,000 feet and ISA there, not where the aircraft is
     expect(decodeResult.raw.altitude).toBeUndefined();
     expect(decodeResult.raw.cruise_altitude).toBe(11000);
     expect(decodeResult.raw.cruise_temperature).toBe(-7);
     expect(decodeResult.raw.transition_altitude).toBe(2500);
-    expect(decodeResult.raw.cost_index).toBe(7);
-    expect(decodeResult.raw.taxi_fuel).toBe(130);
+    expect(decodeResult.raw.reserve_fuel).toBe(700);
+    expect(decodeResult.raw.cost_index).toBe(13);
+    expect(decodeResult.raw.taxi_fuel).toBe(1300);
     expect(decodeResult.raw.assumed_temperature).toBe(30);
     expect(decodeResult.raw.derate).toBe(-40);
     expect(decodeResult.raw.block_fuel).toBe(36090);
     expect(decodeResult.raw.zero_fuel_weight).toBe(345500);
     expect(decodeResult.raw.zero_fuel_cg).toBe(30.0);
-    expect(decodeResult.remaining.text).toBe('F37A#M1B/183,13');
+    expect(decodeResult.remaining.text).toBe('F37A#M1B/');
   });
 
   test('decodes Label H1 Preamble FPN <invalid>', () => {
