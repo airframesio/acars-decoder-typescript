@@ -46,7 +46,7 @@ export class RouteUtils {
 
   public static waypointToString(waypoint: Waypoint): string {
     let s = waypoint.name;
-    if (waypoint.latitude && waypoint.longitude) {
+    if (waypoint.latitude !== undefined && waypoint.longitude !== undefined) {
       s += `(${CoordinateUtils.coordinateString({ latitude: waypoint.latitude, longitude: waypoint.longitude })})`;
     }
     if (waypoint.offset) {
