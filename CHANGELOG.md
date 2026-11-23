@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+### Added
+
+- `Label_49`: flight-phase transition reports. The 4-letter code is two 2-letter
+  segment codes; the body carries altitude, indicated airspeed and total air
+  temperature. Supports the signed and unsigned body layouts, masked fields, the
+  `M##AJL` variant and the OUT/OFF/ON/IN events. Segment names that ADS-B only
+  proves by phase are marked inferred.
+
 ## 1.10.0
 
 ### Breaking

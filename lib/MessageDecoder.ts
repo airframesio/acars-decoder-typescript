@@ -66,6 +66,7 @@ const pluginClasses = [
   Plugins.Label_4A_DIS,
   Plugins.Label_4A_DOOR,
   Plugins.Label_4A_Slash_01,
+  Plugins.Label_49,
   Plugins.Label_4N,
   Plugins.Label_4T_AGFSR,
   Plugins.Label_4T_ETA,

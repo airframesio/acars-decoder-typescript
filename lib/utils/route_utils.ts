@@ -18,6 +18,13 @@ export class RouteUtils {
         return 'Descent';
       case 'AP':
         return 'Approach';
+      // Label 49: GA is the only inferred segment we expand. The APGA
+      // sequence (approach, low altitude, then a climb) makes it
+      // unambiguous. FL, RO, TI, SD, PO, ES and TA are left unexpanded:
+      // their acronyms are not documented, and FL is ambiguous with
+      // Flight Level.
+      case 'GA':
+        return 'Go-Around';
       default:
         return `Unknown ${state}`;
     }
