@@ -255,12 +255,65 @@ export class Arinc702Helper {
       ResultFormatter.altitude(decodeResult, Number(data[3]) * 100);
       processRoute(decodeResult, data[1], data[2], data[4], data[5], data[6]);
       ResultFormatter.temperature(decodeResult, data[7]);
-      ResultFormatter.unknown(decodeResult, data[8]);
-      ResultFormatter.unknown(decodeResult, data[9]);
+      // data[8] is wind, written DDDSSS with leading zeros dropped:
+      // `272100` = 272° at 100 kt, `02216` = 022° at 16 kt. The direction is
+      // the one the wind comes FROM (meteorological convention).
+      const wind = parseWind(data[8]);
+      if (wind) {
+        ResultFormatter.wind(decodeResult, wind.direction, wind.speed);
+      } else if (data[8] !== '') {
+        ResultFormatter.unknown(decodeResult, data[8]);
+      }
+      // data[9] is the fuel remaining on board (NTSB ACARS legend), in
+      // hundreds of pounds. The value is kept as-is; the unit is the source
+      // format's. The Southwest 21-field layout has its own fuel field and is
+      // handled by processSouthwestPosition.
+      if (data[9] !== '') {
+        const fuel = Number(data[9]);
+        if (Number.isFinite(fuel)) {
+          ResultFormatter.remainingFuel(decodeResult, fuel);
+        } else {
+          ResultFormatter.unknown(decodeResult, data[9]);
+        }
+      }
+    }
+    if (data.length >= 11) {
+      // variant 2, long: ground speed, TAS, IAS, suffix
+      const groundSpeed = data[10];
+      if (/^\d+$/.test(groundSpeed) && Number(groundSpeed) <= 700) {
+        ResultFormatter.groundspeed(decodeResult, Number(groundSpeed));
+      } else if (groundSpeed !== '') {
+        ResultFormatter.unknown(decodeResult, groundSpeed);
+      }
+    }
+    if (data.length >= 12) {
+      const tas = data[11].match(/^(\d+)K$/);
+      if (tas) {
+        ResultFormatter.airspeed(decodeResult, Number(tas[1]));
+      } else if (data[11] !== '') {
+        ResultFormatter.unknown(decodeResult, data[11]);
+      }
+    }
+    if (data.length >= 13) {
+      const ias = data[12].match(/^(\d+)K$/);
+      if (ias) {
+        ResultFormatter.indicatedAirspeed(decodeResult, Number(ias[1]));
+      } else if (data[12] !== '') {
+        ResultFormatter.unknown(decodeResult, data[12]);
+      }
     }
     if (data.length >= 14) {
-      // variant 2,long
-      ResultFormatter.unknownArr(decodeResult, data.slice(10));
+      ResultFormatter.raw(
+        decodeResult,
+        'trailing_suffix',
+        'TRAILING_SUFFIX',
+        'Trailing Suffix',
+        data[13],
+        data[13],
+      );
+    }
+    if (data.length > 14) {
+      ResultFormatter.unknownArr(decodeResult, data.slice(14));
     }
   }
 
@@ -285,6 +338,33 @@ export class Arinc702Helper {
     }
     decodeResult.raw.message_timestamp = time;
   }
+}
+
+/**
+ * Parses a wind field written as DDDSSS with leading zeros dropped.
+ * `272100` = 272° at 100 kt; `02216` = 022° at 16 kt. The direction follows
+ * the meteorological convention: it is the direction the wind comes FROM.
+ *
+ * Only 5- and 6-digit values are accepted: a 4-digit value is ambiguous
+ * (`1726` can be 172°/6 kt or 017°/26 kt), so it is left to the caller as
+ * unknown instead of being guessed.
+ *
+ * @param value - the raw field, as it appears after the temperature
+ * @returns the direction the wind comes from (0-360°) and its speed
+ *          (0-200 kt), or undefined when the field is not a plausible wind
+ */
+export function parseWind(
+  value: string,
+): { direction: number; speed: number } | undefined {
+  if (!/^\d{5,6}$/.test(value)) {
+    return undefined;
+  }
+  const direction = Number(value.slice(0, 3));
+  const speed = Number(value.slice(3));
+  if (direction > 360 || speed > 200) {
+    return undefined;
+  }
+  return { direction, speed };
 }
 
 function processETA(

@@ -55,8 +55,11 @@ describe('Label H1 /', () => {
     expect(decodeResult.raw.outside_air_temperature).toBe(-45);
     expect(decodeResult.raw.ground_address).toBe('HDQDLUA');
     expect(decodeResult.raw.checksum).toBe(0x0721);
-    expect(decodeResult.formatted.items.length).toBe(6);
-    expect(decodeResult.remaining.text).toBe('/HDQDLUA.20967,194/CA');
+    expect(decodeResult.formatted.items.length).toBe(8);
+    expect(decodeResult.raw.wind_direction).toBe(209);
+    expect(decodeResult.raw.wind_speed).toBe(67);
+    expect(decodeResult.raw.fuel_remaining).toBe(194);
+    expect(decodeResult.remaining.text).toBe('/HDQDLUA.CA');
   });
 
   test('decodes variant 3', () => {
@@ -68,7 +71,7 @@ describe('Label H1 /', () => {
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.formatted.description).toBe('Position Report');
     expect(decodeResult.raw.message_timestamp).toBe(1731592882);
-    expect(decodeResult.formatted.items.length).toBe(5);
+    expect(decodeResult.formatted.items.length).toBe(7);
     expect(decodeResult.formatted.items[0].label).toBe('Aircraft Position');
     expect(decodeResult.formatted.items[0].value).toBe('38.535 N, 78.005 W');
     expect(decodeResult.formatted.items[1].label).toBe('Altitude');
@@ -81,9 +84,12 @@ describe('Label H1 /', () => {
       'Outside Air Temperature (C)',
     );
     expect(decodeResult.formatted.items[3].value).toBe('-56 degrees');
-    expect(decodeResult.formatted.items[4].label).toBe('Message Checksum');
-    expect(decodeResult.formatted.items[4].value).toBe('0x6763');
-    expect(decodeResult.remaining.text).toBe('/.24739,127');
+    expect(decodeResult.raw.wind_direction).toBe(247);
+    expect(decodeResult.raw.wind_speed).toBe(39);
+    expect(decodeResult.raw.fuel_remaining).toBe(127);
+    expect(decodeResult.formatted.items[6].label).toBe('Message Checksum');
+    expect(decodeResult.formatted.items[6].value).toBe('0x6763');
+    expect(decodeResult.remaining.text).toBe('/.830');
   });
 
   test('does not decode invalid', () => {

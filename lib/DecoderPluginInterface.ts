@@ -37,9 +37,13 @@ export interface RawFields {
   indicated_airspeed?: number;
   mach?: number;
   track?: number;
+  /** Direction the wind comes from (meteorological convention), degrees. */
   wind_direction?: number;
+  /** Wind speed, knots. */
   wind_speed?: number;
   wind_variable?: boolean;
+  /** POSN long-variant trailing suffix, usually `73`. */
+  trailing_suffix?: string;
 
   // Flight identification
   flight_number?: string;
@@ -95,6 +99,7 @@ export interface RawFields {
   // Fuel
   fuel_on_board?: number;
   fuel_burned?: number;
+  /** Fuel remaining on board; the unit is the source format's (POSN: hundreds of pounds). */
   fuel_remaining?: number;
   fuel_in_tons?: number;
   out_fuel?: number;

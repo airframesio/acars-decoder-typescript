@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+### Changed
+
+- `Arinc702` position reports: the field after the temperature is decoded as
+  wind (`DDDSSS`, leading zeros dropped), the next field as fuel remaining on
+  board (NTSB ACARS legend, hundreds of pounds), and the long variant decodes
+  ground speed, TAS and IAS. Four-digit wind values are left unknown because
+  they are ambiguous. The Southwest 21-field layout keeps its own fuel field.
+
 ## 1.10.0
 
 ### Breaking
