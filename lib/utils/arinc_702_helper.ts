@@ -436,6 +436,28 @@ function processIdentification(decodeResult: DecodeResult, data: string[]) {
   }
 }
 
+/**
+ * Predicted fuel remaining at destination (ARINC 702A-5 Att. 7 §7, /DT
+ * element 3; 0.1 Klbs = hundreds of pounds). Kept separate from
+ * fuel_on_board: the /DT figure is a forecast at arrival, not the fuel on
+ * board when the report was sent.
+ */
+function destinationFuel(decodeResult: DecodeResult, value: string) {
+  if (!/^\d+$/.test(value)) {
+    return false;
+  }
+  const hundreds = Number(value) * 100;
+  ResultFormatter.raw(
+    decodeResult,
+    'destination_fuel',
+    'DEST_FUEL',
+    'Fuel at Destination',
+    `${hundreds}`,
+    hundreds,
+  );
+  return true;
+}
+
 function processDT(decodeResult: DecodeResult, data: string[]) {
   if (data.length === 9) {
     ResultFormatter.unknown(decodeResult, data[0]);
@@ -443,7 +465,9 @@ function processDT(decodeResult: DecodeResult, data: string[]) {
       ResultFormatter.arrivalAirport(decodeResult, data[1]);
     }
     ResultFormatter.arrivalRunway(decodeResult, data[2]);
-    ResultFormatter.currentFuel(decodeResult, parseInt(data[3], 10));
+    if (!destinationFuel(decodeResult, data[3])) {
+      ResultFormatter.unknown(decodeResult, data[3]);
+    }
     ResultFormatter.eta(
       decodeResult,
       DateTimeUtils.convertHHMMSSToTod(data[4]),
@@ -462,13 +486,16 @@ function processDT(decodeResult: DecodeResult, data: string[]) {
       ResultFormatter.arrivalAirport(decodeResult, data[0]);
     }
     ResultFormatter.arrivalRunway(decodeResult, data[1]);
-    ResultFormatter.currentFuel(decodeResult, parseInt(data[2], 10));
+    if (!destinationFuel(decodeResult, data[2])) {
+      ResultFormatter.unknown(decodeResult, data[2]);
+    }
     ResultFormatter.eta(
       decodeResult,
       DateTimeUtils.convertHHMMSSToTod(data[3]),
     );
     if (data.length > 4) {
-      ResultFormatter.remainingFuel(decodeResult, Number(data[4]));
+      // Report stimulus, not fuel (ARINC 702A-5 Att. 7 §7, /DT element 5).
+      ResultFormatter.unknown(decodeResult, data[4]);
     }
     return;
   }
@@ -666,10 +693,11 @@ function processIMI(decodeResult: DecodeResult, type: string): boolean {
  * condition of the assumed temperature (selected vs maximum at MTOW) depends
  * on the AOC host, so it is named but not further interpreted.
  *
- * Field 3 is left in the remaining text unless it matches an existing
- * fuel_on_board, since /DT also shows a figure as fuel on board and the two
- * would clash. Field 4 (plan or block fuel) keeps its raw number: the unit is
- * not documented, observed values are consistent with hundreds of pounds on
+ * Field 3 (fuel remaining, hundreds of pounds) becomes fuel_on_board when no
+ * other IEI supplied it; if one did (/DT also shows fuel on board), it is
+ * accepted only when the values agree, so the two figures do not clash.
+ * Field 4 (plan or block fuel) keeps its raw number: the unit is not
+ * documented, observed values are consistent with hundreds of pounds on
  * LS/SV routes. Field counts other than 11, 12, 18 and 19 are not decoded
  * either: their field positions are undocumented, so they stay in the
  * remaining text.
@@ -816,12 +844,20 @@ function decodePerformanceField(
         hundreds,
       );
       return true;
-    case 3:
-      return (
-        supportedLayout &&
-        hundreds !== undefined &&
-        decodeResult.raw.fuel_on_board === hundreds
-      );
+    case 3: {
+      // FUEL REMAINING: ARINC 702A-5 Att. 7 §7 (PR element 4), hundreds of
+      // pounds. When no other IEI (e.g. /DT) supplied fuel_on_board, this is
+      // the fuel on board at report time; when one did, only accept an
+      // identical value so the two figures do not clash.
+      if (!supportedLayout || hundreds === undefined) {
+        return false;
+      }
+      if (decodeResult.raw.fuel_on_board === undefined) {
+        ResultFormatter.currentFuel(decodeResult, hundreds);
+        return true;
+      }
+      return decodeResult.raw.fuel_on_board === hundreds;
+    }
     case 4: {
       // PLAN OR BLOCK FUEL: ARINC Characteristic 702A-5, Attachment 7 §7
       // (PR element 5). Rare on the wire (17/244 816 messages); unit not

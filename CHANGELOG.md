@@ -7,11 +7,22 @@ All notable changes to this project will be documented in this file.
 ### Added
 
 - `Arinc702` performance reports (`/PR`): decode the 12-, 18- and 19-field
-  layouts — current CG, reserve fuel, cost index, cruise wind, block fuel,
-  taxi fuel, zero fuel weight, zero fuel CG, plan or block fuel (idx4),
-  assumed temperature (`Pxx`) and probable derate (`Pyy`). The `/PR` wind is
-  reported as `cruise_wind_direction` / `cruise_wind_speed` so it no longer
-  overwrites the wind at the aircraft.
+  layouts — fuel remaining at report time (`fuel_on_board`, idx3), current
+  CG, reserve fuel, cost index, cruise wind, block fuel, taxi fuel, zero fuel
+  weight, zero fuel CG, plan or block fuel (idx4), assumed temperature
+  (`Pxx`) and probable derate (`Pyy`). The `/PR` wind is reported as
+  `cruise_wind_direction` / `cruise_wind_speed` so it no longer overwrites the
+  wind at the aircraft.
+
+### Fixed
+
+- `Arinc702` destination reports (`/DT`): the fuel field is the **predicted
+  fuel remaining at destination** (ARINC 702A-5 Att. 7 §7, /DT element 3,
+  0.1 Klbs per Boeing D922A601), now decoded as `destination_fuel` instead of
+  overwriting `fuel_on_board` with the current fuel. The trailing element is
+  the report stimulus, no longer exposed as `fuel_remaining`. Together with
+  `/PR` idx3 this takes the share of fully decoded `PER/…/PR` messages from
+  0 % to ~97 % on the 244 816-message corpus.
 
 ### Changed
 

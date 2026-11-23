@@ -17,10 +17,14 @@ describe('Label H1 Preamble PRG', () => {
     const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
-    expect(decodeResult.decoder.decodeLevel).toBe('full');
+    expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.raw.flight_number).toBe('EXS67TP');
+    // /DT element 3 is the predicted fuel remaining at destination
+    // (0.1 Klbs); the trailing element is the report stimulus, not fuel.
+    expect(decodeResult.raw.destination_fuel).toBe(6700);
+    expect(decodeResult.raw.fuel_remaining).toBeUndefined();
     expect(decodeResult.formatted.description).toBe('Progress Report');
-    expect(decodeResult.formatted.items.length).toBe(6);
+    expect(decodeResult.formatted.items.length).toBe(5);
   });
 
   test('decodes Label H1 Preamble PRG/LR', () => {
@@ -43,11 +47,12 @@ describe('Label H1 Preamble PRG', () => {
     const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
-    expect(decodeResult.decoder.decodeLevel).toBe('full');
+    expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.raw.flight_number).toBe('SAS87W');
     expect(decodeResult.raw.message_timestamp).toBe(1708781205);
+    expect(decodeResult.raw.destination_fuel).toBe(6900);
     expect(decodeResult.formatted.description).toBe('Progress Report');
-    expect(decodeResult.formatted.items.length).toBe(6);
+    expect(decodeResult.formatted.items.length).toBe(5);
   });
 
   test('decodes Label H1 PRG with flightplan', () => {
@@ -59,13 +64,13 @@ describe('Label H1 Preamble PRG', () => {
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.formatted.description).toBe('Progress Report');
-    expect(decodeResult.formatted.items.length).toBe(21);
+    expect(decodeResult.formatted.items.length).toBe(22);
     expect(decodeResult.formatted.items[0].label).toBe('Destination');
     expect(decodeResult.formatted.items[0].value).toBe('GCRR');
     expect(decodeResult.formatted.items[1].label).toBe('Arrival Runway');
     expect(decodeResult.formatted.items[1].value).toBe('03O');
-    expect(decodeResult.formatted.items[2].label).toBe('Fuel On Board');
-    expect(decodeResult.formatted.items[2].value).toBe('62');
+    expect(decodeResult.formatted.items[2].label).toBe('Fuel at Destination');
+    expect(decodeResult.formatted.items[2].value).toBe('6200');
     expect(decodeResult.formatted.items[3].label).toBe(
       'Estimated Time of Arrival',
     );
@@ -76,39 +81,41 @@ describe('Label H1 Preamble PRG', () => {
     expect(decodeResult.formatted.items[5].value).toBe('28.6 % MAC');
     expect(decodeResult.formatted.items[6].label).toBe('Cruise Altitude');
     expect(decodeResult.formatted.items[6].value).toBe('35000 feet');
-    expect(decodeResult.formatted.items[7].label).toBe('Reserve Fuel');
-    expect(decodeResult.formatted.items[7].value).toBe('0 pounds');
-    expect(decodeResult.formatted.items[8].label).toBe('Cost Index');
-    expect(decodeResult.formatted.items[8].value).toBe('66');
+    expect(decodeResult.formatted.items[7].label).toBe('Fuel On Board');
+    expect(decodeResult.formatted.items[7].value).toBe('23900');
+    expect(decodeResult.formatted.items[8].label).toBe('Reserve Fuel');
+    expect(decodeResult.formatted.items[8].value).toBe('0 pounds');
+    expect(decodeResult.formatted.items[9].label).toBe('Cost Index');
+    expect(decodeResult.formatted.items[9].value).toBe('66');
     // Berlin's transition altitude is 5,000 feet
-    expect(decodeResult.formatted.items[9].label).toBe('Transition Altitude');
-    expect(decodeResult.formatted.items[9].value).toBe('5000 feet');
-    expect(decodeResult.formatted.items[10].label).toBe('Assumed Temperature');
-    expect(decodeResult.formatted.items[10].value).toBe('19 degrees');
-    expect(decodeResult.formatted.items[11].label).toBe('Derate (probable)');
-    expect(decodeResult.formatted.items[11].value).toBe('0');
-    expect(decodeResult.formatted.items[12].label).toBe('Block Fuel');
-    expect(decodeResult.formatted.items[12].value).toBe('27440 pounds');
-    expect(decodeResult.formatted.items[13].label).toBe('Zero Fuel Weight');
-    expect(decodeResult.formatted.items[13].value).toBe('130500 pounds');
-    expect(decodeResult.formatted.items[14].label).toBe('Zero Fuel CG');
-    expect(decodeResult.formatted.items[14].value).toBe('30.3 % MAC');
-    expect(decodeResult.formatted.items[15].label).toBe('Route Status');
-    expect(decodeResult.formatted.items[15].value).toBe('Route Planned');
-    expect(decodeResult.formatted.items[16].label).toBe('Origin');
-    expect(decodeResult.formatted.items[16].value).toBe('EDDB');
-    expect(decodeResult.formatted.items[17].label).toBe('Destination');
-    expect(decodeResult.formatted.items[17].value).toBe(
+    expect(decodeResult.formatted.items[10].label).toBe('Transition Altitude');
+    expect(decodeResult.formatted.items[10].value).toBe('5000 feet');
+    expect(decodeResult.formatted.items[11].label).toBe('Assumed Temperature');
+    expect(decodeResult.formatted.items[11].value).toBe('19 degrees');
+    expect(decodeResult.formatted.items[12].label).toBe('Derate (probable)');
+    expect(decodeResult.formatted.items[12].value).toBe('0');
+    expect(decodeResult.formatted.items[13].label).toBe('Block Fuel');
+    expect(decodeResult.formatted.items[13].value).toBe('27440 pounds');
+    expect(decodeResult.formatted.items[14].label).toBe('Zero Fuel Weight');
+    expect(decodeResult.formatted.items[14].value).toBe('130500 pounds');
+    expect(decodeResult.formatted.items[15].label).toBe('Zero Fuel CG');
+    expect(decodeResult.formatted.items[15].value).toBe('30.3 % MAC');
+    expect(decodeResult.formatted.items[16].label).toBe('Route Status');
+    expect(decodeResult.formatted.items[16].value).toBe('Route Planned');
+    expect(decodeResult.formatted.items[17].label).toBe('Origin');
+    expect(decodeResult.formatted.items[17].value).toBe('EDDB');
+    expect(decodeResult.formatted.items[18].label).toBe('Destination');
+    expect(decodeResult.formatted.items[18].value).toBe(
       'GCRR..N50059E004552..N49588E004338..N49241E002528..N49122E002199..PON.UN872..ERIGA..FUJTI',
     ); // TODO - pull out route
-    expect(decodeResult.formatted.items[18].label).toBe('Arrival Procedure');
-    expect(decodeResult.formatted.items[18].value).toBe('TERT1P');
-    expect(decodeResult.formatted.items[19].label).toBe('Approach Procedure');
-    expect(decodeResult.formatted.items[19].value).toBe(
+    expect(decodeResult.formatted.items[19].label).toBe('Arrival Procedure');
+    expect(decodeResult.formatted.items[19].value).toBe('TERT1P');
+    expect(decodeResult.formatted.items[20].label).toBe('Approach Procedure');
+    expect(decodeResult.formatted.items[20].value).toBe(
       'ILSZ03 starting at BAPAL(03O)',
     );
-    expect(decodeResult.formatted.items[20].label).toBe('Message Checksum');
-    expect(decodeResult.formatted.items[20].value).toBe('0x226d');
+    expect(decodeResult.formatted.items[21].label).toBe('Message Checksum');
+    expect(decodeResult.formatted.items[21].value).toBe('0x226d');
     expect(decodeResult.remaining.text).toBe(
       ':WS:FUJTI,360..BAKUP..BATAX..TAKAV..VEDOD',
     );
@@ -124,7 +131,7 @@ describe('Label H1 Preamble PRG', () => {
     expect(decodeResult.raw.arrival_runway).toBe('31R');
     expect(decodeResult.raw.position.latitude).toBe(38.584);
     expect(decodeResult.raw.position.longitude).toBe(-77.333);
-    expect(decodeResult.raw.fuel_on_board).toBe(62);
+    expect(decodeResult.raw.destination_fuel).toBe(6200);
     expect(decodeResult.raw.checksum).toBe(0x2b3c);
     expect(decodeResult.formatted.description).toBe('Progress Report');
     expect(decodeResult.formatted.items.length).toBe(6);

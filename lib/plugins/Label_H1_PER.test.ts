@@ -18,7 +18,7 @@ describe('Label_H1 PER', () => {
     const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
-    expect(decodeResult.decoder.decodeLevel).toBe('partial');
+    expect(decodeResult.decoder.decodeLevel).toBe('full');
     expect(decodeResult.raw.checksum).toBe(0x2917);
     expect(decodeResult.raw.gross_weight).toBe(133700);
     expect(decodeResult.raw.center_of_gravity).toBe(26.2);
@@ -31,6 +31,7 @@ describe('Label_H1 PER', () => {
     expect(decodeResult.raw.transition_altitude).toBe(18000);
     expect(decodeResult.raw.assumed_temperature).toBe(52);
     expect(decodeResult.raw.derate).toBe(0);
+    expect(decodeResult.raw.fuel_on_board).toBe(22200);
     expect(item(decodeResult, 'Gross Weight')).toBe('133700 pounds');
     expect(item(decodeResult, 'Centre of Gravity')).toBe('26.2 % MAC');
     expect(item(decodeResult, 'Cruise Altitude')).toBe('32000 feet');
@@ -42,7 +43,7 @@ describe('Label_H1 PER', () => {
     expect(item(decodeResult, 'Assumed Temperature')).toBe('52 degrees');
     expect(item(decodeResult, 'Derate (probable)')).toBe('0');
     expect(item(decodeResult, 'Message Checksum')).toBeDefined();
-    expect(decodeResult.remaining.text).toBe('222');
+    expect(decodeResult.remaining.text).toBe('');
   });
 
   test('decodes long variant (18 fields)', () => {
@@ -51,7 +52,7 @@ describe('Label_H1 PER', () => {
     const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
-    expect(decodeResult.decoder.decodeLevel).toBe('partial');
+    expect(decodeResult.decoder.decodeLevel).toBe('full');
     expect(decodeResult.raw.checksum).toBe(0x388d);
     expect(decodeResult.raw.gross_weight).toBe(121800);
     expect(decodeResult.raw.center_of_gravity).toBe(27.6);
@@ -73,7 +74,8 @@ describe('Label_H1 PER', () => {
     expect(item(decodeResult, 'Zero Fuel Weight')).toBe('108400 pounds');
     expect(item(decodeResult, 'Zero Fuel CG')).toBe('28.4 % MAC');
     expect(decodeResult.raw.plan_or_block_fuel).toBeUndefined();
-    expect(decodeResult.remaining.text).toBe('134');
+    expect(decodeResult.raw.fuel_on_board).toBe(13400);
+    expect(decodeResult.remaining.text).toBe('');
   });
 
   test('decodes idx4 as plan or block fuel (ARINC 702A-5 Att. 7)', () => {
@@ -90,7 +92,8 @@ describe('Label_H1 PER', () => {
     expect(item(decodeResult, 'Plan or Block Fuel (unit per AOC host)')).toBe(
       '214',
     );
-    expect(decodeResult.remaining.text).toBe('222');
+    expect(decodeResult.raw.fuel_on_board).toBe(22200);
+    expect(decodeResult.remaining.text).toBe('');
   });
 
   test('decodes 19-field layout', () => {
@@ -98,7 +101,7 @@ describe('Label_H1 PER', () => {
     const decodeResult = plugin.decode(message);
 
     expect(decodeResult.decoded).toBe(true);
-    expect(decodeResult.decoder.decodeLevel).toBe('partial');
+    expect(decodeResult.decoder.decodeLevel).toBe('full');
     expect(decodeResult.raw.checksum).toBe(0xf07d);
     expect(decodeResult.raw.gross_weight).toBe(336700);
     expect(decodeResult.raw.center_of_gravity).toBe(28.0);
@@ -111,7 +114,8 @@ describe('Label_H1 PER', () => {
     expect(decodeResult.raw.cruise_temperature).toBe(-25);
     expect(item(decodeResult, 'Assumed Temperature')).toBe('13 degrees');
     expect(item(decodeResult, 'Cruise Temperature (C)')).toBe('-25 degrees');
-    expect(decodeResult.remaining.text).toBe('168');
+    expect(decodeResult.raw.fuel_on_board).toBe(16800);
+    expect(decodeResult.remaining.text).toBe('');
   });
 
   test('leaves implausible or malformed values in remaining', () => {
