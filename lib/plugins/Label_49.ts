@@ -112,10 +112,15 @@ export class Label_49 extends DecoderPlugin {
     }
 
     if (/^[0-9]{6}$/.test(time)) {
-      result.raw.day = Number(time.slice(0, 2));
-      result.raw.message_timestamp = DateTimeUtils.convertHHMMSSToTod(
-        time.slice(2),
-      );
+      const day = Number(time.slice(0, 2));
+      const hour = Number(time.slice(2, 4));
+      const minute = Number(time.slice(4, 6));
+      if (day >= 1 && day <= 31 && hour <= 23 && minute <= 59) {
+        result.raw.day = day;
+        result.raw.message_timestamp = DateTimeUtils.convertHHMMSSToTod(
+          time.slice(2),
+        );
+      }
     }
 
     if (!isSwap && /^[A-Z]{4}$/.test(origin)) {
@@ -136,10 +141,20 @@ export class Label_49 extends DecoderPlugin {
       }
     }
 
-    const body = this.parseBody(lines[1].trim());
+    // Strip formatting whitespace before a signed value (the AJL body starts
+    // with a tab), but keep the leading space of the unsigned layout: it is a
+    // field position, not formatting.
+    const bodyLine = lines[1].replace(/^[\t ]*([+-])/, '$1').trimEnd();
+    const body = this.parseBody(bodyLine);
     if (!body) {
       return this.failUnknown(result, message.text, options);
     }
+
+    const trailing = lines
+      .slice(2)
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0)
+      .join('\n');
 
     if (body.altitude !== undefined) {
       ResultFormatter.altitude(result, body.altitude);
@@ -153,6 +168,9 @@ export class Label_49 extends DecoderPlugin {
     if (body.extra) {
       ResultFormatter.unknown(result, body.extra);
     }
+    if (trailing) {
+      ResultFormatter.unknown(result, trailing, '\n');
+    }
 
     const parsed = [body.altitude, body.ias, body.tat].filter(
       (value) => value !== undefined,
@@ -160,7 +178,7 @@ export class Label_49 extends DecoderPlugin {
     this.setDecodeLevel(
       result,
       true,
-      parsed === 3 && !body.extra ? 'full' : 'partial',
+      parsed === 3 && !body.extra && !trailing ? 'full' : 'partial',
     );
 
     this.debug(options, reportCode, previous, next, body);
@@ -174,9 +192,6 @@ export class Label_49 extends DecoderPlugin {
 
     const core = body.slice(0, 17);
     const extra = body.slice(17);
-    if (extra && !/^[0-9*]+$/.test(extra)) {
-      return undefined;
-    }
 
     const num = (value: string): number | undefined => {
       const trimmed = value.trim();
@@ -201,7 +216,10 @@ export class Label_49 extends DecoderPlugin {
             ? undefined
             : altitude * (core[0] === '-' ? -1 : 1),
         ias,
-        tat: tat === undefined ? undefined : tat * (core[11] === '-' ? -1 : 1),
+        tat:
+          tat === undefined || (core[11] !== '+' && core[11] !== '-')
+            ? undefined
+            : tat * (core[11] === '-' ? -1 : 1),
         extra: extra || undefined,
       };
     }

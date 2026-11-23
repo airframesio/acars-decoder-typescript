@@ -148,6 +148,56 @@ describe('Label 49', () => {
     expect(result.remaining.text).toContain('*');
   });
 
+  test('does not emit an invalid header time', () => {
+    message.text = '01ERDCUAL770    /042400LEBLKORD\r\n+31994297.4- 11.1';
+    const result = plugin.decode(message);
+
+    expect(result.decoded).toBe(true);
+    expect(result.raw.day).toBeUndefined();
+    expect(result.raw.message_timestamp).toBeUndefined();
+  });
+
+  test('keeps leading spaces in the unsigned layout', () => {
+    message.text = '01DCAP    AAL123/222233KDFWKJFK\r\n 1903 158.3 +17.7';
+    const result = plugin.decode(message);
+
+    expect(result.raw.altitude).toBe(1903);
+    expect(result.raw.indicated_airspeed).toBeCloseTo(158.3, 3);
+    expect(result.raw.total_air_temperature).toBeCloseTo(17.7, 3);
+  });
+
+  test('keeps a textual trailer', () => {
+    message.text =
+      '01CLER    AAL123/222233KDFWKJFK\r\n+33998298.1- 17.5/FOB 010600';
+    const result = plugin.decode(message);
+
+    expect(result.raw.altitude).toBe(33998);
+    expect(result.raw.indicated_airspeed).toBeCloseTo(298.1, 3);
+    expect(result.raw.total_air_temperature).toBeCloseTo(-17.5, 3);
+    expect(result.decoder.decodeLevel).toBe('partial');
+    expect(result.remaining.text).toBe('/FOB 010600');
+  });
+
+  test('keeps a masked TAT sign unknown', () => {
+    message.text = '01ERDCUAL770    /042300LEBLKORD\r\n+31994297.4* 11.1';
+    const result = plugin.decode(message);
+
+    expect(result.raw.altitude).toBe(31994);
+    expect(result.raw.indicated_airspeed).toBeCloseTo(297.4, 3);
+    expect(result.raw.total_air_temperature).toBeUndefined();
+    expect(result.decoder.decodeLevel).toBe('partial');
+  });
+
+  test('keeps lines after the body', () => {
+    message.text =
+      '01ERDCUAL770    /042300LEBLKORD\r\n+31994297.4- 11.1\r\n/FOB 010600';
+    const result = plugin.decode(message);
+
+    expect(result.raw.altitude).toBe(31994);
+    expect(result.remaining.text).toBe('/FOB 010600');
+    expect(result.decoder.decodeLevel).toBe('partial');
+  });
+
   test('does not decode other label 49 text', () => {
     message.text = 'POS Bogus message';
     const result = plugin.decode(message);
