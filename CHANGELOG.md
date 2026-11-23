@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+### Added
+
+- `Arinc702` performance reports (`/PR`): decode the 12-, 18- and 19-field
+  layouts — current CG, cost index, taxi fuel, cruise wind, block fuel, zero
+  fuel weight, zero fuel CG, assumed temperature (`Pxx`) and probable derate
+  (`Pyy`). The `/PR` wind is reported as `cruise_wind_direction` /
+  `cruise_wind_speed` so it no longer overwrites the wind at the aircraft.
+
 ### Changed
 
 - `Arinc702` position reports: the field after the temperature is decoded as

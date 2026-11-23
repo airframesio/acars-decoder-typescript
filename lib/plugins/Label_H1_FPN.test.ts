@@ -121,7 +121,7 @@ describe('Label_H1 FPN', () => {
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.raw.message_timestamp).toBe(1708178417);
     expect(decodeResult.formatted.description).toBe('Flight Plan');
-    expect(decodeResult.formatted.items.length).toBe(12);
+    expect(decodeResult.formatted.items.length).toBe(19);
     expect(decodeResult.formatted.items[0].label).toBe('Route Status');
     expect(decodeResult.formatted.items[0].value).toBe('Route Planned');
     expect(decodeResult.formatted.items[1].label).toBe('Origin');
@@ -136,21 +136,35 @@ describe('Label_H1 FPN', () => {
     expect(decodeResult.formatted.items[4].value).toBe('ILS30L(30L)');
     expect(decodeResult.formatted.items[5].label).toBe('Gross Weight');
     expect(decodeResult.formatted.items[5].value).toBe('435600 pounds');
-    expect(decodeResult.formatted.items[6].label).toBe('Cruise Altitude');
-    expect(decodeResult.formatted.items[6].value).toBe('36000 feet');
+    expect(decodeResult.formatted.items[6].label).toBe('Centre of Gravity');
+    expect(decodeResult.formatted.items[6].value).toBe('34.4 % MAC');
+    expect(decodeResult.formatted.items[7].label).toBe('Cruise Altitude');
+    expect(decodeResult.formatted.items[7].value).toBe('36000 feet');
+    expect(decodeResult.formatted.items[8].label).toBe('Taxi Fuel');
+    expect(decodeResult.formatted.items[8].value).toBe('130 pounds');
     // Amsterdam's transition altitude is 3,000 feet
-    expect(decodeResult.formatted.items[7].label).toBe('Transition Altitude');
-    expect(decodeResult.formatted.items[7].value).toBe('3000 feet');
-    expect(decodeResult.formatted.items[8].label).toBe('Arrival Runway');
-    expect(decodeResult.formatted.items[8].value).toBe('30L');
-    expect(decodeResult.formatted.items[9].label).toBe('Fuel On Board');
-    expect(decodeResult.formatted.items[9].value).toBe('172');
-    expect(decodeResult.formatted.items[10].label).toBe(
+    expect(decodeResult.formatted.items[9].label).toBe('Transition Altitude');
+    expect(decodeResult.formatted.items[9].value).toBe('3000 feet');
+    expect(decodeResult.formatted.items[10].label).toBe('Assumed Temperature');
+    expect(decodeResult.formatted.items[10].value).toBe('50 degrees');
+    expect(decodeResult.formatted.items[11].label).toBe('Derate (probable)');
+    expect(decodeResult.formatted.items[11].value).toBe('-40');
+    expect(decodeResult.formatted.items[12].label).toBe('Block Fuel');
+    expect(decodeResult.formatted.items[12].value).toBe('36090 pounds');
+    expect(decodeResult.formatted.items[13].label).toBe('Zero Fuel Weight');
+    expect(decodeResult.formatted.items[13].value).toBe('329600 pounds');
+    expect(decodeResult.formatted.items[14].label).toBe('Zero Fuel CG');
+    expect(decodeResult.formatted.items[14].value).toBe('29.2 % MAC');
+    expect(decodeResult.formatted.items[15].label).toBe('Arrival Runway');
+    expect(decodeResult.formatted.items[15].value).toBe('30L');
+    expect(decodeResult.formatted.items[16].label).toBe('Fuel On Board');
+    expect(decodeResult.formatted.items[16].value).toBe('172');
+    expect(decodeResult.formatted.items[17].label).toBe(
       'Estimated Time of Arrival',
     );
-    expect(decodeResult.formatted.items[10].value).toBe('21:51:17');
-    expect(decodeResult.formatted.items[11].label).toBe('Message Checksum');
-    expect(decodeResult.formatted.items[11].value).toBe('0x156d');
+    expect(decodeResult.formatted.items[17].value).toBe('21:51:17');
+    expect(decodeResult.formatted.items[18].label).toBe('Message Checksum');
+    expect(decodeResult.formatted.items[18].value).toBe('0x156d');
   });
 
   test('decodes Label H1 Preamble FPN with newlines', () => {
@@ -298,15 +312,20 @@ describe('Label_H1 FPN', () => {
     expect(decodeResult.raw.eta_time).toBe(85448);
     expect(decodeResult.raw.checksum).toBe(0x47c0);
     expect(decodeResult.formatted.description).toBe('Flight Plan');
-    expect(decodeResult.formatted.items.length).toBe(14);
+    expect(decodeResult.formatted.items.length).toBe(21);
     // a flight plan sent before departure: 11,000 feet and ISA there, not where the aircraft is
     expect(decodeResult.raw.altitude).toBeUndefined();
     expect(decodeResult.raw.cruise_altitude).toBe(11000);
     expect(decodeResult.raw.cruise_temperature).toBe(-7);
     expect(decodeResult.raw.transition_altitude).toBe(2500);
-    expect(decodeResult.remaining.text).toBe(
-      'F37A#M1B/,,,183,7,13,,,,P30,M40,36090,13,3455,300',
-    );
+    expect(decodeResult.raw.cost_index).toBe(7);
+    expect(decodeResult.raw.taxi_fuel).toBe(130);
+    expect(decodeResult.raw.assumed_temperature).toBe(30);
+    expect(decodeResult.raw.derate).toBe(-40);
+    expect(decodeResult.raw.block_fuel).toBe(36090);
+    expect(decodeResult.raw.zero_fuel_weight).toBe(345500);
+    expect(decodeResult.raw.zero_fuel_cg).toBe(30.0);
+    expect(decodeResult.remaining.text).toBe('F37A#M1B/183,13');
   });
 
   test('decodes Label H1 Preamble FPN <invalid>', () => {

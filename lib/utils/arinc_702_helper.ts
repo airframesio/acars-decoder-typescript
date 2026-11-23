@@ -622,33 +622,130 @@ function processIMI(decodeResult: DecodeResult, type: string): boolean {
 }
 
 /**
- * /PR, performance data. The fields mean the same in every layout on disk (6,201 reports with
- * /PR from WN, AS, AA, B6, BA and AC; 12, 18 and 19 fields), so shorter and longer ones just
- * carry fewer or more of them:
- * - 0 gross weight (hundreds of pounds);
- * - 2 cruise altitude (hundreds of feet): one value for the whole flight on 85-100% of each
- *   airline's flights, and present in a flight plan sent before departure (FPN TNCA-TNCB: 110);
- * - 3 fuel on board (hundreds of pounds);
- * - 8 temperature at cruise altitude: M7 with the 110 above, ISA at 11,000 feet, while the
- *   aircraft was on the ground;
- * - 9 transition altitude (hundreds of feet) of the departure: 180 from US airports, 185 from
- *   Mexico, 60 from London, 50 from Berlin, 30 from Amsterdam.
- * The rest is unknown. Fields 0 and 3 are the same as the Southwest position report's gross
- * weight and fuel on board on 3,449 of 3,450 reports, so a value the report already gave is not
- * shown again. Field 3 is otherwise left in the remaining text, since /DT also shows a figure as
- * fuel on board and the two would clash.
+ * /PR, performance data.
+ *
+ * The field positions depend on the number of fields in the report:
+ *
+ * - 12 fields (AA): 0 gross weight, 1 CG, 2 cruise altitude, 3 fuel on board,
+ *   5 cost index, 6 taxi fuel, 7 wind, 8 cruise temperature, 9 transition
+ *   altitude, 10 assumed temperature, 11 derate;
+ * - 18 fields (AA/B6): 0 gross weight, 1 CG, 2 cruise altitude, 3 fuel on
+ *   board, 5 cost index, 6 taxi fuel, 8 cruise temperature, 9 transition
+ *   altitude, 12 assumed temperature, 13 derate, 14 block fuel, 16 ZFW,
+ *   17 ZFW CG;
+ * - 19 fields (LATAM/SV/UP): 0 gross weight, 1 CG, 2 cruise altitude, 3 fuel
+ *   on board, 5 cost index, 6 taxi fuel, 9 transition altitude, 10 assumed
+ *   temperature, 11 derate, 18 cruise temperature.
+ *
+ * Units: gross weight, fuel on board and ZFW are hundreds of pounds (x100);
+ * CG and ZFW CG are 0.1 % MAC; taxi fuel is ten-pound units (x10 lb); block
+ * fuel is pounds; altitude and transition altitude are hundreds of feet;
+ * temperatures are degrees Celsius (`M` = negative); assumed temperature is
+ * degrees Celsius (accepted 0-100); derate is the probable companion value
+ * (accepted -100 to 100, P0 on most reports). Field 7 is stored as a cruise
+ * wind, separately from the wind at the aircraft (case 7): the `DDDSSS` format
+ * is confirmed, while "cruise altitude" is inferred from the report's purpose.
+ *
+ * Evidence: the CG matches the A02 CE/CN field on same-flight pairs; ZFW and
+ * ZFW CG match the loadsheet; block fuel is fixed by weight conservation;
+ * taxi fuel matches the taxi-out time and TPS TXI FUEL; assumed temperature is
+ * labelled `AT/Pxx` in AERODATA/TPS uplinks. The exact condition of the
+ * assumed temperature (selected vs maximum at MTOW) depends on the AOC host,
+ * so it is named but not further interpreted.
+ *
+ * Field 3 is left in the remaining text unless it matches an existing
+ * fuel_on_board, since /DT also shows a figure as fuel on board and the two
+ * would clash. Fields 4 and 15 are not decoded and stay in the remaining text.
+ * Field counts other than 11, 12, 18 and 19 are not decoded either: their
+ * field positions are undocumented, so they stay in the remaining text.
  */
 function processPerformanceData(decodeResult: DecodeResult, data: string[]) {
   if (data.length < 3) {
     ResultFormatter.unknownArr(decodeResult, data, ',');
     return;
   }
-  const remaining = data.filter(
-    (value, i) => !decodePerformanceField(decodeResult, i, value),
-  );
-  if (remaining.some((r) => r !== '')) {
+  const length = data.length;
+  const supportedLayout = length === 12 || length === 18 || length === 19;
+  const remaining = data.filter((value, i) => {
+    // Keep the historical comma pattern for unsupported/truncated layouts;
+    // only the documented 12/18/19 layouts drop their empty padding.
+    if (supportedLayout && value === '') {
+      return false;
+    }
+    return !decodePerformanceField(decodeResult, i, value, length);
+  });
+  if (remaining.length > 0) {
     ResultFormatter.unknown(decodeResult, remaining.join(','), '/PR');
   }
+}
+
+/** Parse a signed `P`/`M` performance value (`P48` = 48, `M2` = -2). */
+function signedPerformanceValue(value: string): number | undefined {
+  if (!/^[MP]\d{1,3}$/.test(value)) {
+    return undefined;
+  }
+  return value.startsWith('M')
+    ? -Number(value.slice(1))
+    : Number(value.slice(1));
+}
+
+/** Decode a cruise temperature field (`M54` = -54, `P0` = 0). */
+function decodePerformanceTemperature(
+  decodeResult: DecodeResult,
+  value: string,
+): boolean {
+  const temperature = signedPerformanceValue(value);
+  if (temperature === undefined) {
+    return false;
+  }
+  ResultFormatter.raw(
+    decodeResult,
+    'cruise_temperature',
+    'CRZ_TEMP',
+    'Cruise Temperature (C)',
+    `${temperature} degrees`,
+    temperature,
+  );
+  return true;
+}
+
+/** Decode the assumed temperature (`Pxx`) from the Pxx/Pyy pair. */
+function decodeAssumedTemperature(
+  decodeResult: DecodeResult,
+  value: string,
+): boolean {
+  const assumed = signedPerformanceValue(value);
+  // Assumed takeoff temperatures above 100 C are not physically plausible.
+  if (assumed === undefined || assumed < 0 || assumed > 100) {
+    return false;
+  }
+  ResultFormatter.raw(
+    decodeResult,
+    'assumed_temperature',
+    'TEMP_ASSUMED',
+    'Assumed Temperature',
+    `${assumed} degrees`,
+    assumed,
+  );
+  return true;
+}
+
+/** Decode the probable derate (`Pyy`) from the Pxx/Pyy pair. */
+function decodeDerate(decodeResult: DecodeResult, value: string): boolean {
+  const derate = signedPerformanceValue(value);
+  // A derate is a percentage deviation; keep it within +/-100.
+  if (derate === undefined || derate < -100 || derate > 100) {
+    return false;
+  }
+  ResultFormatter.raw(
+    decodeResult,
+    'derate',
+    'DERATE',
+    'Derate (probable)',
+    `${derate}`,
+    derate,
+  );
+  return true;
 }
 
 /** Decodes one /PR field; false leaves it in the remaining text. */
@@ -656,11 +753,15 @@ function decodePerformanceField(
   decodeResult: DecodeResult,
   i: number,
   value: string,
+  length: number,
 ): boolean {
   const hundreds = /^\d+$/.test(value) ? Number(value) * 100 : undefined;
+  const supportedLayout = length === 12 || length === 18 || length === 19;
+  // 11 fields is a 12-field report with its last field missing.
+  const documented = supportedLayout || length === 11;
   switch (i) {
     case 0:
-      if (hundreds === undefined) {
+      if (!documented || hundreds === undefined) {
         return false;
       }
       if (decodeResult.raw.gross_weight === undefined) {
@@ -668,8 +769,26 @@ function decodePerformanceField(
         return true;
       }
       return decodeResult.raw.gross_weight === hundreds;
+    case 1: {
+      if (!supportedLayout || !/^\d{1,3}$/.test(value)) {
+        return false;
+      }
+      const cg = Number(value) / 10;
+      if (cg > 100) {
+        return false;
+      }
+      ResultFormatter.raw(
+        decodeResult,
+        'center_of_gravity',
+        'CG',
+        'Centre of Gravity',
+        `${cg.toFixed(1)} % MAC`,
+        cg,
+      );
+      return true;
+    }
     case 2:
-      if (!hundreds) {
+      if (!documented || !hundreds) {
         return false;
       }
       ResultFormatter.raw(
@@ -683,25 +802,62 @@ function decodePerformanceField(
       return true;
     case 3:
       return (
-        hundreds !== undefined && decodeResult.raw.fuel_on_board === hundreds
+        documented &&
+        hundreds !== undefined &&
+        decodeResult.raw.fuel_on_board === hundreds
       );
-    case 8: {
-      if (!/^[MP]\d+$/.test(value)) {
+    case 5: {
+      if (!supportedLayout || !/^\d{1,3}$/.test(value)) {
         return false;
       }
-      const temperature = Number(value.replace('M', '-').replace('P', '+'));
+      const costIndex = Number(value);
       ResultFormatter.raw(
         decodeResult,
-        'cruise_temperature',
-        'CRZ_TEMP',
-        'Cruise Temperature (C)',
-        `${temperature} degrees`,
-        temperature,
+        'cost_index',
+        'CI',
+        'Cost Index',
+        `${costIndex}`,
+        costIndex,
       );
       return true;
     }
+    case 6: {
+      if (!supportedLayout || !/^\d{1,4}$/.test(value)) {
+        return false;
+      }
+      const pounds = Number(value) * 10;
+      if (pounds > 10000) {
+        return false;
+      }
+      ResultFormatter.raw(
+        decodeResult,
+        'taxi_fuel',
+        'TAXI',
+        'Taxi Fuel',
+        `${pounds} pounds`,
+        pounds,
+      );
+      return true;
+    }
+    case 7: {
+      if (length !== 12) {
+        return false;
+      }
+      const wind = parseWind(value);
+      if (!wind) {
+        return false;
+      }
+      // Inferred from the performance report's purpose; the DDDSSS format itself is confirmed.
+      ResultFormatter.cruiseWind(decodeResult, wind.direction, wind.speed);
+      return true;
+    }
+    case 8:
+      return (
+        (length === 11 || length === 12 || length === 18) &&
+        decodePerformanceTemperature(decodeResult, value)
+      );
     case 9:
-      if (hundreds === undefined) {
+      if (!documented || hundreds === undefined) {
         return false;
       }
       ResultFormatter.raw(
@@ -713,6 +869,67 @@ function decodePerformanceField(
         hundreds,
       );
       return true;
+    case 10:
+      return (
+        (length === 12 || length === 19) &&
+        decodeAssumedTemperature(decodeResult, value)
+      );
+    case 11:
+      return (
+        (length === 12 || length === 19) && decodeDerate(decodeResult, value)
+      );
+    case 12:
+      return length === 18 && decodeAssumedTemperature(decodeResult, value);
+    case 13:
+      return length === 18 && decodeDerate(decodeResult, value);
+    case 14: {
+      if (length !== 18 || !/^\d{1,6}$/.test(value)) {
+        return false;
+      }
+      const blockFuel = Number(value);
+      ResultFormatter.raw(
+        decodeResult,
+        'block_fuel',
+        'BLOCK_FUEL',
+        'Block Fuel',
+        `${blockFuel} pounds`,
+        blockFuel,
+      );
+      return true;
+    }
+    case 16:
+      if (length !== 18 || hundreds === undefined) {
+        return false;
+      }
+      ResultFormatter.raw(
+        decodeResult,
+        'zero_fuel_weight',
+        'ZFW',
+        'Zero Fuel Weight',
+        `${hundreds} pounds`,
+        hundreds,
+      );
+      return true;
+    case 17: {
+      if (length !== 18 || !/^\d{1,3}$/.test(value)) {
+        return false;
+      }
+      const cg = Number(value) / 10;
+      if (cg > 100) {
+        return false;
+      }
+      ResultFormatter.raw(
+        decodeResult,
+        'zero_fuel_cg',
+        'ZFW_CG',
+        'Zero Fuel CG',
+        `${cg.toFixed(1)} % MAC`,
+        cg,
+      );
+      return true;
+    }
+    case 18:
+      return length === 19 && decodePerformanceTemperature(decodeResult, value);
     default:
       return false;
   }

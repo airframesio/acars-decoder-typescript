@@ -475,6 +475,44 @@ export class ResultFormatter {
     });
   }
 
+  /**
+   * Wind carried in a performance report, normally interpreted as the wind at
+   * cruise altitude (inferred); it is distinct from the wind at the aircraft's
+   * current position (see {@link wind}). Either half may be missing.
+   *
+   * @param decodeResult result under construction
+   * @param direction direction the wind comes from, degrees (0-360)
+   * @param speed wind speed, knots
+   */
+  static cruiseWind(
+    decodeResult: DecodeResult,
+    direction?: number,
+    speed?: number,
+  ) {
+    const hasDirection = direction !== undefined && !isNaN(direction);
+    const hasSpeed = speed !== undefined && !isNaN(speed);
+    if (hasDirection) decodeResult.raw.cruise_wind_direction = direction;
+    if (hasSpeed) decodeResult.raw.cruise_wind_speed = speed;
+    if (!hasDirection && !hasSpeed) {
+      return;
+    }
+    decodeResult.formatted.items.push({
+      type: 'wind',
+      code: 'WIND',
+      label: !hasSpeed
+        ? 'Cruise Wind Direction'
+        : !hasDirection
+          ? 'Cruise Wind Speed'
+          : 'Cruise Wind',
+      value: [
+        hasDirection ? `${direction} degrees` : '',
+        hasSpeed ? `${speed} knots` : '',
+      ]
+        .filter((s) => s !== '')
+        .join(' at '),
+    });
+  }
+
   static variableWind(decodeResult: DecodeResult, speed: number) {
     if (isNaN(speed)) {
       return;
