@@ -617,9 +617,20 @@ describe('Label_H1 POS', () => {
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.raw.next_waypoint_distance).toBe(56);
     expect(decodeResult.raw.altitude).toBe(15800);
+    expect(decodeResult.raw.gross_weight).toBe(159400);
+    expect(decodeResult.raw.fuel_on_board).toBe(37000);
+    expect(decodeResult.raw.center_of_gravity).toBe(23.8);
     expect(decodeResult.raw.cruise_altitude).toBe(34000);
+    expect(decodeResult.raw.cost_index).toBe(44);
+    expect(decodeResult.raw.taxi_fuel).toBe(90);
+    expect(decodeResult.raw.cruise_wind_direction).toBe(287);
+    expect(decodeResult.raw.cruise_wind_speed).toBe(60);
+    expect(decodeResult.raw.cruise_temperature).toBe(-51);
     expect(decodeResult.raw.transition_altitude).toBe(18000);
-    expect(decodeResult.remaining.text).toBe('73/PR238,,44,9,287060,P0');
+    expect(decodeResult.raw.assumed_temperature).toBe(0);
+    // The last field (Pyy/derate) is the one that is missing.
+    expect(decodeResult.raw.derate).toBeUndefined();
+    expect(decodeResult.remaining.text).toBe('73');
   });
 
   test('decodes Label H1 Preamble #M1BPOS <invalid>', () => {

@@ -626,6 +626,8 @@ function processIMI(decodeResult: DecodeResult, type: string): boolean {
  *
  * The field positions depend on the number of fields in the report:
  *
+ * - 11 fields: a 12-field report with its last field (usually derate) missing;
+ *   the surviving fields keep their 12-field positions;
  * - 12 fields (AA): 0 gross weight, 1 CG, 2 cruise altitude, 3 fuel on board,
  *   5 cost index, 6 taxi fuel, 7 wind, 8 cruise temperature, 9 transition
  *   altitude, 10 assumed temperature, 11 derate;
@@ -665,10 +667,11 @@ function processPerformanceData(decodeResult: DecodeResult, data: string[]) {
     return;
   }
   const length = data.length;
-  const supportedLayout = length === 12 || length === 18 || length === 19;
+  const supportedLayout =
+    length === 11 || length === 12 || length === 18 || length === 19;
   const remaining = data.filter((value, i) => {
-    // Keep the historical comma pattern for unsupported/truncated layouts;
-    // only the documented 12/18/19 layouts drop their empty padding.
+    // Keep the historical comma pattern for unsupported layouts; only the
+    // documented 11/12/18/19 layouts drop their empty padding.
     if (supportedLayout && value === '') {
       return false;
     }
@@ -756,12 +759,12 @@ function decodePerformanceField(
   length: number,
 ): boolean {
   const hundreds = /^\d+$/.test(value) ? Number(value) * 100 : undefined;
-  const supportedLayout = length === 12 || length === 18 || length === 19;
   // 11 fields is a 12-field report with its last field missing.
-  const documented = supportedLayout || length === 11;
+  const supportedLayout =
+    length === 11 || length === 12 || length === 18 || length === 19;
   switch (i) {
     case 0:
-      if (!documented || hundreds === undefined) {
+      if (!supportedLayout || hundreds === undefined) {
         return false;
       }
       if (decodeResult.raw.gross_weight === undefined) {
@@ -788,7 +791,7 @@ function decodePerformanceField(
       return true;
     }
     case 2:
-      if (!documented || !hundreds) {
+      if (!supportedLayout || !hundreds) {
         return false;
       }
       ResultFormatter.raw(
@@ -802,7 +805,7 @@ function decodePerformanceField(
       return true;
     case 3:
       return (
-        documented &&
+        supportedLayout &&
         hundreds !== undefined &&
         decodeResult.raw.fuel_on_board === hundreds
       );
@@ -840,7 +843,7 @@ function decodePerformanceField(
       return true;
     }
     case 7: {
-      if (length !== 12) {
+      if (length !== 11 && length !== 12) {
         return false;
       }
       const wind = parseWind(value);
@@ -857,7 +860,7 @@ function decodePerformanceField(
         decodePerformanceTemperature(decodeResult, value)
       );
     case 9:
-      if (!documented || hundreds === undefined) {
+      if (!supportedLayout || hundreds === undefined) {
         return false;
       }
       ResultFormatter.raw(
@@ -871,12 +874,13 @@ function decodePerformanceField(
       return true;
     case 10:
       return (
-        (length === 12 || length === 19) &&
+        (length === 11 || length === 12 || length === 19) &&
         decodeAssumedTemperature(decodeResult, value)
       );
     case 11:
       return (
-        (length === 12 || length === 19) && decodeDerate(decodeResult, value)
+        (length === 11 || length === 12 || length === 19) &&
+        decodeDerate(decodeResult, value)
       );
     case 12:
       return length === 18 && decodeAssumedTemperature(decodeResult, value);

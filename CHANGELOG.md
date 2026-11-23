@@ -19,6 +19,8 @@ All notable changes to this project will be documented in this file.
   board (NTSB ACARS legend, hundreds of pounds), and the long variant decodes
   ground speed, TAS and IAS. Four-digit wind values are left unknown because
   they are ambiguous. The Southwest 21-field layout keeps its own fuel field.
+- `/PR` reports with 11 fields (a 12-field layout missing its last field) now
+  decode the surviving fields instead of leaving them in `remaining`.
 
 ## 1.10.0
 
