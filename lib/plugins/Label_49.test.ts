@@ -24,7 +24,7 @@ describe('Label 49', () => {
     expect(result.raw.report_code).toBe('ERDC');
     expect(result.raw.previous_segment).toBe('ER');
     expect(result.raw.next_segment).toBe('DC');
-    expect(result.raw.segment_known).toBe(true);
+    expect(result.raw.segment_code_known).toBe(true);
     expect(result.raw.altitude).toBe(31994);
     expect(result.raw.indicated_airspeed).toBeCloseTo(297.4, 3);
     expect(result.raw.total_air_temperature).toBeCloseTo(-11.1, 3);
@@ -53,19 +53,19 @@ describe('Label 49', () => {
     expect(result.raw.arrival_icao).toBe('VGHS');
   });
 
-  test('decodes a go-around', () => {
+  test('keeps GA unexpanded', () => {
     message.text = '01APGABAW15     /212010WSSSYSSY\r\n+  207148.4+ 23.6';
     const result = plugin.decode(message);
 
     expect(result.raw.report_code).toBe('APGA');
     expect(result.raw.previous_segment).toBe('AP');
     expect(result.raw.next_segment).toBe('GA');
-    expect(result.raw.segment_known).toBe(true);
+    expect(result.raw.segment_code_known).toBe(true);
     expect(result.raw.altitude).toBe(207);
     expect(
       result.formatted.items.find((item) => item.type === 'state_change')
         ?.value,
-    ).toBe('Approach -> Go-Around');
+    ).toBe('Approach -> Unknown GA');
   });
 
   test('decodes an OOOI event and keeps the extended tail', () => {
@@ -117,7 +117,7 @@ describe('Label 49', () => {
     expect(result.raw.report_code).toBe('ECER');
     expect(result.raw.previous_segment).toBe('EC');
     expect(result.raw.next_segment).toBe('ER');
-    expect(result.raw.segment_known).toBe(false);
+    expect(result.raw.segment_code_known).toBe(false);
     expect(
       result.formatted.items.find((item) => item.type === 'state_change')
         ?.value,

@@ -2,12 +2,10 @@ import { DecoderPlugin } from '../DecoderPlugin';
 import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
 import { DateTimeUtils } from '../DateTimeUtils';
 import { ResultFormatter } from '../utils/result_formatter';
-import { RouteUtils } from '../utils/route_utils';
 
-// Segment codes observed in label 49. The airborne ones (TO, IC, CL, ER, DC,
-// AP) are documented by airframesio/acars-message-documentation; GA and the
-// ground codes are established by ADS-B phase correlation. Ground names are
-// inferred, not documented.
+// Segment codes observed in label 49. TO/IC/CL/ER/DC/AP are documented by
+// airframesio/acars-message-documentation; GA and the ground codes are observed
+// and their phases are supported by ADS-B, but their names are not documented.
 const KNOWN_SEGMENTS = new Set([
   'TO',
   'IC',
@@ -103,7 +101,9 @@ export class Label_49 extends DecoderPlugin {
     result.raw.known_report_code =
       KNOWN_CODES.has(reportCode) || isOOOI || isKeyword;
     result.raw.variant = standard ? 'standard' : 'ajl';
-    result.raw.segment_known =
+    // Both letters are in the observed segment alphabet. This does not assert
+    // what they mean: only TO/IC/CL/ER/DC/AP are documented.
+    result.raw.segment_code_known =
       isPair && KNOWN_SEGMENTS.has(previous) && KNOWN_SEGMENTS.has(next);
 
     const callsign = callsignField.trim();
@@ -128,7 +128,7 @@ export class Label_49 extends DecoderPlugin {
     if (isPair) {
       result.raw.previous_segment = previous;
       result.raw.next_segment = next;
-      this.formatStateChange(result, previous, next);
+      ResultFormatter.state_change(result, previous, next);
     } else {
       result.raw.event = isSwap ? 'SWAPINITIALIZE' : reportCode;
       if (isSwap) {
@@ -165,24 +165,6 @@ export class Label_49 extends DecoderPlugin {
 
     this.debug(options, reportCode, previous, next, body);
     return result;
-  }
-
-  private formatStateChange(
-    result: DecodeResult,
-    previous: string,
-    next: string,
-  ): void {
-    result.raw.state_change = { from: previous, to: next };
-    // GA is inferred from the APGA sequence and is kept local: the shared
-    // RouteUtils map only carries states that are documented.
-    const label = (segment: string): string =>
-      segment === 'GA' ? 'Go-Around' : RouteUtils.formatFlightState(segment);
-    result.formatted.items.push({
-      type: 'state_change',
-      code: 'STATE_CHANGE',
-      label: 'State Change',
-      value: `${label(previous)} -> ${label(next)}`,
-    });
   }
 
   private parseBody(body: string): BodyFields | undefined {
