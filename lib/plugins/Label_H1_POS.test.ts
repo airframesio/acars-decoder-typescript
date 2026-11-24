@@ -215,6 +215,7 @@ describe('Label_H1 POS', () => {
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('full');
     expect(decodeResult.formatted.description).toBe('Position Report');
+    // /PR idx3 now emits fuel_remaining instead of fuel_on_board (ARINC 702A-5)
     expect(decodeResult.formatted.items.length).toBe(25);
     expect(decodeResult.formatted.items[0].label).toBe('Destination');
     expect(decodeResult.formatted.items[0].value).toBe('MMGL');
@@ -234,7 +235,8 @@ describe('Label_H1 POS', () => {
     expect(decodeResult.formatted.items[5].value).toBe('23.1 % MAC');
     expect(decodeResult.formatted.items[6].label).toBe('Cruise Altitude');
     expect(decodeResult.formatted.items[6].value).toBe('35000 feet');
-    expect(decodeResult.formatted.items[7].label).toBe('Fuel On Board');
+    // /PR idx3 = FUEL REMAINING (ARINC 702A-5 Att. 7 §7), not Fuel On Board
+    expect(decodeResult.formatted.items[7].label).toBe('Fuel Remaining');
     expect(decodeResult.formatted.items[7].value).toBe('18900');
     expect(decodeResult.formatted.items[8].label).toBe('Reserve Fuel');
     expect(decodeResult.formatted.items[8].value).toBe('0 pounds');
@@ -349,6 +351,7 @@ describe('Label_H1 POS', () => {
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.formatted.description).toBe('Position Report');
+    // /PR idx3 now emits fuel_remaining instead of fuel_on_board (ARINC 702A-5)
     expect(decodeResult.formatted.items.length).toBe(24);
     expect(decodeResult.formatted.items[0].label).toBe('Aircraft Position');
     expect(decodeResult.formatted.items[0].value).toBe('51.323 N, 4.878 E');
@@ -379,10 +382,10 @@ describe('Label_H1 POS', () => {
     expect(decodeResult.formatted.items[10].value).toBe('15.0 % MAC');
     expect(decodeResult.formatted.items[11].label).toBe('Cruise Altitude');
     expect(decodeResult.formatted.items[11].value).toBe('37000 feet');
-    // /PR idx3 (191, hundreds of pounds) is now decoded as Fuel On Board;
-    // the POSN fuel remaining (191) agrees with it.
-    expect(decodeResult.formatted.items[12].label).toBe('Fuel On Board');
+    // /PR idx3 (191, hundreds of pounds) = FUEL REMAINING (ARINC 702A-5 Att. 7 §7)
+    expect(decodeResult.formatted.items[12].label).toBe('Fuel Remaining');
     expect(decodeResult.formatted.items[12].value).toBe('19100');
+    // idx4 is empty in this /PR, so Plan or Block Fuel is not present; idx5 = Reserve Fuel
     expect(decodeResult.formatted.items[13].label).toBe('Reserve Fuel');
     expect(decodeResult.formatted.items[13].value).toBe('5500 pounds');
     expect(decodeResult.formatted.items[14].label).toBe('Cost Index');
@@ -520,7 +523,7 @@ describe('Label_H1 POS', () => {
     expect(decodeResult.raw.airspeed).toBe(366);
     expect(decodeResult.raw.indicated_airspeed).toBe(290);
     expect(decodeResult.raw.gross_weight).toBe(159400);
-    expect(decodeResult.raw.fuel_on_board).toBe(37000);
+    expect(decodeResult.raw.fuel_remaining).toBe(37000);
     expect(decodeResult.raw.departure_icao).toBe('KPIT');
     expect(decodeResult.formatted.items[11].label).toBe('Destination');
     expect(decodeResult.formatted.items[11].value).toBe('KLAS');
@@ -605,7 +608,7 @@ describe('Label_H1 POS', () => {
     expect(decodeResult.raw.altitude).toBe(0);
     expect(decodeResult.raw.wind_speed).toBeUndefined();
     expect(decodeResult.raw.gross_weight).toBeUndefined();
-    expect(decodeResult.raw.fuel_on_board).toBe(15000);
+    expect(decodeResult.raw.fuel_remaining).toBe(15000);
     expect(decodeResult.raw.destination_fuel).toBeUndefined();
     expect(decodeResult.raw.cruise_altitude).toBeUndefined();
     expect(decodeResult.raw.transition_altitude).toBe(18000);
@@ -627,7 +630,7 @@ describe('Label_H1 POS', () => {
     expect(decodeResult.raw.next_waypoint_distance).toBe(56);
     expect(decodeResult.raw.altitude).toBe(15800);
     expect(decodeResult.raw.gross_weight).toBe(159400);
-    expect(decodeResult.raw.fuel_on_board).toBe(37000);
+    expect(decodeResult.raw.fuel_remaining).toBe(37000);
     expect(decodeResult.raw.center_of_gravity).toBe(23.8);
     expect(decodeResult.raw.cruise_altitude).toBe(34000);
     expect(decodeResult.raw.reserve_fuel).toBe(4400);

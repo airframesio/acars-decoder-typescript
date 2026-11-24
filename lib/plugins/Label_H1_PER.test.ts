@@ -31,7 +31,7 @@ describe('Label_H1 PER', () => {
     expect(decodeResult.raw.transition_altitude).toBe(18000);
     expect(decodeResult.raw.assumed_temperature).toBe(52);
     expect(decodeResult.raw.derate).toBe(0);
-    expect(decodeResult.raw.fuel_on_board).toBe(22200);
+    expect(decodeResult.raw.fuel_remaining).toBe(22200);
     expect(item(decodeResult, 'Gross Weight')).toBe('133700 pounds');
     expect(item(decodeResult, 'Centre of Gravity')).toBe('26.2 % MAC');
     expect(item(decodeResult, 'Cruise Altitude')).toBe('32000 feet');
@@ -74,7 +74,7 @@ describe('Label_H1 PER', () => {
     expect(item(decodeResult, 'Zero Fuel Weight')).toBe('108400 pounds');
     expect(item(decodeResult, 'Zero Fuel CG')).toBe('28.4 % MAC');
     expect(decodeResult.raw.plan_or_block_fuel).toBeUndefined();
-    expect(decodeResult.raw.fuel_on_board).toBe(13400);
+    expect(decodeResult.raw.fuel_remaining).toBe(13400);
     expect(decodeResult.remaining.text).toBe('');
   });
 
@@ -92,7 +92,7 @@ describe('Label_H1 PER', () => {
     expect(item(decodeResult, 'Plan or Block Fuel (unit per AOC host)')).toBe(
       '214',
     );
-    expect(decodeResult.raw.fuel_on_board).toBe(22200);
+    expect(decodeResult.raw.fuel_remaining).toBe(22200);
     expect(decodeResult.remaining.text).toBe('');
   });
 
@@ -114,7 +114,7 @@ describe('Label_H1 PER', () => {
     expect(decodeResult.raw.cruise_temperature).toBe(-25);
     expect(item(decodeResult, 'Assumed Temperature')).toBe('13 degrees');
     expect(item(decodeResult, 'Cruise Temperature (C)')).toBe('-25 degrees');
-    expect(decodeResult.raw.fuel_on_board).toBe(16800);
+    expect(decodeResult.raw.fuel_remaining).toBe(16800);
     expect(decodeResult.remaining.text).toBe('');
   });
 

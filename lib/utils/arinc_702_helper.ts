@@ -447,6 +447,9 @@ function destinationFuel(decodeResult: DecodeResult, value: string) {
     return false;
   }
   const hundreds = Number(value) * 100;
+  if (!Number.isSafeInteger(hundreds)) {
+    return false;
+  }
   ResultFormatter.raw(
     decodeResult,
     'destination_fuel',
@@ -846,17 +849,13 @@ function decodePerformanceField(
       return true;
     case 3: {
       // FUEL REMAINING: ARINC 702A-5 Att. 7 §7 (PR element 4), hundreds of
-      // pounds. When no other IEI (e.g. /DT) supplied fuel_on_board, this is
-      // the fuel on board at report time; when one did, only accept an
-      // identical value so the two figures do not clash.
+      // pounds. This is the fuel remaining at report time, distinct from
+      // fuel_on_board (e.g. from /FB). Both can coexist.
       if (!supportedLayout || hundreds === undefined) {
         return false;
       }
-      if (decodeResult.raw.fuel_on_board === undefined) {
-        ResultFormatter.currentFuel(decodeResult, hundreds);
-        return true;
-      }
-      return decodeResult.raw.fuel_on_board === hundreds;
+      ResultFormatter.remainingFuel(decodeResult, hundreds);
+      return true;
     }
     case 4: {
       // PLAN OR BLOCK FUEL: ARINC Characteristic 702A-5, Attachment 7 §7
@@ -909,7 +908,9 @@ function decodePerformanceField(
       return true;
     }
     case 7: {
-      if (length !== 11 && length !== 12) {
+      // CRUISE WIND: ARINC 702A-5 Att. 7 §7 (PR element 8).
+      // Fields 0-11 retain their positions in 11-, 12-, 18-, and 19-field layouts.
+      if (length !== 11 && length !== 12 && length !== 18 && length !== 19) {
         return false;
       }
       const wind = parseWind(value);

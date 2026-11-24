@@ -121,6 +121,7 @@ describe('Label_H1 FPN', () => {
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.raw.message_timestamp).toBe(1708178417);
     expect(decodeResult.formatted.description).toBe('Flight Plan');
+    // /PR idx3 now emits fuel_remaining instead of fuel_on_board (ARINC 702A-5)
     expect(decodeResult.formatted.items.length).toBe(20);
     expect(decodeResult.formatted.items[0].label).toBe('Route Status');
     expect(decodeResult.formatted.items[0].value).toBe('Route Planned');
@@ -140,8 +141,8 @@ describe('Label_H1 FPN', () => {
     expect(decodeResult.formatted.items[6].value).toBe('34.4 % MAC');
     expect(decodeResult.formatted.items[7].label).toBe('Cruise Altitude');
     expect(decodeResult.formatted.items[7].value).toBe('36000 feet');
-    // /PR idx3 (1060, hundreds of pounds): fuel on board at report time
-    expect(decodeResult.formatted.items[8].label).toBe('Fuel On Board');
+    // /PR idx3 (1060, hundreds of pounds): FUEL REMAINING (ARINC 702A-5 Att. 7 §7)
+    expect(decodeResult.formatted.items[8].label).toBe('Fuel Remaining');
     expect(decodeResult.formatted.items[8].value).toBe('106000');
     expect(decodeResult.formatted.items[9].label).toBe('Cost Index');
     expect(decodeResult.formatted.items[9].value).toBe('13');

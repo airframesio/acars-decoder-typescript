@@ -23,6 +23,9 @@ describe('Label H1 Preamble PRG', () => {
     // (0.1 Klbs); the trailing element is the report stimulus, not fuel.
     expect(decodeResult.raw.destination_fuel).toBe(6700);
     expect(decodeResult.raw.fuel_remaining).toBeUndefined();
+    expect(decodeResult.raw.fuel_on_board).toBeUndefined();
+    // Note: message has an implicit checksum; data[4] of /DT is '29' (stimulus)
+    expect(decodeResult.remaining.text).toBe('29');
     expect(decodeResult.formatted.description).toBe('Progress Report');
     expect(decodeResult.formatted.items.length).toBe(5);
   });
@@ -51,6 +54,8 @@ describe('Label H1 Preamble PRG', () => {
     expect(decodeResult.raw.flight_number).toBe('SAS87W');
     expect(decodeResult.raw.message_timestamp).toBe(1708781205);
     expect(decodeResult.raw.destination_fuel).toBe(6900);
+    expect(decodeResult.raw.fuel_on_board).toBeUndefined();
+    expect(decodeResult.remaining.text).toBe('042');
     expect(decodeResult.formatted.description).toBe('Progress Report');
     expect(decodeResult.formatted.items.length).toBe(5);
   });
@@ -64,6 +69,7 @@ describe('Label H1 Preamble PRG', () => {
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.formatted.description).toBe('Progress Report');
+    // /PR idx3 now emits fuel_remaining instead of fuel_on_board (ARINC 702A-5)
     expect(decodeResult.formatted.items.length).toBe(22);
     expect(decodeResult.formatted.items[0].label).toBe('Destination');
     expect(decodeResult.formatted.items[0].value).toBe('GCRR');
@@ -81,7 +87,8 @@ describe('Label H1 Preamble PRG', () => {
     expect(decodeResult.formatted.items[5].value).toBe('28.6 % MAC');
     expect(decodeResult.formatted.items[6].label).toBe('Cruise Altitude');
     expect(decodeResult.formatted.items[6].value).toBe('35000 feet');
-    expect(decodeResult.formatted.items[7].label).toBe('Fuel On Board');
+    // /PR idx3 = FUEL REMAINING (ARINC 702A-5 Att. 7 §7), not Fuel On Board
+    expect(decodeResult.formatted.items[7].label).toBe('Fuel Remaining');
     expect(decodeResult.formatted.items[7].value).toBe('23900');
     expect(decodeResult.formatted.items[8].label).toBe('Reserve Fuel');
     expect(decodeResult.formatted.items[8].value).toBe('0 pounds');
