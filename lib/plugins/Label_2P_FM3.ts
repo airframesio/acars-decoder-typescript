@@ -61,7 +61,7 @@ export class Label_2P_FM3 extends DecoderPlugin {
           longitude:
             CoordinateUtils.getDirection(lon[0]) * Number(lon.substring(1)),
         });
-      } else {
+      } else if (lat && lon) {
         ResultFormatter.position(decodeResult, {
           latitude: Number(lat),
           longitude: Number(lon),

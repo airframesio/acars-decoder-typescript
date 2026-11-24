@@ -41,6 +41,17 @@ describe('Label_2P Preamble FM5', () => {
     expect(decodeResult.remaining.text).toBe('116.24,502 ,36900,');
   });
 
+  test('empty position', () => {
+    message.text =
+      'FM5 EIDW,OMAA,113522,1540,,,35002,116.24,502 ,36900,ETD23N ,';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoded).toBe(true);
+    expect(decodeResult.raw.position).toBeUndefined();
+    expect(decodeResult.formatted.items.length).toBe(6);
+    expect(decodeResult.formatted.items[4].label).toBe('Altitude');
+  });
+
   test('<invalid>', () => {
     message.text = 'FM4 Bogus message';
     const decodeResult = plugin.decode(message);
