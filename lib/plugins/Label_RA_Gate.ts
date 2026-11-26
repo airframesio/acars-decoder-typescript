@@ -452,13 +452,27 @@ export class Label_RA_Gate extends DecoderPlugin {
       }
     }
     let inRange = false;
+    let flightLine = false;
     let ita:
       | { origin: string; airport: string; eta: string; idx: number }
       | undefined;
     for (let i = 0; i < lines.length; i++) {
       const l = lines[i];
+      if (ARR_ICAO.test(l)) {
+        // A flight line ("SC8402 ARR:ZSJN"): arrIcaoGate reads its gate.
+        flightLine = true;
+      }
       if (GATE_STOP_LINE.test(l)) {
-        break;
+        // ITA titles its own gate list; the route follows it.
+        if (
+          !(
+            l === 'CONNECTING GATES' &&
+            lines.slice(i + 1, i + 3).some((n) => ITA_ROUTE.test(n))
+          )
+        ) {
+          break;
+        }
+        continue;
       }
       const gate = (m: RegExpExecArray | null, group: number = 1) => {
         if (!m) return undefined;
@@ -473,7 +487,7 @@ export class Label_RA_Gate extends DecoderPlugin {
         inRange = true;
         continue;
       }
-      if (inRange) {
+      if (inRange && !flightLine) {
         const u = gate(IN_RANGE_COLON_GATE.exec(l));
         if (u) return u;
       }

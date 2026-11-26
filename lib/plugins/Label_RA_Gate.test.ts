@@ -677,6 +677,16 @@ describe('Label RA gate, round 7 formats', () => {
     expect(r.raw.arrival_gate).toBe('10');
   });
 
+  test('reads the Shandong flight line before an in-range gate line', () => {
+    const r = plugin.decode({
+      label: 'RA',
+      text: 'CURRENT FLIGHT:\r\nSC8402 ARR:ZSJN\r\nIN-RANGE FROM AA\r\nGATE:10\r\n',
+    });
+    expect(r.raw.flight_number).toBe('SC8402');
+    expect(r.raw.arrival_icao).toBe('ZSJN');
+    expect(r.raw.arrival_gate).toBe('10');
+  });
+
   test('keeps the ITA route, ETA and bag claim', () => {
     for (const text of [
       ITA,

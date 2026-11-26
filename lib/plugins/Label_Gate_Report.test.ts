@@ -384,6 +384,14 @@ describe('Label gate report, round 5 formats', () => {
     expect(r.remaining.text).toContain('1220 B10 LX1270 Copenhagen');
   });
 
+  test('stops at a CONNECTING GATES list on label 32', () => {
+    const r = plugin.decode({
+      label: '32',
+      text: 'ARR POS I12\r\nCONNECTING GATES\r\nARR GATE A52\r\n',
+    });
+    expect(r.raw.arrival_gate).toBe('I12');
+  });
+
   test('decodes the Swiss arrival gate before the position', () => {
     const r = plugin.decode({ label: '32', text: SWISS });
     expect(r.raw.arrival_gate).toBe('A52');
