@@ -6,7 +6,7 @@ import {
   Qualifiers,
 } from './DecoderPluginInterface';
 import { ResultFormatter } from './utils/result_formatter';
-import { MessageDecoder } from './MessageDecoder';
+import type { MessageDecoder } from './MessageDecoder';
 
 export abstract class DecoderPlugin implements DecoderPluginInterface {
   decoder!: MessageDecoder;
