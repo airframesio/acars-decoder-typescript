@@ -20,7 +20,7 @@ You are welcome to contribute (please see https://github.com/airframesio/acars-m
 # Node.js Support Policy
 
 - Runtime support: Node.js >= 18
-- Development and CI: validated on Node 18.x, 20.x, 22.x, and 24.x
+- Development and CI: tests run on Node 22.x, 24.x and 26.x. The test toolchain (Babel 8) needs Node 22.18+ or 24.11+; the published package does not use it, so the runtime support above is unchanged.
 - TypeScript development uses the latest stable Node types (currently v24) without forcing consumers to use a specific Node types version, since `@types/node` is a devDependency.
 - The published builds are compiled targeting Node 18 runtime via `tsup` so they remain compatible across supported Node versions.
 

@@ -6,6 +6,9 @@ import {
   Qualifiers,
 } from './DecoderPluginInterface';
 import { ResultFormatter } from './utils/result_formatter';
+// Type-only on purpose: a value import cycles through MessageDecoder and the
+// plugins, and Babel 8 keeps that require, so plugins would extend undefined.
+// `npm run build` stays green without `type`; only the Jest run fails.
 import type { MessageDecoder } from './MessageDecoder';
 
 export abstract class DecoderPlugin implements DecoderPluginInterface {
