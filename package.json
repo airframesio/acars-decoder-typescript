@@ -32,7 +32,7 @@
   "author": "Kevin Elliott <kevin@welikeinc.com>",
   "license": "MIT",
   "dependencies": {
-    "pako": "^2.1.0"
+    "pako": "^2.2.0"
   },
   "devDependencies": {
     "@babel/core": "^8.1.3",
