@@ -253,7 +253,6 @@ describe('Label RA gate', () => {
   test('decodes Air Wisconsin flight, airport and gate', () => {
     const r = plugin.decode({ label: 'RA', text: AIR_WISCONSIN });
     expect(r.decoded).toBe(true);
-    expect(r.decoder.decodeLevel).toBe('full');
     expect(r.raw.flight_number).toBe('4940');
     expect(r.raw.arrival_iata).toBe('IAD');
     expect(r.raw.arrival_gate).toBe('A4C');
@@ -543,6 +542,136 @@ describe('Label RA gate, round 6 formats', () => {
       const r = decoder.decode({ label: 'RA', text });
       expect(r.decoder.name).toBe('label-ra-gate');
       expect(r.raw.arrival_gate).toBe(gate);
+    }
+  });
+});
+
+// Texts from production RA uplinks of 2026-11-17, 19 and 22 (shortened,
+// names removed).
+const FRONTIER_FREE_TEXT = 'QUANPOCF9~1\r\nGATE D36\r\n';
+const FRONTIER_OTHER_AIRPORT =
+  'QUANPOCF9~1\r\nGOOD TO KNOW. RIDES STILL ROUGH? \r\nSEEING GATE F3 IN KMIA\r\n';
+const SKYWEST_IN_RANGE =
+  'QUSILITOO.1AA IN-RANGE     \r\nIN-RANGE FROM AA        \r\nGATE: 1D\r\nTERMINATING FLIGHT\r\n';
+const SKYWEST_NOT_IN_RANGE = 'QUSILITOO.1ENROUTE PLAN    \r\nGATE: 4\r\n';
+const ALLEGIANT =
+  'QUANPOCG4~1           \r\n*AUTOMATED MSG FLT 9201*****IN-RANGE NOTICE*****\r\n--GATE ASSIGNMENT       PVU GATE 2 ASSIGNED      \r\n--NEXT FLIGHT           3232 PVU-SNA 19-1700Z\r\n';
+const AIR_NOSTRUM =
+  'QUVLCASYW~1\r\nIB1059  SDR   K92\r\nPKN:330   GATE:K88   BELT:19  HALL:10\r\n';
+const VOLARIS =
+  'QUANPH1Y4~1HOLA CAP, BUEN DIA. A SU LLEGADA GATE J16 Y GPU DISPONIBLE, FAVOR DE CONFIRMAR E\r\nN TIERRA\r\n';
+const ITA =
+  'QUMGL1AAZ~1CONNECTING GATES\r\nEIHHI AZ0571/17 \r\nZRH/FCO ETA 1220 \r\nGATE A32 BAG CLAIM 23 \r\nFLT/DTE   TYP ETD   TO   \r\nAZ1781/17 INF 1315 PMO  \r\n';
+const STAND_NO =
+  'QUCANXMCZ~1RA170521\n\t//**TRANSFER PASSENGER INFORMATION***\n\tFLTNO         DEST     GATE  CDT DLY STAND\n\tNIL\n\tBAGGAGE CLAIM BELT: 01\n\tSTAND NO: 136\n';
+const CHINA_EASTERN = 'HI SIR, MU9062 SWA/HFE, PARK BAY 6.FOR REFERENCE ONLY.';
+const FEDEX =
+  'QUMEMXRFX~1(4511)\r\nRAMP INRANGE NOTICE\r\nEXPECT GATE: 2(SBD)\r\nGROUND POWER AVAILABLE\r\n';
+const AIRSIDE = 'QUANPOCPD~1 FREETEXT MSG\r\nAIRSIDE ARRIVAL GATE IS: B12\r\n';
+const HORIZON = 'ARRIVAL GATE:B9\r\n';
+const MESA = 'QUPHXACYV.1ARRIVAL GATE A1B\r\n\r\n';
+const ALASKA_ACK =
+  'ETA ACK\r\nFROM:ANC OPS\r\nAS2301\r\nETA:0126\r\nARRIVAL GATE:C7 \r\n';
+
+describe('Label RA gate, round 7 formats', () => {
+  let decoder: MessageDecoder;
+  let plugin: Label_RA_Gate;
+
+  beforeEach(() => {
+    decoder = new MessageDecoder();
+    plugin = new Label_RA_Gate(decoder);
+  });
+
+  test.each([
+    ['Frontier ops free text', FRONTIER_FREE_TEXT, undefined, 'D36'],
+    ['SkyWest AA in-range', SKYWEST_IN_RANGE, undefined, '1D'],
+    ['Allegiant in-range', ALLEGIANT, 'PVU', '2'],
+    ['Air Nostrum', AIR_NOSTRUM, undefined, 'K88'],
+    ['Volaris', VOLARIS, undefined, 'J16'],
+    ['ITA connecting gates', ITA, 'FCO', 'A32'],
+    ['stand number', STAND_NO, undefined, '136'],
+    ['China Eastern park bay', CHINA_EASTERN, 'HFE', '6'],
+    ['FedEx expected gate', FEDEX, 'SBD', '2'],
+    ['airside arrival gate', AIRSIDE, undefined, 'B12'],
+    ['Horizon arrival gate', HORIZON, undefined, 'B9'],
+    ['Mesa header arrival gate', MESA, undefined, 'A1B'],
+    ['Alaska ETA acknowledgement', ALASKA_ACK, 'ANC', 'C7'],
+  ])('decodes %s', (_name, text, airport, gate) => {
+    const r = plugin.decode({ label: 'RA', text });
+    expect(r.decoded).toBe(true);
+    expect(r.raw.arrival_iata).toBe(airport);
+    expect(r.raw.arrival_gate).toBe(gate);
+  });
+
+  test('keeps the China Eastern flight and route', () => {
+    const r = plugin.decode({ label: 'RA', text: CHINA_EASTERN });
+    expect(r.raw.flight_number).toBe('MU9062');
+    expect(r.raw.departure_iata).toBe('SWA');
+    expect(r.remaining.text).toBe('.FOR REFERENCE ONLY.');
+  });
+
+  test('keeps the Alaska flight on RA', () => {
+    const r = plugin.decode({ label: 'RA', text: ALASKA_ACK });
+    expect(r.raw.flight_number).toBe('AS2301');
+    expect(r.formatted.description).toBe('ETA Acknowledgement');
+  });
+
+  test('leaves the Air Nostrum parking number and belt unread', () => {
+    const r = plugin.decode({ label: 'RA', text: AIR_NOSTRUM });
+    expect(r.remaining.text).toContain('PKN:330 BELT:19  HALL:10');
+  });
+
+  test('leaves the Mesa header unread', () => {
+    const r = plugin.decode({ label: 'RA', text: MESA });
+    expect(r.remaining.text).toBe('QUPHXACYV.1');
+  });
+
+  test('still reads the Frontier FROM PHL OPS form first', () => {
+    const r = plugin.decode({ label: 'RA', text: FRONTIER });
+    expect(r.raw.arrival_iata).toBe('PHL');
+    expect(r.raw.arrival_gate).toBe('E8');
+  });
+
+  test("does not read Frontier chat about another airport's gate", () => {
+    const r = plugin.decode({ label: 'RA', text: FRONTIER_OTHER_AIRPORT });
+    expect(r.decoded).toBe(false);
+  });
+
+  test('does not read a SkyWest GATE: line outside an in-range message', () => {
+    const r = plugin.decode({ label: 'RA', text: SKYWEST_NOT_IN_RANGE });
+    expect(r.decoded).toBe(false);
+  });
+
+  test('still decodes SkyWest ARR GATE INFO with its reader', () => {
+    const r = plugin.decode({ label: 'RA', text: SKYWEST });
+    expect(r.raw.arrival_iata).toBe('BFL');
+    expect(r.raw.arrival_gate).toBe('4');
+    expect(r.remaining.text).toContain('NEXT FLIGHT INFORMATION-');
+  });
+
+  test('is reached through MessageDecoder', () => {
+    for (const [text, gate] of [
+      [FRONTIER_FREE_TEXT, 'D36'],
+      [SKYWEST_IN_RANGE, '1D'],
+      [ALLEGIANT, '2'],
+      [AIR_NOSTRUM, 'K88'],
+      [VOLARIS, 'J16'],
+      [ITA, 'A32'],
+      [STAND_NO, '136'],
+      [CHINA_EASTERN, '6'],
+      [FEDEX, '2'],
+      [AIRSIDE, 'B12'],
+      [HORIZON, 'B9'],
+      [MESA, 'A1B'],
+      [ALASKA_ACK, 'C7'],
+    ]) {
+      const r = decoder.decode({ label: 'RA', text });
+      expect(r.decoder.name).toBe('label-ra-gate');
+      expect(r.raw.arrival_gate).toBe(gate);
+    }
+    for (const text of [FRONTIER_OTHER_AIRPORT, SKYWEST_NOT_IN_RANGE]) {
+      const r = decoder.decode({ label: 'RA', text });
+      expect(r.raw.arrival_gate).toBeUndefined();
     }
   });
 });

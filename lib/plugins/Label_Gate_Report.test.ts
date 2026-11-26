@@ -488,3 +488,46 @@ describe('Label gate report, round 6 formats', () => {
     expect(n.raw.arrival_gate).toBeUndefined();
   });
 });
+
+// Texts from production C1 uplinks of 2026-11-17 and 19 (shortened, names
+// removed).
+const HELVETIC =
+  '.ZRHOWOA 191354\r\nAGM\r\nARR GATE GRZ\r\nARR POS  I12\r\nCONNECTING GATE INFO 19NOV1004Z\r\n';
+const AIR_FRANCE =
+  '.PAROWAF 171200\r\nAGM\r\nARRIVAL PKG: K12 PKG TYPE: C TERM: E\r\n';
+
+describe('Label gate report, round 7 formats', () => {
+  let decoder: MessageDecoder;
+  let plugin: Label_Gate_Report;
+
+  beforeEach(() => {
+    decoder = new MessageDecoder();
+    plugin = new Label_Gate_Report(decoder);
+  });
+
+  test('decodes the Helvetic arrival position on C1', () => {
+    const r = plugin.decode({ label: 'C1', text: HELVETIC });
+    expect(r.decoded).toBe(true);
+    expect(r.raw.arrival_gate).toBe('I12');
+    expect(r.remaining.text).toContain('ARR GATE GRZ');
+    expect(r.remaining.text).toContain('CONNECTING GATE INFO');
+  });
+
+  test('decodes the Air France arrival parking on C1', () => {
+    const r = plugin.decode({ label: 'C1', text: AIR_FRANCE });
+    expect(r.decoded).toBe(true);
+    expect(r.raw.arrival_gate).toBe('K12');
+    expect(r.remaining.text).toContain('PKG TYPE: C TERM: E');
+  });
+
+  test('is reached through MessageDecoder after the other C1 plugins', () => {
+    for (const [text, gate] of [
+      [HELVETIC, 'I12'],
+      [AIR_FRANCE, 'K12'],
+    ]) {
+      const r = decoder.decode({ label: 'C1', text });
+      expect(r.decoder.name).toBe('label-gate-report');
+      expect(r.raw.arrival_gate).toBe(gate);
+    }
+  });
+});
