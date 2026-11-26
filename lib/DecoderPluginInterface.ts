@@ -94,6 +94,8 @@ export interface RawFields {
 
   // Fuel
   fuel_on_board?: number;
+  /** Saleable seat configuration as sent (9C/104Y). */
+  cabin_configuration?: string;
   fuel_burned?: number;
   fuel_remaining?: number;
   fuel_in_tons?: number;

@@ -82,7 +82,7 @@ describe('Label_C1_LoadInfo', () => {
     expect(r.raw.day).toBe(19);
     expect(r.raw.message_timestamp).toBe(9 * 3600 + 25 * 60);
     expect(r.raw.tail).toBe('HB-JVA');
-    expect(r.raw.loadsheet.status).toBe('prelim');
+    expect(r.raw.loadsheet?.status).toBe('prelim');
     // As with splitAgmHeader, the AN suffix 'MA 277A' is not decoded.
     expect(r.remaining.text).toBe('MA 277A');
     expect(r.decoder.decodeLevel).toBe('partial');
@@ -96,22 +96,78 @@ describe('Label_C1_LoadInfo', () => {
     expect(r.decoded).toBe(true);
     expect(r.raw.tail).toBe('HB-JVA');
     expect(r.raw.flight_number).toBe('LX1366');
-    expect(r.raw.loadsheet.zfw).toBe(37329);
+    expect(r.raw.loadsheet?.zfw).toBe(37329);
     expect(r.decoder.decodeLevel).toBe('full');
   });
 
   test('reads final load info and keeps unknown lines', () => {
     const r = plugin.decode({
       label: 'C1',
-      text: 'FINAL LOAD INFO 1140\nZFW 37400\nTOW 43200\nPAX 91\nDOI 45.1\nEND',
+      text: 'FINAL LOAD INFO 1140\nZFW 37400\nTOW 43200\nPAX 91\nDOI 45.1\nTRIM OK\nEND',
     });
     expect(r.decoded).toBe(true);
-    expect(r.raw.loadsheet.status).toBe('final');
-    expect(r.raw.loadsheet.time).toBe('1140');
-    expect(r.raw.loadsheet.pax_total).toBe(91);
-    expect(r.raw.loadsheet.pax_breakdown).toBe('91');
-    expect(r.remaining.text).toBe('DOI 45.1');
+    expect(r.raw.loadsheet?.status).toBe('final');
+    expect(r.raw.loadsheet?.time).toBe('1140');
+    expect(r.raw.loadsheet?.pax_total).toBe(91);
+    expect(r.raw.loadsheet?.pax_breakdown).toBe('91');
+    expect(r.raw.loadsheet?.doi).toBe(45.1);
+    expect(r.remaining.text).toBe('TRIM OK');
     expect(r.decoder.decodeLevel).toBe('partial');
+  });
+
+  test('reads a dashed one-field-per-line header through the decoder', () => {
+    const r = decoder.decode({
+      label: 'C1',
+      text: '.FRAGDLH\n190925\nAGM\nAN HB-JVA/MA 277A\n-  PRELIMINARY LOAD INFO 11:25\nZFW 37329\nTOW 43129\nEND',
+    });
+    expect(r.decoder.name).toBe('label-c1-load-info');
+    expect(r.raw.loadsheet?.zfw).toBe(37329);
+    expect(r.remaining.text).toBe('MA 277A');
+  });
+
+  test('splits lines on a bare CR', () => {
+    const r = plugin.decode({
+      label: 'C1',
+      text: 'PRELIMINARY LOAD INFO 11:25\rZFW 37329\rTOW 43129\rEND',
+    });
+    expect(r.decoded).toBe(true);
+    expect(r.raw.loadsheet?.tow).toBe(43129);
+  });
+
+  test('reads the issue time only when it is a clock', () => {
+    const time = (header: string) =>
+      plugin.decode({ label: 'C1', text: `${header}\nZFW 37329` });
+    expect(time('PRELIMINARY LOAD INFO 11:25Z').raw.loadsheet?.time).toBe(
+      '1125',
+    );
+    expect(time('PRELIMINARY LOAD INFO  9:25').raw.loadsheet?.time).toBe(
+      '0925',
+    );
+    const bad = time('PRELIMINARY LOAD INFO 11:60');
+    expect(bad.decoded).toBe(true);
+    expect(bad.raw.loadsheet?.time).toBeUndefined();
+    expect(bad.remaining.text).toBe('11:60');
+    expect(bad.decoder.decodeLevel).toBe('partial');
+  });
+
+  test('keeps digit lines that do not follow the preparer', () => {
+    const r = plugin.decode({
+      label: 'C1',
+      text: 'PRELIMINARY LOAD INFO 11:25\nZFW 37329\n12345\nEND',
+    });
+    expect(r.remaining.text).toBe('12345');
+    expect(r.decoder.decodeLevel).toBe('partial');
+  });
+
+  test('accepts any weight and keeps SI free text', () => {
+    const r = plugin.decode({
+      label: 'C1',
+      text: 'FINAL LOAD INFO 1140\nLAW 40629\nSI ZRH-WRO CREW 2/4',
+    });
+    expect(r.decoded).toBe(true);
+    expect(r.raw.loadsheet?.law).toBe(40629);
+    expect(r.raw.departure_iata).toBe('ZRH');
+    expect(r.remaining.text).toBe('CREW 2/4');
   });
 
   test('leaves IATA loadsheets to the Loadsheet plugin', () => {
@@ -120,7 +176,7 @@ describe('Label_C1_LoadInfo', () => {
     expect(plugin.decode({ label: 'C1', text }).decoded).toBe(false);
     const r = decoder.decode({ label: 'C1', text });
     expect(r.decoder.name).toBe('loadsheet');
-    expect(r.raw.loadsheet.status).toBe('final');
+    expect(r.raw.loadsheet?.status).toBe('final');
   });
 
   test('does not decode other C1 messages', () => {

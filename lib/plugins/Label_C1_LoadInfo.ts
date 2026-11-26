@@ -33,12 +33,15 @@ import { ResultFormatter } from '../utils/result_formatter';
  * Contributed by @thepacket in #416, reworked to reuse the loadsheet output.
  */
 
-const HEADER = /^(PRELIMINARY|FINAL) LOAD INFO(?: (\d{1,2}):?(\d{2}))?$/;
+const HEADER = /^(PRELIMINARY|FINAL) LOAD INFO(?:\s+(.*))?$/;
+const CLOCK = /^([01]?\d|2[0-3]):?([0-5]\d)Z?$/;
 const WEIGHT = /^(ZFW|TOW|LAW|TOF|DOW) (\d+)$/;
 // "PAX C/Y 6/84", "PAX 90", "PAX/6/84"
 const PAX = /^PAX(?: ([A-Z](?:\/[A-Z])*))?[ /](\d+(?:\/\d+)*)$/;
-const MAC_TOW = /^MACTOW (\d+(?:\.\d+)?)$/;
-const ROUTE = /^SI ([A-Z]{3,4})[-/]([A-Z]{3,4})$/;
+const MAC_TOW = /^MACTOW (\d+(?:[.,]\d+)?)$/;
+const DOI = /^DOI (-?\d+(?:[.,]\d+)?)$/;
+// "SI ZRH-WRO", optionally followed by free text
+const ROUTE = /^SI ([A-Z]{3,4})[-/]([A-Z]{3,4})(?:\s+(.*))?$/;
 const NOTOC = /^NOTOC ?: ?(YES|NO)$/;
 const CONFIG = /^SALEABLE CONFIGURATION (\S+)$/;
 const FUEL = /^FUEL IN TANKS (\d+)$/;
@@ -78,7 +81,7 @@ export class Label_C1_LoadInfo extends DecoderPlugin {
 
     let lines = splitAgmHeader(text, decodeResult);
     if (!lines) {
-      lines = text.split(/\r?\n/);
+      lines = text.split(/\r\n|\r|\n/);
       // Header written one field per line: ".FRAGDLH", "190925", "AGM", "AN ..."
       while (lines.length && !HEADER.test(stripDash(lines[0]))) {
         const line = lines.shift()!.trim();
@@ -106,11 +109,27 @@ export class Label_C1_LoadInfo extends DecoderPlugin {
       kind: 'loadsheet',
       status: (header[1] === 'FINAL' ? 'final' : 'prelim') as LoadsheetStatus,
     };
-    if (header[2]) ls.time = header[2].padStart(2, '0') + header[3];
+    const issued = header[2]?.trim();
+    if (issued) {
+      const clock = CLOCK.exec(issued);
+      if (clock) ls.time = clock[1].padStart(2, '0') + clock[2];
+      else ResultFormatter.unknown(decodeResult, issued, '\n');
+    }
 
     let fuelInTanks: number | undefined;
     let config: string | undefined;
+    let afterPreparer = false;
     for (const line of lines.slice(1)) {
+      // Preparer's name, and the licence number on the line after it: not
+      // decoded and not kept.
+      if (PREPARED.test(line)) {
+        afterPreparer = true;
+        continue;
+      }
+      const licence = afterPreparer && /^\d{5,}$/.test(line);
+      afterPreparer = false;
+      if (licence) continue;
+
       let m: RegExpExecArray | null;
       if ((m = WEIGHT.exec(line))) {
         ls[WEIGHT_KEYS[m[1]]] = Number(m[2]);
@@ -119,25 +138,28 @@ export class Label_C1_LoadInfo extends DecoderPlugin {
         ls.pax_total = counts.reduce((a, b) => a + b, 0);
         ls.pax_breakdown = m[1] ? `${m[1]} ${m[2]}` : m[2];
       } else if ((m = MAC_TOW.exec(line))) {
-        ls.mac_tow = Number(m[1]);
+        ls.mac_tow = Number(m[1].replace(',', '.'));
+      } else if ((m = DOI.exec(line))) {
+        ls.doi = Number(m[1].replace(',', '.'));
       } else if ((m = ROUTE.exec(line))) {
         ls.departure = m[1];
         ls.arrival = m[2];
+        if (m[3]) ResultFormatter.unknown(decodeResult, m[3], '\n');
       } else if ((m = NOTOC.exec(line))) {
         ls.notoc = m[1] === 'YES';
       } else if ((m = CONFIG.exec(line))) {
         config = m[1];
       } else if ((m = FUEL.exec(line))) {
         fuelInTanks = Number(m[1]);
-      } else if (PREPARED.test(line) || /^\d{5,}$/.test(line)) {
-        // Preparer's name and licence number: not decoded, not kept.
       } else if (line !== 'END') {
         ResultFormatter.unknown(decodeResult, line, '\n');
       }
     }
 
-    if (ls.zfw === undefined && ls.tow === undefined) {
-      this.debug(options, `Load info without weights: ${text}`);
+    const weights = ['zfw', 'tow', 'law', 'tof', 'dow'] as const;
+    if (!weights.some((k) => ls[k] !== undefined)) {
+      // Not the text: it may hold the preparer's name.
+      this.debug(options, 'Load info without weights');
       this.setDecodeLevel(decodeResult, false);
       return decodeResult;
     }
