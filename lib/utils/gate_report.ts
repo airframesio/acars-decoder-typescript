@@ -272,3 +272,64 @@ export function addWestJetGate(
   }
   return undefined;
 }
+
+/** Alaska flight line: "AS1636". */
+export const ALASKA_FLIGHT = /^(AS\d{1,4})$/;
+// Alaska ETA acknowledgement (labels 21 and RA): "FROM:LAX OPS" / "AS1831"
+// / "ARRIVAL GATE:65B".
+const ALASKA_FROM = /^FROM:\s*([A-Z]{3}) OPS$/;
+const ALASKA_ACK_LINE = /^ETA ACK$/;
+const ALASKA_ARR_GATE = new RegExp(`^ARRIVAL GATE:\\s*${GATE_TOKEN}\\s*$`);
+
+/**
+ * Reads an Alaska ETA acknowledgement: the airport, flight and gate. The
+ * gate line alone is not enough (Horizon sends a bare "ARRIVAL GATE:B9"):
+ * the message must also have an "ETA ACK", "FROM:<IATA> OPS" or AS flight
+ * line before the next flight.
+ */
+export function addAlaskaEtaAck(
+  decodeResult: DecodeResult,
+  lines: string[],
+): UsedLines | undefined {
+  let airport: string | undefined;
+  let flight: string | undefined;
+  let ack = false;
+  let gate: string | undefined;
+  const used: UsedLines = new Map();
+  for (let i = 0; i < lines.length; i++) {
+    if (GATE_STOP_LINE.test(lines[i])) {
+      break;
+    }
+    if (ALASKA_ACK_LINE.test(lines[i])) {
+      ack = true;
+      continue;
+    }
+    const a = ALASKA_FROM.exec(lines[i]);
+    if (a) {
+      airport = a[1];
+      used.set(i, '');
+      continue;
+    }
+    const f = ALASKA_FLIGHT.exec(lines[i]);
+    if (f) {
+      flight = f[1];
+      used.set(i, '');
+      continue;
+    }
+    const g = gate === undefined ? ALASKA_ARR_GATE.exec(lines[i]) : null;
+    if (g) {
+      gate = g[1];
+      used.set(i, '');
+    }
+  }
+  if (gate === undefined || !(ack || airport || flight)) {
+    return undefined;
+  }
+  decodeResult.formatted.description = 'ETA Acknowledgement';
+  if (flight) ResultFormatter.flightNumber(decodeResult, flight);
+  if (airport) {
+    ResultFormatter.arrivalAirport(decodeResult, airport, 'IATA');
+  }
+  ResultFormatter.arrivalGate(decodeResult, gate);
+  return used;
+}
