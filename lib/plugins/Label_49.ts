@@ -116,10 +116,15 @@ export class Label_49 extends DecoderPlugin {
       const hour = Number(time.slice(2, 4));
       const minute = Number(time.slice(4, 6));
       if (day >= 1 && day <= 31 && hour <= 23 && minute <= 59) {
+        const tod = DateTimeUtils.convertHHMMSSToTod(time.slice(2));
         result.raw.day = day;
-        result.raw.message_timestamp = DateTimeUtils.convertHHMMSSToTod(
-          time.slice(2),
-        );
+        result.raw.message_timestamp = tod;
+        // For OUT/OFF/ON/IN the header time is the event time, so it also
+        // feeds the raw.*_time field that the other OOOI plugins publish and
+        // downstream consumers already read.
+        if (isOOOI) {
+          this.formatOOOITime(result, reportCode, tod);
+        }
       }
     }
 
@@ -183,6 +188,41 @@ export class Label_49 extends DecoderPlugin {
 
     this.debug(options, reportCode, previous, next, body);
     return result;
+  }
+
+  /**
+   * Publishes the header time of an OOOI report as its event time.
+   *
+   * @param result decode result being built; `raw.<event>_time` and a `time`
+   *   formatted item are added to it
+   * @param reportCode report code from the header; must be one of OUT, OFF,
+   *   ON or IN (guaranteed by the caller's `isOOOI` check)
+   * @param tod time of day of the event, in seconds since midnight
+   *   (0-86399), as returned by `DateTimeUtils.convertHHMMSSToTod`
+   * @throws Error if `reportCode` is not an OOOI code, which would mean the
+   *   caller broke the `OOOI` set invariant
+   */
+  private formatOOOITime(
+    result: DecodeResult,
+    reportCode: string,
+    tod: number,
+  ): void {
+    switch (reportCode) {
+      case 'OUT':
+        ResultFormatter.out(result, tod);
+        return;
+      case 'OFF':
+        ResultFormatter.off(result, tod);
+        return;
+      case 'ON':
+        ResultFormatter.on(result, tod);
+        return;
+      case 'IN':
+        ResultFormatter.in(result, tod);
+        return;
+      default:
+        throw new Error(`not an OOOI report code: ${reportCode}`);
+    }
   }
 
   private parseBody(body: string): BodyFields | undefined {

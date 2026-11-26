@@ -2,6 +2,15 @@ import { beforeEach, describe, expect, test } from '@jest/globals';
 import { MessageDecoder } from '../MessageDecoder';
 import { Label_49 } from './Label_49';
 
+// Report code -> the raw field the OOOI formatters write, so the mapping can
+// be checked for every code without repeating the body of the test.
+const OOOI_RAW_FIELDS = {
+  OUT: 'out_time',
+  OFF: 'off_time',
+  ON: 'on_time',
+  IN: 'in_time',
+} as const;
+
 describe('Label 49', () => {
   let plugin: Label_49;
   const message = { label: '49', text: '' };
@@ -80,8 +89,31 @@ describe('Label 49', () => {
     expect(result.raw.altitude).toBe(383);
     expect(result.raw.indicated_airspeed).toBeCloseTo(182.8, 3);
     expect(result.raw.total_air_temperature).toBeCloseTo(21.1, 3);
+    expect(result.raw.off_time).toBe(62880);
+    expect(
+      result.formatted.items.find((item) => item.code === 'OFF'),
+    ).toMatchObject({ type: 'time', value: '17:28:00' });
     expect(result.remaining.text).toBe('215102230851');
   });
+
+  test.each(Object.entries(OOOI_RAW_FIELDS))(
+    'publishes the %s header time as its event time',
+    (code, field) => {
+      message.text = `01${code.padEnd(4)}     APZ136/211728KIADRKSI\r\n+  383182.8+ 21.1215102230851`;
+      const result = plugin.decode(message);
+
+      expect(result.decoded).toBe(true);
+      expect(result.raw[field]).toBe(62880);
+      expect(
+        result.formatted.items.find((item) => item.code === code),
+      ).toMatchObject({ type: 'time', value: '17:28:00' });
+      for (const [other, otherField] of Object.entries(OOOI_RAW_FIELDS)) {
+        if (other !== code) {
+          expect(result.raw[otherField]).toBeUndefined();
+        }
+      }
+    },
+  );
 
   test('decodes the M##AJL variant', () => {
     message.text =
@@ -145,6 +177,10 @@ describe('Label 49', () => {
     expect(result.raw.event).toBe('OUT');
     expect(result.raw.altitude).toBeUndefined();
     expect(result.raw.callsign).toBeUndefined();
+    expect(result.raw.out_time).toBeUndefined();
+    expect(
+      result.formatted.items.find((item) => item.type === 'time'),
+    ).toBeUndefined();
     expect(result.remaining.text).toContain('*');
   });
 
@@ -155,6 +191,18 @@ describe('Label 49', () => {
     expect(result.decoded).toBe(true);
     expect(result.raw.day).toBeUndefined();
     expect(result.raw.message_timestamp).toBeUndefined();
+  });
+
+  test('does not invent an OOOI event time from an invalid day', () => {
+    message.text =
+      '01OUT     APZ136/002359KIADRKSI\r\n+  383182.8+ 21.1215102230851';
+    const result = plugin.decode(message);
+
+    expect(result.decoded).toBe(true);
+    expect(result.raw.report_code).toBe('OUT');
+    expect(result.raw.day).toBeUndefined();
+    expect(result.raw.message_timestamp).toBeUndefined();
+    expect(result.raw.out_time).toBeUndefined();
   });
 
   test('keeps leading spaces in the unsigned layout', () => {
