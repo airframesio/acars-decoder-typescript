@@ -83,8 +83,8 @@ describe('Label H1 Preamble PRG', () => {
     expect(decodeResult.formatted.items[3].value).toBe('16:30:55');
     expect(decodeResult.formatted.items[4].label).toBe('Gross Weight');
     expect(decodeResult.formatted.items[4].value).toBe('154400 pounds');
-    expect(decodeResult.formatted.items[5].label).toBe('Centre of Gravity');
-    expect(decodeResult.formatted.items[5].value).toBe('28.6 % MAC');
+    expect(decodeResult.formatted.items[5].label).toBe('Center of Gravity');
+    expect(decodeResult.formatted.items[5].value).toBe('28.6 %');
     expect(decodeResult.formatted.items[6].label).toBe('Cruise Altitude');
     expect(decodeResult.formatted.items[6].value).toBe('35000 feet');
     // /PR idx3 = FUEL REMAINING (ARINC 702A-5 Att. 7 §7), not Fuel On Board

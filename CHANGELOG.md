@@ -7,7 +7,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 
 - `Arinc702` performance reports (`/PR`): decode the 12-, 18- and 19-field
-  layouts — fuel remaining at report time (`fuel_on_board`, idx3), current
+  layouts — fuel remaining at report time (`fuel_remaining`, idx3), current
   CG, reserve fuel, cost index, cruise wind, block fuel, taxi fuel, zero fuel
   weight, zero fuel CG, plan or block fuel (idx4), assumed temperature
   (`Pxx`) and probable derate (`Pyy`). The `/PR` wind is reported as
@@ -16,6 +16,14 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
+- `Arinc702` performance reports (`/PR`): fuel remaining (idx3) is published
+  once. It is consumed when the POSN body, `/FB` (whatever its IEI order) or
+  another element already reports the same figure in pounds, and left in the
+  remaining text when the figures differ, so a report no longer carries two
+  fuel items with different units.
+- `Arinc702` `/FB` fuel on board: a value that is not all digits (for example
+  `FB12A4`) is kept in the remaining text instead of being truncated by
+  `parseInt` or published as `NaN`.
 - `Arinc702` destination reports (`/DT`): the fuel field is the **predicted
   fuel remaining at destination** (ARINC 702A-5 Att. 7 §7, /DT element 3,
   0.1 Klbs per Boeing D922A601), now decoded as `destination_fuel` instead of
@@ -34,9 +42,12 @@ All notable changes to this project will be documented in this file.
   mapping.
 - `Arinc702` position reports: the field after the temperature is decoded as
   wind (`DDDSSS`, leading zeros dropped), the next field as fuel remaining on
-  board (NTSB ACARS legend, hundreds of pounds), and the long variant decodes
-  ground speed, TAS and IAS. Four-digit wind values are left unknown because
-  they are ambiguous. The Southwest 21-field layout keeps its own fuel field.
+  board, and the long variant decodes ground speed, TAS and IAS. Four-digit
+  wind values are left unknown because they are ambiguous. The Southwest
+  21-field layout keeps its own fuel field. The POSN fuel is the FUEL REMAINING
+  element of ARINC 702A-5 Att. 7, sent in 0.1 Klbs; it is now stored in pounds
+  like the other fuel fields, so `fuel_remaining` changes from e.g. 191 to
+  19100 on a POSN-only report.
 - `/PR` reports with 11 fields (a 12-field layout missing its last field) now
   decode the surviving fields instead of leaving them in `remaining`.
 

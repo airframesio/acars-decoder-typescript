@@ -62,6 +62,9 @@ export class Arinc702Helper {
       decodeResult.decoder.decodeLevel = 'none';
       return false;
     }
+    // /FB can come after /PR: read the declared fuel on board first so the
+    // /PR fuel field agrees with it whatever the IEI order is.
+    const fuelOnBoard = declaredFuelOnBoard(fields);
     for (let i = 1; i < fields.length; ++i) {
       const iei = fields[i].substring(0, 2);
       const data = fields[i].substring(2);
@@ -98,8 +101,14 @@ export class Arinc702Helper {
           break;
         case 'FB':
           // military OOI reports sometimes send an empty /FB
-          if (data !== '') {
-            ResultFormatter.currentFuel(decodeResult, parseInt(data, 10));
+          if (data === '') {
+            break;
+          }
+          if (/^\d+$/.test(data)) {
+            ResultFormatter.currentFuel(decodeResult, Number(data));
+          } else {
+            // Keep a value this decoder cannot read instead of publishing NaN.
+            ResultFormatter.unknown(decodeResult, fields[i], '/');
           }
           break;
         case 'FN':
@@ -141,7 +150,7 @@ export class Arinc702Helper {
           processOutEvent(decodeResult, data.split(','));
           break;
         case 'PR':
-          processPerformanceData(decodeResult, data.split(','));
+          processPerformanceData(decodeResult, data.split(','), fuelOnBoard);
           break;
         //case 'PR':
         // TODO: decode /PR fields
@@ -264,14 +273,16 @@ export class Arinc702Helper {
       } else if (data[8] !== '') {
         ResultFormatter.unknown(decodeResult, data[8]);
       }
-      // data[9] is the fuel remaining on board (NTSB ACARS legend), in
-      // hundreds of pounds. The value is kept as-is; the unit is the source
-      // format's. The Southwest 21-field layout has its own fuel field and is
-      // handled by processSouthwestPosition.
+      // data[9] is the fuel remaining on board: the FUEL REMAINING element of
+      // ARINC 702A-5 Att. 7 (POS IEI), sent with a 0.1 Klbs scale, i.e.
+      // hundreds of pounds, which the NTSB legend confirms (DCA10IA001).
+      // Stored in pounds like the other fuel fields. The Southwest 21-field
+      // layout has its own fuel field and is handled by
+      // processSouthwestPosition.
       if (data[9] !== '') {
         const fuel = Number(data[9]);
         if (Number.isFinite(fuel)) {
-          ResultFormatter.remainingFuel(decodeResult, fuel);
+          ResultFormatter.remainingFuel(decodeResult, fuel * 100);
         } else {
           ResultFormatter.unknown(decodeResult, data[9]);
         }
@@ -696,16 +707,24 @@ function processIMI(decodeResult: DecodeResult, type: string): boolean {
  * condition of the assumed temperature (selected vs maximum at MTOW) depends
  * on the AOC host, so it is named but not further interpreted.
  *
- * Field 3 (fuel remaining, hundreds of pounds) becomes fuel_on_board when no
- * other IEI supplied it; if one did (/DT also shows fuel on board), it is
- * accepted only when the values agree, so the two figures do not clash.
+ * Field 3 (fuel remaining) is sent in 0.1 Klbs, i.e. hundreds of pounds
+ * (ARINC 702A-5, Attachment 7), and is stored in pounds like the other fuel
+ * fields. It is the same figure the POSN body (data[9]) and /FB can carry, so
+ * it is published once: the field is consumed when a figure already published
+ * (fuel_remaining, fuel_on_board or a /FB present in the message) agrees, and
+ * left in the remaining text when it differs, so two fuel items with
+ * different units cannot appear.
  * Field 4 (plan or block fuel) keeps its raw number: the unit is not
  * documented, observed values are consistent with hundreds of pounds on
  * LS/SV routes. Field counts other than 11, 12, 18 and 19 are not decoded
  * either: their field positions are undocumented, so they stay in the
  * remaining text.
  */
-function processPerformanceData(decodeResult: DecodeResult, data: string[]) {
+function processPerformanceData(
+  decodeResult: DecodeResult,
+  data: string[],
+  fuelOnBoard?: number,
+) {
   if (data.length < 3) {
     ResultFormatter.unknownArr(decodeResult, data, ',');
     return;
@@ -719,11 +738,34 @@ function processPerformanceData(decodeResult: DecodeResult, data: string[]) {
     if (supportedLayout && value === '') {
       return false;
     }
-    return !decodePerformanceField(decodeResult, i, value, length);
+    return !decodePerformanceField(decodeResult, i, value, length, fuelOnBoard);
   });
   if (remaining.length > 0) {
     ResultFormatter.unknown(decodeResult, remaining.join(','), '/PR');
   }
+}
+
+/**
+ * Reads the fuel on board declared by a `/FB` IEI.
+ *
+ * `/FB` can appear before or after `/PR`, so it is read once up front and the
+ * `/PR` fuel field is compared against it regardless of IEI order.
+ *
+ * @param fields IEIs of the message, as produced by splitting the body on `/`
+ * @returns the last `/FB` value when it is all digits, in pounds as sent, or
+ *   `undefined` when the message has no numeric `/FB`
+ */
+function declaredFuelOnBoard(fields: string[]): number | undefined {
+  let fuel: number | undefined;
+  for (let i = 1; i < fields.length; ++i) {
+    if (fields[i].startsWith('FB')) {
+      const value = fields[i].substring(2);
+      if (/^\d+$/.test(value)) {
+        fuel = Number(value);
+      }
+    }
+  }
+  return fuel;
 }
 
 /** Parse a signed `P`/`M` performance value (`P48` = 48, `M2` = -2). */
@@ -801,6 +843,7 @@ function decodePerformanceField(
   i: number,
   value: string,
   length: number,
+  fuelOnBoard?: number,
 ): boolean {
   const hundreds = /^\d+$/.test(value) ? Number(value) * 100 : undefined;
   // 11 fields is a 12-field report with its last field missing.
@@ -824,14 +867,7 @@ function decodePerformanceField(
       if (cg > 100) {
         return false;
       }
-      ResultFormatter.raw(
-        decodeResult,
-        'center_of_gravity',
-        'CG',
-        'Centre of Gravity',
-        `${cg.toFixed(1)} % MAC`,
-        cg,
-      );
+      ResultFormatter.cg(decodeResult, cg);
       return true;
     }
     case 2:
@@ -848,11 +884,21 @@ function decodePerformanceField(
       );
       return true;
     case 3: {
-      // FUEL REMAINING: ARINC 702A-5 Att. 7 §7 (PR element 4), hundreds of
-      // pounds. This is the fuel remaining at report time, distinct from
-      // fuel_on_board (e.g. from /FB). Both can coexist.
+      // FUEL REMAINING: ARINC 702A-5 Att. 7 §7 (PR element 4), sent with a
+      // 0.1 Klbs scale, i.e. hundreds of pounds, so `hundreds` is already in
+      // pounds. The POSN body (data[9]) and /FB can carry the same figure;
+      // publish it once: consume the field when a published value agrees,
+      // leave it in the remaining text when it differs.
       if (!supportedLayout || hundreds === undefined) {
         return false;
+      }
+      const published = [
+        decodeResult.raw.fuel_remaining,
+        decodeResult.raw.fuel_on_board,
+        fuelOnBoard,
+      ].filter((value): value is number => value !== undefined);
+      if (published.length > 0) {
+        return published.includes(hundreds);
       }
       ResultFormatter.remainingFuel(decodeResult, hundreds);
       return true;

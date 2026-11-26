@@ -58,7 +58,7 @@ describe('Label H1 /', () => {
     expect(decodeResult.formatted.items.length).toBe(8);
     expect(decodeResult.raw.wind_direction).toBe(209);
     expect(decodeResult.raw.wind_speed).toBe(67);
-    expect(decodeResult.raw.fuel_remaining).toBe(194);
+    expect(decodeResult.raw.fuel_remaining).toBe(19400);
     expect(decodeResult.remaining.text).toBe('/HDQDLUA.CA');
   });
 
@@ -86,7 +86,7 @@ describe('Label H1 /', () => {
     expect(decodeResult.formatted.items[3].value).toBe('-56 degrees');
     expect(decodeResult.raw.wind_direction).toBe(247);
     expect(decodeResult.raw.wind_speed).toBe(39);
-    expect(decodeResult.raw.fuel_remaining).toBe(127);
+    expect(decodeResult.raw.fuel_remaining).toBe(12700);
     expect(decodeResult.formatted.items[6].label).toBe('Message Checksum');
     expect(decodeResult.formatted.items[6].value).toBe('0x6763');
     expect(decodeResult.remaining.text).toBe('/.830');

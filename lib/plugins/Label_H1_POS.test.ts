@@ -27,7 +27,7 @@ describe('Label_H1 POS', () => {
     expect(decodeResult.raw.outside_air_temperature).toBe(-48);
     expect(decodeResult.raw.wind_direction).toBe(22);
     expect(decodeResult.raw.wind_speed).toBe(16);
-    expect(decodeResult.raw.fuel_remaining).toBe(185);
+    expect(decodeResult.raw.fuel_remaining).toBe(18500);
   });
 
   test('variant 2', () => {
@@ -46,7 +46,7 @@ describe('Label_H1 POS', () => {
     expect(decodeResult.raw.outside_air_temperature).toBe(-6);
     expect(decodeResult.raw.wind_direction).toBe(60);
     expect(decodeResult.raw.wind_speed).toBe(13);
-    expect(decodeResult.raw.fuel_remaining).toBe(269);
+    expect(decodeResult.raw.fuel_remaining).toBe(26900);
   });
 
   test('variant 3', () => {
@@ -65,7 +65,7 @@ describe('Label_H1 POS', () => {
     expect(decodeResult.raw.outside_air_temperature).toBe(-47);
     expect(decodeResult.raw.wind_direction).toBeUndefined();
     expect(decodeResult.raw.wind_speed).toBeUndefined();
-    expect(decodeResult.raw.fuel_remaining).toBe(86);
+    expect(decodeResult.raw.fuel_remaining).toBe(8600);
   });
 
   test('variant 4', () => {
@@ -84,7 +84,7 @@ describe('Label_H1 POS', () => {
     expect(decodeResult.raw.outside_air_temperature).toBe(-42);
     expect(decodeResult.raw.wind_direction).toBe(3);
     expect(decodeResult.raw.wind_speed).toBe(51);
-    expect(decodeResult.raw.fuel_remaining).toBe(158);
+    expect(decodeResult.raw.fuel_remaining).toBe(15800);
   });
 
   test('variant 5', () => {
@@ -104,7 +104,7 @@ describe('Label_H1 POS', () => {
     expect(decodeResult.raw.outside_air_temperature).toBe(-40);
     expect(decodeResult.raw.wind_direction).toBe(260);
     expect(decodeResult.raw.wind_speed).toBe(67);
-    expect(decodeResult.raw.fuel_remaining).toBe(2247);
+    expect(decodeResult.raw.fuel_remaining).toBe(224700);
   });
 
   test('variant 6', () => {
@@ -166,7 +166,7 @@ describe('Label_H1 POS', () => {
     expect(decodeResult.remaining.text).toBe('');
     expect(decodeResult.raw.wind_direction).toBe(272);
     expect(decodeResult.raw.wind_speed).toBe(100);
-    expect(decodeResult.raw.fuel_remaining).toBe(157);
+    expect(decodeResult.raw.fuel_remaining).toBe(15700);
   });
 
   test('# variant 7', () => {
@@ -231,8 +231,8 @@ describe('Label_H1 POS', () => {
     expect(decodeResult.formatted.items[3].value).toBe('10:33:16');
     expect(decodeResult.formatted.items[4].label).toBe('Gross Weight');
     expect(decodeResult.formatted.items[4].value).toBe('175400 pounds');
-    expect(decodeResult.formatted.items[5].label).toBe('Centre of Gravity');
-    expect(decodeResult.formatted.items[5].value).toBe('23.1 % MAC');
+    expect(decodeResult.formatted.items[5].label).toBe('Center of Gravity');
+    expect(decodeResult.formatted.items[5].value).toBe('23.1 %');
     expect(decodeResult.formatted.items[6].label).toBe('Cruise Altitude');
     expect(decodeResult.formatted.items[6].value).toBe('35000 feet');
     // /PR idx3 = FUEL REMAINING (ARINC 702A-5 Att. 7 §7), not Fuel On Board
@@ -309,7 +309,7 @@ describe('Label_H1 POS', () => {
     expect(decodeResult.remaining.text).toBe('');
     expect(decodeResult.raw.wind_direction).toBe(306);
     expect(decodeResult.raw.wind_speed).toBe(28);
-    expect(decodeResult.raw.fuel_remaining).toBe(320);
+    expect(decodeResult.raw.fuel_remaining).toBe(32000);
   });
 
   test('variant 9', () => {
@@ -339,7 +339,7 @@ describe('Label_H1 POS', () => {
     expect(decodeResult.remaining.text).toBe('1726');
     expect(decodeResult.raw.wind_direction).toBeUndefined();
     expect(decodeResult.raw.wind_speed).toBeUndefined();
-    expect(decodeResult.raw.fuel_remaining).toBe(167);
+    expect(decodeResult.raw.fuel_remaining).toBe(16700);
   });
 
   test('variant 10', () => {
@@ -351,8 +351,9 @@ describe('Label_H1 POS', () => {
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.formatted.description).toBe('Position Report');
-    // /PR idx3 now emits fuel_remaining instead of fuel_on_board (ARINC 702A-5)
-    expect(decodeResult.formatted.items.length).toBe(24);
+    // The /PR idx3 fuel (191) agrees with the POSN field, so it is consumed
+    // and the report keeps the single POSN Fuel Remaining item.
+    expect(decodeResult.formatted.items.length).toBe(23);
     expect(decodeResult.formatted.items[0].label).toBe('Aircraft Position');
     expect(decodeResult.formatted.items[0].value).toBe('51.323 N, 4.878 E');
     expect(decodeResult.formatted.items[1].label).toBe('Altitude');
@@ -378,43 +379,40 @@ describe('Label_H1 POS', () => {
     expect(decodeResult.raw.outside_air_temperature).toBe(-20);
     expect(decodeResult.formatted.items[9].label).toBe('Gross Weight');
     expect(decodeResult.formatted.items[9].value).toBe('149600 pounds');
-    expect(decodeResult.formatted.items[10].label).toBe('Centre of Gravity');
-    expect(decodeResult.formatted.items[10].value).toBe('15.0 % MAC');
+    expect(decodeResult.formatted.items[10].label).toBe('Center of Gravity');
+    expect(decodeResult.formatted.items[10].value).toBe('15 %');
     expect(decodeResult.formatted.items[11].label).toBe('Cruise Altitude');
     expect(decodeResult.formatted.items[11].value).toBe('37000 feet');
-    // /PR idx3 (191, hundreds of pounds) = FUEL REMAINING (ARINC 702A-5 Att. 7 §7)
-    expect(decodeResult.formatted.items[12].label).toBe('Fuel Remaining');
-    expect(decodeResult.formatted.items[12].value).toBe('19100');
     // idx4 is empty in this /PR, so Plan or Block Fuel is not present; idx5 = Reserve Fuel
-    expect(decodeResult.formatted.items[13].label).toBe('Reserve Fuel');
-    expect(decodeResult.formatted.items[13].value).toBe('5500 pounds');
-    expect(decodeResult.formatted.items[14].label).toBe('Cost Index');
-    expect(decodeResult.formatted.items[14].value).toBe('10');
-    expect(decodeResult.formatted.items[15].label).toBe('Cruise Wind');
-    expect(decodeResult.formatted.items[15].value).toBe(
+    expect(decodeResult.formatted.items[12].label).toBe('Reserve Fuel');
+    expect(decodeResult.formatted.items[12].value).toBe('5500 pounds');
+    expect(decodeResult.formatted.items[13].label).toBe('Cost Index');
+    expect(decodeResult.formatted.items[13].value).toBe('10');
+    expect(decodeResult.formatted.items[14].label).toBe('Cruise Wind');
+    expect(decodeResult.formatted.items[14].value).toBe(
       '248 degrees at 28 knots',
     );
-    expect(decodeResult.formatted.items[16].label).toBe(
+    expect(decodeResult.formatted.items[15].label).toBe(
       'Cruise Temperature (C)',
     );
-    expect(decodeResult.formatted.items[16].value).toBe('-47 degrees');
+    expect(decodeResult.formatted.items[15].value).toBe('-47 degrees');
     // Eindhoven's transition altitude is 3,000 feet
-    expect(decodeResult.formatted.items[17].label).toBe('Transition Altitude');
-    expect(decodeResult.formatted.items[17].value).toBe('3000 feet');
-    expect(decodeResult.formatted.items[18].label).toBe('Assumed Temperature');
-    expect(decodeResult.formatted.items[18].value).toBe('19 degrees');
-    expect(decodeResult.formatted.items[19].label).toBe('Derate (probable)');
-    expect(decodeResult.formatted.items[19].value).toBe('0');
-    expect(decodeResult.formatted.items[20].label).toBe('Arrival Runway'); // FIXME should remove
-    expect(decodeResult.formatted.items[20].value).toBe(''); // FIXME should remove
-    expect(decodeResult.formatted.items[21].label).toBe('Fuel at Destination');
-    expect(decodeResult.formatted.items[21].value).toBe('8900');
-    expect(decodeResult.formatted.items[22].label).toBe(
+    expect(decodeResult.formatted.items[16].label).toBe('Transition Altitude');
+    expect(decodeResult.formatted.items[16].value).toBe('3000 feet');
+    expect(decodeResult.formatted.items[17].label).toBe('Assumed Temperature');
+    expect(decodeResult.formatted.items[17].value).toBe('19 degrees');
+    expect(decodeResult.formatted.items[18].label).toBe('Derate (probable)');
+    expect(decodeResult.formatted.items[18].value).toBe('0');
+    expect(decodeResult.formatted.items[19].label).toBe('Arrival Runway'); // FIXME should remove
+    expect(decodeResult.formatted.items[19].value).toBe(''); // FIXME should remove
+    expect(decodeResult.formatted.items[20].label).toBe('Fuel at Destination');
+    expect(decodeResult.formatted.items[20].value).toBe('8900');
+    expect(decodeResult.formatted.items[21].label).toBe(
       'Estimated Time of Arrival',
     );
-    expect(decodeResult.formatted.items[22].value).toBe('12:45:03');
-    expect(decodeResult.formatted.items[23].label).toBe('Message Checksum');
-    expect(decodeResult.formatted.items[23].value).toBe('0x53b2');
+    expect(decodeResult.formatted.items[21].value).toBe('12:45:03');
+    expect(decodeResult.formatted.items[22].label).toBe('Message Checksum');
+    expect(decodeResult.formatted.items[22].value).toBe('0x53b2');
     expect(decodeResult.remaining.text).toContain('FHCIV');
   });
 
@@ -523,7 +521,7 @@ describe('Label_H1 POS', () => {
     expect(decodeResult.raw.airspeed).toBe(366);
     expect(decodeResult.raw.indicated_airspeed).toBe(290);
     expect(decodeResult.raw.gross_weight).toBe(159400);
-    expect(decodeResult.raw.fuel_remaining).toBe(37000);
+    expect(decodeResult.raw.fuel_remaining).toBeUndefined();
     expect(decodeResult.raw.departure_icao).toBe('KPIT');
     expect(decodeResult.formatted.items[11].label).toBe('Destination');
     expect(decodeResult.formatted.items[11].value).toBe('KLAS');
@@ -608,7 +606,7 @@ describe('Label_H1 POS', () => {
     expect(decodeResult.raw.altitude).toBe(0);
     expect(decodeResult.raw.wind_speed).toBeUndefined();
     expect(decodeResult.raw.gross_weight).toBeUndefined();
-    expect(decodeResult.raw.fuel_remaining).toBe(15000);
+    expect(decodeResult.raw.fuel_remaining).toBeUndefined();
     expect(decodeResult.raw.destination_fuel).toBeUndefined();
     expect(decodeResult.raw.cruise_altitude).toBeUndefined();
     expect(decodeResult.raw.transition_altitude).toBe(18000);
@@ -630,7 +628,7 @@ describe('Label_H1 POS', () => {
     expect(decodeResult.raw.next_waypoint_distance).toBe(56);
     expect(decodeResult.raw.altitude).toBe(15800);
     expect(decodeResult.raw.gross_weight).toBe(159400);
-    expect(decodeResult.raw.fuel_remaining).toBe(37000);
+    expect(decodeResult.raw.fuel_remaining).toBeUndefined();
     expect(decodeResult.raw.center_of_gravity).toBe(23.8);
     expect(decodeResult.raw.cruise_altitude).toBe(34000);
     expect(decodeResult.raw.reserve_fuel).toBe(4400);

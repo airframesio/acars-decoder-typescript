@@ -7,6 +7,10 @@ describe('Label_H1 PER', () => {
   const message = { label: 'H1', text: '' };
   const item = (result: ReturnType<Arinc702['decode']>, label: string) =>
     result.formatted.items.find((i) => i.label === label)?.value;
+  const fuelItems = (result: ReturnType<Arinc702['decode']>) =>
+    result.formatted.items.filter(
+      (i) => i.type === 'fuel_remaining' || i.type === 'fuel_on_board',
+    );
 
   beforeEach(() => {
     const decoder = new MessageDecoder();
@@ -33,7 +37,7 @@ describe('Label_H1 PER', () => {
     expect(decodeResult.raw.derate).toBe(0);
     expect(decodeResult.raw.fuel_remaining).toBe(22200);
     expect(item(decodeResult, 'Gross Weight')).toBe('133700 pounds');
-    expect(item(decodeResult, 'Centre of Gravity')).toBe('26.2 % MAC');
+    expect(item(decodeResult, 'Center of Gravity')).toBe('26.2 %');
     expect(item(decodeResult, 'Cruise Altitude')).toBe('32000 feet');
     expect(item(decodeResult, 'Reserve Fuel')).toBe('6000 pounds');
     expect(item(decodeResult, 'Cost Index')).toBe('24');
@@ -182,6 +186,88 @@ describe('Label_H1 PER', () => {
     expect(decodeResult.remaining.text).toContain(
       '1337,262,320,222,,60,24,275103,M53,180,P52,P0,999',
     );
+  });
+
+  test('consumes the /PR fuel field when the POSN figure agrees', () => {
+    message.text =
+      'POSN43312W123174,EASON,215754,370,EBINY,220601,ELENN,M48,02216,185/PR1337,262,320,185,,60,24,275103,M53,180,P52,P08CD2';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoded).toBe(true);
+    // POSN data[9] = 185 in 0.1 Klbs, i.e. 18 500 lb; /PR idx3 carries the
+    // same figure, so it is consumed instead of adding a second item.
+    expect(decodeResult.raw.fuel_remaining).toBe(18500);
+    expect(fuelItems(decodeResult)).toHaveLength(1);
+    expect(fuelItems(decodeResult)[0].value).toBe('18500');
+  });
+
+  test('leaves a disagreeing /PR fuel figure in the remaining text', () => {
+    message.text =
+      'POSN43312W123174,EASON,215754,370,EBINY,220601,ELENN,M48,02216,185/PR1337,262,320,190,,60,24,275103,M53,180,P52,P03CB4';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoded).toBe(true);
+    expect(decodeResult.raw.fuel_remaining).toBe(18500);
+    expect(fuelItems(decodeResult)).toHaveLength(1);
+    expect(decodeResult.remaining.text).toBe('190');
+  });
+
+  test('consumes the /PR fuel field when a later /FB agrees', () => {
+    message.text =
+      'PER/PR1337,262,320,185,,60,24,275103,M53,180,P52,P0/FB18500716C';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoded).toBe(true);
+    expect(decodeResult.raw.fuel_remaining).toBeUndefined();
+    expect(decodeResult.raw.fuel_on_board).toBe(18500);
+    expect(fuelItems(decodeResult)).toHaveLength(1);
+    expect(fuelItems(decodeResult)[0].label).toBe('Fuel On Board');
+  });
+
+  test('consumes the /PR fuel field when an earlier /FB agrees', () => {
+    message.text =
+      'PER/FB18500/PR1337,262,320,185,,60,24,275103,M53,180,P52,P07D8B';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoded).toBe(true);
+    expect(decodeResult.raw.fuel_remaining).toBeUndefined();
+    expect(decodeResult.raw.fuel_on_board).toBe(18500);
+    expect(fuelItems(decodeResult)).toHaveLength(1);
+    expect(fuelItems(decodeResult)[0].label).toBe('Fuel On Board');
+  });
+
+  test('keeps a /PR fuel figure that disagrees with a later /FB', () => {
+    message.text =
+      'PER/PR1337,262,320,185,,60,24,275103,M53,180,P52,P0/FB18000AAFF';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoded).toBe(true);
+    expect(decodeResult.raw.fuel_remaining).toBeUndefined();
+    expect(decodeResult.raw.fuel_on_board).toBe(18000);
+    expect(fuelItems(decodeResult)).toHaveLength(1);
+    expect(decodeResult.remaining.text).toBe('185');
+  });
+
+  test('does not publish a non-numeric /FB as fuel', () => {
+    message.text =
+      'PER/PR1337,262,320,185,,60,24,275103,M53,180,P52,P0/FBABC89EB';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoded).toBe(true);
+    expect(decodeResult.raw.fuel_on_board).toBeUndefined();
+    expect(decodeResult.raw.fuel_remaining).toBe(18500);
+    expect(fuelItems(decodeResult)).toHaveLength(1);
+    expect(fuelItems(decodeResult)[0].label).toBe('Fuel Remaining');
+    expect(decodeResult.remaining.text).toBe('FBABC');
+  });
+
+  test('does not truncate a non-numeric /FB', () => {
+    message.text = 'PER/FB12A4C7DB';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoded).toBe(true);
+    expect(decodeResult.raw.fuel_on_board).toBeUndefined();
+    expect(decodeResult.remaining.text).toBe('FB12A4');
   });
 
   test('does not decode invalid message', () => {

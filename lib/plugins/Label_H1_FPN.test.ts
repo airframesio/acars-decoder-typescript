@@ -137,8 +137,8 @@ describe('Label_H1 FPN', () => {
     expect(decodeResult.formatted.items[4].value).toBe('ILS30L(30L)');
     expect(decodeResult.formatted.items[5].label).toBe('Gross Weight');
     expect(decodeResult.formatted.items[5].value).toBe('435600 pounds');
-    expect(decodeResult.formatted.items[6].label).toBe('Centre of Gravity');
-    expect(decodeResult.formatted.items[6].value).toBe('34.4 % MAC');
+    expect(decodeResult.formatted.items[6].label).toBe('Center of Gravity');
+    expect(decodeResult.formatted.items[6].value).toBe('34.4 %');
     expect(decodeResult.formatted.items[7].label).toBe('Cruise Altitude');
     expect(decodeResult.formatted.items[7].value).toBe('36000 feet');
     // /PR idx3 (1060, hundreds of pounds): FUEL REMAINING (ARINC 702A-5 Att. 7 §7)
