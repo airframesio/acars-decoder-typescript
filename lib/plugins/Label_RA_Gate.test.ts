@@ -642,6 +642,55 @@ describe('Label RA gate, round 7 formats', () => {
     expect(r.decoded).toBe(false);
   });
 
+  test('keeps the Horizon description and needs Alaska context for an ack', () => {
+    const r = plugin.decode({ label: 'RA', text: HORIZON });
+    expect(r.formatted.description).toBe('Arrival Gate');
+    expect(r.raw.arrival_gate).toBe('B9');
+    const ack = plugin.decode({ label: 'RA', text: ALASKA_ACK });
+    expect(ack.formatted.description).toBe('ETA Acknowledgement');
+  });
+
+  test('does not read previous or chat ARRIVAL GATE: lines', () => {
+    for (const text of [
+      'PREVIOUS ARRIVAL GATE: B4\r\n',
+      'SEEING ARRIVAL GATE: F3\r\n',
+    ]) {
+      expect(plugin.decode({ label: 'RA', text }).decoded).toBe(false);
+    }
+  });
+
+  test('ignores an in-range marker of a later flight', () => {
+    const r = plugin.decode({
+      label: 'RA',
+      text: SKYWEST_NOT_IN_RANGE + 'NEXT FLIGHT\r\nIN-RANGE FROM AA\r\n',
+    });
+    expect(r.decoded).toBe(false);
+  });
+
+  test('still reads Shandong flight and airport when an in-range line follows', () => {
+    const r = plugin.decode({
+      label: 'RA',
+      text: 'CURRENT FLIGHT:\r\nSC8402 ARR:ZSJN\r\nGATE:10\r\nWEATHER:\r\nIN-RANGE FROM AA\r\n',
+    });
+    expect(r.raw.flight_number).toBe('SC8402');
+    expect(r.raw.arrival_icao).toBe('ZSJN');
+    expect(r.raw.arrival_gate).toBe('10');
+  });
+
+  test('keeps the ITA route, ETA and bag claim', () => {
+    for (const text of [
+      ITA,
+      'QUMGL1AAZ~1\r\nCONNECTING GATES\r\nZRH/FCO ETA 1220\r\nGATE A32 BAG CLAIM 23\r\n',
+    ]) {
+      const r = plugin.decode({ label: 'RA', text });
+      expect(r.raw.departure_iata).toBe('ZRH');
+      expect(r.raw.arrival_iata).toBe('FCO');
+      expect(r.raw.arrival_gate).toBe('A32');
+      expect(r.raw.eta_time).toBe(12 * 3600 + 20 * 60);
+      expect(r.remaining.text).toContain('BAG CLAIM 23');
+    }
+  });
+
   test('still decodes SkyWest ARR GATE INFO with its reader', () => {
     const r = plugin.decode({ label: 'RA', text: SKYWEST });
     expect(r.raw.arrival_iata).toBe('BFL');

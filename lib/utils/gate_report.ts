@@ -16,7 +16,7 @@ export const GATE_TOKEN = '([A-Z]{0,3}\\d{1,4}[A-Z]?)';
  * next flight). Gate lines after it are not this flight's.
  */
 export const GATE_STOP_LINE =
-  /^(CREW CONNECTING|CONNECTING GATE|NEXT FLT|NEXT FLIGHT|NEXT LEG|NEXT SECTOR|NXM\b|- NEXT FLIGHT|ON STAND-|CREW DEPT|TURN FLT|CREW CONNECTIONS|PAX CONNECTIONS|AC TURN|END$)/;
+  /^(CREW CONNECTING|CONNECTING GATE\b|NEXT FLT|NEXT FLIGHT|NEXT LEG|NEXT SECTOR|NXM\b|- NEXT FLIGHT|ON STAND-|CREW DEPT|TURN FLT|CREW CONNECTIONS|PAX CONNECTIONS|AC TURN|END$)/;
 
 /**
  * Lines that were read: the line's index and what is left of it ('' when
@@ -278,19 +278,31 @@ export const ALASKA_FLIGHT = /^(AS\d{1,4})$/;
 // Alaska ETA acknowledgement (labels 21 and RA): "FROM:LAX OPS" / "AS1831"
 // / "ARRIVAL GATE:65B".
 const ALASKA_FROM = /^FROM:\s*([A-Z]{3}) OPS$/;
+const ALASKA_ACK_LINE = /^ETA ACK$/;
 const ALASKA_ARR_GATE = new RegExp(`^ARRIVAL GATE:\\s*${GATE_TOKEN}\\s*$`);
 
-/** Reads an Alaska ETA acknowledgement: the airport, flight and gate. */
+/**
+ * Reads an Alaska ETA acknowledgement: the airport, flight and gate. The
+ * gate line alone is not enough (Horizon sends a bare "ARRIVAL GATE:B9"):
+ * the message must also have an "ETA ACK", "FROM:<IATA> OPS" or AS flight
+ * line before the next flight.
+ */
 export function addAlaskaEtaAck(
   decodeResult: DecodeResult,
   lines: string[],
 ): UsedLines | undefined {
   let airport: string | undefined;
   let flight: string | undefined;
+  let ack = false;
+  let gate: string | undefined;
   const used: UsedLines = new Map();
   for (let i = 0; i < lines.length; i++) {
     if (GATE_STOP_LINE.test(lines[i])) {
       break;
+    }
+    if (ALASKA_ACK_LINE.test(lines[i])) {
+      ack = true;
+      continue;
     }
     const a = ALASKA_FROM.exec(lines[i]);
     if (a) {
@@ -304,17 +316,20 @@ export function addAlaskaEtaAck(
       used.set(i, '');
       continue;
     }
-    const g = ALASKA_ARR_GATE.exec(lines[i]);
+    const g = gate === undefined ? ALASKA_ARR_GATE.exec(lines[i]) : null;
     if (g) {
+      gate = g[1];
       used.set(i, '');
-      decodeResult.formatted.description = 'ETA Acknowledgement';
-      if (flight) ResultFormatter.flightNumber(decodeResult, flight);
-      if (airport) {
-        ResultFormatter.arrivalAirport(decodeResult, airport, 'IATA');
-      }
-      ResultFormatter.arrivalGate(decodeResult, g[1]);
-      return used;
     }
   }
-  return undefined;
+  if (gate === undefined || !(ack || airport || flight)) {
+    return undefined;
+  }
+  decodeResult.formatted.description = 'ETA Acknowledgement';
+  if (flight) ResultFormatter.flightNumber(decodeResult, flight);
+  if (airport) {
+    ResultFormatter.arrivalAirport(decodeResult, airport, 'IATA');
+  }
+  ResultFormatter.arrivalGate(decodeResult, gate);
+  return used;
 }

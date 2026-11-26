@@ -550,6 +550,9 @@ export class Label_Gate_Report extends DecoderPlugin {
     lines: string[],
   ): UsedLines | undefined {
     for (let i = 0; i < lines.length; i++) {
+      if (GATE_STOP_LINE.test(lines[i])) {
+        break;
+      }
       const m = AIR_FRANCE_PKG.exec(lines[i]);
       if (m) {
         // The parking type and terminal stay unread.

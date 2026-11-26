@@ -126,8 +126,10 @@ const AIR_NOSTRUM_GATE = new RegExp(
 const VOLARIS_GATE = new RegExp(`LLEGADA GATE\\s+${GATE_TOKEN}\\b`);
 // ITA connecting gates: "ZRH/FCO ETA 1220" then "GATE A32 BAG CLAIM 23"
 // (the gate at FCO).
-const ITA_ROUTE = /^([A-Z]{3})\/([A-Z]{3}) ETA \d{4}$/;
-const ITA_GATE = new RegExp(`^GATE\\s+${GATE_TOKEN}\\s+BAG CLAIM`);
+const ITA_ROUTE = /^([A-Z]{3})\/([A-Z]{3}) ETA (\d{4})$/;
+// The bag claim stays unread.
+const ITA_GATE = new RegExp(`^GATE\\s+${GATE_TOKEN}(?=\\s+BAG CLAIM\\b)`);
+const HHMM = /^([01]\d|2[0-3])[0-5]\d$/;
 // China Southern and others: "STAND NO: 136".
 const STAND_NO = new RegExp(`^STAND NO:\\s*${GATE_TOKEN}\\s*$`);
 // China Eastern: "HI SIR, MU9062 SWA/HFE, PARK BAY 6.".
@@ -139,9 +141,13 @@ const FEDEX_EXPECT = new RegExp(
   `^EXPECT GATE:\\s*${GATE_TOKEN}\\(([A-Z]{3})\\)`,
 );
 // "AIRSIDE ARRIVAL GATE IS: B12", Horizon "ARRIVAL GATE:B9".
+// Anchored, so chat ("SEEING ARRIVAL GATE: F3") and "PREVIOUS ARRIVAL GATE:"
+// lines are not read.
 const ARRIVAL_GATE_COLON = new RegExp(
-  `ARRIVAL GATE(?: IS)?:\\s*${GATE_TOKEN}\\s*$`,
+  `^(?:AIRSIDE\\s+)?ARRIVAL GATE(?: IS)?:\\s*${GATE_TOKEN}\\s*$`,
 );
+// SkyWest AA in-range marker; the GATE: line must come after it.
+const IN_RANGE_MARKER = /^IN-RANGE FROM AA\b/;
 
 /**
  * Label RA uplinks that name the gate at the arrival airport: United
@@ -445,8 +451,10 @@ export class Label_RA_Gate extends DecoderPlugin {
         return f;
       }
     }
-    const inRange = lines.some((l) => l.startsWith('IN-RANGE'));
-    let ita: { airport: string; idx: number } | undefined;
+    let inRange = false;
+    let ita:
+      | { origin: string; airport: string; eta: string; idx: number }
+      | undefined;
     for (let i = 0; i < lines.length; i++) {
       const l = lines[i];
       if (GATE_STOP_LINE.test(l)) {
@@ -461,20 +469,34 @@ export class Label_RA_Gate extends DecoderPlugin {
         const u = gate(PLAIN_GATE_LINE.exec(l));
         if (u) return u;
       }
+      if (IN_RANGE_MARKER.test(l)) {
+        inRange = true;
+        continue;
+      }
       if (inRange) {
         const u = gate(IN_RANGE_COLON_GATE.exec(l));
         if (u) return u;
       }
       const r = ITA_ROUTE.exec(l);
       if (r) {
-        ita = { airport: r[2], idx: i };
+        ita = { origin: r[1], airport: r[2], eta: r[3], idx: i };
       }
       const g = ITA_GATE.exec(l);
       if (g && ita) {
         decodeResult.formatted.description = 'Connecting Gates';
+        ResultFormatter.departureAirport(decodeResult, ita.origin, 'IATA');
         ResultFormatter.arrivalAirport(decodeResult, ita.airport, 'IATA');
         const used = gate(g)!;
-        used.set(ita.idx, '');
+        if (HHMM.test(ita.eta)) {
+          ResultFormatter.eta(
+            decodeResult,
+            DateTimeUtils.convertHHMMSSToTod(ita.eta),
+          );
+          used.set(ita.idx, '');
+        } else {
+          // Not a clock: left unread.
+          used.set(ita.idx, `ETA ${ita.eta}`);
+        }
         return used;
       }
       const a = ALLEGIANT_GATE.exec(l);

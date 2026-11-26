@@ -360,6 +360,7 @@ describe('Label gate report, round 5 formats', () => {
 
   test('decodes the Alaska ETA acknowledgement, not the next flight', () => {
     const r = plugin.decode({ label: '21', text: ALASKA_ETA_ACK });
+    expect(r.formatted.description).toBe('ETA Acknowledgement');
     expect(r.decoded).toBe(true);
     expect(r.formatted.description).toBe('ETA Acknowledgement');
     expect(r.raw.flight_number).toBe('AS1831');
@@ -518,6 +519,14 @@ describe('Label gate report, round 7 formats', () => {
     expect(r.decoded).toBe(true);
     expect(r.raw.arrival_gate).toBe('K12');
     expect(r.remaining.text).toContain('PKG TYPE: C TERM: E');
+  });
+
+  test('stops the Air France parking read at the next flight', () => {
+    const r = plugin.decode({
+      label: 'C1',
+      text: '.PAROWAF 171200\r\nAGM\r\nNEXT FLIGHT\r\nARRIVAL PKG: K12 PKG TYPE: C TERM: E\r\n',
+    });
+    expect(r.raw.arrival_gate).toBeUndefined();
   });
 
   test('is reached through MessageDecoder after the other C1 plugins', () => {
