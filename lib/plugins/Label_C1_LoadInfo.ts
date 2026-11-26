@@ -86,14 +86,19 @@ export class Label_C1_LoadInfo extends DecoderPlugin {
       while (lines.length && !HEADER.test(stripDash(lines[0]))) {
         const line = lines.shift()!.trim();
         const dtg = DTG.exec(line);
-        if (/^\.[A-Z0-9]{7}$/.test(line)) {
-          ResultFormatter.groundAddress(decodeResult, line.substring(1));
+        const addr = /^\.([A-Z0-9]{7})(?: (\d{6}))?$/.exec(line);
+        if (addr) {
+          ResultFormatter.groundAddress(decodeResult, addr[1]);
+          const stamp = addr[2] ? DTG.exec(addr[2]) : null;
+          if (stamp) this.dayTime(decodeResult, stamp);
+          else if (addr[2])
+            ResultFormatter.unknown(decodeResult, addr[2], '\n');
         } else if (dtg) {
           this.dayTime(decodeResult, dtg);
         } else if (line.startsWith('AN ')) {
           this.anFields(decodeResult, line.substring(3));
         } else if (line && line !== 'AGM') {
-          ResultFormatter.unknown(decodeResult, line);
+          ResultFormatter.unknown(decodeResult, line, '\n');
         }
       }
     }

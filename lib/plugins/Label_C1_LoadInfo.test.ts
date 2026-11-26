@@ -125,6 +125,18 @@ describe('Label_C1_LoadInfo', () => {
     expect(r.remaining.text).toBe('MA 277A');
   });
 
+  test('reads a CR-separated AGM header', () => {
+    const r = decoder.decode({
+      label: 'C1',
+      text: '.FRAGDLH 190925\rAGM\rAN HB-JVA\r-  PRELIMINARY LOAD INFO 11:25\rZFW 37329\rEND',
+    });
+    expect(r.decoder.name).toBe('label-c1-load-info');
+    expect(r.raw.ground_address).toBe('FRAGDLH');
+    expect(r.raw.day).toBe(19);
+    expect(r.raw.tail).toBe('HB-JVA');
+    expect(r.decoder.decodeLevel).toBe('full');
+  });
+
   test('splits lines on a bare CR', () => {
     const r = plugin.decode({
       label: 'C1',
