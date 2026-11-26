@@ -13,6 +13,13 @@ All notable changes to this project will be documented in this file.
   codes (TO, IC, CL, ER, DC, AP) are expanded in the formatted state change;
   every other code keeps its raw letters and is reported as `Unknown XX`.
 
+### Fixed
+
+- `Label_49`: keep the TAT sign when the altitude sign is masked
+  (`******297.4- 11.1` now decodes −11.1 instead of +11.1). With the altitude
+  sign masked its value stays unknown, and with both signs masked the TAT stays
+  unknown instead of being guessed.
+
 ## 1.10.0
 
 ### Breaking

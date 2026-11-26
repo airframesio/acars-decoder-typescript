@@ -245,16 +245,25 @@ export class Label_49 extends DecoderPlugin {
         : undefined;
     };
 
-    // Signed layout: "+31994297.4- 11.1".
-    if (core[0] === '+' || core[0] === '-') {
+    // Signed layout: "+31994297.4- 11.1". A masked altitude sign
+    // ("******297.4- 11.1") hides core[0], but the TAT sign at index 11 still
+    // identifies this layout.
+    if (
+      core[0] === '+' ||
+      core[0] === '-' ||
+      core[11] === '+' ||
+      core[11] === '-'
+    ) {
       const altitude = num(core.slice(1, 6));
       const ias = num(core.slice(6, 11));
       const tat = num(core.slice(12, 17));
+      const altitudeSign =
+        core[0] === '-' ? -1 : core[0] === '+' ? 1 : undefined;
       return {
         altitude:
-          altitude === undefined
+          altitude === undefined || altitudeSign === undefined
             ? undefined
-            : altitude * (core[0] === '-' ? -1 : 1),
+            : altitude * altitudeSign,
         ias,
         tat:
           tat === undefined || (core[11] !== '+' && core[11] !== '-')
@@ -264,11 +273,13 @@ export class Label_49 extends DecoderPlugin {
       };
     }
 
-    // Unsigned layout (Qatar): "34946 283.1 -13.6".
+    // Unsigned layout (Qatar): "34946 283.1 -13.6". When the altitude sign is
+    // masked and index 11 is not a sign, the two layouts cannot be told apart:
+    // leave the TAT unknown rather than guess its sign.
     return {
       altitude: num(core.slice(0, 5)),
       ias: num(core.slice(6, 11)),
-      tat: numSigned(core.slice(12, 17)),
+      tat: core[0] === '*' ? undefined : numSigned(core.slice(12, 17)),
       extra: extra || undefined,
     };
   }

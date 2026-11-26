@@ -236,6 +236,33 @@ describe('Label 49', () => {
     expect(result.decoder.decodeLevel).toBe('partial');
   });
 
+  test('keeps the TAT sign when the altitude sign is masked', () => {
+    message.text = '01ERDCUAL770    /042300LEBLKORD\r\n******297.4- 11.1';
+    const result = plugin.decode(message);
+
+    expect(result.raw.altitude).toBeUndefined();
+    expect(result.raw.indicated_airspeed).toBeCloseTo(297.4, 3);
+    expect(result.raw.total_air_temperature).toBeCloseTo(-11.1, 3);
+    expect(result.decoder.decodeLevel).toBe('partial');
+  });
+
+  test('does not guess the altitude when its sign is masked', () => {
+    message.text = '01ERDCUAL770    /042300LEBLKORD\r\n*31994297.4- 11.1';
+    const result = plugin.decode(message);
+
+    expect(result.raw.altitude).toBeUndefined();
+    expect(result.raw.indicated_airspeed).toBeCloseTo(297.4, 3);
+    expect(result.raw.total_air_temperature).toBeCloseTo(-11.1, 3);
+  });
+
+  test('leaves the TAT unknown when both signs are masked', () => {
+    message.text = '01ERDCUAL770    /042300LEBLKORD\r\n******297.4* 11.1';
+    const result = plugin.decode(message);
+
+    expect(result.raw.indicated_airspeed).toBeCloseTo(297.4, 3);
+    expect(result.raw.total_air_temperature).toBeUndefined();
+  });
+
   test('keeps lines after the body', () => {
     message.text =
       '01ERDCUAL770    /042300LEBLKORD\r\n+31994297.4- 11.1\r\n/FOB 010600';
