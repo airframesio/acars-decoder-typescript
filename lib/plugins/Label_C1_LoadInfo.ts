@@ -45,6 +45,10 @@ const FUEL = /^FUEL IN TANKS (\d+)$/;
 const PREPARED = /^PREPARED BY\b/;
 const DTG = /^(0[1-9]|[12]\d|3[01])([01]\d|2[0-3])([0-5]\d)$/;
 
+function stripDash(line: string): string {
+  return line.trim().replace(/^-\s*/, '');
+}
+
 const WEIGHT_KEYS: Record<string, 'zfw' | 'tow' | 'law' | 'tof' | 'dow'> = {
   ZFW: 'zfw',
   TOW: 'tow',
@@ -76,22 +80,21 @@ export class Label_C1_LoadInfo extends DecoderPlugin {
     if (!lines) {
       lines = text.split(/\r?\n/);
       // Header written one field per line: ".FRAGDLH", "190925", "AGM", "AN ..."
-      while (lines.length && !HEADER.test(lines[0].trim())) {
+      while (lines.length && !HEADER.test(stripDash(lines[0]))) {
         const line = lines.shift()!.trim();
         const dtg = DTG.exec(line);
-        const an = /^AN ([A-Z0-9-]{3,8})(?:\/.*)?$/.exec(line);
         if (/^\.[A-Z0-9]{7}$/.test(line)) {
           ResultFormatter.groundAddress(decodeResult, line.substring(1));
         } else if (dtg) {
           this.dayTime(decodeResult, dtg);
-        } else if (an) {
-          ResultFormatter.tail(decodeResult, an[1]);
+        } else if (line.startsWith('AN ')) {
+          this.anFields(decodeResult, line.substring(3));
         } else if (line && line !== 'AGM') {
           ResultFormatter.unknown(decodeResult, line);
         }
       }
     }
-    lines = lines.map((l) => l.replace(/^-\s*/, '').trim()).filter((l) => l);
+    lines = lines.map(stripDash).filter((l) => l);
 
     const header = lines.length ? HEADER.exec(lines[0]) : null;
     if (!header) {
@@ -169,6 +172,19 @@ export class Label_C1_LoadInfo extends DecoderPlugin {
       decodeResult.remaining.text ? 'partial' : 'full',
     );
     return decodeResult;
+  }
+
+  // The AN line's '/' fields, read like splitAgmHeader does.
+  private anFields(decodeResult: DecodeResult, value: string) {
+    for (const field of value.trim().split('/')) {
+      if (field.startsWith('FI ')) {
+        ResultFormatter.flightNumber(decodeResult, field.substring(3).trim());
+      } else if (/^[A-Z0-9-]{3,8}$/.test(field)) {
+        ResultFormatter.tail(decodeResult, field);
+      } else if (field) {
+        ResultFormatter.unknown(decodeResult, field, '/');
+      }
+    }
   }
 
   private dayTime(decodeResult: DecodeResult, m: RegExpExecArray) {

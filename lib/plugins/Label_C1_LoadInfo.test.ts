@@ -83,6 +83,20 @@ describe('Label_C1_LoadInfo', () => {
     expect(r.raw.message_timestamp).toBe(9 * 3600 + 25 * 60);
     expect(r.raw.tail).toBe('HB-JVA');
     expect(r.raw.loadsheet.status).toBe('prelim');
+    // As with splitAgmHeader, the AN suffix 'MA 277A' is not decoded.
+    expect(r.remaining.text).toBe('MA 277A');
+    expect(r.decoder.decodeLevel).toBe('partial');
+  });
+
+  test('reads a one-field-per-line header with a dash and a flight', () => {
+    const r = plugin.decode({
+      label: 'C1',
+      text: `.FRAGDLH\n190925\nAGM\nAN HB-JVA/FI LX1366\n-  ${BODY.replace(/\r/g, '')}`,
+    });
+    expect(r.decoded).toBe(true);
+    expect(r.raw.tail).toBe('HB-JVA');
+    expect(r.raw.flight_number).toBe('LX1366');
+    expect(r.raw.loadsheet.zfw).toBe(37329);
     expect(r.decoder.decodeLevel).toBe('full');
   });
 
