@@ -2,11 +2,13 @@ import { DecoderPlugin } from '../DecoderPlugin';
 import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
 import { splitAgmHeader } from '../utils/agm_header';
 import {
+  addAlaskaEtaAck,
   addDeltaCrewGate,
   addFinnairGate,
   addRouteGate,
   addUnreadLines,
   addWestJetGate,
+  ALASKA_FLIGHT,
   cutMatch,
   findRouteGate,
   GATE_STOP_LINE,
@@ -64,20 +66,17 @@ const VIRGIN_BAY = new RegExp(
 const PSA_ACK = new RegExp(`^/ACKFLT GATE\\s+${GATE_TOKEN}\\s*$`);
 // Alaska, label 21: "GATE CHANGE IN LAX" / "AS1636" / "NEW GATE: 210A".
 const ALASKA_CHANGE = /^GATE CHANGE IN ([A-Z]{3})$/;
-const ALASKA_FLIGHT = /^(AS\d{1,4})$/;
 const NEW_GATE = new RegExp(`^NEW GATE:\\s*${GATE_TOKEN}\\s*$`);
-// Alaska ETA acknowledgement, label 21: "FROM:LAX OPS" / "AS1831" /
-// "ARRIVAL GATE:65B".
-const ALASKA_FROM = /^FROM:\s*([A-Z]{3}) OPS$/;
-const ALASKA_ARR_GATE = new RegExp(`^ARRIVAL GATE:\\s*${GATE_TOKEN}\\s*$`);
 // SAS passenger info, label C1: "ATT SK0932  ETA: 1414  GATE: C33   TERM: 3".
 const SAS_INFO = new RegExp(
   `^ATT (SK\\d{1,4})\\s+ETA:\\s*\\d{4}\\s+GATE:\\s*${GATE_TOKEN}(?=\\s|$)`,
 );
-// Swiss and Edelweiss, label 32: "ARR GATE A52", else "ARR POS D12" (when
-// the gate is a bus).
+// Swiss and Edelweiss (label 32) and Helvetic (C1): "ARR GATE A52", else
+// "ARR POS D12" (when the gate is a bus).
 const ARR_GATE_LINE = new RegExp(`^ARR GATE\\s+${GATE_TOKEN}\\s*$`);
 const ARR_POS_LINE = new RegExp(`^ARR POS\\s+${GATE_TOKEN}\\s*$`);
+// Air France, label C1: "ARRIVAL PKG: K12 PKG TYPE: C TERM: E".
+const AIR_FRANCE_PKG = new RegExp(`^ARRIVAL PKG:\\s*${GATE_TOKEN}\\b`);
 // KLM connection info, label 32: "P64AMSKWKL170542", "KL 1750", "GATE  A04
 // POS  A62" (the gate, at AMS). "NXM" starts the next flight.
 const KLM_HEADER = /^P\d{2}AMSKWKL\d{6}/;
@@ -110,9 +109,11 @@ const AER_LINGUS_STAND = new RegExp(`^STAND INFO\\s*=\\s*${GATE_TOKEN}\\s*$`);
  *   acknowledgement "FROM:LAX OPS" / "ARRIVAL GATE:65B" (21)
  * - WestJet Encore "FTX01,WS 3564 YVR-YLW" / "YLW GATE 9/OPS" (41, 42)
  * - SAS "ATT SK0932  ETA: 1414  GATE: C33" (C1)
+ * - Air France "ARRIVAL PKG: K12" (C1)
  * - Finnair "ARRIVING STAND 131" and boarding gate "AY230 19NOV TKU
  *   STD0600 BOARD 0540 GATE 2", a departure gate (3E)
- * - Swiss/Edelweiss "ARR GATE A52", else "ARR POS D12" (32)
+ * - Swiss/Edelweiss (32) and Helvetic (C1) "ARR GATE A52", else "ARR POS
+ *   D12"
  * - KLM connection info "KL 1750" / "GATE  A04  POS  A62", at AMS (32)
  * - Korean Air "SPOT NO : 606" (33) and Aer Lingus "STAND INFO = 400C" (48)
  *
@@ -164,13 +165,15 @@ export class Label_Gate_Report extends DecoderPlugin {
       case '21':
         used =
           this.alaskaGateChange(decodeResult, lines) ??
-          this.alaskaEtaAck(decodeResult, lines);
+          addAlaskaEtaAck(decodeResult, lines);
         break;
       case 'C1':
         used =
           this.jetstar(decodeResult, lines) ??
           this.jazz(decodeResult, lines) ??
           this.jazzFlightData(decodeResult, lines) ??
+          this.airFrancePkg(decodeResult, lines) ??
+          this.arrGatePos(decodeResult, lines) ??
           this.sas(decodeResult, lines) ??
           this.jetstarChange(decodeResult, lines) ??
           this.routeGate(decodeResult, lines);
@@ -200,9 +203,7 @@ export class Label_Gate_Report extends DecoderPlugin {
           used = this.klm(decodeResult, lines);
           break;
         }
-        used =
-          this.firstLine(decodeResult, lines, ARR_GATE_LINE) ??
-          this.firstLine(decodeResult, lines, ARR_POS_LINE);
+        used = this.arrGatePos(decodeResult, lines);
         break;
       case '3M':
         used = this.virginBay(decodeResult, lines);
@@ -533,6 +534,35 @@ export class Label_Gate_Report extends DecoderPlugin {
     return undefined;
   }
 
+  /** "ARR GATE A52", else "ARR POS D12", before a stop line. */
+  private arrGatePos(
+    decodeResult: DecodeResult,
+    lines: string[],
+  ): UsedLines | undefined {
+    return (
+      this.firstLine(decodeResult, lines, ARR_GATE_LINE) ??
+      this.firstLine(decodeResult, lines, ARR_POS_LINE)
+    );
+  }
+
+  private airFrancePkg(
+    decodeResult: DecodeResult,
+    lines: string[],
+  ): UsedLines | undefined {
+    for (let i = 0; i < lines.length; i++) {
+      if (GATE_STOP_LINE.test(lines[i])) {
+        break;
+      }
+      const m = AIR_FRANCE_PKG.exec(lines[i]);
+      if (m) {
+        // The parking type and terminal stay unread.
+        ResultFormatter.arrivalGate(decodeResult, m[1]);
+        return new Map([[i, cutMatch(lines[i], m)]]);
+      }
+    }
+    return undefined;
+  }
+
   private klm(
     decodeResult: DecodeResult,
     lines: string[],
@@ -577,44 +607,6 @@ export class Label_Gate_Report extends DecoderPlugin {
         }
         ResultFormatter.arrivalGate(decodeResult, m[2]);
         return new Map([[i, cutMatch(lines[i], m)]]);
-      }
-    }
-    return undefined;
-  }
-
-  private alaskaEtaAck(
-    decodeResult: DecodeResult,
-    lines: string[],
-  ): UsedLines | undefined {
-    let airport: string | undefined;
-    let flight: string | undefined;
-    const used: UsedLines = new Map();
-    for (let i = 0; i < lines.length; i++) {
-      if (GATE_STOP_LINE.test(lines[i])) {
-        break;
-      }
-      const a = ALASKA_FROM.exec(lines[i]);
-      if (a) {
-        airport = a[1];
-        used.set(i, '');
-        continue;
-      }
-      const f = ALASKA_FLIGHT.exec(lines[i]);
-      if (f) {
-        flight = f[1];
-        used.set(i, '');
-        continue;
-      }
-      const g = ALASKA_ARR_GATE.exec(lines[i]);
-      if (g) {
-        used.set(i, '');
-        decodeResult.formatted.description = 'ETA Acknowledgement';
-        if (flight) ResultFormatter.flightNumber(decodeResult, flight);
-        if (airport) {
-          ResultFormatter.arrivalAirport(decodeResult, airport, 'IATA');
-        }
-        ResultFormatter.arrivalGate(decodeResult, g[1]);
-        return used;
       }
     }
     return undefined;
