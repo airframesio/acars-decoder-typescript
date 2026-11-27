@@ -95,6 +95,7 @@ const pluginClasses = [
   Plugins.Label_81_TRAKK,
   Plugins.Label_FPR,
   Plugins.Label_C1_Part117,
+  Plugins.Label_C1_LoadInfo,
   Plugins.Label_80,
   Plugins.Label_83,
   Plugins.Label_8E,

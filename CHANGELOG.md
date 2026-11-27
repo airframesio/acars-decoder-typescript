@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+### Added
+
+- Label C1 "PRELIMINARY/FINAL LOAD INFO" uplinks, reported in the same `raw.loadsheet` shape as IATA loadsheets (based on #416 by @thepacket).
+
 ## 1.10.0
 
 ### Breaking
