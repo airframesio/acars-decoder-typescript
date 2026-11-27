@@ -77,6 +77,19 @@ describe('Label_2P Preamble FM4', () => {
     expect(decodeResult.remaining.text).toBe('M58A,-105.5, 52800');
   });
 
+  test('empty position', () => {
+    message.text = 'FM4KIAD,OMAA,140256,1448,,,23228,328,  43.5, 72500';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoded).toBe(true);
+    expect(decodeResult.raw.position).toBeUndefined();
+    expect(
+      decodeResult.formatted.items.some((i) => i.label === 'Aircraft Position'),
+    ).toBe(false);
+    expect(decodeResult.formatted.items.length).toBe(7);
+    expect(decodeResult.formatted.items[5].label).toBe('Altitude');
+  });
+
   test('<invalid>', () => {
     message.text = 'FM4 Bogus message';
     const decodeResult = plugin.decode(message);
