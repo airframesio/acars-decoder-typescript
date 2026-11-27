@@ -14,7 +14,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 
 - Dependencies: Babel 8, typescript-eslint 8.74 and pako 2.2 (#584).
-- CI tests on Node 22, 24 and 26; Node 22 or later is supported (#585).
+- CI tests on Node 22, 24 and 26. The published package still supports Node 18 and later (#585).
 
 ## 1.10.0
 
