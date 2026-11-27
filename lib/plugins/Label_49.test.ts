@@ -273,6 +273,14 @@ describe('Label 49', () => {
     expect(result.decoder.decodeLevel).toBe('partial');
   });
 
+  test('does not decode a body that matches neither layout', () => {
+    message.text = '01ERDCUAL770    /042300LEBLKORD\r\nXXXXXXXXXXXXXXXXX';
+    const result = plugin.decode(message);
+
+    expect(result.decoded).toBe(false);
+    expect(result.decoder.decodeLevel).toBe('none');
+  });
+
   test('does not decode other label 49 text', () => {
     message.text = 'POS Bogus message';
     const result = plugin.decode(message);
