@@ -77,6 +77,17 @@ describe('Label_2P Preamble FM4', () => {
     expect(decodeResult.remaining.text).toBe('M58A,-105.5, 52800');
   });
 
+  test('space after FM4 preamble', () => {
+    message.text =
+      'FM4 KIAD,OMAA,140256,1448, 39.43,- 75.62,23228,328,  43.5, 72500';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoded).toBe(true);
+    expect(decodeResult.raw.departure_icao).toBe('KIAD');
+    expect(decodeResult.formatted.items[0].label).toBe('Origin');
+    expect(decodeResult.formatted.items[0].value).toBe('KIAD');
+  });
+
   test('empty position', () => {
     message.text = 'FM4KIAD,OMAA,140256,1448,,,23228,328,  43.5, 72500';
     const decodeResult = plugin.decode(message);

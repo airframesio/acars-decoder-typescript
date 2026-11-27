@@ -34,7 +34,7 @@ export class Label_2P_FM4 extends DecoderPlugin {
         ResultFormatter.unknown(decodeResult, header[0].substring(0, 4));
         ResultFormatter.flightNumber(decodeResult, header[0].substring(4));
       }
-      ResultFormatter.departureAirport(decodeResult, header[1]);
+      ResultFormatter.departureAirport(decodeResult, header[1].trim());
       ResultFormatter.arrivalAirport(decodeResult, parts[1]);
       ResultFormatter.day(decodeResult, Number(parts[2].substring(0, 2)));
       ResultFormatter.timestamp(
