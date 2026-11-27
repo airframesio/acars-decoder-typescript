@@ -45,8 +45,8 @@ export class Label_2P_FM4 extends DecoderPlugin {
         decodeResult,
         DateTimeUtils.convertHHMMSSToTod(parts[3]),
       );
-      const lat = parts[4].replaceAll(' ', '');
-      const lon = parts[5].replaceAll(' ', '');
+      const lat = parts[4].replace(/\s/g, '');
+      const lon = parts[5].replace(/\s/g, '');
       if (lat && lon) {
         ResultFormatter.position(decodeResult, {
           latitude: Number(lat),

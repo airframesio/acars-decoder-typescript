@@ -83,6 +83,9 @@ describe('Label_2P Preamble FM4', () => {
 
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.raw.position).toBeUndefined();
+    expect(
+      decodeResult.formatted.items.some((i) => i.label === 'Aircraft Position'),
+    ).toBe(false);
     expect(decodeResult.formatted.items.length).toBe(7);
     expect(decodeResult.formatted.items[5].label).toBe('Altitude');
   });

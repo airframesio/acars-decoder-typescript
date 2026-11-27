@@ -52,8 +52,8 @@ export class Label_2P_FM3 extends DecoderPlugin {
         decodeResult,
         DateTimeUtils.convertHHMMSSToTod(parts[1]),
       );
-      const lat = parts[2].replaceAll(' ', '');
-      const lon = parts[3].replaceAll(' ', '');
+      const lat = parts[2].replace(/\s/g, '');
+      const lon = parts[3].replace(/\s/g, '');
       if (lat[0] === 'N' || lat[0] === 'S') {
         ResultFormatter.position(decodeResult, {
           latitude:

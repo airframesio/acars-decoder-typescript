@@ -86,8 +86,19 @@ describe('Label 2P Preamble FM3', () => {
 
     expect(decodeResult.decoded).toBe(true);
     expect(decodeResult.raw.position).toBeUndefined();
+    expect(
+      decodeResult.formatted.items.some((i) => i.label === 'Aircraft Position'),
+    ).toBe(false);
     expect(decodeResult.formatted.items.length).toBe(3);
     expect(decodeResult.formatted.items[2].label).toBe('Altitude');
+  });
+
+  test('whitespace-only position', () => {
+    message.text = 'FM3 1217,1312,\t,\t, 39981, 426, 25';
+    const decodeResult = plugin.decode(message);
+
+    expect(decodeResult.decoded).toBe(true);
+    expect(decodeResult.raw.position).toBeUndefined();
   });
 
   test('<invalid>', () => {
