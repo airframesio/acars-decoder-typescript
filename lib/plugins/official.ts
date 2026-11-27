@@ -96,3 +96,4 @@ export * from './Label_3A_ETA';
 export * from './Label_81_TRAKK';
 export * from './Label_FPR';
 export * from './Label_C1_Part117';
+export * from './Label_C1_LoadInfo';

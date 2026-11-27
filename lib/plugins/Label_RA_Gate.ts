@@ -2,6 +2,7 @@ import { DateTimeUtils } from '../DateTimeUtils';
 import { DecoderPlugin } from '../DecoderPlugin';
 import { DecodeResult, Message, Options } from '../DecoderPluginInterface';
 import {
+  addAlaskaEtaAck,
   addDeltaCrewGate,
   addFinnairGate,
   addRouteGate,
@@ -51,10 +52,11 @@ const REPUBLIC_GATE = new RegExp(
 const SKYWEST_HEADER = /^[A-Z0-9~.]+?ARR GATE INFO\b\s*(.*)$/;
 const SKYWEST_GATE = new RegExp(`^([A-Z]{3}) ARRIVAL GATE\\s+(${GATE})$`);
 
-// Headers of the formats above (Republic's other messages are read by the
-// formats below once its ARRIVAL GATE reader has passed), and of Finnair connection lists (other
-// flights' departure gates): the other formats are not tried on them.
-const HANDLED_HEADER = /^(QUNDCULUA|QUHDQITOO|QUSILITOO|QUHELASAY)/;
+// Headers of the United format above, and of Finnair connection lists
+// (other flights' departure gates): the other formats are not tried on them.
+// Republic and SkyWest messages that their ARRIVAL GATE readers above do not
+// read go on to the formats below.
+const HANDLED_HEADER = /^(QUNDCULUA|QUHELASAY)/;
 
 // Turkish: "- EXPECTED PARKING POSITION: F8R"; China Southern and others:
 // "PARKING PREASSIGNED:138" or "PARKING ASSIGNED:138" (NA when none).
@@ -102,6 +104,51 @@ const COLON_GATE = new RegExp(`^GATE:\\s*${GATE_TOKEN}\\s*$`);
 const LATAM_HEADER = 'GATE ASSIGNMENT';
 const LATAM_PPOS = new RegExp(`^PPOS:\\s*${GATE_TOKEN}\\s*$`);
 
+// Round 7 forms, tried before the others.
+// Mesa: the gate on the header line, "QUPHXACYV.1ARRIVAL GATE A1B".
+const HEADER_ARRIVAL_GATE = new RegExp(
+  `^([A-Z0-9]{9}[.~]\\d)ARRIVAL GATE\\s+${GATE_TOKEN}\\s*$`,
+);
+// Frontier ops free text (QUANPOCF9): "GATE D36" alone on a line.
+const FRONTIER_OPS_HEADER = 'QUANPOCF9';
+const PLAIN_GATE_LINE = new RegExp(`^GATE\\s+${GATE_TOKEN}\\s*$`);
+// SkyWest AA in-range: an "IN-RANGE FROM AA" line, then "GATE: 1D".
+const IN_RANGE_COLON_GATE = new RegExp(`^GATE:\\s*${GATE_TOKEN}\\s*$`);
+// Allegiant in-range: "--GATE ASSIGNMENT       PVU GATE 2 ASSIGNED".
+const ALLEGIANT_GATE = new RegExp(
+  `^--GATE ASSIGNMENT\\s+([A-Z]{3}) GATE\\s+${GATE_TOKEN}\\s+ASSIGNED`,
+);
+// Air Nostrum: "PKN:330   GATE:K88   BELT:19  HALL:10".
+const AIR_NOSTRUM_GATE = new RegExp(
+  `^(PKN:\\S*)\\s+GATE:\\s*${GATE_TOKEN}(?:\\s|$)`,
+);
+// Volaris: "... A SU LLEGADA GATE J16 Y GPU DISPONIBLE ...".
+const VOLARIS_GATE = new RegExp(`LLEGADA GATE\\s+${GATE_TOKEN}\\b`);
+// ITA connecting gates: "ZRH/FCO ETA 1220" then "GATE A32 BAG CLAIM 23"
+// (the gate at FCO).
+const ITA_ROUTE = /^([A-Z]{3})\/([A-Z]{3}) ETA (\d{4})$/;
+// The bag claim stays unread.
+const ITA_GATE = new RegExp(`^GATE\\s+${GATE_TOKEN}(?=\\s+BAG CLAIM\\b)`);
+const HHMM = /^([01]\d|2[0-3])[0-5]\d$/;
+// China Southern and others: "STAND NO: 136".
+const STAND_NO = new RegExp(`^STAND NO:\\s*${GATE_TOKEN}\\s*$`);
+// China Eastern: "HI SIR, MU9062 SWA/HFE, PARK BAY 6.".
+const CHINA_EASTERN_BAY = new RegExp(
+  `^HI SIR, (MU\\d{1,4}) ([A-Z]{3})/([A-Z]{3}), PARK BAY\\s+${GATE_TOKEN}\\b`,
+);
+// FedEx: "EXPECT GATE: 2(SBD)".
+const FEDEX_EXPECT = new RegExp(
+  `^EXPECT GATE:\\s*${GATE_TOKEN}\\(([A-Z]{3})\\)`,
+);
+// "AIRSIDE ARRIVAL GATE IS: B12", Horizon "ARRIVAL GATE:B9".
+// Anchored, so chat ("SEEING ARRIVAL GATE: F3") and "PREVIOUS ARRIVAL GATE:"
+// lines are not read.
+const ARRIVAL_GATE_COLON = new RegExp(
+  `^(?:AIRSIDE\\s+)?ARRIVAL GATE(?: IS)?:\\s*${GATE_TOKEN}\\s*$`,
+);
+// SkyWest AA in-range marker; the GATE: line must come after it.
+const IN_RANGE_MARKER = /^IN-RANGE FROM AA\b/;
+
 /**
  * Label RA uplinks that name the gate at the arrival airport: United
  * GATE ASSIGN / GATE CHANGE, Republic ARRIVAL GATE, SkyWest ARR GATE INFO,
@@ -115,7 +162,14 @@ const LATAM_PPOS = new RegExp(`^PPOS:\\s*${GATE_TOKEN}\\s*$`);
  * IS 9", "PLANNING GATE B37", "EAU ARRIVAL GATE 1"), and the Finnair
  * arriving stand and boarding gate (a departure gate), Avianca dispatch
  * "GATE 13 EN SAL" / "E7 PARK EN BOG", and Republic messages other than
- * ARRIVAL GATE ("FLT YX4704 RDU-LGA" / "GATE 29").
+ * ARRIVAL GATE ("FLT YX4704 RDU-LGA" / "GATE 29"). Tried before those:
+ * the Alaska ETA acknowledgement "FROM:ANC OPS" / "ARRIVAL GATE:C7", Mesa
+ * "QUPHXACYV.1ARRIVAL GATE A1B", Frontier ops free text "GATE D36", SkyWest
+ * AA in-range "GATE: 1D", ITA "ZRH/FCO ETA 1220" / "GATE A32 BAG CLAIM",
+ * Allegiant "--GATE ASSIGNMENT PVU GATE 2 ASSIGNED", Air Nostrum
+ * "PKN:330 GATE:K88", Volaris "LLEGADA GATE J16", "STAND NO: 136", China
+ * Eastern "MU9062 SWA/HFE, PARK BAY 6", FedEx "EXPECT GATE: 2(SBD)" and
+ * "ARRIVAL GATE IS: B12" / "ARRIVAL GATE:B9".
  *
  * Finnair connection lists are not read: they give the departure gates of
  * other flights.
@@ -358,6 +412,8 @@ export class Label_RA_Gate extends DecoderPlugin {
       used = addFinnairGate(decodeResult, lines);
     } else if (!HANDLED_HEADER.test(lines[0])) {
       used =
+        addAlaskaEtaAck(decodeResult, lines) ??
+        this.round7(decodeResult, lines) ??
         this.aviancaDispatch(decodeResult, lines) ??
         addDeltaCrewGate(decodeResult, lines) ??
         this.arrivalLine(decodeResult, lines) ??
@@ -374,6 +430,126 @@ export class Label_RA_Gate extends DecoderPlugin {
     addUnreadLines(decodeResult, lines, used);
     this.setDecodeLevel(decodeResult, true);
     return decodeResult;
+  }
+
+  /** The round 7 forms, listed with HEADER_ARRIVAL_GATE. */
+  private round7(
+    decodeResult: DecodeResult,
+    lines: string[],
+  ): UsedLines | undefined {
+    const h = HEADER_ARRIVAL_GATE.exec(lines[0]);
+    if (h) {
+      // The RA header stays unread.
+      ResultFormatter.arrivalGate(decodeResult, h[2]);
+      return new Map([[0, h[1]]]);
+    }
+    const frontier = lines[0].startsWith(FRONTIER_OPS_HEADER);
+    if (frontier) {
+      // "FROM PHL OPS" ... "GATE AVAIL AT ARRIVAL" also names the airport.
+      const f = this.frontier(decodeResult, lines);
+      if (f) {
+        return f;
+      }
+    }
+    let inRange = false;
+    let flightLine = false;
+    let ita:
+      | { origin: string; airport: string; eta: string; idx: number }
+      | undefined;
+    for (let i = 0; i < lines.length; i++) {
+      const l = lines[i];
+      if (ARR_ICAO.test(l)) {
+        // A flight line ("SC8402 ARR:ZSJN"): arrIcaoGate reads its gate.
+        flightLine = true;
+      }
+      if (GATE_STOP_LINE.test(l)) {
+        // ITA titles its own gate list; the route follows it.
+        if (
+          !(
+            l === 'CONNECTING GATES' &&
+            lines.slice(i + 1, i + 3).some((n) => ITA_ROUTE.test(n))
+          )
+        ) {
+          break;
+        }
+        continue;
+      }
+      const gate = (m: RegExpExecArray | null, group: number = 1) => {
+        if (!m) return undefined;
+        ResultFormatter.arrivalGate(decodeResult, m[group]);
+        return new Map([[i, cutMatch(l, m)]]) as UsedLines;
+      };
+      if (frontier) {
+        const u = gate(PLAIN_GATE_LINE.exec(l));
+        if (u) return u;
+      }
+      if (IN_RANGE_MARKER.test(l)) {
+        inRange = true;
+        continue;
+      }
+      if (inRange && !flightLine) {
+        const u = gate(IN_RANGE_COLON_GATE.exec(l));
+        if (u) return u;
+      }
+      const r = ITA_ROUTE.exec(l);
+      if (r) {
+        ita = { origin: r[1], airport: r[2], eta: r[3], idx: i };
+      }
+      const g = ITA_GATE.exec(l);
+      if (g && ita) {
+        decodeResult.formatted.description = 'Connecting Gates';
+        ResultFormatter.departureAirport(decodeResult, ita.origin, 'IATA');
+        ResultFormatter.arrivalAirport(decodeResult, ita.airport, 'IATA');
+        const used = gate(g)!;
+        if (HHMM.test(ita.eta)) {
+          ResultFormatter.eta(
+            decodeResult,
+            DateTimeUtils.convertHHMMSSToTod(ita.eta),
+          );
+          used.set(ita.idx, '');
+        } else {
+          // Not a clock: left unread.
+          used.set(ita.idx, `ETA ${ita.eta}`);
+        }
+        return used;
+      }
+      const a = ALLEGIANT_GATE.exec(l);
+      if (a) {
+        ResultFormatter.arrivalAirport(decodeResult, a[1], 'IATA');
+        return gate(a, 2);
+      }
+      const n = AIR_NOSTRUM_GATE.exec(l);
+      if (n) {
+        // The parking number stays unread.
+        ResultFormatter.arrivalGate(decodeResult, n[2]);
+        return new Map([
+          [i, `${n[1]} ${l.slice(n.index + n[0].length).trim()}`.trim()],
+        ]);
+      }
+      const v = gate(VOLARIS_GATE.exec(l));
+      if (v) return v;
+      const st = STAND_NO.exec(l);
+      if (st) {
+        decodeResult.formatted.description = 'Arrival Stand';
+        return gate(st);
+      }
+      const c = CHINA_EASTERN_BAY.exec(l);
+      if (c) {
+        decodeResult.formatted.description = 'Parking Bay';
+        ResultFormatter.flightNumber(decodeResult, c[1]);
+        ResultFormatter.departureAirport(decodeResult, c[2], 'IATA');
+        ResultFormatter.arrivalAirport(decodeResult, c[3], 'IATA');
+        return gate(c, 4);
+      }
+      const fx = FEDEX_EXPECT.exec(l);
+      if (fx) {
+        ResultFormatter.arrivalAirport(decodeResult, fx[2], 'IATA');
+        return gate(fx);
+      }
+      const ag = gate(ARRIVAL_GATE_COLON.exec(l));
+      if (ag) return ag;
+    }
+    return undefined;
   }
 
   private aviancaDispatch(
