@@ -62,6 +62,9 @@ export class Arinc702Helper {
       decodeResult.decoder.decodeLevel = 'none';
       return false;
     }
+    // /FB can come after /PR: read the declared fuel on board first so the
+    // /PR fuel field agrees with it whatever the IEI order is.
+    const fuelOnBoard = declaredFuelOnBoard(fields);
     for (let i = 1; i < fields.length; ++i) {
       const iei = fields[i].substring(0, 2);
       const data = fields[i].substring(2);
@@ -98,8 +101,14 @@ export class Arinc702Helper {
           break;
         case 'FB':
           // military OOI reports sometimes send an empty /FB
-          if (data !== '') {
-            ResultFormatter.currentFuel(decodeResult, parseInt(data, 10));
+          if (data === '') {
+            break;
+          }
+          if (/^\d+$/.test(data)) {
+            ResultFormatter.currentFuel(decodeResult, Number(data));
+          } else {
+            // Keep a value this decoder cannot read instead of publishing NaN.
+            ResultFormatter.unknown(decodeResult, fields[i], '/');
           }
           break;
         case 'FN':
@@ -141,7 +150,7 @@ export class Arinc702Helper {
           processOutEvent(decodeResult, data.split(','));
           break;
         case 'PR':
-          processPerformanceData(decodeResult, data.split(','));
+          processPerformanceData(decodeResult, data.split(','), fuelOnBoard);
           break;
         //case 'PR':
         // TODO: decode /PR fields
@@ -255,12 +264,67 @@ export class Arinc702Helper {
       ResultFormatter.altitude(decodeResult, Number(data[3]) * 100);
       processRoute(decodeResult, data[1], data[2], data[4], data[5], data[6]);
       ResultFormatter.temperature(decodeResult, data[7]);
-      ResultFormatter.unknown(decodeResult, data[8]);
-      ResultFormatter.unknown(decodeResult, data[9]);
+      // data[8] is wind, written DDDSSS with leading zeros dropped:
+      // `272100` = 272° at 100 kt, `02216` = 022° at 16 kt. The direction is
+      // the one the wind comes FROM (meteorological convention).
+      const wind = parseWind(data[8]);
+      if (wind) {
+        ResultFormatter.wind(decodeResult, wind.direction, wind.speed);
+      } else if (data[8] !== '') {
+        ResultFormatter.unknown(decodeResult, data[8]);
+      }
+      // data[9] is the fuel remaining on board: the FUEL REMAINING element of
+      // ARINC 702A-5 Att. 7 (POS IEI), sent with a 0.1 Klbs scale, i.e.
+      // hundreds of pounds, which the NTSB legend confirms (DCA10IA001).
+      // Stored in pounds like the other fuel fields. The Southwest 21-field
+      // layout has its own fuel field and is handled by
+      // processSouthwestPosition.
+      if (data[9] !== '') {
+        const fuel = Number(data[9]);
+        if (Number.isFinite(fuel)) {
+          ResultFormatter.remainingFuel(decodeResult, fuel * 100);
+        } else {
+          ResultFormatter.unknown(decodeResult, data[9]);
+        }
+      }
+    }
+    if (data.length >= 11) {
+      // variant 2, long: ground speed, TAS, IAS, suffix
+      const groundSpeed = data[10];
+      if (/^\d+$/.test(groundSpeed) && Number(groundSpeed) <= 700) {
+        ResultFormatter.groundspeed(decodeResult, Number(groundSpeed));
+      } else if (groundSpeed !== '') {
+        ResultFormatter.unknown(decodeResult, groundSpeed);
+      }
+    }
+    if (data.length >= 12) {
+      const tas = data[11].match(/^(\d+)K$/);
+      if (tas) {
+        ResultFormatter.airspeed(decodeResult, Number(tas[1]));
+      } else if (data[11] !== '') {
+        ResultFormatter.unknown(decodeResult, data[11]);
+      }
+    }
+    if (data.length >= 13) {
+      const ias = data[12].match(/^(\d+)K$/);
+      if (ias) {
+        ResultFormatter.indicatedAirspeed(decodeResult, Number(ias[1]));
+      } else if (data[12] !== '') {
+        ResultFormatter.unknown(decodeResult, data[12]);
+      }
     }
     if (data.length >= 14) {
-      // variant 2,long
-      ResultFormatter.unknownArr(decodeResult, data.slice(10));
+      ResultFormatter.raw(
+        decodeResult,
+        'trailing_suffix',
+        'TRAILING_SUFFIX',
+        'Trailing Suffix',
+        data[13],
+        data[13],
+      );
+    }
+    if (data.length > 14) {
+      ResultFormatter.unknownArr(decodeResult, data.slice(14));
     }
   }
 
@@ -285,6 +349,33 @@ export class Arinc702Helper {
     }
     decodeResult.raw.message_timestamp = time;
   }
+}
+
+/**
+ * Parses a wind field written as DDDSSS with leading zeros dropped.
+ * `272100` = 272° at 100 kt; `02216` = 022° at 16 kt. The direction follows
+ * the meteorological convention: it is the direction the wind comes FROM.
+ *
+ * Only 5- and 6-digit values are accepted: a 4-digit value is ambiguous
+ * (`1726` can be 172°/6 kt or 017°/26 kt), so it is left to the caller as
+ * unknown instead of being guessed.
+ *
+ * @param value - the raw field, as it appears after the temperature
+ * @returns the direction the wind comes from (0-360°) and its speed
+ *          (0-200 kt), or undefined when the field is not a plausible wind
+ */
+export function parseWind(
+  value: string,
+): { direction: number; speed: number } | undefined {
+  if (!/^\d{5,6}$/.test(value)) {
+    return undefined;
+  }
+  const direction = Number(value.slice(0, 3));
+  const speed = Number(value.slice(3));
+  if (direction > 360 || speed > 200) {
+    return undefined;
+  }
+  return { direction, speed };
 }
 
 function processETA(
@@ -356,6 +447,31 @@ function processIdentification(decodeResult: DecodeResult, data: string[]) {
   }
 }
 
+/**
+ * Predicted fuel remaining at destination (ARINC 702A-5 Att. 7 §7, /DT
+ * element 3; 0.1 Klbs = hundreds of pounds). Kept separate from
+ * fuel_on_board: the /DT figure is a forecast at arrival, not the fuel on
+ * board when the report was sent.
+ */
+function destinationFuel(decodeResult: DecodeResult, value: string) {
+  if (!/^\d+$/.test(value)) {
+    return false;
+  }
+  const hundreds = Number(value) * 100;
+  if (!Number.isSafeInteger(hundreds)) {
+    return false;
+  }
+  ResultFormatter.raw(
+    decodeResult,
+    'destination_fuel',
+    'DEST_FUEL',
+    'Fuel at Destination',
+    `${hundreds}`,
+    hundreds,
+  );
+  return true;
+}
+
 function processDT(decodeResult: DecodeResult, data: string[]) {
   if (data.length === 9) {
     ResultFormatter.unknown(decodeResult, data[0]);
@@ -363,7 +479,9 @@ function processDT(decodeResult: DecodeResult, data: string[]) {
       ResultFormatter.arrivalAirport(decodeResult, data[1]);
     }
     ResultFormatter.arrivalRunway(decodeResult, data[2]);
-    ResultFormatter.currentFuel(decodeResult, parseInt(data[3], 10));
+    if (!destinationFuel(decodeResult, data[3])) {
+      ResultFormatter.unknown(decodeResult, data[3]);
+    }
     ResultFormatter.eta(
       decodeResult,
       DateTimeUtils.convertHHMMSSToTod(data[4]),
@@ -382,13 +500,16 @@ function processDT(decodeResult: DecodeResult, data: string[]) {
       ResultFormatter.arrivalAirport(decodeResult, data[0]);
     }
     ResultFormatter.arrivalRunway(decodeResult, data[1]);
-    ResultFormatter.currentFuel(decodeResult, parseInt(data[2], 10));
+    if (!destinationFuel(decodeResult, data[2])) {
+      ResultFormatter.unknown(decodeResult, data[2]);
+    }
     ResultFormatter.eta(
       decodeResult,
       DateTimeUtils.convertHHMMSSToTod(data[3]),
     );
     if (data.length > 4) {
-      ResultFormatter.remainingFuel(decodeResult, Number(data[4]));
+      // Report stimulus, not fuel (ARINC 702A-5 Att. 7 §7, /DT element 5).
+      ResultFormatter.unknown(decodeResult, data[4]);
     }
     return;
   }
@@ -542,33 +663,178 @@ function processIMI(decodeResult: DecodeResult, type: string): boolean {
 }
 
 /**
- * /PR, performance data. The fields mean the same in every layout on disk (6,201 reports with
- * /PR from WN, AS, AA, B6, BA and AC; 12, 18 and 19 fields), so shorter and longer ones just
- * carry fewer or more of them:
- * - 0 gross weight (hundreds of pounds);
- * - 2 cruise altitude (hundreds of feet): one value for the whole flight on 85-100% of each
- *   airline's flights, and present in a flight plan sent before departure (FPN TNCA-TNCB: 110);
- * - 3 fuel on board (hundreds of pounds);
- * - 8 temperature at cruise altitude: M7 with the 110 above, ISA at 11,000 feet, while the
- *   aircraft was on the ground;
- * - 9 transition altitude (hundreds of feet) of the departure: 180 from US airports, 185 from
- *   Mexico, 60 from London, 50 from Berlin, 30 from Amsterdam.
- * The rest is unknown. Fields 0 and 3 are the same as the Southwest position report's gross
- * weight and fuel on board on 3,449 of 3,450 reports, so a value the report already gave is not
- * shown again. Field 3 is otherwise left in the remaining text, since /DT also shows a figure as
- * fuel on board and the two would clash.
+ * /PR, performance data.
+ *
+ * The field positions depend on the number of fields in the report:
+ *
+ * - 11 fields: a 12-field report with its last field (usually derate) missing;
+ *   the surviving fields keep their 12-field positions;
+ * - 12 fields (AA): 0 gross weight, 1 CG, 2 cruise altitude, 3 fuel on board,
+ *   4 plan or block fuel, 5 reserve fuel, 6 cost index, 7 wind,
+ *   8 cruise temperature, 9 transition altitude, 10 assumed temperature,
+ *   11 derate;
+ * - 18 fields (AA/B6): same 0-11, plus 12 assumed temperature, 13 derate,
+ *   14 block fuel, 15 taxi fuel, 16 ZFW, 17 ZFW CG;
+ * - 19 fields (LATAM/SV/UP): same as 12 but the cruise temperature moves to
+ *   field 18.
+ *
+ * The element names and default order follow ARINC Characteristic 702A-5,
+ * Attachment 7 "FMC/Datalink Interface" §7 (PR downlink, 19 fixed-order
+ * elements: gross weight, cruise CG, cruise altitude, fuel remaining, plan or
+ * block fuel, reserve fuel, cost index, cruise wind, TOC/cruise temperature,
+ * climb transition altitude, fuel flow factor, drag factor, perf factor,
+ * idle factor, tropopause altitude, taxi fuel, ZFW, ZFW CG, minimum fuel
+ * temperature). Airline AOC databases customize the layouts actually seen on the wire:
+ * field 14 is block fuel (not tropopause altitude) in the observed 18-field
+ * layout, and the 12/19 layouts drop fields 12-17.
+ *
+ * Units: gross weight, fuel on board, reserve fuel, taxi fuel and ZFW are
+ * hundreds of pounds (x100); CG and ZFW CG are 0.1 % MAC; block fuel is
+ * pounds; altitude and transition altitude are hundreds of feet; temperatures
+ * are degrees Celsius (`M` = negative); assumed temperature is degrees Celsius
+ * (accepted 0-100); derate is the probable companion value (accepted -100 to
+ * 100, P0 on most reports). Field 7 is stored as a cruise wind, separately
+ * from the wind at the aircraft (case 7): the `DDDSSS` format is confirmed,
+ * while "cruise altitude" is inferred from the report's purpose.
+ *
+ * Evidence: the CG matches the A02 CE/CN field on same-flight pairs; ZFW and
+ * ZFW CG match the loadsheet (NTSB DCA10IA001: /PR ...1231,334 = ZFW 123.1,
+ * ZFW CG 33.4); block fuel is fixed by weight conservation; fields 5/6/15
+ * match the REQPER/PQ request of the same flight at the ARINC positions
+ * (reserve, cost index, taxi fuel). Fields 10-13 (Pxx/Pyy) are named assumed
+ * temperature / derate from the `AT/Pxx` AERODATA and TPS labels; the ARINC
+ * default names for those positions are perf factor / idle factor. The exact
+ * condition of the assumed temperature (selected vs maximum at MTOW) depends
+ * on the AOC host, so it is named but not further interpreted.
+ *
+ * Field 3 (fuel remaining) is sent in 0.1 Klbs, i.e. hundreds of pounds
+ * (ARINC 702A-5, Attachment 7), and is stored in pounds like the other fuel
+ * fields. It is the same figure the POSN body (data[9]) and /FB can carry, so
+ * it is published once: the field is consumed when a figure already published
+ * (fuel_remaining, fuel_on_board or a /FB present in the message) agrees, and
+ * left in the remaining text when it differs, so two fuel items with
+ * different units cannot appear.
+ * Field 4 (plan or block fuel) keeps its raw number: the unit is not
+ * documented, observed values are consistent with hundreds of pounds on
+ * LS/SV routes. Field counts other than 11, 12, 18 and 19 are not decoded
+ * either: their field positions are undocumented, so they stay in the
+ * remaining text.
  */
-function processPerformanceData(decodeResult: DecodeResult, data: string[]) {
+function processPerformanceData(
+  decodeResult: DecodeResult,
+  data: string[],
+  fuelOnBoard?: number,
+) {
   if (data.length < 3) {
     ResultFormatter.unknownArr(decodeResult, data, ',');
     return;
   }
-  const remaining = data.filter(
-    (value, i) => !decodePerformanceField(decodeResult, i, value),
-  );
-  if (remaining.some((r) => r !== '')) {
+  const length = data.length;
+  const supportedLayout =
+    length === 11 || length === 12 || length === 18 || length === 19;
+  const remaining = data.filter((value, i) => {
+    // Keep the historical comma pattern for unsupported layouts; only the
+    // documented 11/12/18/19 layouts drop their empty padding.
+    if (supportedLayout && value === '') {
+      return false;
+    }
+    return !decodePerformanceField(decodeResult, i, value, length, fuelOnBoard);
+  });
+  if (remaining.length > 0) {
     ResultFormatter.unknown(decodeResult, remaining.join(','), '/PR');
   }
+}
+
+/**
+ * Reads the fuel on board declared by a `/FB` IEI.
+ *
+ * `/FB` can appear before or after `/PR`, so it is read once up front and the
+ * `/PR` fuel field is compared against it regardless of IEI order.
+ *
+ * @param fields IEIs of the message, as produced by splitting the body on `/`
+ * @returns the last `/FB` value when it is all digits, in pounds as sent, or
+ *   `undefined` when the message has no numeric `/FB`
+ */
+function declaredFuelOnBoard(fields: string[]): number | undefined {
+  let fuel: number | undefined;
+  for (let i = 1; i < fields.length; ++i) {
+    if (fields[i].startsWith('FB')) {
+      const value = fields[i].substring(2);
+      if (/^\d+$/.test(value)) {
+        fuel = Number(value);
+      }
+    }
+  }
+  return fuel;
+}
+
+/** Parse a signed `P`/`M` performance value (`P48` = 48, `M2` = -2). */
+function signedPerformanceValue(value: string): number | undefined {
+  if (!/^[MP]\d{1,3}$/.test(value)) {
+    return undefined;
+  }
+  return value.startsWith('M')
+    ? -Number(value.slice(1))
+    : Number(value.slice(1));
+}
+
+/** Decode a cruise temperature field (`M54` = -54, `P0` = 0). */
+function decodePerformanceTemperature(
+  decodeResult: DecodeResult,
+  value: string,
+): boolean {
+  const temperature = signedPerformanceValue(value);
+  if (temperature === undefined) {
+    return false;
+  }
+  ResultFormatter.raw(
+    decodeResult,
+    'cruise_temperature',
+    'CRZ_TEMP',
+    'Cruise Temperature (C)',
+    `${temperature} degrees`,
+    temperature,
+  );
+  return true;
+}
+
+/** Decode the assumed temperature (`Pxx`) from the Pxx/Pyy pair. */
+function decodeAssumedTemperature(
+  decodeResult: DecodeResult,
+  value: string,
+): boolean {
+  const assumed = signedPerformanceValue(value);
+  // Assumed takeoff temperatures above 100 C are not physically plausible.
+  if (assumed === undefined || assumed < 0 || assumed > 100) {
+    return false;
+  }
+  ResultFormatter.raw(
+    decodeResult,
+    'assumed_temperature',
+    'TEMP_ASSUMED',
+    'Assumed Temperature',
+    `${assumed} degrees`,
+    assumed,
+  );
+  return true;
+}
+
+/** Decode the probable derate (`Pyy`) from the Pxx/Pyy pair. */
+function decodeDerate(decodeResult: DecodeResult, value: string): boolean {
+  const derate = signedPerformanceValue(value);
+  // A derate is a percentage deviation; keep it within +/-100.
+  if (derate === undefined || derate < -100 || derate > 100) {
+    return false;
+  }
+  ResultFormatter.raw(
+    decodeResult,
+    'derate',
+    'DERATE',
+    'Derate (probable)',
+    `${derate}`,
+    derate,
+  );
+  return true;
 }
 
 /** Decodes one /PR field; false leaves it in the remaining text. */
@@ -576,11 +842,16 @@ function decodePerformanceField(
   decodeResult: DecodeResult,
   i: number,
   value: string,
+  length: number,
+  fuelOnBoard?: number,
 ): boolean {
   const hundreds = /^\d+$/.test(value) ? Number(value) * 100 : undefined;
+  // 11 fields is a 12-field report with its last field missing.
+  const supportedLayout =
+    length === 11 || length === 12 || length === 18 || length === 19;
   switch (i) {
     case 0:
-      if (hundreds === undefined) {
+      if (!supportedLayout || hundreds === undefined) {
         return false;
       }
       if (decodeResult.raw.gross_weight === undefined) {
@@ -588,8 +859,19 @@ function decodePerformanceField(
         return true;
       }
       return decodeResult.raw.gross_weight === hundreds;
+    case 1: {
+      if (!supportedLayout || !/^\d{1,3}$/.test(value)) {
+        return false;
+      }
+      const cg = Number(value) / 10;
+      if (cg > 100) {
+        return false;
+      }
+      ResultFormatter.cg(decodeResult, cg);
+      return true;
+    }
     case 2:
-      if (!hundreds) {
+      if (!supportedLayout || !hundreds) {
         return false;
       }
       ResultFormatter.raw(
@@ -601,27 +883,97 @@ function decodePerformanceField(
         hundreds,
       );
       return true;
-    case 3:
-      return (
-        hundreds !== undefined && decodeResult.raw.fuel_on_board === hundreds
-      );
-    case 8: {
-      if (!/^[MP]\d+$/.test(value)) {
+    case 3: {
+      // FUEL REMAINING: ARINC 702A-5 Att. 7 §7 (PR element 4), sent with a
+      // 0.1 Klbs scale, i.e. hundreds of pounds, so `hundreds` is already in
+      // pounds. The POSN body (data[9]) and /FB can carry the same figure;
+      // publish it once: consume the field when a published value agrees,
+      // leave it in the remaining text when it differs.
+      if (!supportedLayout || hundreds === undefined) {
         return false;
       }
-      const temperature = Number(value.replace('M', '-').replace('P', '+'));
+      const published = [
+        decodeResult.raw.fuel_remaining,
+        decodeResult.raw.fuel_on_board,
+        fuelOnBoard,
+      ].filter((value): value is number => value !== undefined);
+      if (published.length > 0) {
+        return published.includes(hundreds);
+      }
+      ResultFormatter.remainingFuel(decodeResult, hundreds);
+      return true;
+    }
+    case 4: {
+      // PLAN OR BLOCK FUEL: ARINC Characteristic 702A-5, Attachment 7 §7
+      // (PR element 5). Rare on the wire (17/244 816 messages); unit not
+      // documented, so the raw number is kept without a unit assertion.
+      if (!supportedLayout || !/^\d{1,5}$/.test(value)) {
+        return false;
+      }
       ResultFormatter.raw(
         decodeResult,
-        'cruise_temperature',
-        'CRZ_TEMP',
-        'Cruise Temperature (C)',
-        `${temperature} degrees`,
-        temperature,
+        'plan_or_block_fuel',
+        'PLAN_BLOCK_FUEL',
+        'Plan or Block Fuel (unit per AOC host)',
+        `${value}`,
+        Number(value),
       );
       return true;
     }
+    case 5: {
+      // RESERVE FUEL: ARINC 702A-5 Att. 7 §7 (PR element 6); hundreds of
+      // pounds, matching the REQPER/PQ reserve of the same flight.
+      if (!supportedLayout || !/^\d{1,3}$/.test(value)) {
+        return false;
+      }
+      const reserve = Number(value) * 100;
+      ResultFormatter.raw(
+        decodeResult,
+        'reserve_fuel',
+        'RESERVE',
+        'Reserve Fuel',
+        `${reserve} pounds`,
+        reserve,
+      );
+      return true;
+    }
+    case 6: {
+      // COST INDEX: ARINC 702A-5 Att. 7 §7 (PR element 7); unitless 0-999.
+      if (!supportedLayout || !/^\d{1,3}$/.test(value)) {
+        return false;
+      }
+      const costIndex = Number(value);
+      ResultFormatter.raw(
+        decodeResult,
+        'cost_index',
+        'CI',
+        'Cost Index',
+        `${costIndex}`,
+        costIndex,
+      );
+      return true;
+    }
+    case 7: {
+      // CRUISE WIND: ARINC 702A-5 Att. 7 §7 (PR element 8).
+      // Fields 0-11 retain their positions in 11-, 12-, 18-, and 19-field layouts.
+      if (length !== 11 && length !== 12 && length !== 18 && length !== 19) {
+        return false;
+      }
+      const wind = parseWind(value);
+      if (!wind) {
+        return false;
+      }
+      // Inferred from the performance report's purpose; the DDDSSS format itself is confirmed.
+      ResultFormatter.cruiseWind(decodeResult, wind.direction, wind.speed);
+      return true;
+    }
+    case 8:
+      return (
+        (length === 11 || length === 12 || length === 18) &&
+        decodePerformanceTemperature(decodeResult, value)
+      );
     case 9:
-      if (hundreds === undefined) {
+      if (!supportedLayout || hundreds === undefined) {
         return false;
       }
       ResultFormatter.raw(
@@ -633,6 +985,88 @@ function decodePerformanceField(
         hundreds,
       );
       return true;
+    case 10:
+      return (
+        (length === 11 || length === 12 || length === 19) &&
+        decodeAssumedTemperature(decodeResult, value)
+      );
+    case 11:
+      return (
+        (length === 11 || length === 12 || length === 19) &&
+        decodeDerate(decodeResult, value)
+      );
+    case 12:
+      return length === 18 && decodeAssumedTemperature(decodeResult, value);
+    case 13:
+      return length === 18 && decodeDerate(decodeResult, value);
+    case 14: {
+      if (length !== 18 || !/^\d{1,6}$/.test(value)) {
+        return false;
+      }
+      const blockFuel = Number(value);
+      ResultFormatter.raw(
+        decodeResult,
+        'block_fuel',
+        'BLOCK_FUEL',
+        'Block Fuel',
+        `${blockFuel} pounds`,
+        blockFuel,
+      );
+      return true;
+    }
+    case 15: {
+      // TAXI FUEL: ARINC 702A-5 Att. 7 §7 (PR element 16), 18-field layout;
+      // hundreds of pounds, echoed from the REQPER/PQ request of the flight.
+      if (length !== 18 || !/^\d{1,3}$/.test(value)) {
+        return false;
+      }
+      const taxi = Number(value) * 100;
+      if (taxi > 36100) {
+        return false;
+      }
+      ResultFormatter.raw(
+        decodeResult,
+        'taxi_fuel',
+        'TAXI',
+        'Taxi Fuel',
+        `${taxi} pounds`,
+        taxi,
+      );
+      return true;
+    }
+    case 16:
+      if (length !== 18 || hundreds === undefined) {
+        return false;
+      }
+      ResultFormatter.raw(
+        decodeResult,
+        'zero_fuel_weight',
+        'ZFW',
+        'Zero Fuel Weight',
+        `${hundreds} pounds`,
+        hundreds,
+      );
+      return true;
+    case 17: {
+      if (length !== 18 || !/^\d{1,3}$/.test(value)) {
+        return false;
+      }
+      const cg = Number(value) / 10;
+      if (cg > 100) {
+        return false;
+      }
+      ResultFormatter.raw(
+        decodeResult,
+        'zero_fuel_cg',
+        'ZFW_CG',
+        'Zero Fuel CG',
+        `${cg.toFixed(1)} % MAC`,
+        cg,
+      );
+      return true;
+    }
+    case 18:
+      return length === 19 && decodePerformanceTemperature(decodeResult, value);
     default:
       return false;
   }

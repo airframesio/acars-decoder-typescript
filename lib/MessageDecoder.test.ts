@@ -134,7 +134,7 @@ describe('MessageDecoder', () => {
       return;
     }
     expect(decodeResult.message.label).toBe('H1');
-    expect(decodeResult.formatted.items.length).toBe(5);
+    expect(decodeResult.formatted.items.length).toBe(7);
   });
 
   test('preserves default fallback result when no plugin decodes', () => {

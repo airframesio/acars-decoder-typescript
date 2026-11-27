@@ -52,6 +52,7 @@ export * from './Label_4A_01';
 export * from './Label_4A_DIS';
 export * from './Label_4A_DOOR';
 export * from './Label_4A_Slash_01';
+export * from './Label_49';
 export * from './Label_4N';
 export * from './Label_4T_AGFSR';
 export * from './Label_58';

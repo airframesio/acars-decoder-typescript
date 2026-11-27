@@ -121,7 +121,8 @@ describe('Label_H1 FPN', () => {
     expect(decodeResult.decoder.decodeLevel).toBe('partial');
     expect(decodeResult.raw.message_timestamp).toBe(1708178417);
     expect(decodeResult.formatted.description).toBe('Flight Plan');
-    expect(decodeResult.formatted.items.length).toBe(12);
+    // /PR idx3 now emits fuel_remaining instead of fuel_on_board (ARINC 702A-5)
+    expect(decodeResult.formatted.items.length).toBe(20);
     expect(decodeResult.formatted.items[0].label).toBe('Route Status');
     expect(decodeResult.formatted.items[0].value).toBe('Route Planned');
     expect(decodeResult.formatted.items[1].label).toBe('Origin');
@@ -136,21 +137,39 @@ describe('Label_H1 FPN', () => {
     expect(decodeResult.formatted.items[4].value).toBe('ILS30L(30L)');
     expect(decodeResult.formatted.items[5].label).toBe('Gross Weight');
     expect(decodeResult.formatted.items[5].value).toBe('435600 pounds');
-    expect(decodeResult.formatted.items[6].label).toBe('Cruise Altitude');
-    expect(decodeResult.formatted.items[6].value).toBe('36000 feet');
+    expect(decodeResult.formatted.items[6].label).toBe('Center of Gravity');
+    expect(decodeResult.formatted.items[6].value).toBe('34.4 %');
+    expect(decodeResult.formatted.items[7].label).toBe('Cruise Altitude');
+    expect(decodeResult.formatted.items[7].value).toBe('36000 feet');
+    // /PR idx3 (1060, hundreds of pounds): FUEL REMAINING (ARINC 702A-5 Att. 7 §7)
+    expect(decodeResult.formatted.items[8].label).toBe('Fuel Remaining');
+    expect(decodeResult.formatted.items[8].value).toBe('106000');
+    expect(decodeResult.formatted.items[9].label).toBe('Cost Index');
+    expect(decodeResult.formatted.items[9].value).toBe('13');
     // Amsterdam's transition altitude is 3,000 feet
-    expect(decodeResult.formatted.items[7].label).toBe('Transition Altitude');
-    expect(decodeResult.formatted.items[7].value).toBe('3000 feet');
-    expect(decodeResult.formatted.items[8].label).toBe('Arrival Runway');
-    expect(decodeResult.formatted.items[8].value).toBe('30L');
-    expect(decodeResult.formatted.items[9].label).toBe('Fuel On Board');
-    expect(decodeResult.formatted.items[9].value).toBe('172');
-    expect(decodeResult.formatted.items[10].label).toBe(
+    expect(decodeResult.formatted.items[10].label).toBe('Transition Altitude');
+    expect(decodeResult.formatted.items[10].value).toBe('3000 feet');
+    expect(decodeResult.formatted.items[11].label).toBe('Assumed Temperature');
+    expect(decodeResult.formatted.items[11].value).toBe('50 degrees');
+    expect(decodeResult.formatted.items[12].label).toBe('Derate (probable)');
+    expect(decodeResult.formatted.items[12].value).toBe('-40');
+    expect(decodeResult.formatted.items[13].label).toBe('Block Fuel');
+    expect(decodeResult.formatted.items[13].value).toBe('36090 pounds');
+    expect(decodeResult.formatted.items[14].label).toBe('Zero Fuel Weight');
+    expect(decodeResult.formatted.items[14].value).toBe('329600 pounds');
+    expect(decodeResult.formatted.items[15].label).toBe('Zero Fuel CG');
+    expect(decodeResult.formatted.items[15].value).toBe('29.2 % MAC');
+    expect(decodeResult.formatted.items[16].label).toBe('Arrival Runway');
+    expect(decodeResult.formatted.items[16].value).toBe('30L');
+    // /DT predicted fuel remaining at destination, not current fuel
+    expect(decodeResult.formatted.items[17].label).toBe('Fuel at Destination');
+    expect(decodeResult.formatted.items[17].value).toBe('17200');
+    expect(decodeResult.formatted.items[18].label).toBe(
       'Estimated Time of Arrival',
     );
-    expect(decodeResult.formatted.items[10].value).toBe('21:51:17');
-    expect(decodeResult.formatted.items[11].label).toBe('Message Checksum');
-    expect(decodeResult.formatted.items[11].value).toBe('0x156d');
+    expect(decodeResult.formatted.items[18].value).toBe('21:51:17');
+    expect(decodeResult.formatted.items[19].label).toBe('Message Checksum');
+    expect(decodeResult.formatted.items[19].value).toBe('0x156d');
   });
 
   test('decodes Label H1 Preamble FPN with newlines', () => {
@@ -294,19 +313,27 @@ describe('Label_H1 FPN', () => {
     expect(decodeResult.raw.procedures[0].route.name).toBe('ADRI1F');
     expect(decodeResult.raw.procedures[1].type).toBe('approach');
     expect(decodeResult.raw.procedures[1].route.name).toBe('RNV10(10O)');
-    expect(decodeResult.raw.fuel_on_board).toBe(119);
+    expect(decodeResult.raw.destination_fuel).toBe(11900);
     expect(decodeResult.raw.eta_time).toBe(85448);
     expect(decodeResult.raw.checksum).toBe(0x47c0);
     expect(decodeResult.formatted.description).toBe('Flight Plan');
-    expect(decodeResult.formatted.items.length).toBe(14);
+    expect(decodeResult.formatted.items.length).toBe(23);
+    // the embedded /PR block carries idx4 = 183 (PLAN OR BLOCK FUEL)
+    expect(decodeResult.raw.plan_or_block_fuel).toBe(183);
     // a flight plan sent before departure: 11,000 feet and ISA there, not where the aircraft is
     expect(decodeResult.raw.altitude).toBeUndefined();
     expect(decodeResult.raw.cruise_altitude).toBe(11000);
     expect(decodeResult.raw.cruise_temperature).toBe(-7);
     expect(decodeResult.raw.transition_altitude).toBe(2500);
-    expect(decodeResult.remaining.text).toBe(
-      'F37A#M1B/,,,183,7,13,,,,P30,M40,36090,13,3455,300',
-    );
+    expect(decodeResult.raw.reserve_fuel).toBe(700);
+    expect(decodeResult.raw.cost_index).toBe(13);
+    expect(decodeResult.raw.taxi_fuel).toBe(1300);
+    expect(decodeResult.raw.assumed_temperature).toBe(30);
+    expect(decodeResult.raw.derate).toBe(-40);
+    expect(decodeResult.raw.block_fuel).toBe(36090);
+    expect(decodeResult.raw.zero_fuel_weight).toBe(345500);
+    expect(decodeResult.raw.zero_fuel_cg).toBe(30.0);
+    expect(decodeResult.remaining.text).toBe('F37A#M1B/');
   });
 
   test('decodes Label H1 Preamble FPN <invalid>', () => {

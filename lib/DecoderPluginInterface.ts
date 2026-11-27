@@ -37,9 +37,17 @@ export interface RawFields {
   indicated_airspeed?: number;
   mach?: number;
   track?: number;
+  /** Direction the wind comes from (meteorological convention), degrees. */
   wind_direction?: number;
+  /** Wind speed, knots. */
   wind_speed?: number;
+  /** Cruise wind direction in a performance report, degrees (altitude inferred). */
+  cruise_wind_direction?: number;
+  /** Cruise wind speed in a performance report, knots (altitude inferred). */
+  cruise_wind_speed?: number;
   wind_variable?: boolean;
+  /** POSN long-variant trailing suffix, usually `73`. */
+  trailing_suffix?: string;
 
   // Flight identification
   flight_number?: string;
@@ -107,6 +115,7 @@ export interface RawFields {
   /** Saleable seat configuration as sent (9C/104Y). */
   cabin_configuration?: string;
   fuel_burned?: number;
+  /** Fuel remaining on board; the unit is the source format's (POSN: hundreds of pounds). */
   fuel_remaining?: number;
   fuel_in_tons?: number;
   out_fuel?: number;
@@ -126,6 +135,28 @@ export interface RawFields {
   cg_upper_limit?: number;
   mac?: number;
   trim?: number;
+
+  // Performance report (/PR)
+  /** Cruise altitude, feet. */
+  cruise_altitude?: number;
+  /** Temperature at cruise altitude, degrees Celsius. */
+  cruise_temperature?: number;
+  /** Transition altitude of the departure, feet. */
+  transition_altitude?: number;
+  /** Cost index, unitless. */
+  cost_index?: number;
+  /** Taxi fuel, pounds. */
+  taxi_fuel?: number;
+  /** Block fuel (18-field layout only), pounds. */
+  block_fuel?: number;
+  /** Zero fuel weight (18-field layout only), pounds. */
+  zero_fuel_weight?: number;
+  /** Zero fuel weight CG (18-field layout only), % MAC. */
+  zero_fuel_cg?: number;
+  /** Assumed temperature (`Pxx`), degrees Celsius (0-100). */
+  assumed_temperature?: number;
+  /** Probable derate (`Pyy`, -100 to 100); exact meaning depends on the AOC host. */
+  derate?: number;
 
   // Route & flight plan
   route?: Route;
