@@ -46,8 +46,15 @@ export class RouteUtils {
 
   public static waypointToString(waypoint: Waypoint): string {
     let s = waypoint.name;
-    if (waypoint.latitude !== undefined && waypoint.longitude !== undefined) {
-      s += `(${CoordinateUtils.coordinateString({ latitude: waypoint.latitude, longitude: waypoint.longitude })})`;
+    const { latitude, longitude } = waypoint;
+    // Zero is a valid coordinate; NaN (undecodable digits) is not.
+    if (
+      latitude !== undefined &&
+      longitude !== undefined &&
+      Number.isFinite(latitude) &&
+      Number.isFinite(longitude)
+    ) {
+      s += `(${CoordinateUtils.coordinateString({ latitude, longitude })})`;
     }
     if (waypoint.offset) {
       s += `[${waypoint.offset.bearing}° ${waypoint.offset.distance}nm]`;

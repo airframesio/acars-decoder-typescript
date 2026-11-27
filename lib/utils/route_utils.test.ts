@@ -26,5 +26,21 @@ describe('RouteUtils', () => {
         }),
       ).toBe('NULL(0.000 N, 0.000 E)');
     });
+
+    test('leaves out coordinates that did not decode', () => {
+      expect(
+        RouteUtils.waypointToString({
+          name: 'FIX',
+          latitude: NaN,
+          longitude: -12.575,
+        }),
+      ).toBe('FIX');
+      expect(RouteUtils.getWaypoint('FIX,NABCDEW012345').latitude).toBeNaN();
+      expect(
+        RouteUtils.waypointToString(
+          RouteUtils.getWaypoint('FIX,NABCDEW012345'),
+        ),
+      ).toBe('FIX');
+    });
   });
 });
