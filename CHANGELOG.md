@@ -4,8 +4,21 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
-### Fixes
+### Added
 
+- `Label_49`: flight-phase transition reports. The 4-letter code is two 2-letter
+  segment codes; the body carries altitude, indicated airspeed and total air
+  temperature. Supports the signed and unsigned body layouts, masked fields, the
+  `M##AJL` variant and the OUT/OFF/ON/IN events. Only the documented segment
+  codes (TO, IC, CL, ER, DC, AP) are expanded in the formatted state change;
+  every other code keeps its raw letters and is reported as `Unknown XX`.
+
+### Fixed
+
+- `Label_49`: keep the TAT sign when the altitude sign is masked
+  (`******297.4- 11.1` now decodes −11.1 instead of +11.1). With the altitude
+  sign masked its value stays unknown, and with both signs masked the TAT stays
+  unknown instead of being guessed.
 - `Label_22_POS`: decode the position field as DDMMSS (degrees, minutes,
   seconds) instead of dividing it by 10000, which placed aircraft about 18 nm
   off while still reporting a successful partial decode.
