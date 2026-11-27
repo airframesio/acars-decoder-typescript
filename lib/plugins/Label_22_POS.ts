@@ -29,14 +29,12 @@ export class Label_22_POS extends DecoderPlugin {
       return decodeResult;
     }
 
-    const latStr = fields[0].substring(1, 8);
-    const lonStr = fields[0].substring(9);
-    const lat = Number(latStr) / 10000;
-    const lon = Number(lonStr) / 10000;
-    ResultFormatter.position(decodeResult, {
-      latitude: CoordinateUtils.getDirection(fields[0][0]) * lat,
-      longitude: CoordinateUtils.getDirection(fields[0][8]) * lon,
-    });
+    // The position is DDMMSS (degrees, minutes, seconds), e.g. 394138 is
+    // 39°41'38", not the decimal fraction 39.4138.
+    ResultFormatter.position(
+      decodeResult,
+      CoordinateUtils.decodeStringCoordinatesDMS(fields[0]),
+    );
 
     ResultFormatter.timestamp(
       decodeResult,
