@@ -275,7 +275,13 @@ export class Label_49 extends DecoderPlugin {
 
     // Unsigned layout (Qatar): "34946 283.1 -13.6". When the altitude sign is
     // masked and index 11 is not a sign, the two layouts cannot be told apart:
-    // leave the TAT unknown rather than guess its sign.
+    // leave the TAT unknown rather than guess its sign. A field that is
+    // neither a number nor masked means the body is not this layout either.
+    const masked = (value: string): boolean => /^[*. ]*$/.test(value);
+    const slots = [core.slice(0, 5), core.slice(6, 11), core.slice(12, 17)];
+    if (slots.some((slot) => !masked(slot) && numSigned(slot) === undefined)) {
+      return undefined;
+    }
     return {
       altitude: num(core.slice(0, 5)),
       ias: num(core.slice(6, 11)),

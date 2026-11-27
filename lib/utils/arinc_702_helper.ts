@@ -56,15 +56,15 @@ export class Arinc702Helper {
       return false;
     }
     const fields = data.split('/');
-    const canDecode = parseMessageType(decodeResult, fields[0]);
+    // /FB can come after /PR or the POS body: read the declared fuel on board
+    // first so those fuel fields agree with it whatever the IEI order is.
+    const fuelOnBoard = declaredFuelOnBoard(fields);
+    const canDecode = parseMessageType(decodeResult, fields[0], fuelOnBoard);
     if (!canDecode) {
       decodeResult.decoded = false;
       decodeResult.decoder.decodeLevel = 'none';
       return false;
     }
-    // /FB can come after /PR: read the declared fuel on board first so the
-    // /PR fuel field agrees with it whatever the IEI order is.
-    const fuelOnBoard = declaredFuelOnBoard(fields);
     for (let i = 1; i < fields.length; ++i) {
       const iei = fields[i].substring(0, 2);
       const data = fields[i].substring(2);
@@ -248,7 +248,16 @@ export class Arinc702Helper {
    * @param decodeResult - object to store decoded results in
    * @param data - the report's comma-separated fields
    */
-  public static processPosition(decodeResult: DecodeResult, data: string[]) {
+  /**
+   * @param fuelOnBoard the message's numeric `/FB` value, in pounds, if any.
+   *   The POSN fuel field is not published again when it matches it, and is
+   *   kept as unknown text when it differs.
+   */
+  public static processPosition(
+    decodeResult: DecodeResult,
+    data: string[],
+    fuelOnBoard?: number,
+  ) {
     const position = CoordinateUtils.decodeStringCoordinatesDecimalMinutes(
       data[0],
     );
@@ -280,10 +289,12 @@ export class Arinc702Helper {
       // layout has its own fuel field and is handled by
       // processSouthwestPosition.
       if (data[9] !== '') {
-        const fuel = Number(data[9]);
-        if (Number.isFinite(fuel)) {
-          ResultFormatter.remainingFuel(decodeResult, fuel * 100);
-        } else {
+        if (!/^\d+$/.test(data[9])) {
+          ResultFormatter.unknown(decodeResult, data[9]);
+        } else if (fuelOnBoard === undefined) {
+          ResultFormatter.remainingFuel(decodeResult, Number(data[9]) * 100);
+        } else if (Number(data[9]) * 100 !== fuelOnBoard) {
+          // /FB publishes the fuel; keep a disagreeing POSN figure as sent.
           ResultFormatter.unknown(decodeResult, data[9]);
         }
       }
@@ -570,6 +581,7 @@ function processCenterOfGravity(decodeResult: DecodeResult, data: string[]) {
 function parseMessageType(
   decodeResult: DecodeResult,
   messagePart: string,
+  fuelOnBoard?: number,
 ): boolean {
   const messageParts = messagePart.split(',');
   const messageType = messageParts[0];
@@ -577,6 +589,7 @@ function parseMessageType(
     Arinc702Helper.processPosition(
       decodeResult,
       messagePart.substring(3).split(','),
+      fuelOnBoard,
     );
     return processIMI(decodeResult, 'POS');
   } else if (messageType.length === 6) {

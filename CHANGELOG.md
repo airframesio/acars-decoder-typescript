@@ -45,6 +45,12 @@ All notable changes to this project will be documented in this file.
   `/PR` idx3 this takes the share of fully decoded `PER/…/PR` messages from
   0 % to ~97 % on the 244 816-message corpus.
 
+- `Arinc702` position reports: the POSN fuel field is decoded only when it is
+  all digits (`-1` was published as −100 lb), and is published once when `/FB`
+  reports the same figure; a differing figure stays in the remaining text.
+- `Label_49`: a body that matches neither layout is no longer reported as a
+  partial decode with nothing left over; the message is not decoded.
+
 ### Changed
 
 - `/PR` fields 5 and 6 follow the ARINC Characteristic 702A-5 Attachment 7

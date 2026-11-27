@@ -695,4 +695,39 @@ describe('POS wind and speed', () => {
     expect(result.raw.airspeed).toBeUndefined();
     expect(result.remaining.text).toContain('M080T460');
   });
+  test('keeps a POSN fuel field that is not all digits', () => {
+    const decodeResult = new Arinc702(decoder).decode({
+      label: 'H1',
+      text: 'POSN43312W123174,EASON,215754,370,EBINY,220601,ELENN,M48,02216,-1/TS215754,0921220664',
+    });
+
+    expect(decodeResult.decoded).toBe(true);
+    expect(decodeResult.raw.fuel_remaining).toBeUndefined();
+    expect(decodeResult.remaining.text).toBe('-1');
+  });
+
+  test('publishes POSN fuel once when /FB reports the same figure', () => {
+    const decodeResult = new Arinc702(decoder).decode({
+      label: 'H1',
+      text: 'POSN43312W123174,EASON,215754,370,EBINY,220601,ELENN,M48,02216,185/FB18500/TS215754,0921227C0B',
+    });
+
+    expect(decodeResult.raw.fuel_remaining).toBeUndefined();
+    expect(decodeResult.raw.fuel_on_board).toBe(18500);
+    expect(
+      decodeResult.formatted.items.filter((item) => /Fuel/.test(item.label))
+        .length,
+    ).toBe(1);
+  });
+
+  test('keeps a POSN fuel figure that disagrees with /FB', () => {
+    const decodeResult = new Arinc702(decoder).decode({
+      label: 'H1',
+      text: 'POSN43312W123174,EASON,215754,370,EBINY,220601,ELENN,M48,02216,185/FB19000/TS215754,092122070A',
+    });
+
+    expect(decodeResult.raw.fuel_remaining).toBeUndefined();
+    expect(decodeResult.raw.fuel_on_board).toBe(19000);
+    expect(decodeResult.remaining.text).toContain('185');
+  });
 });

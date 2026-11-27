@@ -115,7 +115,7 @@ export interface RawFields {
   /** Saleable seat configuration as sent (9C/104Y). */
   cabin_configuration?: string;
   fuel_burned?: number;
-  /** Fuel remaining on board; the unit is the source format's (POSN: hundreds of pounds). */
+  /** Fuel remaining on board, in pounds (POSN sends hundreds of pounds; it is multiplied by 100). */
   fuel_remaining?: number;
   fuel_in_tons?: number;
   out_fuel?: number;
