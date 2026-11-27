@@ -4,9 +4,17 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+## 1.11.0
+
 ### Added
 
-- Label C1 "PRELIMINARY/FINAL LOAD INFO" uplinks, reported in the same `raw.loadsheet` shape as IATA loadsheets (based on #416 by @thepacket).
+- Label C1 "PRELIMINARY/FINAL LOAD INFO" uplinks, reported in the same `raw.loadsheet` shape as IATA loadsheets (based on #416 by @thepacket) (#586).
+- Arrival and departure gate decoding: label RA gate uplinks (United, Republic, SkyWest), PDC departure gates, stands, bays and parking positions, and further airline gate formats in rounds 5 to 7 (#569, #577, #583).
+
+### Changed
+
+- Dependencies: Babel 8, typescript-eslint 8.74 and pako 2.2 (#584).
+- CI tests on Node 22, 24 and 26; Node 22 or later is supported (#585).
 
 ## 1.10.0
 
