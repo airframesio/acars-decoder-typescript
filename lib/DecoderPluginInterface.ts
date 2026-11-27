@@ -72,6 +72,16 @@ export interface RawFields {
   // Gates
   departure_gate?: string;
   arrival_gate?: string;
+  /** Label RA gate uplink status, such as `OPEN` or `AVAIL 06:30`. */
+  gate_status?: string;
+  /** Estimated on time, seconds since midnight (same units as `eta_time`). */
+  eon_time?: number;
+  /** Ramp frequency: MHz as a number (label RA), or text such as `131.55 MHz` (label 40). */
+  ramp_frequency?: number | string;
+  /** Operations frequency in MHz. */
+  ops_frequency?: number;
+  ground_power?: string;
+  planned_ground_time?: string;
 
   // Times (seconds since midnight or epoch)
   message_timestamp?: number;

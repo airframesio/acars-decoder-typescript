@@ -9,11 +9,11 @@ All notable changes to this project will be documented in this file.
 ### Added
 
 - Label C1 "PRELIMINARY/FINAL LOAD INFO" uplinks, reported in the same `raw.loadsheet` shape as IATA loadsheets (based on #416 by @thepacket) (#586).
-- Arrival and departure gate decoding: label RA gate uplinks (United, Republic, SkyWest), PDC departure gates, stands, bays and parking positions, and further airline gate formats in rounds 5 to 7 (#569, #577, #583).
+- Arrival and departure gate decoding: label RA gate uplinks (United, Republic, SkyWest), label B3 PDC departure gates, stands, bays and parking positions, and further airline gate formats in rounds 5 to 7 (#569, #577, #583). Gates are `raw.departure_gate` (formatted code `DGATE`) and `raw.arrival_gate` (`AGATE`). United RA uplinks can also set `gate_status`, `eon_time`, `ramp_frequency`, `ops_frequency`, `ground_power` and `planned_ground_time`, now declared on `RawFields`. The C1 load info also sets `raw.cabin_configuration` and `raw.fuel_on_board` beside `raw.loadsheet`.
 
 ### Changed
 
-- Dependencies: Babel 8, typescript-eslint 8.74 and pako 2.2 (#584).
+- Runtime dependency `pako` moved from `^1.0.11` to `^2.2.0` (2.2.0 or any later 2.x); it is the only dependency the package installs. Inflation uses `Z_SYNC_FLUSH`, which pako 2.0 and 2.1 never deliver, hence the 2.2.0 minimum. Babel 8 and typescript-eslint 8.74 are development tools only (#584).
 - CI tests on Node 22, 24 and 26. The published package still supports Node 18 and later (#585).
 
 ## 1.10.0
