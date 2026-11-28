@@ -60,10 +60,9 @@ export class Label_20_CFB01 extends DecoderPlugin {
       ) {
         decodeResult.raw.fuel_in_tons = Number(results.groups.fuel_in_tons);
       }
+      decodeResult.decoded = true;
+      decodeResult.decoder.decodeLevel = 'full';
     }
-
-    decodeResult.decoded = true;
-    decodeResult.decoder.decodeLevel = 'full';
 
     return decodeResult;
   }
